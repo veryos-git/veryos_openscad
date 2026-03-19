@@ -8,3 +8,4 @@
 2026-03-19 12:00:40 - Mirrored label text on X axis so it reads correctly when baseplate is flipped
 2026-03-19 12:40:49 - Moved counterbore into bottom bosses (feet) so floor stays solid and standoffs don't break off
 2026-03-19 12:45:19 - Removed bosses, enforced minimum floor thickness via max() for counterbore instead
+2026-03-19 12:46:11 - Enforced standoff radius >= screw head radius + 1mm so counterbore never exceeds standoff

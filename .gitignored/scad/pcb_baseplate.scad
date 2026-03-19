@@ -60,8 +60,9 @@ n_scl_z__rim   = n_scl_z__floor_actual + n_scl_z__clearance;
 n_scl_z__total = n_scl_z__rim + n_scl_z__standoff;
 
 n_r__hole     = n_dia__hole / 2;
-n_r__standoff = n_dia__standoff / 2;
 n_r__head     = n_dia__head / 2;
+// Standoff must be wider than screw head + 1mm wall
+n_r__standoff = max(n_dia__standoff / 2, n_r__head + 1);
 
 // Hole positions relative to PCB origin (centered on board)
 n_cx = n_scl_x__board / 2;
