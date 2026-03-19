@@ -119,10 +119,11 @@ module m_baseplate() {
                 cylinder(h = n_scl_z__total + 2, r = n_r__hole);
         }
 
-        // Label text engraved into bottom
+        // Label text engraved into bottom (mirrored X so it reads correctly when flipped)
         translate([n_scl_x__outer / 2, n_scl_y__outer / 2, -0.01])
-            linear_extrude(height = n_scl_z__text + 0.01)
-                text(s_text__label, size = n_sz__text, halign = "center", valign = "center");
+            mirror([1, 0, 0])
+                linear_extrude(height = n_scl_z__text + 0.01)
+                    text(s_text__label, size = n_sz__text, halign = "center", valign = "center");
 
         // Counterbore from bottom for screw heads
         for (n_pos = a_a_n_pos__hole) {

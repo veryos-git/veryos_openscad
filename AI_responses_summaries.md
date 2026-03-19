@@ -5,3 +5,4 @@
 2026-03-19 11:48:43 - Fixed hole spacing to compensate for caliper measurement (outside-to-outside, adds hole diameter for center-to-center)
 2026-03-19 11:54:31 - Added counterbore from bottom side for flush screw heads with configurable head diameter and depth
 2026-03-19 11:57:12 - Added customizable engraved label text on bottom side (default 'VeryOS', 0.3mm depth)
+2026-03-19 12:00:40 - Mirrored label text on X axis so it reads correctly when baseplate is flipped
