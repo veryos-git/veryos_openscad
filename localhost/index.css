@@ -668,6 +668,51 @@ main {
     border: 1px solid var(--c-border);
 }
 
+/* scad code viewer */
+.o_scad_viewer {
+    border: 1px solid var(--c-border);
+    border-radius: var(--r);
+    padding: 1rem;
+    background: var(--c-surface);
+}
+
+.o_scad_viewer__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.6rem;
+}
+
+.o_scad_viewer__header h3 {
+    font-size: 1rem;
+    color: var(--c-text-dim);
+}
+
+.o_scad_viewer__action {
+    display: flex;
+    gap: 0.4rem;
+}
+
+.o_scad_code {
+    background: rgba(0, 0, 0, 0.4);
+    border: 1px solid var(--c-border);
+    border-radius: var(--r);
+    padding: 1rem;
+    overflow-x: auto;
+    max-height: 500px;
+    overflow-y: auto;
+    font-family: 'Fira Code', 'Cascadia Code', 'JetBrains Mono', monospace;
+    font-size: 0.85rem;
+    line-height: 1.6;
+    color: var(--c-text);
+    tab-size: 4;
+    white-space: pre;
+}
+
+.o_scad_code code {
+    white-space: pre;
+}
+
 /* marketplace preview */
 .o_marketplace_preview {
     border: 1px solid var(--c-border);

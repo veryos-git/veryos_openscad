@@ -332,6 +332,56 @@ let o_component__project = {
                             },
                         ]
                     },
+                    // scad code viewer
+                    {
+                        class: "o_scad_viewer",
+                        'v-if': "o_project__selected.s_path__scad",
+                        a_o: [
+                            {
+                                class: "o_scad_viewer__header",
+                                a_o: [
+                                    { s_tag: "h3", innerText: ".scad source" },
+                                    {
+                                        class: "o_scad_viewer__action",
+                                        a_o: [
+                                            {
+                                                s_tag: "div",
+                                                class: "interactable o_btn__action",
+                                                'v-on:click': "f_load_scad_code",
+                                                'v-if': "!s_scad_code",
+                                                innerText: "Load code",
+                                            },
+                                            {
+                                                s_tag: "div",
+                                                class: "interactable o_btn__action",
+                                                'v-on:click': "f_load_scad_code",
+                                                'v-if': "s_scad_code",
+                                                innerText: "Reload",
+                                            },
+                                            {
+                                                s_tag: "div",
+                                                class: "interactable o_btn__upload",
+                                                'v-on:click': "f_copy_scad_code",
+                                                'v-if': "s_scad_code",
+                                                innerText: "{{ b_copied ? 'Copied!' : 'Copy' }}",
+                                            },
+                                        ]
+                                    },
+                                ]
+                            },
+                            {
+                                s_tag: "pre",
+                                class: "o_scad_code",
+                                'v-if': "s_scad_code",
+                                a_o: [
+                                    {
+                                        s_tag: "code",
+                                        innerText: "{{ s_scad_code }}",
+                                    },
+                                ]
+                            },
+                        ]
+                    },
                     // marketplace preview
                     {
                         class: "o_marketplace_preview",
@@ -380,6 +430,8 @@ let o_component__project = {
         return {
             o_state: o_state,
             o_project__selected: null,
+            s_scad_code: '',
+            b_copied: false,
         };
     },
     computed: {
@@ -408,6 +460,26 @@ let o_component__project = {
         },
         f_select_project: function(o_project) {
             this.o_project__selected = o_project;
+            this.s_scad_code = '';
+            this.b_copied = false;
+        },
+        f_load_scad_code: async function() {
+            let o_self = this;
+            let s_path = o_self.o_project__selected.s_path__scad;
+            if (!s_path) return;
+            let o_resp = await fetch('/api/file?path=' + encodeURIComponent(s_path));
+            if (!o_resp.ok) {
+                o_self.s_scad_code = '// Failed to load file';
+                return;
+            }
+            o_self.s_scad_code = await o_resp.text();
+            o_self.b_copied = false;
+        },
+        f_copy_scad_code: async function() {
+            let o_self = this;
+            await navigator.clipboard.writeText(o_self.s_scad_code);
+            o_self.b_copied = true;
+            setTimeout(function() { o_self.b_copied = false; }, 2000);
         },
         f_update_field: async function(s_field, v_val) {
             let o_self = this;
