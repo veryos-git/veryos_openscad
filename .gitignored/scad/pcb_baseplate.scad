@@ -16,9 +16,9 @@ n_scl_z__board       = 1.6;
 
 /* [Mounting Holes] */
 
-// Hole-to-hole distance in X direction (center-to-center) in mm
+// Hole-to-hole distance in X direction (outside-to-outside, as measured with caliper) in mm
 n_scl_x__hole        = 73;
-// Hole-to-hole distance in Y direction (center-to-center) in mm
+// Hole-to-hole distance in Y direction (outside-to-outside, as measured with caliper) in mm
 n_scl_y__hole        = 43;
 // Hole diameter in mm
 n_dia__hole          = 3.2; // [2.2:M2, 3.2:M3, 4.3:M4, 5.3:M5]
@@ -50,8 +50,9 @@ n_r__standoff = n_dia__standoff / 2;
 // Hole positions relative to PCB origin (centered on board)
 n_cx = n_scl_x__board / 2;
 n_cy = n_scl_y__board / 2;
-n_off_x__hole = n_scl_x__hole / 2;
-n_off_y__hole = n_scl_y__hole / 2;
+// Compensate: caliper measures outside-to-outside, add hole diameter for center-to-center
+n_off_x__hole = (n_scl_x__hole + n_dia__hole) / 2;
+n_off_y__hole = (n_scl_y__hole + n_dia__hole) / 2;
 
 a_a_n_pos__hole = [
     [n_cx - n_off_x__hole, n_cy - n_off_y__hole],
