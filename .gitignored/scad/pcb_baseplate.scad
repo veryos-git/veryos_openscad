@@ -42,6 +42,15 @@ n_gap__pcb           = 0.2;
 // Extra standoff height above rim in mm (0 = flush)
 n_scl_z__standoff    = 10;
 
+/* [Label] */
+
+// Text engraved on bottom
+s_text__label        = "VeryOS";
+// Text size in mm
+n_sz__text           = 8;
+// Engraving depth in mm
+n_scl_z__text        = 0.3;
+
 // Derived values
 n_scl_x__outer = n_scl_x__board + 2 * (n_gap__pcb + n_off__wall);
 n_scl_y__outer = n_scl_y__board + 2 * (n_gap__pcb + n_off__wall);
@@ -109,6 +118,11 @@ module m_baseplate() {
             ])
                 cylinder(h = n_scl_z__total + 2, r = n_r__hole);
         }
+
+        // Label text engraved into bottom
+        translate([n_scl_x__outer / 2, n_scl_y__outer / 2, -0.01])
+            linear_extrude(height = n_scl_z__text + 0.01)
+                text(s_text__label, size = n_sz__text, halign = "center", valign = "center");
 
         // Counterbore from bottom for screw heads
         for (n_pos = a_a_n_pos__hole) {

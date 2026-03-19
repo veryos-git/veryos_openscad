@@ -4,3 +4,4 @@
 2026-03-19 11:46:36 - Renamed params to n_scl_x/y/z pattern, added OpenSCAD Customizer sections and labeled combo box for hole diameter
 2026-03-19 11:48:43 - Fixed hole spacing to compensate for caliper measurement (outside-to-outside, adds hole diameter for center-to-center)
 2026-03-19 11:54:31 - Added counterbore from bottom side for flush screw heads with configurable head diameter and depth
+2026-03-19 11:57:12 - Added customizable engraved label text on bottom side (default 'VeryOS', 0.3mm depth)
