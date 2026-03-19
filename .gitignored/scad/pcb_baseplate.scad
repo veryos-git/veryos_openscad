@@ -5,32 +5,42 @@
 // Protects bottom-side SMD components
 // ============================================
 
-// --- MEASURE YOUR PCB AND ENTER VALUES HERE ---
+/* [Board Dimensions] */
 
-// PCB dimensions (mm)
-n_width__board       = 80;    // Board width
-n_height__board      = 50;    // Board height
+// Board width in mm
+n_scl_x__board       = 80;
+// Board height in mm
+n_scl_y__board       = 50;
+// Board thickness in mm
+n_scl_z__board       = 1.6;
 
-// Mounting holes (mm) — measure center-to-center
-n_width__hole        = 73;    // Hole-to-hole distance in width direction
-n_height__hole       = 43;    // Hole-to-hole distance in height direction
-n_dia__hole          = 3.2;   // Hole diameter (e.g. 3.2 for M3)
+/* [Mounting Holes] */
 
-// Baseplate parameters (mm)
-n_scl_z__clearance   = 3.0;   // Height of cavity (space for SMD components)
-n_scl_z__floor       = 1.5;   // Thickness of the solid floor
-n_off__wall          = 1.5;   // Wall thickness around PCB edge
-n_gap__pcb           = 0.2;   // Gap between PCB edge and inner wall (tolerance)
+// Hole-to-hole distance in X direction (center-to-center) in mm
+n_scl_x__hole        = 73;
+// Hole-to-hole distance in Y direction (center-to-center) in mm
+n_scl_y__hole        = 43;
+// Hole diameter in mm
+n_dia__hole          = 3.2; // [2.2:M2, 3.2:M3, 4.3:M4, 5.3:M5]
+// Standoff outer diameter in mm
+n_dia__standoff      = 6.0;
 
-// Standoff parameters (mm)
-n_dia__standoff      = 6.0;   // Standoff outer diameter
-n_scl_z__standoff    = 0;     // Extra standoff height above rim (0 = flush with rim)
+/* [Baseplate] */
 
-// --- END OF PARAMETERS ---
+// Cavity depth - space for SMD components in mm
+n_scl_z__clearance   = 3.0;
+// Floor thickness in mm
+n_scl_z__floor       = 1.5;
+// Wall thickness around PCB edge in mm
+n_off__wall          = 1.5;
+// Gap between PCB edge and inner wall (print tolerance) in mm
+n_gap__pcb           = 0.2;
+// Extra standoff height above rim in mm (0 = flush)
+n_scl_z__standoff    = 0;
 
 // Derived values
-n_scl_x__outer = n_width__board + 2 * (n_gap__pcb + n_off__wall);
-n_scl_y__outer = n_height__board + 2 * (n_gap__pcb + n_off__wall);
+n_scl_x__outer = n_scl_x__board + 2 * (n_gap__pcb + n_off__wall);
+n_scl_y__outer = n_scl_y__board + 2 * (n_gap__pcb + n_off__wall);
 n_scl_z__rim   = n_scl_z__floor + n_scl_z__clearance;
 n_scl_z__total = n_scl_z__rim + n_scl_z__standoff;
 
@@ -38,10 +48,10 @@ n_r__hole     = n_dia__hole / 2;
 n_r__standoff = n_dia__standoff / 2;
 
 // Hole positions relative to PCB origin (centered on board)
-n_cx = n_width__board / 2;
-n_cy = n_height__board / 2;
-n_off_x__hole = n_width__hole / 2;
-n_off_y__hole = n_height__hole / 2;
+n_cx = n_scl_x__board / 2;
+n_cy = n_scl_y__board / 2;
+n_off_x__hole = n_scl_x__hole / 2;
+n_off_y__hole = n_scl_y__hole / 2;
 
 a_a_n_pos__hole = [
     [n_cx - n_off_x__hole, n_cy - n_off_y__hole],
@@ -99,7 +109,7 @@ module m_baseplate() {
 m_baseplate();
 
 // --- Info echo ---
-echo(str("Board: ", n_width__board, " x ", n_height__board, " | Holes: ", n_width__hole, " x ", n_height__hole));
+echo(str("Board: ", n_scl_x__board, " x ", n_scl_y__board, " x ", n_scl_z__board, " | Holes: ", n_scl_x__hole, " x ", n_scl_y__hole));
 echo(str("Baseplate outer: ", n_scl_x__outer, " x ", n_scl_y__outer, " x ", n_scl_z__rim, " mm"));
 echo(str("Cavity depth: ", n_scl_z__clearance, " mm"));
 echo(str("Total height with standoffs: ", n_scl_z__total, " mm"));
