@@ -1,0 +1,15 @@
+[
+  {
+    "s_title": "pcb_baseplate",
+    "s_description": "a openscad script to generate a rectangular pcb baseplate",
+    "s_hashtag": "",
+    "s_status": "draft",
+    "s_path__scad": "./.gitignored/scad/pcb_baseplate.scad",
+    "s_path__3mf": "",
+    "s_path__stl": "",
+    "s_path__thumbnail": "",
+    "n_ts_ms_created": 1773916426790,
+    "n_ts_ms_updated": 1773916484232,
+    "n_id": 1
+  }
+]
