@@ -7,3 +7,4 @@
 2026-03-19 11:57:12 - Added customizable engraved label text on bottom side (default 'VeryOS', 0.3mm depth)
 2026-03-19 12:00:40 - Mirrored label text on X axis so it reads correctly when baseplate is flipped
 2026-03-19 12:40:49 - Moved counterbore into bottom bosses (feet) so floor stays solid and standoffs don't break off
+2026-03-19 12:45:19 - Removed bosses, enforced minimum floor thickness via max() for counterbore instead

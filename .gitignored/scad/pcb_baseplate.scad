@@ -52,9 +52,11 @@ n_sz__text           = 8;
 n_scl_z__text        = 0.3;
 
 // Derived values
+// Floor must be at least counterbore depth + 0.5mm remaining material
+n_scl_z__floor_actual = max(n_scl_z__floor, n_scl_z__head + 0.5);
 n_scl_x__outer = n_scl_x__board + 2 * (n_gap__pcb + n_off__wall);
 n_scl_y__outer = n_scl_y__board + 2 * (n_gap__pcb + n_off__wall);
-n_scl_z__rim   = n_scl_z__floor + n_scl_z__clearance;
+n_scl_z__rim   = n_scl_z__floor_actual + n_scl_z__clearance;
 n_scl_z__total = n_scl_z__rim + n_scl_z__standoff;
 
 n_r__hole     = n_dia__hole / 2;
@@ -90,7 +92,7 @@ module m_baseplate() {
                 cube([n_scl_x__outer, n_scl_y__outer, n_scl_z__rim]);
 
                 // Hollow out the cavity (leave floor and walls)
-                translate([n_off__wall, n_off__wall, n_scl_z__floor])
+                translate([n_off__wall, n_off__wall, n_scl_z__floor_actual])
                     cube([
                         n_scl_x__outer - 2 * n_off__wall,
                         n_scl_y__outer - 2 * n_off__wall,
@@ -98,7 +100,7 @@ module m_baseplate() {
                     ]);
             }
 
-            // Standoffs at each hole position (extend upward)
+            // Standoffs at each hole position
             for (n_pos = a_a_n_pos__hole) {
                 translate([
                     n_off_x__pcb + n_pos[0],
@@ -107,26 +109,16 @@ module m_baseplate() {
                 ])
                     cylinder(h = n_scl_z__total, r = n_r__standoff);
             }
-
-            // Bosses (feet) extending below floor to house counterbore
-            for (n_pos = a_a_n_pos__hole) {
-                translate([
-                    n_off_x__pcb + n_pos[0],
-                    n_off_y__pcb + n_pos[1],
-                    -n_scl_z__head
-                ])
-                    cylinder(h = n_scl_z__head, r = n_r__standoff);
-            }
         }
 
-        // Drill through-holes at each mounting position (through bosses + standoffs)
+        // Drill through-holes at each mounting position
         for (n_pos = a_a_n_pos__hole) {
             translate([
                 n_off_x__pcb + n_pos[0],
                 n_off_y__pcb + n_pos[1],
-                -n_scl_z__head - 1
+                -1
             ])
-                cylinder(h = n_scl_z__total + n_scl_z__head + 2, r = n_r__hole);
+                cylinder(h = n_scl_z__total + 2, r = n_r__hole);
         }
 
         // Label text engraved into bottom (mirrored X so it reads correctly when flipped)
@@ -135,12 +127,12 @@ module m_baseplate() {
                 linear_extrude(height = n_scl_z__text + 0.01)
                     text(s_text__label, size = n_sz__text, halign = "center", valign = "center");
 
-        // Counterbore inside bosses (below floor, not into it)
+        // Counterbore from bottom for screw heads
         for (n_pos = a_a_n_pos__hole) {
             translate([
                 n_off_x__pcb + n_pos[0],
                 n_off_y__pcb + n_pos[1],
-                -n_scl_z__head - 0.01
+                -0.01
             ])
                 cylinder(h = n_scl_z__head + 0.01, r = n_r__head);
         }
@@ -152,5 +144,6 @@ m_baseplate();
 // --- Info echo ---
 echo(str("Board: ", n_scl_x__board, " x ", n_scl_y__board, " x ", n_scl_z__board, " | Holes: ", n_scl_x__hole, " x ", n_scl_y__hole));
 echo(str("Baseplate outer: ", n_scl_x__outer, " x ", n_scl_y__outer, " x ", n_scl_z__rim, " mm"));
+echo(str("Floor thickness: ", n_scl_z__floor_actual, " mm", n_scl_z__floor_actual > n_scl_z__floor ? str(" (auto-increased from ", n_scl_z__floor, " to fit counterbore)") : ""));
 echo(str("Cavity depth: ", n_scl_z__clearance, " mm"));
 echo(str("Total height with standoffs: ", n_scl_z__total, " mm"));
