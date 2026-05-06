@@ -11,7 +11,8 @@
     "jsr:@std/internal@^1.0.12": "1.0.12",
     "jsr:@std/path@0.217": "0.217.0",
     "jsr:@std/path@1": "1.1.4",
-    "jsr:@std/path@^1.1.4": "1.1.4"
+    "jsr:@std/path@^1.1.4": "1.1.4",
+    "npm:dxf-parser@1.1.2": "1.1.2"
   },
   "jsr": {
     "@db/sqlite@0.11.1": {
@@ -60,6 +61,17 @@
       "dependencies": [
         "jsr:@std/internal"
       ]
+    }
+  },
+  "npm": {
+    "dxf-parser@1.1.2": {
+      "integrity": "sha512-GPTumUvRkounlIazLIyJMmTWt+nlg+ksS0Hdm8jWvejmZKBTz6gvHTam76wRm4PQMma5sgKLThblQyeIJcH79Q==",
+      "dependencies": [
+        "loglevel"
+      ]
+    },
+    "loglevel@1.9.2": {
+      "integrity": "sha512-HgMmCqIJSAKqo68l0rS2AanEWfkxaZ5wNiEFb5ggm08lDs9Xl2KxBlX3PTcaD2chBM1gXAYf491/M2Rv8Jwayg=="
     }
   },
   "workspace": {

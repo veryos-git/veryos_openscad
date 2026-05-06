@@ -1,7 +1,15 @@
 {
   "permissions": {
     "allow": [
-      "Bash(grep -n \"keyvalpair\" /home/legion5pro/code/browser_crud_app_template/serverside/testing/*.js)"
+      "Bash(grep -n \"keyvalpair\" /home/legion5pro/code/browser_crud_app_template/serverside/testing/*.js)",
+      "Bash(deno check *)",
+      "Bash(curl -s -o /tmp/out_hex.scad -D /tmp/hdr_hex.txt -F \"dxf=@examples/hexagon.dxf\" -F \"line_width=2\" -F \"height=2\" -F \"fn=128\" http://localhost:8080/convert)",
+      "Bash(curl -s -o /tmp/out_trc.scad -D /tmp/hdr_trc.txt -F \"dxf=@examples/tracery.dxf\" -F \"line_width=1.5\" -F \"height=2\" -F \"fn=128\" http://localhost:8080/convert)",
+      "Bash(curl -s -o /dev/null -w \"GET /: %{http_code} \\(%{size_download} bytes\\)\\\\n\" http://localhost:8080/)",
+      "Bash(curl -s -w \"bogus DXF: %{http_code}\\\\n\" -o /tmp/err.json -F \"dxf=@server.ts\" -F \"line_width=2\" -F \"height=2\" -F \"fn=128\" http://localhost:8080/convert)",
+      "Bash(kill 839188)",
+      "Bash(wait 839188)",
+      "Bash(pkill -f \"server.ts\")"
     ]
   }
 }

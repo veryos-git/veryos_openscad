@@ -1,0 +1,188 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>DXF &rarr; OpenSCAD wall</title>
+<style>
+    body {
+        font-family: system-ui, sans-serif;
+        max-width: 780px;
+        margin: 2em auto;
+        padding: 0 1em;
+        color: #222;
+    }
+    h1 { font-size: 1.35em; margin-bottom: 0.2em; }
+    p.lede { color: #555; margin-top: 0; }
+    #drop {
+        border: 2px dashed #888;
+        border-radius: 8px;
+        padding: 1.8em;
+        text-align: center;
+        color: #555;
+        cursor: pointer;
+        user-select: none;
+    }
+    #drop.dragover { border-color: #2a7; background: #eafce8; color: #174; }
+    #drop .fname { font-weight: 600; color: #222; margin-top: 0.5em; }
+    .row { display: flex; gap: 1em; flex-wrap: wrap; margin: 1em 0; }
+    .row label { display: flex; flex-direction: column; font-size: 0.9em; gap: 0.2em; }
+    .row input[type=number] { width: 9em; padding: 0.35em; font-size: 1em; }
+    button { padding: 0.55em 1em; font-size: 1em; cursor: pointer; }
+    #error { color: #a00; margin: 1em 0; white-space: pre-wrap; }
+    #warning { color: #a60; margin: 0.5em 0; white-space: pre-wrap; }
+    pre {
+        background: #f4f4f4;
+        border: 1px solid #ddd;
+        padding: 1em;
+        overflow: auto;
+        max-height: 40em;
+        font-size: 0.85em;
+    }
+</style>
+</head>
+<body>
+<h1>DXF &rarr; OpenSCAD constant-width wall</h1>
+<p class="lede">
+    Upload a DXF with one or two closed 2D loops. With one loop, the output
+    is <code>n_rings</code> concentric walls shrunk inward by
+    <code>margin + line_width</code> each step. With two loops, the output
+    morphs point-by-point from the smaller loop (innermost ring) to the
+    larger loop (outermost ring). All dimensions in millimetres.
+</p>
+
+<form id="form">
+    <div id="drop">
+        <div>Drop a <code>.dxf</code> file here, or click to pick one.</div>
+        <div class="fname"></div>
+        <input id="file" type="file" accept=".dxf,application/dxf" hidden>
+    </div>
+
+    <div class="row">
+        <label>line_width (mm)
+            <input name="line_width" type="number" value="2" min="0.01" step="0.01" required>
+        </label>
+        <label>height (mm)
+            <input name="height" type="number" value="2" min="0.01" step="0.01" required>
+        </label>
+        <label>margin (mm)
+            <input name="margin" type="number" value="1" min="0" step="0.01" required>
+        </label>
+        <label>n_rings
+            <input name="n_rings" type="number" value="8" min="1" step="1" required>
+        </label>
+        <label>$fn
+            <input name="fn" type="number" value="128" min="3" step="1" required>
+        </label>
+    </div>
+
+    <button type="submit">Generate .scad</button>
+</form>
+
+<div id="error"></div>
+<div id="warning"></div>
+
+<div id="result" hidden>
+    <div class="row">
+        <button id="download" type="button">Download .scad</button>
+        <button id="copy" type="button">Copy</button>
+    </div>
+    <pre id="out"></pre>
+</div>
+
+<script>
+    const drop = document.getElementById("drop");
+    const fileInput = document.getElementById("file");
+    const form = document.getElementById("form");
+    const errorEl = document.getElementById("error");
+    const warningEl = document.getElementById("warning");
+    const resultEl = document.getElementById("result");
+    const outEl = document.getElementById("out");
+    const downloadBtn = document.getElementById("download");
+    const copyBtn = document.getElementById("copy");
+    const fnameEl = drop.querySelector(".fname");
+
+    let pickedFile = null;
+    let lastScad = "";
+    let lastName = "output.scad";
+
+    function setFile(f) {
+        pickedFile = f;
+        fnameEl.textContent = f ? f.name : "";
+    }
+
+    drop.addEventListener("click", () => fileInput.click());
+    fileInput.addEventListener("change", () => {
+        if (fileInput.files.length > 0) setFile(fileInput.files[0]);
+    });
+    drop.addEventListener("dragover", (e) => {
+        e.preventDefault();
+        drop.classList.add("dragover");
+    });
+    drop.addEventListener("dragleave", () => drop.classList.remove("dragover"));
+    drop.addEventListener("drop", (e) => {
+        e.preventDefault();
+        drop.classList.remove("dragover");
+        if (e.dataTransfer.files.length > 0) setFile(e.dataTransfer.files[0]);
+    });
+
+    form.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        errorEl.textContent = "";
+        warningEl.textContent = "";
+        resultEl.hidden = true;
+        if (!pickedFile) {
+            errorEl.textContent = "Pick a DXF file first.";
+            return;
+        }
+        const fd = new FormData(form);
+        fd.append("dxf", pickedFile);
+
+        let res;
+        try {
+            res = await fetch("/convert", { method: "POST", body: fd });
+        } catch (err) {
+            errorEl.textContent = "Network error: " + err.message;
+            return;
+        }
+        if (!res.ok) {
+            let msg = "Error (HTTP " + res.status + ")";
+            try {
+                const j = await res.json();
+                if (j && j.error) msg = j.error;
+            } catch (_) { /* body wasn't JSON */ }
+            errorEl.textContent = msg;
+            return;
+        }
+        const warn = res.headers.get("x-warning");
+        if (warn) warningEl.textContent = "Warning: " + warn;
+        lastScad = await res.text();
+        lastName = pickedFile.name.replace(/\.dxf$/i, "") + ".scad";
+        outEl.textContent = lastScad;
+        resultEl.hidden = false;
+    });
+
+    copyBtn.addEventListener("click", async () => {
+        const original = copyBtn.textContent;
+        try {
+            await navigator.clipboard.writeText(lastScad);
+            copyBtn.textContent = "Copied!";
+        } catch (err) {
+            copyBtn.textContent = "Copy failed";
+        }
+        setTimeout(() => { copyBtn.textContent = original; }, 1500);
+    });
+
+    downloadBtn.addEventListener("click", () => {
+        const blob = new Blob([lastScad], { type: "text/plain" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = lastName;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        URL.revokeObjectURL(url);
+    });
+</script>
+</body>
+</html>
