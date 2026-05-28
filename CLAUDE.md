@@ -67,3 +67,6 @@ Strong success criteria let you loop independently. Weak criteria ("make it work
 
 #license 
 - First line of every source file: `// Copyright (C) [year] [Jonas Immanuel Frey] - Licensed under GPL. See LICENSE file for details`
+
+---
+after each update please do a git commit and a git push
