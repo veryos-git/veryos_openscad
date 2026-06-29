@@ -26,7 +26,7 @@ step = 0.2;          // [0.1:0.05:0.6]
 // Thinnest section = brightest (mm)
 min_thickness = 0.2; // [0.1:0.1:2]
 // Thickest section = darkest (mm)
-max_thickness = 2.0; // [0.4:0.1:6]
+max_thickness = 4.0; // [0.4:0.1:6]
 
 /* [Tile size] */
 // X size of each thickness section (mm)
