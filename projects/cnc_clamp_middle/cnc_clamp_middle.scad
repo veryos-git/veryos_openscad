@@ -17,8 +17,8 @@ thickness     = 5;
 corner_radius = 2;
 
 /* [Round hole] */
-hole_d        = 5;
-hole_chamfer  = 1;
+hole_d        = 6;
+hole_chamfer  = 0.4;
 hole_offset   = 7.5;   // distance from short edge to hole centre
 
 /* [Slot] */
