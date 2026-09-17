@@ -24,6 +24,67 @@ openscad -o container_50ml.stl -D 'volume_ml=50' -D 'view="container"' cream_con
 openscad -o lid_50ml.stl -D 'volume_ml=50' -D 'view="lid"' cream_container.scad
 ```
 
+## Version 2
+
+Open `cream_container_v2.scad` for the taller lid. The original script is preserved.
+The lid is **10 mm tall in total**, with an internal thread only
+**3 mm high**, measured from the opening. Above the thread is a smooth cavity;
+the roof remains 1.6 mm thick. `lid_height` and `lid_thread_height` control
+these dimensions. All existing capacity and display options remain available.
+The container geometry is unchanged. The taller lid provides 5.4 mm of headspace
+above the container rim, so its roof no longer contacts the rim when seated.
+
+## Version 3
+
+Open `cream_container_v3.scad` for the ribbed lid shown in `ribbed.png` and
+`ribb_cutoff.png`. It retains version 2's **10 mm total lid height** and
+**3 mm internal thread**. The exterior has **36 evenly spaced cylindrical
+cuts** (10 degrees apart), each made with a **10 mm diameter** cutter that
+penetrates the lid's outer radius by **0.4 mm**. The cutters run through the
+lid height and meet the existing top chamfer.
+
+Adjust `rib_count`, `rib_cutoff_diameter`, and `rib_cutoff_overlap` in the
+Customizer. Cutter centers are placed at
+`outer_r + rib_cutoff_diameter/2 - rib_cutoff_overlap` for each capacity.
+The nominal lid wall remaining at the deepest cut is 2.6 mm.
+Set `container_ribs=true` to apply the same cuts to the container exterior,
+from the base to the shoulder. It defaults to `false` (off); the container
+neck thread is unaffected. Previous versions are unchanged; all capacity
+and display options are available.
+
+## Version 4
+
+Open `cream_container_v4.scad` for v3's ribbed lid plus an optional engraved
+capacity label. Two independent switches place the label on the container base
+and/or on the top of the lid:
+
+- `bottom_text_enabled` (default `true`): engraves the base of the bowl.
+- `top_text_enabled` (default `true`): engraves the lid roof, readable from
+  above with the lid fitted.
+- `bottom_text` / `top_text`: custom label. Leave a field empty and that part
+  uses the automatic `"<volume_ml>ml"` label instead, so every grid cell is
+  marked with its own capacity (5ml, 10ml, ... 100ml).
+- `text_depth` (default `0.2`): engraving depth in mm, cut into the 1.6 mm base
+  and lid roof. An assert rejects a depth that would break through.
+- `text_font` (default `Liberation Sans:style=Bold`).
+
+The label is sized per part so that it fills the free round face: width, height
+and the bounding-box corner radius are each capped at a fraction of the free
+diameter (`outer_r - text_margin`). It therefore grows with the container and
+shrinks for longer custom text. The fractions are hidden defaults
+(`text_width_fill = 0.80`, `text_height_fill = 0.38`, `text_fit_fill = 0.90`).
+
+`textmetrics()` is still an experimental function, enabled only in OpenSCAD
+development snapshots with `--enable=textmetrics`, and absent from release
+builds (2021.01 and older). Version 4 therefore measures the string against a
+table of advance widths baked in for the default bold font, so no special build
+or feature flag is needed. The fit is calibrated to that font; other fonts still
+fit approximately.
+
+The base label is mirrored across Y so that it reads correctly once the
+container is tipped towards the viewer to expose its base. The lid label needs
+no mirroring and reads correctly from above.
+
 ## Geometry and capacity
 
 Reconstructed from the supplied STEP and screenshots: cylindrical exterior,
@@ -69,3 +130,20 @@ F5/OpenCSG preview) and extends the complete helical cutter through the opening.
 The corrected quality 64 lid was checked for outward thread normals, a watertight
 shell, approximately 0.9 mm internal thread depth, and no solid overlap with the
 seated container. `lid_section` exposes the profile shown in the new `lid.png` reference.
+
+### Version 4 labels
+
+Rendered at quality 64 with OpenSCAD 2021.01 and compared against the same parts
+with the switches off. The engraved pocket floor sits exactly at z = 0.2 mm, and
+the solid loses exactly glyph area x 0.2 mm (26.27 mm3 for the "10ml" label),
+with no new open edges: the base and the lid are watertight with and without the
+label. (The 2026.09 snapshot tessellates 105 non-manifold edges around the
+container's thread/shoulder junction; they are identical with the label disabled,
+so the label adds none.) The default `grid` view renders all 14 bodies (7
+containers and 7 lids). The 10 ml label spans 29 mm of its 39.4 mm free diameter
+and its furthest corner is 15.4 mm from the axis, well inside the 19.7 mm free
+radius and the 1 mm edge chamfer. The 5 ml base still fits the 18-character label
+`CUSTOM CREAM LABEL`, shrunk to about 25 mm wide; a single `8` on the 100 ml base
+is limited to about 24 mm tall rather than filling the face. Both orientations
+were also checked visually: the base label reads correctly with the container
+tipped towards the viewer, and the lid label reads correctly from above.
