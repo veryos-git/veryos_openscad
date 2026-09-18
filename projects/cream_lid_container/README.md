@@ -85,6 +85,60 @@ The base label is mirrored across Y so that it reads correctly once the
 container is tipped towards the viewer to expose its base. The lid label needs
 no mirroring and reads correctly from above.
 
+## Version 5
+
+Open `cream_container_v5.scad` for v4's ribbed lid and engraved labels plus a
+thread that fades in and out instead of starting at full depth.
+`thread_v5_section.png` compares the v3 and v5 interfaces at the same scale.
+
+Version 3's helix was cut off at full depth at both ends. On the lid, which
+prints open-side up, the first groove roof was therefore a flat horizontal
+face: a hard 90° overhang at the start of the thread. The container had the
+same face left behind as a coincident-face artifact where the thread solid met
+the shoulder. A depth fade removes both.
+
+- The thread region is lengthened from **3 mm to 5 mm**. `neck_height` and
+  `lid_thread_height` must now be equal so the two tapers line up; an assert
+  enforces it.
+- `thread_lead_in` / `thread_lead_out` (default `1.0` mm) are the decay
+  constants of the depth fade at the opening and at the inner end. Keep both
+  `>= thread_depth` (0.9 mm).
+- The fade is exponential rather than a straight chamfer, because a straight
+  ramp adds its slope to the 45° flank and becomes a *steeper* overhang (a
+  1.5 mm linear ramp measured 57°). The exponential's slope never exceeds
+  `(1-s)/thread_depth`, so no surface exceeds the flank's own 45°.
+- The male (neck) and female (lid bore) profiles use the same fade and stay
+  matched: the neck ridge fades out to the `root_r` cylinder while the lid
+  groove fades back to the nominal bore `crest_r + thread_tolerance/2`. That
+  is exactly the cavity radius, so the bore stays flush and the old flat step
+  is gone.
+- The container's thread now starts `thread_root_embed` (0.5 mm) below the
+  shoulder, inside the body, so the union overlaps instead of leaving the
+  coincident faces that produced the shoulder overhang.
+
+The thread still engages over the middle of the 5 mm region: about 0.58 mm
+radial engagement on a 20 ml part, against 0.65 mm at full depth.
+`thread_lead_in` / `thread_lead_out` trade engagement against how gentle the
+fade is.
+
+Because the capacity formula includes `neck_height`, the taller neck makes the
+bowl slightly smaller for the same brimful capacity: the 20 ml bowl radius is
+**18.99 mm** instead of 19.82 mm, and the outside diameter shrinks by about
+1.66 mm. The 20 ml part still holds 20 ml.
+
+Measured on the print-oriented STLs (OpenSCAD 2021.01, quality 64). The 45°
+flanks themselves tessellate to about 45°, so the 50° column is the meaningful
+one:
+
+| part | v3 area > 50° | v3 max | v5 area > 50° | v5 max |
+| --- | --- | --- | --- | --- |
+| lid | 57.9 mm² | 90.0° | 0 mm² | 44.7° |
+| container | 62.8 mm² | 90.0° | 0 mm² | 44.7° |
+
+Both parts are watertight single shells, the seated 20 ml lid/container
+intersection is empty, and the default `grid` renders all 14 bodies as
+watertight single parts. Previous versions are unchanged.
+
 ## Geometry and capacity
 
 Reconstructed from the supplied STEP and screenshots: cylindrical exterior,
@@ -110,6 +164,8 @@ symmetric profile. The male and female surfaces use the same helical phase.
 
 The reconstruction uses 0.9 mm radial thread depth and small flat tips/roots;
 these replace the reference's rounded thread details and end treatments.
+Version 5 adds an exponential depth fade at both ends (see below), so the helix
+no longer starts or stops at full depth.
 It is a parametric reconstruction, not an exact reproduction of every STEP face.
 The mating lid is generated from the same thread surface, enlarged by
 `thread_tolerance/2` radially (default 0.25 mm) and given 0.10 mm axial play.
