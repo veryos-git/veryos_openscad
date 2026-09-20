@@ -40,7 +40,7 @@ lid_thread_height = 5;
 edge_chamfer = 1;
 
 /* [Ribs] */
-container_ribs = false;
+container_ribs = true;
 rib_count = 36; // [1:120]
 rib_cutoff_diameter = 10;
 // Radial penetration into the exterior of each ribbed part, in mm.
