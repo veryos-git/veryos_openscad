@@ -1,0 +1,36 @@
+TITLE
+
+C-Mount USB Microscope Camera Adapter – 23.2 mm Slip-Fit Tube
+
+DESCRIPTION
+
+Attach a C-mount USB camera to a microscope tube with this compact, hollow adapter. The camera end screws into the camera’s female thread, while the smooth stem slides into the microscope tube. A stop collar limits insertion, and a chamfered tip makes fitting easier.
+
+The adapter has been printed and fitted to the camera shown in the photos. Three thread clearances were tested; the included adapter uses the best-fitting 0.20 mm diameter clearance.
+
+DIMENSIONS AND COMPATIBILITY
+
+- Camera thread: C-mount, 1 inch–32 TPI
+- Microscope stem: 23.2 mm outside diameter
+- Designed for a tube opening of approximately 23.5 mm
+- Insertion length: 20 mm
+- Clear internal opening: 19 mm
+- Camera thread length: 3.2 mm
+
+Check your microscope’s tube diameter before printing. This is a mechanical adapter without optics; achievable focus depends on your camera and microscope combination.
+
+SUGGESTED PRINT SETTINGS
+
+- Print upright, microscope stem on the bed and camera thread pointing upward.
+- No supports required.
+- Use 0.08–0.12 mm layers for the fine thread.
+- Use at least 4 walls.
+- Black filament helps reduce stray light.
+
+Remove any strings or brim before assembly. Screw the camera on gently by hand, then slide the stem into the microscope tube. Use the microscope’s retaining screw if available.
+
+The editable OpenSCAD source allows you to adjust the stem diameter, insertion length, and thread clearance for your setup.
+
+TAGS
+
+microscope, USB camera, C-mount, camera adapter, microscopy, microscope adapter, OpenSCAD
