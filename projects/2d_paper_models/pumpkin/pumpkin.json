@@ -1,0 +1,49 @@
+{
+    "fileFormatVersion": "1",
+    "parameterSets": {
+        "Classic": {
+            "body_width": "110",
+            "body_height": "90",
+            "inset": "0.65",
+            "base_flattening": "0.06",
+            "stem_height": "42",
+            "stem_width": "8",
+            "stem_tab": "15",
+            "stem_lean": "8",
+            "branch_length": "15"
+        },
+        "Tall": {
+            "body_width": "85",
+            "body_height": "130",
+            "inset": "0.5",
+            "base_flattening": "0.05",
+            "stem_height": "48",
+            "stem_width": "8",
+            "stem_tab": "18",
+            "stem_lean": "-8",
+            "branch_length": "12"
+        },
+        "Squat": {
+            "body_width": "145",
+            "body_height": "65",
+            "inset": "0.72",
+            "base_flattening": "0.08",
+            "stem_height": "32",
+            "stem_width": "9",
+            "stem_tab": "12",
+            "stem_lean": "5",
+            "branch_length": "14"
+        },
+        "Small round": {
+            "body_width": "65",
+            "body_height": "60",
+            "inset": "0.4",
+            "base_flattening": "0.05",
+            "stem_height": "28",
+            "stem_width": "5",
+            "stem_tab": "10",
+            "stem_lean": "4",
+            "branch_length": "8"
+        }
+    }
+}
