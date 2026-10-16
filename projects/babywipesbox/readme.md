@@ -48,31 +48,43 @@ little space for magnets or hinges.
 
 ## Views and STL export
 
-Set `part` to one of:
+The default is `part = "print_layout"`. Render with **F6**, then use
+**File → Export → Export as STL** to export all three separated parts in one file.
+In the slicer, use **Split to objects**, then arrange the parts across your print
+plates. All three parts already have their printing orientation and rest at Z=0.
+
+**Do not export `assembly` for printing.** In that inspection view, the cover
+touches the box rim, so OpenSCAD fuses them into one solid during export.
+"Split to objects" cannot separate surfaces that have already been fused.
+If an existing Customizer preset still selects `assembly`, change `part` to
+`print_layout` and export again.
+
+Available `part` values:
 
 | Value | Result |
 | --- | --- |
-| `assembly` | Assembled preview; `lid_angle` controls opening from 0° to 180° |
+| `assembly` | Inspection only; touching box/cover fuse on export; `lid_angle` controls opening |
 | `exploded` | Separated assembly; spacing controlled by `exploded_distance` |
-| `print_layout` | All three parts separated, each resting at Z=0 |
+| `print_layout` | Default; all three parts separated, each resting at Z=0 |
 | `box` | Container only, ready to export |
 | `boxcover` | Cover only, underside on the bed |
 | `boxcover_lid` | Lid only, closed underside on the bed |
 
-For each individual part, press **F6** to render, then **File → Export → Export as STL**.
-Export the three parts individually: the default print layout is larger than
-many printer beds, and assembly views are for inspection.
+You can also export each individual part using **F6** and
+**File → Export → Export as STL**. The combined layout is larger than many
+printer beds, so split and arrange it or import the individual files.
 
 Alternatively, from this directory, with `openscad` on your PATH:
 
 ```sh
 mkdir -p build
+openscad -o build/babywipesbox.stl -D 'part="print_layout"' babywipesbox.scad
 openscad -o build/box.stl -D 'part="box"' babywipesbox.scad
 openscad -o build/boxcover.stl -D 'part="boxcover"' babywipesbox.scad
 openscad -o build/boxcover_lid.stl -D 'part="boxcover_lid"' babywipesbox.scad
 ```
 
-Supply the **same dimension overrides** to all three exports, for example
+Supply the **same dimension overrides** to all exports, for example
 `-D 'box_width=220' -D 'box_depth=130' -D 'box_height=90'`.
 Generated STL files live in the ignored `build/` directory.
 
@@ -100,8 +112,10 @@ adhesive and check their retention before use around children.
 
 ## Validation
 
-The default three STLs were rendered with OpenSCAD 2026.09.16 and checked for
-closed, connected meshes. The hinge was checked for solid intersections with
+The individual STLs were rendered with OpenSCAD 2026.09.16 and checked for
+closed, connected meshes. The default combined STL was checked for exactly
+three disconnected, closed components, all resting at Z=0.
+The hinge was checked for solid intersections with
 the cover at 2° intervals from 0° through 180°, including the closed position.
 Alternate box sizes and magnet dimensions were also rendered. These are
 geometry checks; physical print fit and magnetic holding force still need a trial print.

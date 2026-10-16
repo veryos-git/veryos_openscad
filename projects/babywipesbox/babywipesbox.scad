@@ -4,7 +4,8 @@
 // X = width, Y = depth (hinge at +Y), Z = height. See readme.md for assembly.
 
 /* [View] */
-part = "assembly"; // [assembly:Assembled, exploded:Exploded, print_layout:All parts on bed, box:Box, boxcover:Cover, boxcover_lid:Lid]
+// Export this separated layout to keep all three parts splittable in a slicer.
+part = "print_layout"; // [print_layout:All parts on bed, assembly:Assembled (inspection only), exploded:Exploded, box:Box, boxcover:Cover, boxcover_lid:Lid]
 lid_angle = 110; // [0:5:180]
 exploded_distance = 25; // [0:1:80]
 
