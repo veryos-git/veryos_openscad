@@ -1,0 +1,48 @@
+Generation mode: built-in image_gen
+
+Reference inputs:
+/home/mintuser/code/veryos_openscad/projects/babywipesbox/images/WhatsApp Unknown 2026-10-16 at 22.43.04/WhatsApp Image 2026-10-16 at 22.42.48.jpeg
+/home/mintuser/code/veryos_openscad/projects/babywipesbox/images/WhatsApp Unknown 2026-10-16 at 22.43.04/WhatsApp Image 2026-10-16 at 22.37.05 (2).jpeg
+/tmp/veryos_logo_thumbnail_reference.png
+/tmp/openscad_official_logo.png
+
+LANDSCAPE PROMPT
+
+Use case: ads-marketing / compositing.
+Create a finished project thumbnail from the user's real product photographs.
+Input 1: AUTHORITATIVE primary product photo, the black baby-wipes box with its removable top cover slightly offset, flip lid open, a white wipe coming out, and the green-and-white wipe packet visible.
+Input 2: supporting closeup showing the exact black capsule-shaped flip lid, small round finger tab, three-knuckle hinge with a yellow filament pin, and circular silver magnet.
+Input 3: the EXACT VeryOS logo rendered directly from veryos_logo.svg.
+Input 4: official OpenSCAD logo.
+Use the photographed black 3D-printed product as the hero, keeping its true shape, dimensions, construction and real print texture. Preserve the offset cover so the removable magnetic top is clear. Keep the black body, black top, black lid, yellow hinge pin and white wipe. Do NOT recolor the product, do NOT use teal or amber CAD parts. Do not introduce any geometry or rounded molded rim from a different box. Retouch only presentation: isolate from the desk, remove desk objects, soften lighting, gently lift shadows so black details are visible, and place on a clean warm ivory seamless background with natural grounding shadow. Preserve recognizable physical print details, avoid a falsely perfect injection-molded product. Supporting detail is only to preserve construction; do not add a separate closeup panel.
+Design a polished minimalist maker-project cover: warm ivory background, charcoal near-black typography, a small muted mustard accent matching the filament pin, generous whitespace. Do not add decorative patterns or busy shapes.
+All lettering must be Consolas, with bold monospaced Consolas for the headline and regular Consolas for supporting text. Exact headline:
+"MAGNETIC"
+"BABY WIPES"
+"BOX"
+The main product name must be readable at thumbnail size. Exact short supporting line:
+"Flip lid. Easy refill."
+Footer: place the EXACT provided VeryOS mark at bottom-left with the text "VeryOS" in Consolas. Preserve its flat bottom, sharp upper arms, circular top and two curved S-shaped cutouts; do not redraw as a different monogram. Use black on ivory, without a white rectangular patch. At bottom-right include the exact official yellow OpenSCAD logo with the text "OpenSCAD" in Consolas. Both logos should be small, clear, and completely inside the margins. A thin charcoal footer divider is fine.
+Do not put logos on the physical product. No additional claims, badges, people, watermarks, UI, frames or irrelevant props. Do not use earlier photos or any multicolor CAD render. The output must be a single complete ready-to-use thumbnail, not a mockup.
+FORMAT: LANDSCAPE, exactly 1536 x 1152 pixels, 4:3 aspect ratio. Compose headline at upper left with "MAGNETIC" smaller and "BABY WIPES" / "BOX" large; the hero fills the center-right and lower portion without colliding with text. Short supporting line below the headline. Keep enough blank margin around all text. Product takes roughly 60% of canvas width. Footer along the bottom.
+
+PORTRAIT PROMPT
+
+Use case: ads-marketing / compositing.
+Create a finished project thumbnail from the user's real product photographs.
+Input 1: AUTHORITATIVE primary product photo, the black baby-wipes box with its removable top cover slightly offset, flip lid open, a white wipe coming out, and the green-and-white wipe packet visible.
+Input 2: supporting closeup showing the exact black capsule-shaped flip lid, small round finger tab, three-knuckle hinge with a yellow filament pin, and circular silver magnet.
+Input 3: the EXACT VeryOS logo rendered directly from veryos_logo.svg.
+Input 4: official OpenSCAD logo.
+Use the photographed black 3D-printed product as the hero, keeping its true shape, dimensions, construction and real print texture. Preserve the offset cover so the removable magnetic top is clear. Keep the black body, black top, black lid, yellow hinge pin and white wipe. Do NOT recolor the product, do NOT use teal or amber CAD parts. Do not introduce any geometry or rounded molded rim from a different box. Retouch only presentation: isolate from the desk, remove desk objects, soften lighting, gently lift shadows so black details are visible, and place on a clean warm ivory seamless background with natural grounding shadow. Preserve recognizable physical print details, avoid a falsely perfect injection-molded product. Supporting detail is only to preserve construction; do not add a separate closeup panel.
+Design a polished minimalist maker-project cover: warm ivory background, charcoal near-black typography, a small muted mustard accent matching the filament pin, generous whitespace. Do not add decorative patterns or busy shapes.
+All lettering must be Consolas, with bold monospaced Consolas for the headline and regular Consolas for supporting text. Exact headline:
+"MAGNETIC"
+"BABY WIPES"
+"BOX"
+The main product name must be readable at thumbnail size. Exact short supporting line:
+"Flip lid. Easy refill."
+Footer: place the EXACT provided VeryOS mark at bottom-left with the text "VeryOS" in Consolas. Preserve its flat bottom, sharp upper arms, circular top and two curved S-shaped cutouts; do not redraw as a different monogram. Use black on ivory, without a white rectangular patch. At bottom-right include the exact official yellow OpenSCAD logo with the text "OpenSCAD" in Consolas. Both logos should be small, clear, and completely inside the margins. A thin charcoal footer divider is fine.
+Do not put logos on the physical product. No additional claims, badges, people, watermarks, UI, frames or irrelevant props. Do not use earlier photos or any multicolor CAD render. The output must be a single complete ready-to-use thumbnail, not a mockup.
+FORMAT: PORTRAIT, exactly 1152 x 1536 pixels, 3:4 aspect ratio. Reflow for portrait: large left-aligned headline at the top, main black product photograph large and centered across the middle/lower half, short supporting line below the headline. Show all of the product with comfortable margins; do not crop the box or lid. Footer along the bottom. Same ivory, charcoal and muted mustard design system as the landscape version.
+

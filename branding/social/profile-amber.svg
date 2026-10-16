@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Copyright (C) 2026 Jonas Immanuel Frey - Licensed under GPL. See LICENSE file for details -->
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024" role="img">
+<title>VeryOS — Amber profile image</title>
+<desc>VeryOS brand artwork using the original veryos_logo.svg geometry. Very Open Source. Lettering is outlined for consistent display.</desc>
+<defs><linearGradient id="gold" x1="0" y1="0" x2="0.85" y2="1"><stop stop-color="#FFCE76"/><stop offset="1" stop-color="#E7A43A"/></linearGradient><radialGradient id="glow" cx="0.7" cy="0.2" r="0.9"><stop stop-color="#303329"/><stop offset="1" stop-color="#121719"/></radialGradient><pattern id="grid" width="64" height="64" patternUnits="userSpaceOnUse"><path d="M64 0H0V64" fill="none" stroke="#E9BD72" stroke-opacity="0.07" stroke-width="1"/></pattern></defs>
+<rect width="1024" height="1024" fill="#F1B84F"/><g transform="translate(192 284.2384) scale(14.5754)" opacity="1"><path fill="#192222" fill-rule="evenodd" d="     M 7.7528133542 9.1080260785 L 4.6193976626 1.5432914191 L 0 3.4567085809 L 11.5135290962 31.2528266758 L 32.3960002556 31.2528266758 L 43.9095293518 3.4567085809 L 39.2901316892 1.5432914191 L 36.1567159975 9.1080260785 A 15.6264133379 15.6264133379 0 0 0 7.7528133542 9.1080260785 Z     M 30.9694268093 21.2528266758 A 10.6264133379 10.6264133379 0 0 0 21.9547646759 5 A 4.0632066689 4.0632066689 0 0 0 21.9547646759 13.1264133379 A 9.0632066689 9.0632066689 0 0 1 30.9694268093 21.2528266758 Z     M 12.9401025425 10 A 9.0632066689 9.0632066689 0 0 0 21.9547646759 18.1264133379 A 4.0632066689 4.0632066689 0 0 1 21.9547646759 26.2528266758 A 10.6264133379 10.6264133379 0 0 1 12.9401025425 10 Z   "/></g>
+</svg>
