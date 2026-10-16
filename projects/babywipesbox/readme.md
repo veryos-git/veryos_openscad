@@ -9,7 +9,7 @@ using only built-in OpenSCAD geometry:
 - **Boxcover lid:** overlapping flip lid with a finger tab, an underside latch
   magnet pocket, and the middle hinge knuckle.
 
-The hinge knuckles share a circular **1.95 mm bore** (1.75 mm filament + 0.2 mm
+The hinge knuckles share a circular **2.0 mm bore** (1.75 mm filament + 0.25 mm
 diametral tolerance). A piece of filament joins them; no fourth printed part is needed.
 
 ![Assembled model with the lid open](preview.png)
@@ -33,7 +33,7 @@ at the top of the file. Dimensions are in millimetres.
 | `magnet_diameter` / `magnet_thickness` | 6 / 2 | Disc magnet size, shared by all ten pockets |
 | `magnet_diameter_clearance` | 0.2 | Added to pocket diameter, total |
 | `magnet_depth_clearance` | 0.1 | Added to pocket depth |
-| `filament_diameter` / `hinge_tolerance` | 1.75 / 0.2 | Bore = their sum |
+| `filament_diameter` / `hinge_tolerance` | 1.75 / 0.25 | Bore = their sum |
 | `hinge_axial_clearance` | 0.3 | Gap between adjacent hinge knuckles |
 
 The default opening is 106 × 48 mm. Interior space between the flat walls is

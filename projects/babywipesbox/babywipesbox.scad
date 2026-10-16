@@ -38,8 +38,8 @@ magnet_depth_clearance = 0.1; // [0:0.05:0.5]
 
 /* [Filament hinge] */
 filament_diameter = 1.75;
-// Diametral tolerance: the default circular bore is 1.75 + 0.2 = 1.95 mm.
-hinge_tolerance = 0.2; // [0.1:0.05:0.6]
+// Diametral tolerance: the default circular bore is 1.75 + 0.25 = 2.0 mm.
+hinge_tolerance = 0.25; // [0.1:0.05:0.6]
 hinge_outer_diameter = 6.4; // [4:0.2:10]
 hinge_middle_length = 24; // [10:1:50]
 hinge_end_length = 10; // [5:1:25]
