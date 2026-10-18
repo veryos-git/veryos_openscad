@@ -1,0 +1,52 @@
+VERYOS SCREW TOP CONTAINER — PUBLICATION ASSETS
+
+Upload 01_cover_landscape.jpg as the primary image for a landscape listing.
+09_cover_portrait.jpg is an alternative cover for a portrait layout.
+Use 02 through 08 as the supporting image sequence.
+
+Image formats
+  Landscape: 2400 x 1800 px (4:3)
+  Portrait cover: 1800 x 2400 px (3:4)
+  JPEG: compact upload files, sRGB, quality 95
+  PNG: lossless masters in the images folder
+
+Image order
+  01 Cover
+  02 Overall dimensions
+  03 Independent neck and thread heights
+  04 Lid cutaway
+  05 Thread fit and clearances
+  06 Lid alignment adjustment
+  07 Walls and chamfers
+  08 Print orientation and customization
+  09 Alternative portrait cover
+
+listing.md contains the listing title, description and tags.
+parameters.json records the defaults used for every annotated image.
+model/ contains the corresponding SCAD source, print-oriented STLs and license.
+contact-sheet.jpg is a review sheet, not a primary listing image.
+veryos_screw_top_container_upload_pack.zip bundles the nine JPEGs, this guide,
+listing copy, parameter values and model files. PNG masters remain outside
+the ZIP in the images folder.
+
+The images use the current source's 2.0 mm thread pitch. At 0.2 mm shoulder
+extrusion, the estimated stopping-angle change is 36 degrees and the closed
+height is 80.2 mm. Physical print fit has not been tested.
+
+Rendering
+The model geometry is exported directly from OpenSCAD and rendered in Blender.
+Annotations are projected from known geometry points and typeset separately.
+Colors are illustrative. Cutaways are explanatory views, not printable parts.
+The supplied STLs are the complete base and lid.
+
+Regeneration from the repository root
+  node projects/simple_cylindrical_screwing_container/publish/source/render.mjs
+
+Requirements: Node.js, bundled OpenSCAD AppImage, Blender, Python 3, Pillow,
+NumPy, PyGObject/Rsvg and Pycairo. The layout is designed for this preset;
+review label placement if the model dimensions are changed substantially.
+The raw render cache is in .gitignored/container_listing.
+
+Artwork uses the original veryos_logo.svg and the OpenSCAD icon bundled with
+OpenSCAD. Typography is DejaVu Sans Mono, the available monospace fallback
+because Consolas was not installed on the rendering host.
