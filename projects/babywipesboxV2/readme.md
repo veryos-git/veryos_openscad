@@ -1,12 +1,27 @@
-# Baby wipes box V2 — 45° grip lip and lid seat
+# Baby wipes box V2 — ribbed outline, 45° grip lip and lid seat
 
 [babywipesboxV2.scad](babywipesboxV2.scad) is a standalone version of the
-[original baby wipes box](../babywipesbox/babywipesbox.scad), with a larger grip
-lip on the front of the small hinged lid and a matching tapered seat around
-the dispensing opening, following the
-[updated 18 October sketch](WhatsApp%20Image%202026-10-18%20at%2013.07.20.jpeg).
+[original baby wipes box](../babywipesbox/babywipesbox.scad), with a curved rib
+pattern around the container and cover, a larger grip lip on the hinged lid,
+and a matching tapered seat around the dispensing opening. It follows the
+[final 18 October sketch](WhatsApp%20Image%202026-10-18%20at%2013.31.19.jpeg).
 The [earlier grip sketch](archive/WhatsApp%20Image%202026-10-18%20at%2012.00.38.jpeg)
-is retained in `archive/`.
+and [seat sketch](archive/WhatsApp%20Image%202026-10-18%20at%2013.07.20.jpeg)
+are retained in `archive/`.
+
+The default outline has **52 smooth waves**, spaced about **12 mm** apart,
+projecting **1.5 mm outward**. They wrap around the rounded corners and run
+vertically from the first layer to the top rim. The cover uses the same
+outline, so its ribs align with the container. The original inner cavity and
+minimum wall thickness are retained.
+
+The box's measured bed-contact area increases from 23,944.74 to 24,417.21 mm²
+(about **472 mm², or 2%**). This adds contact area; the actual effect on adhesion
+and warping needs a print test. The ribs are part of the finished shape.
+
+![Closed box with matching ribs on the container and cover](preview.png)
+
+![Top view of the curved outline](outline_preview.png)
 
 The underside of the lid now has a solid tapered insert that fits into a
 **2 mm deep, 45° recess** in the cover. Both mating faces run around the entire
@@ -24,8 +39,6 @@ Its width is 16 mm with rounded corners. The original circular magnet pad
 remains beneath the lip: the bevel blends into this reinforcement rather than
 cutting through the blind magnet pocket.
 
-![Closed box with the new grip lip](preview.png)
-
 ![Close-up of the angled lip and retained magnet pad](lip_detail.png)
 
 ![Section through the closed lid and its tapered seat](seat_section.png)
@@ -35,10 +48,17 @@ the left and the grip/latch magnet pockets on the right.
 
 ## Dimensions and compatibility
 
-The container, outer cover dimensions, magnet positions, and filament hinge
-match the original SCAD model. **Print both the revised cover and lid** to use
-the tapered seat; an existing container with matching parameters can be reused.
-The default box measures 200 × 120 × 85 mm. The opening remains 106 × 48 mm
+**Print the ribbed container and cover** for the matching finish. The hinged
+lid is unchanged from the preceding V2 revision with the 45° seat and can be
+reused. Magnet positions, the filament hinge, and the tapered seat are retained.
+An earlier smooth container still fits the cover's magnet positions, although
+their outer outlines differ.
+
+The default box measures **203 × 123 × 85 mm including the ribs**. The
+`box_width` and `box_depth` settings remain 200 × 120 mm before rib projection;
+the overall width and depth each increase by `2 * rib_depth`. Interior space
+between flat walls remains 195.2 × 115.2 × 82.6 mm, with corner posts intruding
+into that space. The opening remains 106 × 48 mm
 at the top, narrowing to a 102 × 44 mm throat below the bevel. This keeps the
 latch magnet pocket enclosed by its original surrounding wall.
 
@@ -51,6 +71,8 @@ The V2 Customizer controls are:
 
 | Parameter | Default | Meaning |
 | --- | --- | --- |
+| `rib_depth` | 1.5 | Maximum outward projection, in mm; zero restores the smooth outline |
+| `rib_pitch` | 12 | Target rib spacing, in mm; adjusted to whole waves in each quarter |
 | `seat_depth` | 2 | Cover recess depth; its radial taper has the same size, in mm |
 | `seat_clearance` | 0.15 | Horizontal gap per side between mating faces at the same Z, in mm |
 | `lip_projection` | 9 | Distance beyond the front edge of the lid, in mm |
@@ -62,6 +84,11 @@ a fit test for a closer seat, or increase it if the printed lid binds. Zero
 means nominal surface contact with no printing allowance. `seat_depth` must
 leave at least 1.2 mm of straight opening below the bevel. All existing box,
 magnet, and hinge parameters remain available.
+
+The rib count adjusts with box size and `rib_pitch`; the default actual pitch
+is 12.04 mm. Opposite sides are mirrored and corners share the continuous
+pattern. Set identical rib parameters for the box and cover. The print layout
+accounts for the larger outline and keeps a 15 mm gap between parts.
 
 ## Export and assembly
 
@@ -107,6 +134,10 @@ exported meshes confirm the 45° mating profiles and 0.15 mm horizontal gap.
 Solid intersection checks between lid and cover are empty at 0.25° steps
 from 0° to 10°, then 1° steps through 180°, using the default clearance.
 A 2.5 mm seat depth with 0.25 mm clearance also renders successfully.
-Physical fit and sealing performance still need a trial print.
+The ribbed box and cover have matching outer rim vertices and verified
+203 × 123 mm bounds; the hinged lid mesh matches the preceding revision.
+The smooth-outline setting and a larger 220 × 130 mm base with 2 mm ribs at
+8 mm target spacing were also checked. Physical fit, bed adhesion, and sealing
+performance still need a trial print.
 
 Licensed under the repository's [GPL license](../../LICENSE).

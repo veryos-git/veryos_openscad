@@ -2,7 +2,7 @@
 
 // Three printable parts. All dimensions are millimetres; no libraries required.
 // X = width, Y = depth (hinge at +Y), Z = height. See readme.md for assembly.
-// V2 adds a 45-degree grip lip and matching tapered lid seat (2026-10-18 sketches).
+// V2 adds a 45-degree grip lip, tapered lid seat and ribbed container outline.
 
 /* [View] */
 // Export this separated layout to keep all three parts splittable in a slicer.
@@ -11,13 +11,19 @@ lid_angle = 110; // [0:5:180]
 exploded_distance = 25; // [0:1:80]
 
 /* [Box dimensions] */
-// Outside dimensions of the box, excluding the cover and lid.
+// Base dimensions before the outward ribs; height excludes the cover and lid.
 box_width = 200; // [100:1:350]
 box_depth = 120; // [70:1:250]
 box_height = 85; // [25:1:200]
 wall_thickness = 2.4; // [1.2:0.2:6]
 bottom_thickness = 2.4; // [1.2:0.2:6]
 corner_radius = 8; // [4:0.5:25]
+
+/* [Ribbed outline] */
+// Maximum outward projection. Zero restores the smooth outline.
+rib_depth = 1.5; // [0:0.1:4]
+// Approximate distance between ribs, adjusted to fit whole waves around the box.
+rib_pitch = 12; // [4:0.5:30]
 
 /* [Cover and opening] */
 cover_thickness = 4; // [2:0.2:10]
@@ -67,6 +73,14 @@ curve_segments = 64; // [32:16:128]
 /* [Hidden] */
 $fn = curve_segments;
 eps = 0.01;
+outline_half_w = box_width / 2 - corner_radius;
+outline_half_d = box_depth / 2 - corner_radius;
+outline_corner_length = PI * corner_radius / 2;
+outline_quarter_length = outline_half_w + outline_corner_length + outline_half_d;
+rib_waves_per_quarter = max(1, round(outline_quarter_length / rib_pitch));
+rib_steps_per_quarter = rib_waves_per_quarter * max(16, ceil(curve_segments / 2));
+ribbed_width = box_width + 2 * rib_depth;
+ribbed_depth = box_depth + 2 * rib_depth;
 opening_w = opening_width == 0 ? box_width * 0.53 : opening_width;
 opening_d = opening_depth == 0 ? box_depth * 0.40 : opening_depth;
 lid_w = opening_w + 2 * lid_overlap;
@@ -102,6 +116,8 @@ assert(wall_thickness >= 1.2 && bottom_thickness >= 1.2,
        "Walls and floor must be at least 1.2 mm thick.");
 assert(box_width > 2 * corner_radius && box_depth > 2 * corner_radius
        && corner_radius > wall_thickness, "Box/corner dimensions leave no interior.");
+assert(rib_depth >= 0 && rib_pitch >= 4,
+       "Rib depth must be nonnegative and rib spacing at least 4 mm.");
 assert(magnet_diameter > 0 && magnet_thickness > 0
        && magnet_diameter_clearance >= 0 && magnet_depth_clearance >= 0,
        "Magnet dimensions must be positive and clearances nonnegative.");
@@ -150,7 +166,10 @@ assert(lid_angle >= 0 && lid_angle <= 180 && exploded_distance >= 0,
        "Use a lid angle from 0 to 180 degrees and a nonnegative explode distance.");
 assert(curve_segments >= 24, "Use at least 24 curve segments.");
 
-echo(str("Box outside: ", box_width, " x ", box_depth, " x ", box_height, " mm"));
+echo(str("Box outside including ribs: ", ribbed_width, " x ", ribbed_depth,
+         " x ", box_height, " mm"));
+echo(str("Outline ribs: ", 4 * rib_waves_per_quarter, " waves, ", rib_depth,
+         " mm outward depth; actual pitch ", outline_quarter_length / rib_waves_per_quarter, " mm."));
 echo(str("Interior between flat walls: ", box_width - 2 * wall_thickness,
          " x ", box_depth - 2 * wall_thickness, " x ", box_height - bottom_thickness,
          " mm; corner posts intrude into this space."));
@@ -166,6 +185,37 @@ module rounded_rectangle(w, d, r) {
         for (x = [-w / 2 + r, w / 2 - r])
             for (y = [-d / 2 + r, d / 2 - r])
                 translate([x, y]) circle(r = r);
+}
+
+// Walk from the front midpoint to the right midpoint, following the rounded
+// rectangle by arc length. The cosine varies only the OUTWARD normal offset.
+function ribbed_quarter_point(s) =
+    let(growth = rib_depth * (1 + cos(360 * rib_waves_per_quarter
+                                     * s / outline_quarter_length)) / 2,
+        a = -90 + 90 * (s - outline_half_w) / outline_corner_length)
+    s <= outline_half_w ? [s, -box_depth / 2 - growth] :
+    s < outline_half_w + outline_corner_length ?
+        [outline_half_w + (corner_radius + growth) * cos(a),
+         -outline_half_d + (corner_radius + growth) * sin(a)] :
+        [box_width / 2 + growth,
+         -outline_half_d + s - outline_half_w - outline_corner_length];
+
+// Mirror the same quarter so opposing sides match and each midpoint is a crest.
+function ribbed_outline_point(q, t) =
+    let(p = ribbed_quarter_point((q % 2 == 0 ? t : 1 - t)
+                                 * outline_quarter_length))
+    q == 0 ? p : q == 1 ? [p[0], -p[1]] :
+    q == 2 ? [-p[0], -p[1]] : [-p[0], p[1]];
+
+// Shared by box and cover: vertical ribs line up across their mating rim.
+// Retain the base outline so polygon chords never reduce the original walls.
+module container_outline() {
+    union() {
+        rounded_rectangle(box_width, box_depth, corner_radius);
+        if (rib_depth > 0)
+            polygon([for (q = [0:3]) for (i = [0:rib_steps_per_quarter - 1])
+                ribbed_outline_point(q, i / rib_steps_per_quarter)]);
+    }
 }
 
 module capsule(w, d) {
@@ -224,7 +274,7 @@ module pocket_from_bottom(z) {
 module box() {
     difference() {
         linear_extrude(box_height)
-            rounded_rectangle(box_width, box_depth, corner_radius);
+            container_outline();
         translate([0, 0, bottom_thickness])
             linear_extrude(box_height)
                 difference() {
@@ -255,7 +305,7 @@ module boxcover() {
     difference() {
         union() {
             linear_extrude(cover_thickness)
-                rounded_rectangle(box_width, box_depth, corner_radius);
+                container_outline();
             // Two fixed outer knuckles; supports stay behind the moving lid.
             for (x = [-hinge_end_x, hinge_end_x]) {
                 hinge_tube(x, hinge_end_length);
@@ -350,8 +400,8 @@ else if (part == "boxcover") boxcover();
 else if (part == "boxcover_lid") translate([0, 0, -seat_bottom_z]) boxcover_lid();
 else if (part == "print_layout") {
     box();
-    translate([0, box_depth + layout_gap, 0]) boxcover();
-    translate([box_width / 2 + layout_gap + lid_w / 2, 0, -seat_bottom_z]) boxcover_lid();
+    translate([0, ribbed_depth + layout_gap, 0]) boxcover();
+    translate([ribbed_width / 2 + layout_gap + lid_w / 2, 0, -seat_bottom_z]) boxcover_lid();
 }
 else if (part == "exploded") assembly(exploded_distance);
 else assembly();
