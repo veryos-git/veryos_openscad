@@ -8,7 +8,7 @@ view = "print"; // [print,container,lid,assembled,section]
 quality = 128; // [64,128,192]
 
 /* [Object] */
-// Total height with the lid fully screwed on, including the lid roof.
+// Nominal closed height, including the lid roof, before alignment adjustment.
 full_height = 80;
 outer_diameter = 40;
 // Body, neck, floor, lid roof, and minimum lid wall thickness.
@@ -23,6 +23,13 @@ neck_height = 0;
 base_thread_entry_chamfer = 1;
 // Exterior edge bevel, at 45 degrees; 0 disables.
 base_chamfer = 0.5;
+// Raise the flat shoulder BELOW the external thread to stop the lid earlier.
+// This adds a seating surface; it does not thicken the helical thread flanks.
+// 0 disables. Positive values also increase the closed height by this amount.
+// Starting estimate: extrusion = thread_pitch * measured_overshoot_degrees / 360.
+// Example: 0.10 mm at 1.2 mm pitch stops about 30 degrees earlier. Fine-tune
+// against the printed markings, since actual seating depends on print fit.
+external_thread_top_surface_extrusion = 0;
 
 /* [Lid] */
 // Total height of the lid, including its roof.
@@ -58,6 +65,10 @@ neck_r = outer_r - wall_thickness - radial_clearance - thread_depth;
 inner_r = neck_r - wall_thickness;
 body_inner_r = outer_r - wall_thickness;
 shoulder_z = full_height - lid_height;
+alignment_stop_z = shoulder_z + external_thread_top_surface_extrusion;
+// Raising the lid by one pitch corresponds to one counterclockwise turn,
+// viewed from above. Applying both transforms preserves the thread phase.
+alignment_stop_angle = 360*external_thread_top_surface_extrusion/thread_pitch;
 lid_cavity_height = lid_height - wall_thickness;
 neck_h = neck_height == 0 ? lid_cavity_height-rim_clearance : neck_height;
 container_height = shoulder_z + neck_h;
@@ -95,6 +106,12 @@ assert(base_thread_entry_chamfer >= 0 && base_thread_entry_chamfer < lid_thread_
        "Base lead-in must leave a thread band and material at the neck rim");
 assert(lid_thread_entry_chamfer >= 0 && lid_thread_entry_chamfer+thread_depth < lid_thread_height,
        "Lid lead-in and thread exit must leave an engaging thread band");
+assert(external_thread_top_surface_extrusion >= 0 &&
+       external_thread_top_surface_extrusion < thread_pitch,
+       "Alignment extrusion must be nonnegative and less than one thread pitch");
+assert(external_thread_top_surface_extrusion == 0 ||
+       external_thread_top_surface_extrusion+base_thread_entry_chamfer+lid_thread_entry_chamfer < lid_thread_height,
+       "Alignment extrusion must leave overlap between the full-depth thread bands");
 assert(base_chamfer >= 0 && base_chamfer < wall_thickness);
 assert(lid_chamfer >= 0 && lid_chamfer < wall_thickness);
 assert(base_top_chamfer+base_bottom_chamfer < shoulder_z &&
@@ -141,7 +158,11 @@ module container() {
                 [0, 0], [outer_r-base_bottom_chamfer, 0],
                 [outer_r, base_bottom_chamfer], [outer_r, shoulder_z-base_top_chamfer],
                 [outer_r-base_top_chamfer, shoulder_z],
-                [0, shoulder_z]]);
+                // Extend the existing flat shoulder upward, keeping the
+                // original neck and helix position. It meets the lid rim.
+                if (external_thread_top_surface_extrusion > 0)
+                    [outer_r-base_top_chamfer, alignment_stop_z],
+                [0, alignment_stop_z]]);
             translate([0, 0, shoulder_z]) {
                 // Smooth neck slides through the lid's threaded opening.
                 rotate_extrude() polygon([
@@ -200,7 +221,8 @@ module print_lid() {
 
 module assembled() {
     color("LightSkyBlue") container();
-    color("Wheat") translate([0, 0, shoulder_z]) lid();
+    color("Wheat") translate([0, 0, alignment_stop_z])
+        rotate([0, 0, alignment_stop_angle]) lid();
 }
 
 if (view == "container") container();
