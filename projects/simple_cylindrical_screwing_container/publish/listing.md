@@ -39,7 +39,7 @@ These settings give an actual closed height of **80.2 mm** and an estimated **36
 
 Print the base upright and the lid open-side up. The included STL files are oriented on the print bed. Open the SCAD file to change the dimensions and fit, render with F6, and export the base or lid separately.
 
-Thread fit depends on the printer and material. Use a small fit test when changing clearances. Listing images are digital renders; colors are illustrative.
+Thread fit depends on the printer and material. Use a small fit test when changing clearances. Annotated views are digital renders; colors are illustrative. Additional covers use a photograph of the printed container, with an edited background and layout.
 
 ## Tags
 

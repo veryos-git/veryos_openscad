@@ -237,6 +237,7 @@ sheet.save(output/'contact-sheet.jpg',quality=93,icc_profile=icc)
 # Keep upload files compact; the lossless masters stay in the images folder.
 archive=output/'veryos_screw_top_container_upload_pack.zip'
 files=[images/(name+'.jpg') for name in made]
+files += [images/name for name in ['10_photo_landscape.jpg','11_photo_portrait.jpg'] if (images/name).exists()]
 files += [output/name for name in ['listing.md','UPLOAD.txt','parameters.json']]
 files += sorted((output/'model').iterdir())
 with zipfile.ZipFile(archive,'w',zipfile.ZIP_DEFLATED) as z:

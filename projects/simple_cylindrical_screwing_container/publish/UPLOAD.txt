@@ -1,12 +1,15 @@
 VERYOS SCREW TOP CONTAINER — PUBLICATION ASSETS
 
-Upload 01_cover_landscape.jpg as the primary image for a landscape listing.
-09_cover_portrait.jpg is an alternative cover for a portrait layout.
+Upload 10_photo_landscape.jpg as the primary image to feature the real print.
+11_photo_portrait.jpg is the corresponding portrait cover.
+01_cover_landscape.jpg and 09_cover_portrait.jpg are the rendered alternatives.
 Use 02 through 08 as the supporting image sequence.
 
 Image formats
-  Landscape: 2400 x 1800 px (4:3)
-  Portrait cover: 1800 x 2400 px (3:4)
+  Rendered landscape: 2400 x 1800 px (4:3)
+  Rendered portrait cover: 1800 x 2400 px (3:4)
+  Photo landscape: 1448 x 1086 px (4:3)
+  Photo portrait: 1086 x 1448 px (3:4)
   JPEG: compact upload files, sRGB, quality 95
   PNG: lossless masters in the images folder
 
@@ -20,12 +23,14 @@ Image order
   07 Walls and chamfers
   08 Print orientation and customization
   09 Alternative portrait cover
+  10 Photo cover, landscape
+  11 Photo cover, portrait
 
 listing.md contains the listing title, description and tags.
 parameters.json records the defaults used for every annotated image.
 model/ contains the corresponding SCAD source, print-oriented STLs and license.
-contact-sheet.jpg is a review sheet, not a primary listing image.
-veryos_screw_top_container_upload_pack.zip bundles the nine JPEGs, this guide,
+contact-sheet.jpg reviews the original nine rendered images.
+veryos_screw_top_container_upload_pack.zip bundles the eleven JPEGs, this guide,
 listing copy, parameter values and model files. PNG masters remain outside
 the ZIP in the images folder.
 
@@ -38,6 +43,14 @@ The model geometry is exported directly from OpenSCAD and rendered in Blender.
 Annotations are projected from known geometry points and typeset separately.
 Colors are illustrative. Cutaways are explanatory views, not printable parts.
 The supplied STLs are the complete base and lid.
+
+Photo covers
+Source: images/WhatsApp Image 2026-10-18 at 21.42.36 (3).jpeg
+The two additional thumbnails were composed with the built-in image_gen tool,
+using that photograph and the earlier cover as the branding reference.
+The background and layout are edited; the original photos are retained.
+Prompts and input references: source/photo-thumbnail-prompts.json
+JPEG copies are format conversions of the generated PNG masters.
 
 Regeneration from the repository root
   node projects/simple_cylindrical_screwing_container/publish/source/render.mjs
