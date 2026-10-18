@@ -14,7 +14,7 @@ exploded_distance = 25; // [0:1:80]
 // Base dimensions before the outward ribs; height excludes the cover and lid.
 box_width = 200; // [100:1:350]
 box_depth = 120; // [70:1:250]
-box_height = 85; // [25:1:200]
+box_height = 65; // [25:1:200]
 wall_thickness = 2.4; // [1.2:0.2:6]
 bottom_thickness = 2.4; // [1.2:0.2:6]
 corner_radius = 8; // [4:0.5:25]

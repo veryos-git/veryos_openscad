@@ -13,7 +13,7 @@ full_height = 80;
 outer_diameter = 40;
 // Body, neck, floor, lid roof, and minimum lid wall thickness.
 wall_thickness = 1.2;
-thread_pitch = 1.2;
+thread_pitch = 2.0;
 
 /* [Base] */
 // 0 fits the neck inside the lid automatically; a positive value overrides

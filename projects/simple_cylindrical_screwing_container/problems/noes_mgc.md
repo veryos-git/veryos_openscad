@@ -1,0 +1,1 @@
+there is the problem that the thread height is the same height as the neck height. the user has to screw many many revolutions until the lid is on if the neck height is high
