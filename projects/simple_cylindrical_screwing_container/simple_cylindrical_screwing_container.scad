@@ -10,7 +10,7 @@ quality = 128; // [64,128,192]
 /* [Dimensions] */
 outer_diameter = 60;
 // Height of the container including its threaded neck, without the lid.
-container_height = 60;
+container_height = 80;
 // Minimum wall thickness at the neck and behind the lid thread.
 wall_thickness = 2.4;
 bottom_thickness = 2.4;
@@ -20,6 +20,9 @@ edge_chamfer = 0.5;
 
 /* [Thread fit] */
 thread_pitch = 1;
+// 45 degree entry chamfer, measured down from the rim at the thread crest.
+// Also bevels the neck rim to guide the lid onto the first turn; 0 disables.
+thread_entry_chamfer = 1;
 // Depth = 40% of pitch, leaving small flat crests and roots.
 // Radial clearance per side; increase slightly if your printed fit is tight.
 radial_clearance = 0.15;
@@ -49,6 +52,9 @@ assert(radial_clearance > 0 && radial_clearance < thread_depth,
        "Radial clearance must be positive and smaller than the thread depth");
 assert(axial_clearance >= 0 && axial_clearance < 0.1 * thread_pitch,
        "Axial clearance must be less than 10% of the pitch");
+assert(thread_entry_chamfer >= 0 &&
+       thread_entry_chamfer < min(neck_height, wall_thickness+thread_depth),
+       "Entry chamfer must leave material at the neck rim");
 assert(edge_chamfer >= 0 && edge_chamfer < min(bottom_thickness, lid_top_thickness, wall_thickness));
 assert(quality >= 32 && quality == floor(quality));
 assert(view == "print" || view == "container" || view == "lid" ||
@@ -94,9 +100,20 @@ module container() {
                 [0, 0], [outer_r-edge_chamfer, 0],
                 [outer_r, edge_chamfer], [outer_r, shoulder_z],
                 [0, shoulder_z]]);
-            translate([0, 0, shoulder_z-eps])
-                cylinder(r = neck_r, h = neck_height+eps);
-            translate([0, 0, shoulder_z]) thread_ridge();
+            translate([0, 0, shoulder_z]) intersection() {
+                union() {
+                    translate([0, 0, -eps])
+                        cylinder(r = neck_r, h = neck_height+eps);
+                    thread_ridge();
+                }
+                // Trim both the external thread and neck with one 45 degree
+                // cone. Its extra radial margin avoids coincident crests.
+                rotate_extrude() polygon([
+                    [0, -eps], [neck_r+thread_depth+eps, -eps],
+                    [neck_r+thread_depth+eps, neck_height-thread_entry_chamfer-eps],
+                    [neck_r+thread_depth-thread_entry_chamfer, neck_height],
+                    [0, neck_height]]);
+            }
         }
         translate([0, 0, bottom_thickness])
             cylinder(r = inner_r, h = container_height);
