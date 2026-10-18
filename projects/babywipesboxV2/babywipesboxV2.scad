@@ -2,7 +2,7 @@
 
 // Three printable parts. All dimensions are millimetres; no libraries required.
 // X = width, Y = depth (hinge at +Y), Z = height. See readme.md for assembly.
-// V2 adds a 45-degree grip lip to the hinged lid, as in the 2026-10-18 sketch.
+// V2 adds a 45-degree grip lip and matching tapered lid seat (2026-10-18 sketches).
 
 /* [View] */
 // Export this separated layout to keep all three parts splittable in a slicer.
@@ -21,18 +21,25 @@ corner_radius = 8; // [4:0.5:25]
 
 /* [Cover and opening] */
 cover_thickness = 4; // [2:0.2:10]
-// Zero sizes the opening automatically with the box: 53% width, 40% depth.
+// Opening size at the TOP of the tapered seat; the throat is smaller below.
+// Zero sizes it automatically with the box: 53% width, 40% depth.
 opening_width = 0; // [0:1:250]
 opening_depth = 0; // [0:1:150]
 lid_overlap = 4; // [2:0.5:10]
 lid_thickness = 3.6; // [2:0.2:8]
-// Vertical clearance between the closed lid and the cover.
+// Vertical clearance under the flat lid flange; the tapered insert sits below it.
 lid_clearance = 0.25; // [0.1:0.05:1]
+
+/* [45-degree lid seat] */
+// Depth of the matching bevel in the cover. Both mating faces are 45 degrees.
+seat_depth = 2; // [0.5:0.1:5]
+// Horizontal clearance PER SIDE at the same Z; zero gives nominal surface contact.
+seat_clearance = 0.15; // [0:0.05:0.5]
 
 /* [Grip lip] */
 // Projection beyond the front edge of the capsule-shaped lid (toward -Y).
 lip_projection = 9; // [7:0.5:20]
-// Total lip height measured from the lid underside, not added to lid_thickness.
+// Lip height above the flat flange underside, excluding the tapered insert.
 lip_height = 5; // [3.6:0.2:10]
 lip_width = 16; // [12:1:30]
 // The front undercut is always 45 degrees; the latch magnet pad is retained.
@@ -79,6 +86,10 @@ hinge_r = hinge_outer_diameter / 2;
 hinge_bore_d = filament_diameter + hinge_tolerance;
 hinge_y = lid_d / 2 + hinge_r + 0.8;
 lid_z = cover_thickness + lid_clearance;
+seat_bottom_z = cover_thickness - seat_depth;
+seat_throat_w = opening_w - 2 * seat_depth;
+seat_throat_d = opening_d - 2 * seat_depth;
+seat_insert_h = lid_z - seat_bottom_z;
 hinge_z = lid_z + hinge_r;
 hinge_length = hinge_middle_length + 2 * (hinge_axial_clearance + hinge_end_length);
 hinge_end_x = hinge_middle_length / 2 + hinge_axial_clearance + hinge_end_length / 2;
@@ -103,6 +114,15 @@ assert(cover_thickness >= magnet_pocket_h + 1.2
        "Cover and lid need at least 1.2 mm material behind each magnet.");
 assert(opening_w >= opening_d && opening_d > 2 * lid_overlap && lid_overlap >= 2,
        "Opening width must be >= depth; increase opening depth or reduce overlap.");
+assert(seat_depth > 0 && seat_bottom_z >= 1.2,
+       "Seat depth must be positive and leave at least 1.2 mm of straight opening below it.");
+assert(seat_clearance >= 0 && seat_clearance < seat_depth
+       && seat_throat_d > 2 * seat_clearance,
+       "Seat clearance must be nonnegative and smaller than the seat depth and throat radius.");
+assert(lid_overlap > lid_clearance - seat_clearance,
+       "The tapered insert must fit inside the lid flange.");
+assert(-latch_y - magnet_pocket_d / 2 - opening_d / 2 >= 1.2,
+       "Leave at least 1.2 mm between the tapered opening and the latch magnet pocket.");
 assert(lid_w / 2 + wall_thickness < magnet_x - post_r,
        "Opening/lid is too wide: leave room for the corner magnets.");
 assert(hinge_y + hinge_r + wall_thickness < box_depth / 2
@@ -138,6 +158,8 @@ echo(str("Use 10 magnets, diameter ", magnet_diameter, " x ", magnet_thickness, 
 echo(str("Hinge bore: ", hinge_bore_d, " mm; filament pin length about ", hinge_length + 2, " mm."));
 echo(str("Grip lip: ", lip_projection, " mm projection, ", lip_height,
          " mm total height, ", lip_width, " mm width; 45-degree undercut."));
+echo(str("Lid seat: 45 degrees, ", seat_depth, " mm deep, ", seat_clearance,
+         " mm clearance per side; throat ", seat_throat_w, " x ", seat_throat_d, " mm."));
 
 module rounded_rectangle(w, d, r) {
     hull()
@@ -150,6 +172,36 @@ module capsule(w, d) {
     hull()
         for (x = [-(w - d) / 2, (w - d) / 2])
             translate([x, 0]) circle(d = d);
+}
+
+// Counterclockwise capsule outline with matching vertices at every height.
+function capsule_points(w, d) =
+    let(steps = ceil(curve_segments / 2))
+    concat(
+        [for (i = [0:steps])
+            let(a = -90 + 180 * i / steps)
+            [(w - d) / 2 + d / 2 * cos(a), d / 2 * sin(a)]],
+        [for (i = [0:steps])
+            let(a = 90 + 180 * i / steps)
+            [-(w - d) / 2 + d / 2 * cos(a), d / 2 * sin(a)]]);
+
+// Sections are [Z, radial growth]. Equal growth and rise give a 45-degree
+// perimeter, including the rounded ends, without scaling the straight span.
+// One mesh avoids coincident faces at the straight-throat / bevel transition.
+module capsule_loft(w, d, sections) {
+    n = len(capsule_points(w, d));
+    levels = len(sections);
+    polyhedron(
+        points = [for (s = sections)
+            for (p = capsule_points(w + 2 * s[1], d + 2 * s[1]))
+                [p[0], p[1], s[0]]],
+        faces = concat(
+            [[for (i = [0:n - 1]) i]],
+            [for (j = [0:levels - 2]) for (i = [0:n - 1])
+                [j * n + i, (j + 1) * n + i,
+                 (j + 1) * n + (i + 1) % n, j * n + (i + 1) % n]],
+            [[for (i = [n - 1:-1:0]) (levels - 1) * n + i]]),
+        convexity = 4);
 }
 
 module corner_positions() {
@@ -213,8 +265,11 @@ module boxcover() {
                           hinge_z - cover_thickness + eps]);
             }
         }
-        translate([0, 0, -eps])
-            linear_extrude(cover_thickness + 2 * eps) capsule(opening_w, opening_d);
+        // Female seat widens to the original opening size at the cover top.
+        // Keeping that top outline preserves the wall around the latch magnet.
+        capsule_loft(seat_throat_w, seat_throat_d,
+                     [[-eps, 0], [seat_bottom_z, 0],
+                      [cover_thickness + eps, seat_depth + eps]]);
         // Corner magnets face DOWN toward the box; the latch faces UP.
         corner_positions() pocket_from_bottom(0);
         translate([0, latch_y, 0]) pocket_from_top(cover_thickness);
@@ -224,7 +279,7 @@ module boxcover() {
 
 // A rounded finger grip with a true 1:1 rise/run along its front face.
 // Intersect a vertical rounded footprint with a trapezoid extruded along X.
-// Polygon coordinates are [Y, Z], relative to the closed lid's underside.
+// Polygon coordinates are [Y, Z], relative to the closed flange's underside.
 module grip_lip() {
     translate([0, 0, lid_z])
         intersection() {
@@ -247,6 +302,13 @@ module grip_lip() {
 module boxcover_lid() {
     difference() {
         union() {
+            // Male insert extends below the flange and narrows toward the box.
+            // Its profile is offset from the female seat at the SAME Z, so the
+            // flange gap does not accidentally increase the mating clearance.
+            translate([0, 0, seat_bottom_z])
+                capsule_loft(seat_throat_w - 2 * seat_clearance,
+                             seat_throat_d - 2 * seat_clearance,
+                             [[0, 0], [seat_insert_h + eps, seat_insert_h + eps]]);
             translate([0, 0, lid_z])
                 linear_extrude(lid_thickness)
                     union() {
@@ -285,11 +347,11 @@ module assembly(explode = 0) {
 // Each export has its lowest surface at Z=0. No printable pin is generated.
 if (part == "box") box();
 else if (part == "boxcover") boxcover();
-else if (part == "boxcover_lid") translate([0, 0, -lid_z]) boxcover_lid();
+else if (part == "boxcover_lid") translate([0, 0, -seat_bottom_z]) boxcover_lid();
 else if (part == "print_layout") {
     box();
     translate([0, box_depth + layout_gap, 0]) boxcover();
-    translate([box_width / 2 + layout_gap + lid_w / 2, 0, -lid_z]) boxcover_lid();
+    translate([box_width / 2 + layout_gap + lid_w / 2, 0, -seat_bottom_z]) boxcover_lid();
 }
 else if (part == "exploded") assembly(exploded_distance);
 else assembly();
