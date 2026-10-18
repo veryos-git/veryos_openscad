@@ -18,7 +18,7 @@ thread_pitch = 1.2;
 /* [Base] */
 // 0 fits the neck inside the lid automatically; a positive value overrides
 // its height above the shoulder, independently of the thread height.
-neck_height = 0;
+neck_height = 10;
 // Axial lead-in length on the external thread and neck rim; 0 disables.
 base_thread_entry_chamfer = 1;
 // Exterior edge bevel, at 45 degrees; 0 disables.
@@ -29,14 +29,14 @@ base_chamfer = 0.5;
 // Starting estimate: extrusion = thread_pitch * measured_overshoot_degrees / 360.
 // Example: 0.10 mm at 1.2 mm pitch stops about 30 degrees earlier. Fine-tune
 // against the printed markings, since actual seating depends on print fit.
-external_thread_top_surface_extrusion = 0;
+external_thread_top_surface_extrusion = 0.2;
 
 /* [Lid] */
 // Total height of the lid, including its roof.
-lid_height = 30;
+lid_height = 20;
 // Threaded band at the opening AND matching band at the base shoulder.
 // The rest of the neck and lid bore are smooth, allowing the lid to slide on.
-lid_thread_height = 3;
+lid_thread_height = 5;
 // Axial lead-in length at the threaded opening; 0 disables.
 lid_thread_entry_chamfer = 1;
 // Exterior edge bevel, at 45 degrees; 0 disables.
