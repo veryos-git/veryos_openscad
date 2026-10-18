@@ -16,7 +16,13 @@ wall_thickness = 2.4;
 bottom_thickness = 2.4;
 lid_top_thickness = 2.4;
 neck_height = 6;
-edge_chamfer = 0.5;
+
+/* [Outer edge chamfers] */
+// 45 degree bevel on the container shoulder and lid top. Set to 0 to disable.
+top_chamfer = 0.5;
+// 45 degree bevel on the container base and lid opening's outer edge.
+// Set to 0 to disable. Top/bottom refer to the assembled orientation.
+bottom_chamfer = 0.5;
 
 /* [Thread fit] */
 thread_pitch = 1;
@@ -55,7 +61,12 @@ assert(axial_clearance >= 0 && axial_clearance < 0.1 * thread_pitch,
 assert(thread_entry_chamfer >= 0 &&
        thread_entry_chamfer < min(neck_height, wall_thickness+thread_depth),
        "Entry chamfer must leave material at the neck rim");
-assert(edge_chamfer >= 0 && edge_chamfer < min(bottom_thickness, lid_top_thickness, wall_thickness));
+assert(top_chamfer >= 0 && top_chamfer < min(lid_top_thickness, wall_thickness),
+       "Top chamfer must leave material at the lid top and container shoulder");
+assert(bottom_chamfer >= 0 && bottom_chamfer < min(bottom_thickness, wall_thickness),
+       "Bottom chamfer must leave material at the container base and lid opening");
+assert(top_chamfer+bottom_chamfer < min(shoulder_z, lid_height),
+       "Top and bottom chamfers must not overlap");
 assert(quality >= 32 && quality == floor(quality));
 assert(view == "print" || view == "container" || view == "lid" ||
        view == "assembled" || view == "section", "Unknown view");
@@ -97,8 +108,9 @@ module container() {
     difference() {
         union() {
             rotate_extrude() polygon([
-                [0, 0], [outer_r-edge_chamfer, 0],
-                [outer_r, edge_chamfer], [outer_r, shoulder_z],
+                [0, 0], [outer_r-bottom_chamfer, 0],
+                [outer_r, bottom_chamfer], [outer_r, shoulder_z-top_chamfer],
+                [outer_r-top_chamfer, shoulder_z],
                 [0, shoulder_z]]);
             translate([0, 0, shoulder_z]) intersection() {
                 union() {
@@ -125,8 +137,9 @@ module container() {
 module lid() {
     difference() {
         rotate_extrude() polygon([
-            [0, 0], [outer_r, 0], [outer_r, lid_height-edge_chamfer],
-            [outer_r-edge_chamfer, lid_height], [0, lid_height]]);
+            [0, 0], [outer_r-bottom_chamfer, 0],
+            [outer_r, bottom_chamfer], [outer_r, lid_height-top_chamfer],
+            [outer_r-top_chamfer, lid_height], [0, lid_height]]);
         translate([0, 0, -eps])
             cylinder(r = neck_r+radial_clearance, h = lid_cavity_height+eps);
         // Clip the groove to the cavity so it cannot cut into the lid roof.
