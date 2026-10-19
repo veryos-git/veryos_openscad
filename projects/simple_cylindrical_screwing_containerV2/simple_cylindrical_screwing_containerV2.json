@@ -1,0 +1,75 @@
+{
+    "fileFormatVersion": "1",
+    "parameterSets": {
+        "01 - Smooth original": {
+            "exterior_pattern": "none",
+            "pattern_on_container": "true",
+            "pattern_on_lid": "true",
+            "pattern_depth": "0.6",
+            "pattern_count": "48",
+            "pattern_margin": "1.2",
+            "pattern_pitch": "12",
+            "pattern_twist": "90"
+        },
+        "02 - Fine vertical ribs": {
+            "exterior_pattern": "ribs",
+            "pattern_on_container": "true",
+            "pattern_on_lid": "true",
+            "pattern_depth": "0.6",
+            "pattern_count": "64",
+            "pattern_margin": "1.2",
+            "pattern_pitch": "12",
+            "pattern_twist": "90"
+        },
+        "03 - Broad rounded flutes": {
+            "exterior_pattern": "flutes",
+            "pattern_on_container": "true",
+            "pattern_on_lid": "true",
+            "pattern_depth": "0.9",
+            "pattern_count": "24",
+            "pattern_margin": "1.5",
+            "pattern_pitch": "12",
+            "pattern_twist": "90"
+        },
+        "04 - Spiral ribs": {
+            "exterior_pattern": "spiral",
+            "pattern_on_container": "true",
+            "pattern_on_lid": "true",
+            "pattern_depth": "0.7",
+            "pattern_count": "32",
+            "pattern_margin": "1.2",
+            "pattern_pitch": "12",
+            "pattern_twist": "90"
+        },
+        "05 - Diamond knurl": {
+            "exterior_pattern": "diamond",
+            "pattern_on_container": "true",
+            "pattern_on_lid": "true",
+            "pattern_depth": "0.65",
+            "pattern_count": "36",
+            "pattern_margin": "1.2",
+            "pattern_pitch": "7",
+            "pattern_twist": "90"
+        },
+        "06 - Wavy ribs": {
+            "exterior_pattern": "waves",
+            "pattern_on_container": "true",
+            "pattern_on_lid": "true",
+            "pattern_depth": "0.6",
+            "pattern_count": "32",
+            "pattern_margin": "1.2",
+            "pattern_pitch": "24",
+            "pattern_twist": "90"
+        },
+        "07 - Chevron ribs": {
+            "exterior_pattern": "chevron",
+            "pattern_on_container": "true",
+            "pattern_on_lid": "true",
+            "pattern_depth": "0.6",
+            "pattern_count": "32",
+            "pattern_margin": "1.2",
+            "pattern_pitch": "24",
+            "pattern_twist": "90"
+        }
+    }
+}
