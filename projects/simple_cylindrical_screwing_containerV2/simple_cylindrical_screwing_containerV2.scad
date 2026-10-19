@@ -8,7 +8,7 @@
 // The matching JSON file supplies seven Customizer presets; see pattern_preview.png.
 
 /* [Display] */
-view = "print"; // [print,container,lid,assembled,section]
+view = "print"; // [print,container,lid,assembled,section,all_patterns:All patterns (assembled)]
 quality = 128; // [64,128,192]
 
 /* [Object] */
@@ -139,7 +139,7 @@ assert(base_top_chamfer+base_bottom_chamfer < shoulder_z &&
        lid_top_chamfer+lid_bottom_chamfer < lid_height);
 assert(quality >= 32 && quality == floor(quality));
 assert(view == "print" || view == "container" || view == "lid" ||
-       view == "assembled" || view == "section", "Unknown view");
+       view == "assembled" || view == "section" || view == "all_patterns", "Unknown view");
 assert(exterior_pattern == "none" || exterior_pattern == "ribs" ||
        exterior_pattern == "flutes" || exterior_pattern == "spiral" ||
        exterior_pattern == "diamond" || exterior_pattern == "waves" ||
@@ -152,26 +152,27 @@ assert(pattern_pitch > 0, "Pattern pitch must be positive");
 
 function triangle_wave(a) = 1-acos(cos(a))/180;
 function fraction(x) = x-floor(x);
-function pattern_shift(z) =
-    exterior_pattern == "spiral" ? pattern_twist*z/full_height :
-    exterior_pattern == "waves" ? 360/pattern_count*sin(360*z/pattern_pitch) :
-    exterior_pattern == "chevron" ? 360/pattern_count*(4*abs(fraction(z/pattern_pitch)-0.5)-1) : 0;
+function pattern_shift(z, pattern = exterior_pattern) =
+    pattern == "spiral" ? pattern_twist*z/full_height :
+    pattern == "waves" ? 360/pattern_count*sin(360*z/pattern_pitch) :
+    pattern == "chevron" ? 360/pattern_count*(4*abs(fraction(z/pattern_pitch)-0.5)-1) : 0;
 
 // All profiles range from 0 to 1. The diamond is a field of raised pyramids,
 // with alternating rows offset by half a cell, like a conventional knurl.
-function pattern_profile(a, z) =
+function pattern_profile(a, z, pattern = exterior_pattern) =
     let(phase = a*pattern_count)
-    exterior_pattern == "diamond" ?
+    pattern == "diamond" ?
         min(triangle_wave(phase+360*z/pattern_pitch),
             triangle_wave(phase-360*z/pattern_pitch)) :
-    exterior_pattern == "flutes" ? (1+cos(phase))/2 :
-    max(0, cos(phase-pattern_count*pattern_shift(z)));
+    pattern == "flutes" ? (1+cos(phase))/2 :
+    max(0, cos(phase-pattern_count*pattern_shift(z, pattern)));
 
 // A single closed mesh avoids hundreds of overlapping rib solids. Its core
 // sits inside the original wall; only the raised relief protrudes. The original
 // body/lid blank remains underneath, so texture never removes wall material.
-module exterior_relief(h, bottom_bevel, top_bevel, enabled, z_origin = 0, angle_origin = 0) {
-    if (enabled && exterior_pattern != "none" && pattern_depth > 0) {
+module exterior_relief(h, bottom_bevel, top_bevel, enabled, z_origin = 0, angle_origin = 0,
+                      pattern = exterior_pattern) {
+    if (enabled && pattern != "none" && pattern_depth > 0) {
         low = max(pattern_margin, bottom_bevel);
         high = h-max(pattern_margin, top_bevel);
         assert(high-low > 2*eps,
@@ -180,9 +181,9 @@ module exterior_relief(h, bottom_bevel, top_bevel, enabled, z_origin = 0, angle_
         samples = max(12, ceil(quality/32)*4);
         segments = max(quality, pattern_count*samples);
         // Constant profiles need only the two end ramps and a straight middle.
-        straight = exterior_pattern == "ribs" || exterior_pattern == "flutes" ||
-                   (exterior_pattern == "spiral" && pattern_twist == 0);
-        step = exterior_pattern == "spiral"
+        straight = pattern == "ribs" || pattern == "flutes" ||
+                   (pattern == "spiral" && pattern_twist == 0);
+        step = pattern == "spiral"
             ? full_height*360/(max(abs(pattern_twist), eps)*pattern_count*samples)
             : pattern_pitch/(2*samples);
         rows = max(1, ceil((high-low-2*fade)/step));
@@ -193,10 +194,10 @@ module exterior_relief(h, bottom_bevel, top_bevel, enabled, z_origin = 0, angle_
         // Follow the ribs with the mesh vertices, avoiding stair-stepped edges
         // on curved patterns and preserving the lid's full peak depth.
         points = [for (z = levels, j = [0:segments-1])
-            let(a = j*360/segments+pattern_shift(z+z_origin)-angle_origin,
+            let(a = j*360/segments+pattern_shift(z+z_origin, pattern)-angle_origin,
                 taper = min(1, (z-low)/fade, (high-z)/fade),
                 r = root_r+(outer_r+pattern_depth-root_r)*taper*
-                    pattern_profile(a+angle_origin, z+z_origin))
+                    pattern_profile(a+angle_origin, z+z_origin, pattern))
             [r*cos(a), r*sin(a), z]];
         faces = concat(
             [[for (j = [0:segments-1]) j]],
@@ -240,7 +241,7 @@ module thread_ridge(female = false) {
     polyhedron(points = points, faces = faces, convexity = 16);
 }
 
-module container() {
+module container(pattern = exterior_pattern) {
     difference() {
         union() {
             rotate_extrude() polygon([
@@ -253,7 +254,7 @@ module container() {
                     [outer_r-base_top_chamfer, alignment_stop_z],
                 [0, alignment_stop_z]]);
             exterior_relief(shoulder_z, base_bottom_chamfer, base_top_chamfer,
-                            pattern_on_container);
+                            pattern_on_container, pattern = pattern);
             translate([0, 0, shoulder_z]) {
                 // Smooth neck slides through the lid's threaded opening.
                 rotate_extrude() polygon([
@@ -282,7 +283,7 @@ module container() {
 
 // Defined open-side down with its opening at z=0. In this orientation the
 // lid and the neck use exactly the same helical phase.
-module lid() {
+module lid(pattern = exterior_pattern) {
     difference() {
         union() {
             rotate_extrude() polygon([
@@ -292,7 +293,7 @@ module lid() {
             // Sample the same assembled coordinates as the body, compensating
             // for the lid's seating rotation so patterns align when screwed shut.
             exterior_relief(lid_height, lid_bottom_chamfer, lid_top_chamfer,
-                            pattern_on_lid, alignment_stop_z, alignment_stop_angle);
+                            pattern_on_lid, alignment_stop_z, alignment_stop_angle, pattern);
         }
         // Short threaded bore, then a 45 degree transition to the smooth
         // cavity. The transition supports the internal ridge when printed.
@@ -316,15 +317,27 @@ module print_lid() {
     translate([0, 0, lid_height]) rotate([180, 0, 0]) lid();
 }
 
-module assembled() {
-    color("LightSkyBlue") container();
+module assembled(pattern = exterior_pattern) {
+    color("LightSkyBlue") container(pattern);
     color("Wheat") translate([0, 0, alignment_stop_z])
-        rotate([0, 0, alignment_stop_angle]) lid();
+        rotate([0, 0, alignment_stop_angle]) lid(pattern);
+}
+
+// Compare every pattern using the same dimensions and texture settings.
+// Left to right: smooth, ribs, flutes, spiral, diamond, waves, chevron.
+// Body/lid texture switches also apply here. Spacing includes the relief depth.
+module all_patterns() {
+    patterns = ["none", "ribs", "flutes", "spiral", "diamond", "waves", "chevron"];
+    spacing = outer_diameter+2*pattern_depth+10;
+    for (i = [0:len(patterns)-1])
+        translate([(i-(len(patterns)-1)/2)*spacing, 0, 0])
+            assembled(patterns[i]);
 }
 
 if (view == "container") container();
 else if (view == "lid") print_lid();
 else if (view == "assembled") assembled();
+else if (view == "all_patterns") all_patterns();
 else if (view == "section") difference() {
     assembled();
     translate([-outer_r-texture_depth-1, -outer_r-texture_depth-1, -1])
