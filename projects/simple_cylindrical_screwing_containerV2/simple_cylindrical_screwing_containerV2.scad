@@ -8,7 +8,7 @@
 // The matching JSON file supplies seven Customizer presets; see pattern_preview.png.
 
 /* [Display] */
-view = "print"; // [print,container,lid,assembled,section,all_patterns:All patterns (assembled)]
+view = "print"; // [print,container,lid,assembled,section,all_patterns:All patterns (print grid)]
 quality = 128; // [64,128,192]
 
 /* [Object] */
@@ -313,8 +313,8 @@ module lid(pattern = exterior_pattern) {
     }
 }
 
-module print_lid() {
-    translate([0, 0, lid_height]) rotate([180, 0, 0]) lid();
+module print_lid(pattern = exterior_pattern) {
+    translate([0, 0, lid_height]) rotate([180, 0, 0]) lid(pattern);
 }
 
 module assembled(pattern = exterior_pattern) {
@@ -323,15 +323,22 @@ module assembled(pattern = exterior_pattern) {
         rotate([0, 0, alignment_stop_angle]) lid(pattern);
 }
 
-// Compare every pattern using the same dimensions and texture settings.
-// Left to right: smooth, ribs, flutes, spiral, diamond, waves, chevron.
-// Body/lid texture switches also apply here. Spacing includes the relief depth.
+// Print every pattern using the same dimensions and texture settings.
+// Two pairs per row, each with its container on the left and lid on the right.
+// Pattern order by row: smooth/ribs, flutes/spiral, diamond/waves, chevron.
+// All parts sit at z=0; lids rest on their flat roofs with the openings upward.
+// Spacing includes the relief depth and leaves at least 10 mm between parts.
 module all_patterns() {
     patterns = ["none", "ribs", "flutes", "spiral", "diamond", "waves", "chevron"];
     spacing = outer_diameter+2*pattern_depth+10;
+    pair_columns = 2;
+    rows = ceil(len(patterns)/pair_columns);
     for (i = [0:len(patterns)-1])
-        translate([(i-(len(patterns)-1)/2)*spacing, 0, 0])
-            assembled(patterns[i]);
+        translate([(2*(i%pair_columns)-(2*pair_columns-1)/2)*spacing,
+                   (floor(i/pair_columns)-(rows-1)/2)*spacing, 0]) {
+            color("LightSkyBlue") container(patterns[i]);
+            color("Wheat") translate([spacing, 0, 0]) print_lid(patterns[i]);
+        }
 }
 
 if (view == "container") container();
