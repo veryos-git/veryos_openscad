@@ -42,6 +42,11 @@ seat_depth = 2; // [0.5:0.1:5]
 // Horizontal clearance PER SIDE at the same Z; zero gives nominal surface contact.
 seat_clearance = 0.15; // [0:0.05:0.5]
 
+/* [Inner edge chamfer] */
+// 45-degree chamfer on the box's inner top rim and the cover's throat opening.
+// Zero disables both.
+inner_edge_chamfer = 1.5; // [0:0.1:4]
+
 /* [Grip lip] */
 // Projection beyond the front edge of the capsule-shaped lid (toward -Y).
 lip_projection = 9; // [7:0.5:20]
@@ -132,6 +137,9 @@ assert(opening_w >= opening_d && opening_d > 2 * lid_overlap && lid_overlap >= 2
        "Opening width must be >= depth; increase opening depth or reduce overlap.");
 assert(seat_depth > 0 && seat_bottom_z >= 1.2,
        "Seat depth must be positive and leave at least 1.2 mm of straight opening below it.");
+assert(inner_edge_chamfer >= 0 && inner_edge_chamfer < wall_thickness
+       && inner_edge_chamfer < seat_bottom_z,
+       "Inner edge chamfer must be nonnegative and smaller than the wall thickness and the straight seat throat.");
 assert(seat_clearance >= 0 && seat_clearance < seat_depth
        && seat_throat_d > 2 * seat_clearance,
        "Seat clearance must be nonnegative and smaller than the seat depth and throat radius.");
@@ -271,6 +279,25 @@ module pocket_from_bottom(z) {
         cylinder(d = magnet_pocket_d, h = magnet_pocket_h + eps);
 }
 
+// 45-degree chamfer cut for the box's inner top rim: a frustum that matches the
+// cavity at box_height - c and widens outward by c at the open top.
+module top_rim_chamfer() {
+    c = inner_edge_chamfer;
+    hull() {
+        translate([0, 0, box_height - c])
+            linear_extrude(eps)
+                rounded_rectangle(box_width - 2 * wall_thickness,
+                                  box_depth - 2 * wall_thickness,
+                                  corner_radius - wall_thickness);
+        translate([0, 0, box_height])
+            linear_extrude(eps)
+                offset(r = c)
+                    rounded_rectangle(box_width - 2 * wall_thickness,
+                                      box_depth - 2 * wall_thickness,
+                                      corner_radius - wall_thickness);
+    }
+}
+
 module box() {
     difference() {
         linear_extrude(box_height)
@@ -285,6 +312,7 @@ module box() {
                     corner_positions() circle(r = post_r);
                 }
         corner_positions() pocket_from_top(box_height);
+        if (inner_edge_chamfer > 0) top_rim_chamfer();
     }
 }
 
@@ -317,9 +345,13 @@ module boxcover() {
         }
         // Female seat widens to the original opening size at the cover top.
         // Keeping that top outline preserves the wall around the latch magnet.
+        // The underside throat opens a 45-degree chamfer over the first c of rise.
         capsule_loft(seat_throat_w, seat_throat_d,
-                     [[-eps, 0], [seat_bottom_z, 0],
-                      [cover_thickness + eps, seat_depth + eps]]);
+                     concat(inner_edge_chamfer > 0
+                                ? [[-eps, inner_edge_chamfer], [inner_edge_chamfer, 0]]
+                                : [[-eps, 0]],
+                            [[seat_bottom_z, 0],
+                             [cover_thickness + eps, seat_depth + eps]]));
         // Corner magnets face DOWN toward the box; the latch faces UP.
         corner_positions() pocket_from_bottom(0);
         translate([0, latch_y, 0]) pocket_from_top(cover_thickness);
