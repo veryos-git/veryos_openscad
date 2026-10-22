@@ -2,27 +2,41 @@
 // A very simple BIC lighter case, reverse-engineered from bic_sleeve_plain.stl.
 //
 // The part is a thin elliptical tube, closed at the bottom and open at the top.
-// A BIC J5/J25 mini lighter drops in from above and a small hole in the floor
-// lets you push it back out with a finger. Every number below was measured off
-// the STL: outer 29.85 x 19.1 mm, 70.9 mm tall, 2 mm wall, 2 mm floor,
-// 1 mm chamfers on the outer edges, 0.5 mm lead-in at the mouth, 3 mm hole.
+// A BIC Maxi (J26, full size) lighter drops in from above and a small hole in
+// the floor lets you push it back out with a finger.
+//
+// What makes a lighter actually slide in and stay put is the INNER cavity, so
+// the cavity is the thing this script is built around: it is the lighter size
+// plus a fit clearance. The outside is then just the cavity plus the wall. The
+// original STL cavity (25.85 x 15.1 mm) is a Maxi (25 x 14.5 mm) plus ~0.4 mm
+// per side, which is exactly what the defaults below reproduce.
 //
 // Units: mm. No external libraries needed.
 
+/* [Lighter: BIC Maxi J26] */
+// Across the wide flat faces of the lighter.
+lighter_width = 25.0;
+// Front to back of the lighter.
+lighter_depth = 14.5;
+
+/* [Fit] */
+// Gap per side between the lighter and the inner wall. THIS is the number that
+// decides whether the lighter slides in and holds: 0.25 snug, 0.4 standard,
+// 0.6 loose. Increase it if your printer tends to over-extrude.
+fit_clearance = 0.4;
+
 /* [Case] */
-// Outer size across the wide faces and front-to-back.
-outer_width = 29.85;
-outer_depth = 19.1;
-// Overall height of the sleeve.
-height = 70.9;
-// Thickness of the side wall and of the bottom floor.
+// Side wall and bottom floor thickness.
 wall = 2.0;
 floor_thickness = 2.0;
+// Overall height of the sleeve. The cavity is this minus the floor, so it sets
+// how far the lighter sinks in and how much of the metal top stays exposed.
+height = 70.9;
 
 /* [Details] */
 // 45 degree chamfer on the outer top and bottom edges.
 edge_chamfer = 1.0;
-// Smaller lead-in chamfer at the inner mouth so the lighter drops in easily.
+// Smaller lead-in chamfer at the inner mouth so the lighter starts in easily.
 mouth_chamfer = 0.5;
 // Diameter of the finger push-out hole through the floor.
 hole_diameter = 3.0;
@@ -33,11 +47,16 @@ $fn = 96;
 
 /* [Hidden] */
 eps = 0.01;
-out_a = outer_width / 2;
-out_b = outer_depth / 2;
-in_a  = out_a - wall;
-in_b  = out_b - wall;
+// The inner cavity is driven by the lighter plus the clearance - the critical
+// dimension. Everything outside is derived from it by adding the wall.
+in_a  = lighter_width / 2 + fit_clearance;
+in_b  = lighter_depth / 2 + fit_clearance;
+out_a = in_a + wall;
+out_b = in_b + wall;
 hole_r = hole_diameter / 2;
+
+assert(edge_chamfer + mouth_chamfer < wall,
+       "Chamfers would eat through the top rim; reduce them or thicken the wall.");
 
 // An ellipse with the given semi-axes.
 module oval(a, b) scale([a, b]) circle(r = 1);
