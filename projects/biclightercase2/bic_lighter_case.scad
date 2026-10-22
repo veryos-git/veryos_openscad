@@ -23,11 +23,11 @@ lighter_depth = 14.5;
 // Gap per side between the lighter and the inner wall. THIS is the number that
 // decides whether the lighter slides in and holds: 0.25 snug, 0.4 standard,
 // 0.6 loose. Increase it if your printer tends to over-extrude.
-fit_clearance = 0.4;
+fit_clearance = 0.25;
 
 /* [Case] */
 // Side wall and bottom floor thickness.
-wall = 2.0;
+wall = 1.0;
 floor_thickness = 2.0;
 // Overall height of the sleeve. The cavity is this minus the floor, so it sets
 // how far the lighter sinks in and how much of the metal top stays exposed.
@@ -35,11 +35,11 @@ height = 70.9;
 
 /* [Details] */
 // 45 degree chamfer on the outer top and bottom edges.
-edge_chamfer = 1.0;
-// Smaller lead-in chamfer at the inner mouth so the lighter starts in easily.
-mouth_chamfer = 0.5;
+edge_chamfer = 0.4;
+// Smaller lead-inm chamfer at the inner mouth so the lighter starts in easily.
+mouth_chamfer = 0.4;
 // Diameter of the finger push-out hole through the floor.
-hole_diameter = 3.0;
+hole_diameter = 12.0;
 
 /* [Quality] */
 // Facets per full circle.
