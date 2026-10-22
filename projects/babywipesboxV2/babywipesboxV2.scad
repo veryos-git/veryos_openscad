@@ -2,11 +2,11 @@
 
 // Three printable parts. All dimensions are millimetres; no libraries required.
 // X = width, Y = depth (hinge at +Y), Z = height. See readme.md for assembly.
-// V2 adds a 45-degree grip lip, tapered lid seat and ribbed container outline.
+// V2 adds a 45-degree grip lip, tapered lid seat and selectable exterior patterns.
 
 /* [View] */
 // Export this separated layout to keep all three parts splittable in a slicer.
-part = "print_layout"; // [print_layout:All parts on bed, assembly:Assembled (inspection only), exploded:Exploded, box:Box, boxcover:Cover, boxcover_lid:Lid]
+part = "print_layout"; // [print_layout:All parts on bed, assembly:Assembled (inspection only), exploded:Exploded, box:Box, boxcover:Cover, boxcover_lid:Lid, all_patterns:All patterns (preview grid)]
 lid_angle = 110; // [0:5:180]
 exploded_distance = 25; // [0:1:80]
 
@@ -19,11 +19,22 @@ wall_thickness = 2.4; // [1.2:0.2:6]
 bottom_thickness = 2.4; // [1.2:0.2:6]
 corner_radius = 8; // [4:0.5:25]
 
-/* [Ribbed outline] */
-// Maximum outward projection. Zero restores the smooth outline.
-rib_depth = 1.5; // [0:0.1:4]
-// Approximate distance between ribs, adjusted to fit whole waves around the box.
-rib_pitch = 12; // [4:0.5:30]
+/* [Exterior pattern] */
+// Material is added OUTSIDE the box; the cavity, seat and hinge stay unchanged.
+// The maximum footprint is box_width/depth + 2*pattern_depth. "none" is smooth.
+exterior_pattern = "ribs"; // [none:Smooth,ribs:Fine round ribs,flutes:Broad rounded flutes,spiral:Spiral/twist ribs,diamond:Diamond knurl,waves:Wavy ribs,chevron:Chevron ribs]
+pattern_on_box = true;
+pattern_on_cover = true;
+// Added outward height; 0 also disables the pattern.
+pattern_depth = 1.5; // [0:0.1:4]
+// Rib/flute repeats around the whole perimeter. Must be a whole number.
+pattern_count = 52; // [8:1:160]
+// Smooth band at the top and bottom edge of each part.
+pattern_margin = 1.2; // [0:0.1:6]
+// Vertical repeat for diamonds, waves and chevrons.
+pattern_pitch = 12; // [4:0.5:40]
+// Total spiral rotation of the pattern over the box height; negative reverses.
+pattern_twist = 90; // [-360:5:360]
 
 /* [Cover and opening] */
 cover_thickness = 4; // [2:0.2:10]
@@ -82,10 +93,11 @@ outline_half_w = box_width / 2 - corner_radius;
 outline_half_d = box_depth / 2 - corner_radius;
 outline_corner_length = PI * corner_radius / 2;
 outline_quarter_length = outline_half_w + outline_corner_length + outline_half_d;
-rib_waves_per_quarter = max(1, round(outline_quarter_length / rib_pitch));
-rib_steps_per_quarter = rib_waves_per_quarter * max(16, ceil(curve_segments / 2));
-ribbed_width = box_width + 2 * rib_depth;
-ribbed_depth = box_depth + 2 * rib_depth;
+perimeter_length = 4 * outline_quarter_length;
+texture_depth = exterior_pattern != "none" && (pattern_on_box || pattern_on_cover)
+    ? pattern_depth : 0;
+outer_width = box_width + 2 * texture_depth;
+outer_depth = box_depth + 2 * texture_depth;
 opening_w = opening_width == 0 ? box_width * 0.53 : opening_width;
 opening_d = opening_depth == 0 ? box_depth * 0.40 : opening_depth;
 lid_w = opening_w + 2 * lid_overlap;
@@ -115,14 +127,29 @@ hinge_end_x = hinge_middle_length / 2 + hinge_axial_clearance + hinge_end_length
 layout_gap = 15;
 
 assert(part == "assembly" || part == "exploded" || part == "print_layout"
-       || part == "box" || part == "boxcover" || part == "boxcover_lid",
-       "Unknown part. Choose assembly, exploded, print_layout, box, boxcover or boxcover_lid.");
+       || part == "box" || part == "boxcover" || part == "boxcover_lid"
+       || part == "all_patterns",
+       "Unknown part. Choose assembly, exploded, print_layout, box, boxcover, boxcover_lid or all_patterns.");
 assert(wall_thickness >= 1.2 && bottom_thickness >= 1.2,
        "Walls and floor must be at least 1.2 mm thick.");
 assert(box_width > 2 * corner_radius && box_depth > 2 * corner_radius
        && corner_radius > wall_thickness, "Box/corner dimensions leave no interior.");
-assert(rib_depth >= 0 && rib_pitch >= 4,
-       "Rib depth must be nonnegative and rib spacing at least 4 mm.");
+assert(exterior_pattern == "none" || exterior_pattern == "ribs"
+       || exterior_pattern == "flutes" || exterior_pattern == "spiral"
+       || exterior_pattern == "diamond" || exterior_pattern == "waves"
+       || exterior_pattern == "chevron", "Unknown exterior pattern.");
+assert(pattern_depth >= 0 && pattern_margin >= 0,
+       "Pattern depth and edge margin must be nonnegative.");
+assert(pattern_count >= 3 && pattern_count == floor(pattern_count),
+       "Pattern count must be a whole number of at least three.");
+assert(pattern_pitch > 0, "Pattern pitch must be positive.");
+assert(pattern_depth < corner_radius,
+       "Pattern depth must be smaller than the corner radius.");
+assert(box_height > 2 * pattern_margin + 2 * eps,
+       "Box is too short for the pattern margin; reduce pattern_margin.");
+assert(!(texture_depth > 0 && pattern_on_cover)
+       || cover_thickness > 2 * pattern_margin + 2 * eps,
+       "Cover is too thin for the pattern margin; reduce pattern_margin.");
 assert(magnet_diameter > 0 && magnet_thickness > 0
        && magnet_diameter_clearance >= 0 && magnet_depth_clearance >= 0,
        "Magnet dimensions must be positive and clearances nonnegative.");
@@ -174,10 +201,11 @@ assert(lid_angle >= 0 && lid_angle <= 180 && exploded_distance >= 0,
        "Use a lid angle from 0 to 180 degrees and a nonnegative explode distance.");
 assert(curve_segments >= 24, "Use at least 24 curve segments.");
 
-echo(str("Box outside including ribs: ", ribbed_width, " x ", ribbed_depth,
+echo(str("Box outside including pattern: ", outer_width, " x ", outer_depth,
          " x ", box_height, " mm"));
-echo(str("Outline ribs: ", 4 * rib_waves_per_quarter, " waves, ", rib_depth,
-         " mm outward depth; actual pitch ", outline_quarter_length / rib_waves_per_quarter, " mm."));
+echo(str("Exterior pattern: ", exterior_pattern, ", depth ", pattern_depth,
+         " mm, ", pattern_count, " repeats over a ", perimeter_length,
+         " mm perimeter (pitch ", perimeter_length / pattern_count, " mm)."));
 echo(str("Interior between flat walls: ", box_width - 2 * wall_thickness,
          " x ", box_depth - 2 * wall_thickness, " x ", box_height - bottom_thickness,
          " mm; corner posts intrude into this space."));
@@ -195,34 +223,92 @@ module rounded_rectangle(w, d, r) {
                 translate([x, y]) circle(r = r);
 }
 
-// Walk from the front midpoint to the right midpoint, following the rounded
-// rectangle by arc length. The cosine varies only the OUTWARD normal offset.
-function ribbed_quarter_point(s) =
-    let(growth = rib_depth * (1 + cos(360 * rib_waves_per_quarter
-                                     * s / outline_quarter_length)) / 2,
-        a = -90 + 90 * (s - outline_half_w) / outline_corner_length)
-    s <= outline_half_w ? [s, -box_depth / 2 - growth] :
+// Base point and outward unit normal on the smooth rounded rectangle, walking
+// the front-right quarter from the front midpoint by arc length s (0..quarter).
+function quarter_base(s) =
+    let(a = -90 + 90 * (s - outline_half_w) / outline_corner_length)
+    s <= outline_half_w ?
+        [[s, -box_depth / 2], [0, -1]] :
     s < outline_half_w + outline_corner_length ?
-        [outline_half_w + (corner_radius + growth) * cos(a),
-         -outline_half_d + (corner_radius + growth) * sin(a)] :
-        [box_width / 2 + growth,
-         -outline_half_d + s - outline_half_w - outline_corner_length];
+        [[outline_half_w + corner_radius * cos(a),
+          -outline_half_d + corner_radius * sin(a)], [cos(a), sin(a)]] :
+        [[box_width / 2,
+          -outline_half_d + s - outline_half_w - outline_corner_length], [1, 0]];
 
-// Mirror the same quarter so opposing sides match and each midpoint is a crest.
-function ribbed_outline_point(q, t) =
-    let(p = ribbed_quarter_point((q % 2 == 0 ? t : 1 - t)
-                                 * outline_quarter_length))
-    q == 0 ? p : q == 1 ? [p[0], -p[1]] :
-    q == 2 ? [-p[0], -p[1]] : [-p[0], p[1]];
+// Mirror the quarter into all four sides. The perimeter fraction f (0..1) runs
+// counterclockwise by arc length, so patterns repeat evenly around the box and
+// each side midpoint stays a crest. Returns [point, outward unit normal].
+function base_point_normal(f) =
+    let(q = min(3, floor(f * 4)),
+        t = f * 4 - q,
+        pn = quarter_base((q % 2 == 0 ? t : 1 - t) * outline_quarter_length),
+        p = pn[0], n = pn[1])
+    q == 0 ? [p, n] :
+    q == 1 ? [[p[0], -p[1]], [n[0], -n[1]]] :
+    q == 2 ? [[-p[0], -p[1]], [-n[0], -n[1]]] :
+             [[-p[0], p[1]], [-n[0], n[1]]];
 
-// Shared by box and cover: vertical ribs line up across their mating rim.
-// Retain the base outline so polygon chords never reduce the original walls.
-module container_outline() {
-    union() {
-        rounded_rectangle(box_width, box_depth, corner_radius);
-        if (rib_depth > 0)
-            polygon([for (q = [0:3]) for (i = [0:rib_steps_per_quarter - 1])
-                ribbed_outline_point(q, i / rib_steps_per_quarter)]);
+// Pattern phase helpers, ported from simple_cylindrical_screwing_containerV2.
+// Here "angle" is the perimeter position in degrees (fraction * 360).
+function triangle_wave(a) = 1 - acos(cos(a)) / 180;
+function fraction(x) = x - floor(x);
+function pattern_shift(z, pattern = exterior_pattern) =
+    pattern == "spiral" ? pattern_twist * z / box_height :
+    pattern == "waves" ? 360 / pattern_count * sin(360 * z / pattern_pitch) :
+    pattern == "chevron" ? 360 / pattern_count * (4 * abs(fraction(z / pattern_pitch) - 0.5) - 1) : 0;
+
+// All profiles range from 0 to 1. The diamond is a field of raised pyramids,
+// with alternating rows offset by half a cell, like a conventional knurl.
+function pattern_profile(a, z, pattern = exterior_pattern) =
+    let(phase = a * pattern_count)
+    pattern == "diamond" ?
+        min(triangle_wave(phase + 360 * z / pattern_pitch),
+            triangle_wave(phase - 360 * z / pattern_pitch)) :
+    pattern == "flutes" ? (1 + cos(phase)) / 2 :
+    max(0, cos(phase - pattern_count * pattern_shift(z, pattern)));
+
+// A single closed mesh wraps the perimeter, adding relief OUTSIDE the smooth
+// blank that stays underneath, so texture never removes wall material. Vertices
+// follow the ribs (via pattern_shift) to avoid stair-stepping on curved
+// patterns. z_origin places the cover's texture in the assembled coordinate so
+// its pattern continues from the box across the closed seam.
+module exterior_relief(h, enabled, z_origin = 0, pattern = exterior_pattern) {
+    if (enabled && pattern != "none" && pattern_depth > 0) {
+        low = pattern_margin;
+        high = h - pattern_margin;
+        assert(high - low > 2 * eps,
+               "Pattern margin leaves no textured area; reduce pattern_margin.");
+        fade = min(pattern_depth, (high - low) / 3);
+        samples = max(12, ceil(curve_segments / 32) * 4);
+        segments = max(4 * curve_segments, pattern_count * samples);
+        // Constant profiles need only the two end ramps and a straight middle.
+        straight = pattern == "ribs" || pattern == "flutes" ||
+                   (pattern == "spiral" && pattern_twist == 0);
+        step = pattern == "spiral"
+            ? box_height * 360 / (max(abs(pattern_twist), eps) * pattern_count * samples)
+            : pattern_pitch / (2 * samples);
+        rows = max(1, ceil((high - low - 2 * fade) / step));
+        levels = straight ? [low, low + fade, high - fade, high] :
+            concat([low], [for (i = [0:rows]) low + fade + (high - low - 2 * fade) * i / rows], [high]);
+        // Sink the relief root just inside the faceted blank so the union is
+        // watertight even at the rounded corners' facet midpoints.
+        inset = corner_radius * (1 - cos(180 / curve_segments)) + 0.1;
+        points = [for (z = levels, j = [0:segments-1])
+            let(a = j * 360 / segments + pattern_shift(z + z_origin, pattern),
+                pn = base_point_normal(fraction(a / 360)),
+                p = pn[0], nrm = pn[1],
+                taper = min(1, (z - low) / fade, (high - z) / fade),
+                d = -inset + (pattern_depth + inset) * taper *
+                    pattern_profile(a, z + z_origin, pattern))
+            [p[0] + nrm[0] * d, p[1] + nrm[1] * d, z]];
+        faces = concat(
+            [[for (j = [0:segments-1]) j]],
+            [for (i = [0:len(levels)-2], j = [0:segments-1])
+                [i*segments+j, (i+1)*segments+j, (i+1)*segments+(j+1)%segments]],
+            [for (i = [0:len(levels)-2], j = [0:segments-1])
+                [i*segments+j, (i+1)*segments+(j+1)%segments, i*segments+(j+1)%segments]],
+            [[for (j = [segments-1:-1:0]) (len(levels)-1)*segments+j]]);
+        polyhedron(points = points, faces = faces, convexity = 16);
     }
 }
 
@@ -298,10 +384,13 @@ module top_rim_chamfer() {
     }
 }
 
-module box() {
+module box(pattern = exterior_pattern, show = pattern_on_box) {
     difference() {
-        linear_extrude(box_height)
-            container_outline();
+        union() {
+            linear_extrude(box_height)
+                rounded_rectangle(box_width, box_depth, corner_radius);
+            exterior_relief(box_height, show, 0, pattern);
+        }
         translate([0, 0, bottom_thickness])
             linear_extrude(box_height)
                 difference() {
@@ -329,11 +418,14 @@ module hinge_bore() {
             cylinder(d = hinge_bore_d, h = hinge_length + 2, center = true);
 }
 
-module boxcover() {
+module boxcover(pattern = exterior_pattern, show = pattern_on_cover) {
     difference() {
         union() {
             linear_extrude(cover_thickness)
-                container_outline();
+                rounded_rectangle(box_width, box_depth, corner_radius);
+            // Sample the assembled Z so the cover's pattern continues from the
+            // box across the closed seam.
+            exterior_relief(cover_thickness, show, box_height, pattern);
             // Two fixed outer knuckles; supports stay behind the moving lid.
             for (x = [-hinge_end_x, hinge_end_x]) {
                 hinge_tube(x, hinge_end_length);
@@ -426,14 +518,29 @@ module assembly(explode = 0) {
     }
 }
 
+// Preview every pattern at the current dimensions. One row per pattern, box on
+// the left and its cover on the right; parts keep their print orientation.
+module all_patterns() {
+    patterns = ["none", "ribs", "flutes", "spiral", "diamond", "waves", "chevron"];
+    col_gap = box_width + 2 * pattern_depth + layout_gap;
+    row_gap = box_depth + 2 * pattern_depth + layout_gap;
+    for (i = [0:len(patterns) - 1])
+        translate([0, (i - (len(patterns) - 1) / 2) * row_gap, 0]) {
+            color([0.30, 0.40, 0.43]) box(patterns[i], true);
+            translate([col_gap, 0, 0])
+                color([0.63, 0.74, 0.72]) boxcover(patterns[i], true);
+        }
+}
+
 // Each export has its lowest surface at Z=0. No printable pin is generated.
 if (part == "box") box();
 else if (part == "boxcover") boxcover();
 else if (part == "boxcover_lid") translate([0, 0, -seat_bottom_z]) boxcover_lid();
+else if (part == "all_patterns") all_patterns();
 else if (part == "print_layout") {
     box();
-    translate([0, ribbed_depth + layout_gap, 0]) boxcover();
-    translate([ribbed_width / 2 + layout_gap + lid_w / 2, 0, -seat_bottom_z]) boxcover_lid();
+    translate([0, outer_depth + layout_gap, 0]) boxcover();
+    translate([outer_width / 2 + layout_gap + lid_w / 2, 0, -seat_bottom_z]) boxcover_lid();
 }
 else if (part == "exploded") assembly(exploded_distance);
 else assembly();
