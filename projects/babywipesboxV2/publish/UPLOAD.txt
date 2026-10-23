@@ -1,0 +1,32 @@
+VERYOS BABY WIPES BOX — PHOTO COVERS
+
+Upload images/photo_landscape.jpg as the primary image.
+images/photo_portrait.jpg is the corresponding portrait cover.
+
+Image formats
+  Landscape: 2400 x 1800 px (4:3)
+  Portrait: 1800 x 2400 px (3:4)
+  JPEG: upload files, sRGB, quality 95
+  PNG: lossless masters
+
+Source photo
+WhatsApp Unknown 2026-10-23 at 17.14.49/WhatsApp Image 2026-10-23 at 17.14.04 (5).jpeg
+The closed box with the flip lid open and a wipe pulled through; no
+packaging branding is visible. The original photographs are retained in
+that folder. The printed box uses the diamond exterior pattern; the model's
+default pattern is ribs.
+
+Processing
+source/photo_covers.py cuts out the box, lid and wipe with OpenCV GrabCut,
+seeded by the dark print and a hand-placed region inside the wipe, and only
+white-balances them against the wipe. The backdrop's lighting is divided out
+so the studio paper becomes the page colour; the contact shadow under the box
+is kept. The print is not retouched or regenerated; only the background and
+layout are edited.
+
+Regeneration from the repository root
+  python3 projects/babywipesboxV2/publish/source/photo_covers.py
+
+Requirements: Python 3, Pillow, NumPy, OpenCV, PyGObject/Rsvg and Pycairo.
+Artwork uses the original veryos_logo.svg and the OpenSCAD icon bundled with
+OpenSCAD. Typography is DejaVu Sans Mono.
