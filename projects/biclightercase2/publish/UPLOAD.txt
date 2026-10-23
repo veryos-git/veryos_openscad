@@ -1,0 +1,60 @@
+VERYOS BIC LIGHTER CASE — PUBLICATION ASSETS
+
+Upload 01_cover_landscape.jpg as the primary image.
+09_cover_portrait.jpg is the corresponding portrait cover.
+Use 02 through 08 as the supporting image sequence.
+
+Image formats
+  Landscape: 2400 x 1800 px (4:3)
+  Portrait cover: 1800 x 2400 px (3:4)
+  JPEG: compact upload files, sRGB, quality 95
+  PNG: lossless masters in the images folder
+
+Image order
+  01 Cover
+  02 Overall size
+  03 Built around the lighter (cavity and fit clearance)
+  04 Inside the case (cutaway, mouth and floor details)
+  05 Seven exterior patterns
+  06 Pattern relief
+  07 Tune the pattern (count, twist and pitch)
+  08 Print and customize
+  09 Alternative portrait cover
+
+listing.md contains the listing title, description and tags.
+parameters.json records the defaults used for every annotated image, plus
+the three changed values shown on image 07.
+model/ contains the SCAD source, one upright STL per pattern at the default
+settings, and the license.
+contact-sheet.jpg reviews the nine images.
+veryos_bic_lighter_case_upload_pack.zip bundles the nine JPEGs, this guide,
+listing copy, parameter values and model files. PNG masters remain outside
+the ZIP in the images folder.
+
+Print project
+../BIC_J26_lightercases_veryos.3mf is a Bambu Studio project with all seven
+cases (Bambu Lab A2L, 0.24 mm layers, PLA, supports off). It is not in the
+ZIP; upload it separately where print profiles are supported.
+
+Photos
+No photograph of a printed case was available, so this pack has no photo
+covers. Add them when photos of the print exist.
+
+Rendering
+The model geometry is exported directly from OpenSCAD and rendered in Blender.
+Annotations are projected from known geometry points and typeset separately.
+Colors are illustrative; amber marks the default pattern on 05 and the
+changed value on 07. Cutaways and detail sections are explanatory views, not
+printable parts. The supplied STLs are complete cases.
+
+Regeneration from the repository root
+  node projects/biclightercase2/publish/source/render.mjs
+
+Requirements: Node.js, bundled OpenSCAD AppImage, Blender, Python 3, Pillow,
+PyGObject/Rsvg and Pycairo. The layout is designed for this preset; review
+label placement if the model dimensions are changed substantially.
+The raw render cache is in .gitignored/bic_case_listing.
+
+Artwork uses the original veryos_logo.svg and the OpenSCAD icon bundled with
+OpenSCAD. Typography is DejaVu Sans Mono. BIC is named for compatibility
+only; no BIC logos or artwork are used.
