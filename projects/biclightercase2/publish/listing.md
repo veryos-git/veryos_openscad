@@ -42,7 +42,7 @@ One STL per pattern is included, all at these default settings.
 
 Print each case upright on its flat bottom, open end up; no supports are needed. Open the SCAD file to pick a pattern and adjust the fit in the Customizer, render with F6 and export the STL. Set `part = "all_patterns"` to lay out all seven cases side by side.
 
-The fit clearance decides whether the lighter slides in and holds: 0.25 mm is snug, 0.4 mm standard and 0.6 mm loose. Fit depends on the printer and material, so print one case to check it before printing a set. Annotated views are digital renders; colors are illustrative.
+The fit clearance decides whether the lighter slides in and holds: 0.25 mm is snug, 0.4 mm standard and 0.6 mm loose. Fit depends on the printer and material, so print one case to check it before printing a set. Annotated views are digital renders; colors are illustrative. The photo covers show the printed cases, with an edited background.
 
 ## Tags
 

@@ -1,7 +1,8 @@
 VERYOS BIC LIGHTER CASE — PUBLICATION ASSETS
 
-Upload 01_cover_landscape.jpg as the primary image.
-09_cover_portrait.jpg is the corresponding portrait cover.
+Upload 10_photo_landscape.jpg as the primary image to feature the real print.
+11_photo_portrait.jpg is the corresponding portrait cover.
+01_cover_landscape.jpg and 09_cover_portrait.jpg are the rendered alternatives.
 Use 02 through 08 as the supporting image sequence.
 
 Image formats
@@ -20,14 +21,16 @@ Image order
   07 Tune the pattern (count, twist and pitch)
   08 Print and customize
   09 Alternative portrait cover
+  10 Photo cover, landscape
+  11 Photo cover, portrait
 
 listing.md contains the listing title, description and tags.
 parameters.json records the defaults used for every annotated image, plus
 the three changed values shown on image 07.
 model/ contains the SCAD source, one upright STL per pattern at the default
 settings, and the license.
-contact-sheet.jpg reviews the nine images.
-veryos_bic_lighter_case_upload_pack.zip bundles the nine JPEGs, this guide,
+contact-sheet.jpg reviews all eleven images.
+veryos_bic_lighter_case_upload_pack.zip bundles the eleven JPEGs, this guide,
 listing copy, parameter values and model files. PNG masters remain outside
 the ZIP in the images folder.
 
@@ -36,9 +39,13 @@ Print project
 cases (Bambu Lab A2L, 0.24 mm layers, PLA, supports off). It is not in the
 ZIP; upload it separately where print profiles are supported.
 
-Photos
-No photograph of a printed case was available, so this pack has no photo
-covers. Add them when photos of the print exist.
+Photo covers
+Source: WhatsApp Unknown 2026-10-23 at 17.14.52/thumb.jpeg
+compose.py fits a smooth surface to the paper backdrop, divides that lighting
+out and maps the backdrop to the page colour, capped at that colour. The
+printed cases, the lighter and their contact shadows are not retouched or
+regenerated; only the background and layout are edited. The original
+photographs are retained in that folder.
 
 Rendering
 The model geometry is exported directly from OpenSCAD and rendered in Blender.
@@ -50,7 +57,7 @@ printable parts. The supplied STLs are complete cases.
 Regeneration from the repository root
   node projects/biclightercase2/publish/source/render.mjs
 
-Requirements: Node.js, bundled OpenSCAD AppImage, Blender, Python 3, Pillow,
+Requirements: Node.js, bundled OpenSCAD AppImage, Blender, Python 3, Pillow, NumPy,
 PyGObject/Rsvg and Pycairo. The layout is designed for this preset; review
 label placement if the model dimensions are changed substantially.
 The raw render cache is in .gitignored/bic_case_listing.

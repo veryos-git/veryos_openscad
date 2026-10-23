@@ -2,6 +2,7 @@
 """Compose publication layouts with exact labels and projected CAD annotations."""
 from pathlib import Path
 import io, json, math, sys, zipfile
+import numpy as np
 from PIL import Image, ImageDraw, ImageFont, ImageCms, ImageFilter
 import gi, cairo
 gi.require_version('Rsvg','2.0')
@@ -47,7 +48,7 @@ logo=svg_logo(88)
 scad=Image.open(Path(__file__).parent/'assets'/'openscad.png').convert('RGBA')
 scad.thumbnail((68,68),Image.Resampling.LANCZOS)
 
-def page(title,subtitle,index,portrait=False):
+def page(title,subtitle,index,portrait=False,footer='VERY OPEN SOURCE  /  PARAMETRIC LIGHTER CASE'):
     global im,d
     W,H=(1800,2400) if portrait else (2400,1800)
     im=Image.new('RGBA',(W,H),BG);d=ImageDraw.Draw(im)
@@ -57,7 +58,7 @@ def page(title,subtitle,index,portrait=False):
     if title: txt((112,210),title,78 if len(title)>25 else 88,INK,True)
     if subtitle: txt((116,330),subtitle,33,MUTE)
     d.line((112,H-113,W-112,H-113),fill=LINE,width=2)
-    txt((112,H-78),'VERY OPEN SOURCE  /  PARAMETRIC LIGHTER CASE',24,MUTE)
+    txt((112,H-78),footer,24,MUTE)
     txt((W-112,H-78),index,26,MUTE,anchor='rt')
 
 def render(name,box):
@@ -255,8 +256,55 @@ txt((116,2110),'Seven exterior patterns',34,INK,True)
 txt((116,2170),f'{cavity} cavity',34,INK)
 save('09_cover_portrait')
 
+# Photo covers: the real print, with the backdrop lighting divided out so the
+# studio paper becomes the page colour. The cases themselves are not retouched.
+PHOTO=output/'WhatsApp Unknown 2026-10-23 at 17.14.52'/'thumb.jpeg'
+def flatten(path,passes=3,threshold=14):
+    pic=Image.open(path).convert('RGB'); W,H=pic.size
+    small=np.asarray(pic.reduce(8),float); h,w,_=small.shape
+    def terms(w,h):
+        yy,xx=np.mgrid[0:h,0:w]; X=xx/w*2-1; Y=yy/h*2-1
+        return [X**i*Y**j for i in range(4) for j in range(6)]
+    A=np.stack([t.ravel() for t in terms(w,h)],1)
+    light=small.mean(2)
+    keep=(light>120)&(small.max(2)-small.min(2)<70)
+    # Fit a smooth backdrop, then drop everything that departs from it
+    # (prints, lighter, contact shadows) and fit again.
+    for _ in range(passes):
+        coef=np.linalg.lstsq(A[keep.ravel()],small.reshape(-1,3)[keep.ravel()],rcond=None)[0]
+        away=np.abs(small-(A@coef).reshape(h,w,3)).max(2)>threshold
+        away=np.asarray(Image.fromarray((away*255).astype(np.uint8)).filter(ImageFilter.MaxFilter(7)))>0
+        keep=~away&(light>120)
+    backdrop=sum(t[...,None]*c for t,c in zip(terms(W,H),coef))
+    page_color=np.array([int(BG[i:i+2],16) for i in (1,3,5)],float)
+    # Light bounce next to the prints sits above the fitted backdrop; capping at
+    # the page colour removes that halo without touching the dark prints.
+    return Image.fromarray(np.clip(np.asarray(pic,float)/backdrop*page_color,0,page_color).astype(np.uint8))
+def place(pic,scale,xy,box):
+    pic=pic.resize((round(pic.width*scale),round(pic.height*scale)),Image.Resampling.LANCZOS)
+    x0,y0=max(box[0],xy[0]),max(box[1],xy[1]); x1,y1=min(box[2],xy[0]+pic.width),min(box[3],xy[1]+pic.height)
+    crop=pic.crop((x0-xy[0],y0-xy[1],x1-xy[0],y1-xy[1]))
+    mask=Image.new('L',crop.size,0); ImageDraw.Draw(mask).rectangle((30,30,crop.width-31,crop.height-31),fill=255)
+    im.paste(crop,(x0,y0),mask.filter(ImageFilter.GaussianBlur(15)))
+
+if PHOTO.exists():
+    shot=flatten(PHOTO)
+    page('',None,'',footer='EDITABLE OPENSCAD MODEL')
+    place(shot,1.083,(117,15),(0,165,2400,1680))
+    txt((116,238),'FOR BIC MAXI J26',33,AMBER,True)
+    txt((106,300),'LIGHTER CASE',117,INK,True)
+    txt((116,470),'Set the fit. Pick the pattern.',43,INK)
+    save('10_photo_landscape')
+    page('',None,'',portrait=True,footer='EDITABLE OPENSCAD MODEL')
+    place(shot,.916,(7,640),(0,165,1800,2280))
+    txt((116,235),'FOR BIC MAXI J26',33,AMBER,True)
+    txt((106,330),'LIGHTER',125,INK,True)
+    txt((106,485),'CASE',125,INK,True)
+    txt((116,690),'Set the fit. Pick the pattern.',40,INK)
+    save('11_photo_portrait')
+
 # A review sheet is deliberately separate from the upload images.
-sheet=Image.new('RGB',(1800,1450),BG)
+sheet=Image.new('RGB',(1800,1450+480*max(0,math.ceil(len(made)/3)-3)),BG)
 draw=ImageDraw.Draw(sheet)
 for i,name in enumerate(made):
     pic=Image.open(images/(name+'.jpg'));pic.thumbnail((566,420),Image.Resampling.LANCZOS)
