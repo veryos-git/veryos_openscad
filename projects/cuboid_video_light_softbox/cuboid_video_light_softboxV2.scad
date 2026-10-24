@@ -20,10 +20,10 @@
 // Units: mm. No external libraries needed.
 
 /* [View] */
-part = "assembly"; // [assembly:Assembly preview,frame:Frame,screw:Light clamp screw,thumb_screw:Thumb screw (covers and ring),wallcover_big:Wall cover big (long sides),wallcover_small:Wall cover small (short sides),fabric_ring:Fabric clamp ring]
+part = "print_layout"; // [print_layout:All parts on bed,assembly:Assembly preview,frame:Frame,screw:Light clamp screw,thumb_screw:Thumb screw (covers and ring),wallcover_big:Wall cover big (long sides),wallcover_small:Wall cover small (short sides),fabric_ring:Fabric clamp ring]
 
 /* [Video light: Ulanzi VL120 RGB] */
-light_length = 117; // x, slides through the clamp tunnels along this axis
+light_length = 116; // x, slides through the clamp tunnels along this axis
 light_width = 67;   // y
 light_height = 16;  // z
 // Gap per side between the light and the clamp tunnel walls. The Onshape
@@ -44,14 +44,14 @@ plate_overlap_x = 13.5;
 plate_overlap_y = 7.5;
 // Struts and the front rim height measured across the walls, and the top
 // plate thickness.
-frame_thickness = 6;
+frame_thickness = 7;
 // Front rim width, measured horizontally. Holds the fabric groove and the
 // ring screws.
 rail_width = 20;
 // From the underside of the light down to the front opening.
-softbox_depth = 78;
+softbox_depth = 60;
 // Side wall tilt from vertical.
-wall_angle = 28.6;
+wall_angle = 24;
 // Notch in the top plate on the -y long side, below the light's 1/4" thread.
 side_notch_width = 48.7;
 // 45 degree bevel on the clamp edges, frame corners and screw holes.
@@ -129,6 +129,7 @@ cover_hole_depth = thumb_screw_length - wallcover_thickness + 0.5;
 window_top_z = -((wallcover_screw_inset + thumb_hole_r) * cos(wall_angle)
                  + cover_hole_depth * sin(wall_angle) + 1.5);
 window_bottom_z = -(cover_bottom_v - wallcover_screw_inset - thumb_hole_r - 1.5) * cos(wall_angle);
+layout_gap = 5;
 
 assert(clamp_length < light_length / 2, "Clamps must not meet in the middle.");
 assert(opening_half.x > 0 && opening_half.y > 0, "Plate overlap is larger than the light.");
@@ -138,7 +139,8 @@ assert(ring_screw_inset + thumb_hole_r + 1 <= groove_inset
        && groove_inset + groove_width + 2 <= rail_width,
        "Ring screws, groove and rail_width do not fit side by side.");
 
-if (part == "assembly") assembly();
+if (part == "print_layout") print_layout();
+else if (part == "assembly") assembly();
 else if (part == "frame") translate([0, 0, softbox_depth]) frame();
 else if (part == "screw") screw();
 else if (part == "thumb_screw") thumb_screw();
@@ -165,6 +167,29 @@ module assembly() {
                 rotate([180, 0, 0]) screw();
     %translate([0, 0, light_height / 2])
         cube([light_length, light_width, light_height], center = true);
+}
+
+// Every part in its print orientation: the frame on its front rim, the rest
+// as noted at their modules. The thumb screws print inside the frame, the
+// light clamp screws inside the ring and the covers, turned by 90 degrees,
+// beside them. About 310 x 300 mm with the default sizes.
+module print_layout() {
+    g = layout_gap;
+    ring_y = 2 * front_half.y + g;
+    translate([0, 0, softbox_depth]) frame();
+    for (i = [0:5], j = [0:3])
+        translate([i - 2.5, j - 1.5] * (thumb_head_diameter + g)) thumb_screw();
+    translate([0, ring_y, 0]) {
+        fabric_ring();
+        for (s = [-1, 1]) translate([s * (screw_head_width + g), 0, 0]) screw();
+    }
+    // Turned covers span x from 0 to cover_bottom_v.
+    big = cover_bottom_half(top_x);
+    small = cover_bottom_half(top_y);
+    for (k = [0, 1]) translate([front_half.x + g + k * (cover_bottom_v + g), ring_y + front_half.y, 0]) {
+        translate([0, -big, 0]) rotate(90) wallcover(top_x);
+        translate([0, -2 * big - g - small, 0]) rotate(90) wallcover(top_y);
+    }
 }
 
 module frame() {
@@ -306,6 +331,9 @@ module cover_outline(top_half) {
     v = cover_bottom_v;
     polygon([[-w, 0], [w, 0], [w + v * s, -v], [-w - v * s, -v]]);
 }
+
+// Half width of the cover outline at its bottom edge.
+function cover_bottom_half(top_half) = top_half - chamfer - 0.5 + cover_bottom_v * sin(wall_angle);
 
 module window_outline(top_half) {
     v0 = -window_top_z / cos(wall_angle);
