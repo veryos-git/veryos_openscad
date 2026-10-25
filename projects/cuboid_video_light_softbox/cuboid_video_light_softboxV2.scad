@@ -42,9 +42,12 @@ clamp_roof = 8;
 // How far the top plate reaches under the light, per side.
 plate_overlap_x = 13.5;
 plate_overlap_y = 7.5;
-// Struts and the front rim height measured across the walls, and the top
-// plate thickness.
-frame_thickness = 7;
+// General frame thickness: struts and front rim height measured across the
+// walls, and the top plate. The thumb screw length follows it.
+frame_thickness = 5.5;
+// Material left between the thumb screw holes and the inside of the wall or
+// the windows.
+hole_margin = 0.8;
 // Front rim width, measured horizontally. Holds the fabric groove and the
 // ring screws.
 rail_width = 20;
@@ -89,10 +92,10 @@ screw_head_width = 15; // across flats
 screw_head_height = 6;
 
 /* [Thumb screws] */
-thumb_thread_diameter = 8;
+thumb_thread_diameter = 7;
 thumb_thread_pitch = 1.5;
-// Threaded shank: wall cover plus frame wall, or ring plus rim.
-thumb_screw_length = 8;
+// 45 degree chamfer at the tip, for an easy start.
+thumb_tip_chamfer = 1;
 thumb_head_width = 13; // across flats
 thumb_head_height = 5;
 
@@ -123,12 +126,15 @@ side_faces = [[0, top_x, top_y], [180, top_x, top_y], [90, top_y, top_x], [270, 
 cover_bottom_v = (softbox_depth - 4) / cos(wall_angle);
 thumb_hole_r = thumb_thread_diameter / 2 + thread_clearance;
 // Depth of the cover screw holes, square to the face.
-cover_hole_depth = thumb_screw_length - wallcover_thickness + 0.5;
-// Windows stop 1.5 mm short of the cover screw holes. At the top the hole
-// runs downwards into the wall, so its inner end decides.
+cover_hole_depth = frame_thickness - hole_margin;
+// Threaded shank: wall cover plus hole, 0.5 mm short of the hole's end. The
+// ring screws are the same.
+thumb_screw_length = wallcover_thickness + cover_hole_depth - 0.5;
+// Windows stop hole_margin short of the cover screw holes. At the top the
+// hole runs downwards into the wall, so its inner end decides.
 window_top_z = -((wallcover_screw_inset + thumb_hole_r) * cos(wall_angle)
-                 + cover_hole_depth * sin(wall_angle) + 1.5);
-window_bottom_z = -(cover_bottom_v - wallcover_screw_inset - thumb_hole_r - 1.5) * cos(wall_angle);
+                 + cover_hole_depth * sin(wall_angle) + hole_margin);
+window_bottom_z = -(cover_bottom_v - wallcover_screw_inset - thumb_hole_r - hole_margin) * cos(wall_angle);
 layout_gap = 5;
 
 assert(clamp_length < light_length / 2, "Clamps must not meet in the middle.");
@@ -265,11 +271,12 @@ module thumb_thread_hole(depth) {
 
 // Printed head down.
 module screw()
-    hex_screw(thread_diameter, thread_pitch, screw_length, screw_head_width, screw_head_height);
+    hex_screw(thread_diameter, thread_pitch, screw_length, screw_head_width, screw_head_height,
+              chamfer);
 
 module thumb_screw()
     hex_screw(thumb_thread_diameter, thumb_thread_pitch, thumb_screw_length,
-              thumb_head_width, thumb_head_height);
+              thumb_head_width, thumb_head_height, thumb_tip_chamfer);
 
 // Lies on a flat of the head, centred on the origin, so the layers run along
 // the shank and it does not snap between them. The shank needs support.
@@ -278,7 +285,7 @@ module thumb_screw_lying()
         rotate([-90, 0, 0]) thumb_screw();
 
 // Hex head with bevelled corners on z = 0, shank upwards.
-module hex_screw(d, pitch, length, head_width, head_height) {
+module hex_screw(d, pitch, length, head_width, head_height, tip) {
     w = head_width / 2;
     h = head_height;
     intersection() {
@@ -289,7 +296,7 @@ module hex_screw(d, pitch, length, head_width, head_height) {
         threaded_rod(d, length + eps, pitch);
         // 45 degree tip chamfer eases the start into the thread. On the light
         // clamp screw it also leaves a flat pad that presses on the light.
-        cylinder(h = length + eps, r1 = d / 2 - chamfer + length, r2 = d / 2 - chamfer);
+        cylinder(h = length + eps, r1 = d / 2 - tip + length, r2 = d / 2 - tip);
     }
 }
 
