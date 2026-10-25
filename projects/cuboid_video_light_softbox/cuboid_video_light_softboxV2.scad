@@ -63,7 +63,7 @@ wallcover_thickness = 2;
 // tan(wall_angle)) the lip's lower edge hits the frame.
 wallcover_lip_clearance = 1.2;
 // Distance of the thumb screw rows from the cover's top and bottom edges.
-wallcover_screw_inset = 5;
+wallcover_screw_inset = 8;
 
 /* [Fabric clamp ring] */
 ring_thickness = 3;
@@ -89,11 +89,11 @@ screw_head_width = 15; // across flats
 screw_head_height = 6;
 
 /* [Thumb screws] */
-thumb_thread_diameter = 5;
+thumb_thread_diameter = 8;
 thumb_thread_pitch = 1.5;
 // Threaded shank: wall cover plus frame wall, or ring plus rim.
 thumb_screw_length = 8;
-thumb_head_diameter = 12;
+thumb_head_width = 13; // across flats
 thumb_head_height = 5;
 
 /* [Quality] */
@@ -143,7 +143,7 @@ if (part == "print_layout") print_layout();
 else if (part == "assembly") assembly();
 else if (part == "frame") translate([0, 0, softbox_depth]) frame();
 else if (part == "screw") screw();
-else if (part == "thumb_screw") thumb_screw();
+else if (part == "thumb_screw") thumb_screw_lying();
 else if (part == "wallcover_big") wallcover(top_x);
 else if (part == "wallcover_small") wallcover(top_y);
 else if (part == "fabric_ring") fabric_ring();
@@ -170,15 +170,17 @@ module assembly() {
 }
 
 // Every part in its print orientation: the frame on its front rim, the rest
-// as noted at their modules. The thumb screws print inside the frame, the
-// light clamp screws inside the ring and the covers, turned by 90 degrees,
-// beside them. About 310 x 300 mm with the default sizes.
+// as noted at their modules. The thumb screws print lying inside the frame,
+// the light clamp screws inside the ring and the covers, turned by 90
+// degrees, beside them. About 310 x 300 mm with the default sizes.
 module print_layout() {
     g = layout_gap;
     ring_y = 2 * front_half.y + g;
     translate([0, 0, softbox_depth]) frame();
     for (i = [0:5], j = [0:3])
-        translate([i - 2.5, j - 1.5] * (thumb_head_diameter + g)) thumb_screw();
+        translate([(i - 2.5) * (thumb_head_width / cos(30) + g),
+                   (j - 1.5) * (thumb_head_height + thumb_screw_length + g), 0])
+            thumb_screw_lying();
     translate([0, ring_y, 0]) {
         fabric_ring();
         for (s = [-1, 1]) translate([s * (screw_head_width + g), 0, 0]) screw();
@@ -261,34 +263,33 @@ module thumb_thread_hole(depth) {
     }
 }
 
-module screw() {
-    w = screw_head_width / 2;
-    h = screw_head_height;
+// Printed head down.
+module screw()
+    hex_screw(thread_diameter, thread_pitch, screw_length, screw_head_width, screw_head_height);
+
+module thumb_screw()
+    hex_screw(thumb_thread_diameter, thumb_thread_pitch, thumb_screw_length,
+              thumb_head_width, thumb_head_height);
+
+// Lies on a flat of the head, centred on the origin, so the layers run along
+// the shank and it does not snap between them. The shank needs support.
+module thumb_screw_lying()
+    translate([0, -(thumb_head_height + thumb_screw_length) / 2, thumb_head_width / 2])
+        rotate([-90, 0, 0]) thumb_screw();
+
+// Hex head with bevelled corners on z = 0, shank upwards.
+module hex_screw(d, pitch, length, head_width, head_height) {
+    w = head_width / 2;
+    h = head_height;
     intersection() {
         cylinder(r = w / cos(30), h = h, $fn = 6);
         rotate_extrude() polygon([[0, 0], [w, 0], [w + 1, 1], [w + 1, h - 1], [w, h], [0, h]]);
     }
     translate([0, 0, h - eps]) intersection() {
-        threaded_rod(thread_diameter, screw_length + eps, thread_pitch);
-        // 45 degree tip chamfer leaves a flat pad that presses on the light.
-        cylinder(h = screw_length + eps,
-                 r1 = thread_diameter / 2 - chamfer + screw_length, r2 = thread_diameter / 2 - chamfer);
-    }
-}
-
-// Round head with finger notches, printed head down.
-module thumb_screw() {
-    r = thumb_head_diameter / 2;
-    tip = 0.4 * thumb_thread_pitch;
-    difference() {
-        cylinder(r = r, h = thumb_head_height);
-        for (i = [0:7]) rotate(45 * i) translate([r, 0, -1]) cylinder(d = 3, h = thumb_head_height + 2);
-    }
-    translate([0, 0, thumb_head_height - eps]) intersection() {
-        threaded_rod(thumb_thread_diameter, thumb_screw_length + eps, thumb_thread_pitch);
-        cylinder(h = thumb_screw_length + eps,
-                 r1 = thumb_thread_diameter / 2 - tip + thumb_screw_length,
-                 r2 = thumb_thread_diameter / 2 - tip);
+        threaded_rod(d, length + eps, pitch);
+        // 45 degree tip chamfer eases the start into the thread. On the light
+        // clamp screw it also leaves a flat pad that presses on the light.
+        cylinder(h = length + eps, r1 = d / 2 - chamfer + length, r2 = d / 2 - chamfer);
     }
 }
 
