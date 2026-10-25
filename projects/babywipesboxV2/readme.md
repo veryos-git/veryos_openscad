@@ -15,8 +15,8 @@ The exterior carries a **selectable surface pattern**, chosen with
 [cylindrical screw container V2](../simple_cylindrical_screwing_containerV2/),
 adapted to the box perimeter. The default is **`ribs`**: **52 repeats** around
 the perimeter, spaced about **12 mm** apart, projecting **1.5 mm outward**. The
-pattern wraps the rounded corners and, for `ribs`/`flutes`, runs vertically from
-the first layer to the top rim. The cover samples the same assembled Z height,
+pattern wraps the rounded corners and, for `ribs`/`flutes`, runs vertically
+between the smooth edge bands. The cover samples the same assembled Z height,
 so its pattern aligns with the box across the closed seam. The pattern only adds
 material outside the wall, so the original inner cavity and minimum wall
 thickness are retained. Preview every pattern at once with
@@ -28,6 +28,25 @@ and warping needs a print test. The pattern is part of the finished shape.
 ![Closed box with the default ribs on the container and cover](preview.png)
 
 ![Top view of the patterned outline](outline_preview.png)
+
+The cover now has a **45° tapered underside that fits the box's inner rim
+chamfer**. At the default 1.5 mm rim chamfer and 0.15 mm clearance, it projects
+1.35 mm below the cover plate. The outer plate rests on the box rim while the
+taper centres the cover. The corner magnet mouths move down with the insert,
+leaving 0.15 mm between the cover underside and the lowered box posts.
+
+The box magnet bores now provide **2.6 mm of usable depth below the chamfered
+post tops**. Previously, the 1.5 mm chamfer removed most of the nominal 2.1 mm
+bores, leaving only 0.6 mm. Depth now includes compensation for that chamfer
+plus `box_magnet_extra_depth` (default 0.5 mm). Cover and lid bores are 2.1 mm
+deep. The extra box depth allows room for adhesive; position magnets near the
+bore mouths when gluing for a smaller magnetic gap.
+
+![Section through the matching rim bevel and a pair of magnet bores](rim_section.png)
+
+The dark lower part is the box; the lighter upper part is the cover. The narrow
+diagonal gap follows the matching bevels, and the central void shows the two
+opposing blind magnet bores.
 
 The underside of the lid now has a solid tapered insert that fits into a
 **2 mm deep, 45° recess** in the cover. Both mating faces run around the entire
@@ -57,14 +76,15 @@ the left and the grip/latch magnet pockets on the right.
 **Print the box and cover with matching pattern settings** for the aligned
 finish. The hinged
 lid is unchanged from the preceding V2 revision with the 45° seat and can be
-reused. Magnet positions, the filament hinge, and the tapered seat are retained.
-An earlier smooth container still fits the cover's magnet positions, although
-their outer outlines differ.
+reused. Magnet X/Y positions, the filament hinge, and the hinged lid's tapered
+seat are retained. The new cover requires the matching chamfered box rim and
+lowered corner posts. For a box without that rim chamfer, set
+`inner_edge_chamfer = 0` to disable the cover's locating insert.
 
-The default box measures **203 × 123 × 85 mm including the pattern**. The
+The default box measures **203 × 123 × 65 mm including the pattern**. The
 `box_width` and `box_depth` settings remain 200 × 120 mm before the pattern;
 the overall width and depth each increase by `2 * pattern_depth`. Interior space
-between flat walls remains 195.2 × 115.2 × 82.6 mm, with corner posts intruding
+between flat walls remains 195.2 × 115.2 × 62.6 mm, with corner posts intruding
 into that space. The opening remains 106 × 48 mm
 at the top, narrowing to a 102 × 44 mm throat below the bevel. This keeps the
 latch magnet pocket enclosed by its original surrounding wall.
@@ -85,6 +105,9 @@ The V2 Customizer controls are:
 | `pattern_twist` | 90 | Total spiral rotation over the box height, in degrees |
 | `seat_depth` | 2 | Cover recess depth; its radial taper has the same size, in mm |
 | `seat_clearance` | 0.15 | Horizontal gap per side between mating faces at the same Z, in mm |
+| `inner_edge_chamfer` | 1.5 | Matching 45° box rim / cover underside and cover throat chamfer, in mm; zero disables |
+| `cover_seat_clearance` | 0.15 | Gap per side at the box/cover taper and above the box posts, in mm |
+| `box_magnet_extra_depth` | 0.5 | Extra usable box magnet depth beyond magnet thickness and normal depth clearance, in mm |
 | `lip_projection` | 9 | Distance beyond the front edge of the lid, in mm |
 | `lip_height` | 5 | Lip height from the flat flange underside, excluding the insert, in mm |
 | `lip_width` | 16 | Grip width along X, in mm |
@@ -107,8 +130,8 @@ for the larger footprint and keeps a 15 mm gap between parts.
 ## Export and assembly
 
 Open `babywipesboxV2.scad` in OpenSCAD. The default `part = "print_layout"`
-puts all three separate parts at Z=0, with the lid resting on the insert's
-flat bottom. Render with **F6**, export as STL, then
+puts all three separate parts at Z=0, with the cover and hinged lid resting on
+their respective inserts' flat bottoms. Render with **F6**, export as STL, then
 split into objects and arrange the parts in your slicer.
 
 Use `box`, `boxcover`, or `boxcover_lid` to export a single part.
@@ -136,17 +159,26 @@ matching the current original SCAD file. See the original
 [printing and assembly instructions](../babywipesbox/readme.md#print-and-assemble).
 The lip and insert slope at 45° in the supplied print orientation. The lid's
 flange, latch pad, and hinge now sit 2.25 mm above the bed: inspect these
-overhangs and add local supports where needed. Keep support away from the
+overhangs and add local supports where needed. The cover's outer seating ledge
+sits 1.35 mm above the bed with the default rim fit; inspect this short overhang
+in the slicer too. Keep support away from the
 sloped mating surface and filament bore; clean the seat and magnet-pocket
 bridges before checking the fit.
 
 ## Validation
 
-Rendered with OpenSCAD 2026.09.16. Each default part is a connected, closed
-mesh with consistent face orientation and its lowest point at Z=0. The
-combined layout contains exactly three separate closed components. The
-exported meshes confirm the 45° mating profiles and 0.15 mm horizontal gap.
-Solid intersection checks between lid and cover are empty at 0.25° steps
+The updated rim and magnet geometry was rendered with OpenSCAD 2026.09.16
+(Manifold). After discarding zero-area triangles introduced by binary STL
+rounding, each default part is a connected, closed mesh with consistent face
+orientation and its lowest point at Z=0. The combined layout contains exactly
+three separate closed components. Measurements of the exported meshes confirm
+the matching 45° rim profiles, 0.15 mm horizontal clearance, all four 2.6 mm
+box bores, and all four 2.1 mm cover bores. The assembled box and cover have no
+solid overlap below their intended flat contact surface, and the closed hinged
+lid has no solid overlap with the cover. Layouts with the rim chamfer disabled
+or reduced to 0.5 mm also retain three closed components resting at Z=0.
+
+Earlier lid-seat validation found empty intersections at 0.25° steps
 from 0° to 10°, then 1° steps through 180°, using the default clearance.
 A 2.5 mm seat depth with 0.25 mm clearance also renders successfully.
 All seven exterior patterns (none, ribs, flutes, spiral, diamond, waves,

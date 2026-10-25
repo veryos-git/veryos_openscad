@@ -54,9 +54,12 @@ seat_depth = 2; // [0.5:0.1:5]
 seat_clearance = 0.15; // [0:0.05:0.5]
 
 /* [Inner edge chamfer] */
-// 45-degree chamfer on the box's inner top rim and the cover's throat opening.
-// Zero disables both.
+// Matching 45-degree box rim / cover underside, plus the cover throat bevel.
+// Zero disables these chamfers and the cover's locating insert.
 inner_edge_chamfer = 1.5; // [0:0.1:4]
+// Horizontal clearance per side between the cover insert and box rim.
+// Also leaves this vertical gap above the lowered corner posts.
+cover_seat_clearance = 0.15; // [0:0.05:0.5]
 
 /* [Grip lip] */
 // Projection beyond the front edge of the capsule-shaped lid (toward -Y).
@@ -73,6 +76,8 @@ magnet_thickness = 2; // [1:0.5:5]
 // Clearance added to the DIAMETER, not to each side.
 magnet_diameter_clearance = 0.2; // [0:0.05:0.8]
 magnet_depth_clearance = 0.1; // [0:0.05:0.5]
+// Additional usable depth below the box's chamfered corner-post tops.
+box_magnet_extra_depth = 0.5; // [0:0.1:3]
 
 /* [Filament hinge] */
 filament_diameter = 1.75;
@@ -104,6 +109,10 @@ lid_w = opening_w + 2 * lid_overlap;
 lid_d = opening_d + 2 * lid_overlap;
 magnet_pocket_d = magnet_diameter + magnet_diameter_clearance;
 magnet_pocket_h = magnet_thickness + magnet_depth_clearance;
+box_magnet_pocket_h = magnet_pocket_h + box_magnet_extra_depth;
+// The rim chamfer lowers the post tops, including the entire bore mouths.
+box_magnet_top_z = box_height - inner_edge_chamfer;
+cover_insert_depth = max(0, inner_edge_chamfer - cover_seat_clearance);
 magnet_x = box_width / 2 - corner_radius;
 magnet_y = box_depth / 2 - corner_radius;
 post_r = max(magnet_pocket_d / 2 + 1.6,
@@ -151,11 +160,12 @@ assert(!(texture_depth > 0 && pattern_on_cover)
        || cover_thickness > 2 * pattern_margin + 2 * eps,
        "Cover is too thin for the pattern margin; reduce pattern_margin.");
 assert(magnet_diameter > 0 && magnet_thickness > 0
-       && magnet_diameter_clearance >= 0 && magnet_depth_clearance >= 0,
+       && magnet_diameter_clearance >= 0 && magnet_depth_clearance >= 0
+       && box_magnet_extra_depth >= 0,
        "Magnet dimensions must be positive and clearances nonnegative.");
 assert(post_r <= corner_radius && post_r >= magnet_pocket_d / 2 + 1.2,
        "Increase corner_radius or reduce the magnet diameter to enclose the corner pockets.");
-assert(box_height > bottom_thickness + magnet_pocket_h + 1.2,
+assert(box_magnet_top_z > bottom_thickness + box_magnet_pocket_h + 1.2,
        "Box is too shallow for its floor and magnet pockets.");
 assert(cover_thickness >= magnet_pocket_h + 1.2
        && lid_thickness >= magnet_pocket_h + 1.2,
@@ -167,6 +177,12 @@ assert(seat_depth > 0 && seat_bottom_z >= 1.2,
 assert(inner_edge_chamfer >= 0 && inner_edge_chamfer < wall_thickness
        && inner_edge_chamfer < seat_bottom_z,
        "Inner edge chamfer must be nonnegative and smaller than the wall thickness and the straight seat throat.");
+assert(cover_seat_clearance >= 0
+       && (inner_edge_chamfer == 0 || cover_seat_clearance < inner_edge_chamfer),
+       "Cover seat clearance must be nonnegative and smaller than the enabled rim chamfer.");
+assert(cover_insert_depth == 0
+       || corner_radius - wall_thickness >= magnet_pocket_d / 2 + 1.2,
+       "Increase corner_radius to leave 1.2 mm around the cover insert's magnet bores.");
 assert(seat_clearance >= 0 && seat_clearance < seat_depth
        && seat_throat_d > 2 * seat_clearance,
        "Seat clearance must be nonnegative and smaller than the seat depth and throat radius.");
@@ -210,6 +226,11 @@ echo(str("Interior between flat walls: ", box_width - 2 * wall_thickness,
          " x ", box_depth - 2 * wall_thickness, " x ", box_height - bottom_thickness,
          " mm; corner posts intrude into this space."));
 echo(str("Use 10 magnets, diameter ", magnet_diameter, " x ", magnet_thickness, " mm."));
+echo(str("Box magnet bores: ", box_magnet_pocket_h,
+         " mm usable depth below chamfered post tops; cover/lid bores: ",
+         magnet_pocket_h, " mm."));
+echo(str("Cover rim seat: 45 degrees, ", cover_insert_depth,
+         " mm underside projection, ", cover_seat_clearance, " mm clearance per side."));
 echo(str("Hinge bore: ", hinge_bore_d, " mm; filament pin length about ", hinge_length + 2, " mm."));
 echo(str("Grip lip: ", lip_projection, " mm projection, ", lip_height,
          " mm total height, ", lip_width, " mm width; 45-degree undercut."));
@@ -221,6 +242,16 @@ module rounded_rectangle(w, d, r) {
         for (x = [-w / 2 + r, w / 2 - r])
             for (y = [-d / 2 + r, d / 2 - r])
                 translate([x, y]) circle(r = r);
+}
+
+// The corner centres stay fixed as the radius grows. Equal height and growth
+// give matching 45-degree faces around the straight sides and rounded corners.
+module rounded_rectangle_taper(w, d, r, h, growth) {
+    hull()
+        for (x = [-w / 2 + r, w / 2 - r])
+            for (y = [-d / 2 + r, d / 2 - r])
+                translate([x, y, 0])
+                    cylinder(r1 = r, r2 = r + growth, h = h);
 }
 
 // Base point and outward unit normal on the smooth rounded rectangle, walking
@@ -355,9 +386,9 @@ module corner_positions() {
 }
 
 // Blind pockets. The small epsilon opens the mouth without deepening the seat.
-module pocket_from_top(z) {
-    translate([0, 0, z - magnet_pocket_h])
-        cylinder(d = magnet_pocket_d, h = magnet_pocket_h + eps);
+module pocket_from_top(z, depth = magnet_pocket_h) {
+    translate([0, 0, z - depth])
+        cylinder(d = magnet_pocket_d, h = depth + eps);
 }
 
 module pocket_from_bottom(z) {
@@ -369,19 +400,23 @@ module pocket_from_bottom(z) {
 // cavity at box_height - c and widens outward by c at the open top.
 module top_rim_chamfer() {
     c = inner_edge_chamfer;
-    hull() {
-        translate([0, 0, box_height - c])
-            linear_extrude(eps)
-                rounded_rectangle(box_width - 2 * wall_thickness,
-                                  box_depth - 2 * wall_thickness,
-                                  corner_radius - wall_thickness);
-        translate([0, 0, box_height])
-            linear_extrude(eps)
-                offset(r = c)
-                    rounded_rectangle(box_width - 2 * wall_thickness,
-                                      box_depth - 2 * wall_thickness,
-                                      corner_radius - wall_thickness);
-    }
+    translate([0, 0, box_height - c])
+        rounded_rectangle_taper(box_width - 2 * wall_thickness,
+                                box_depth - 2 * wall_thickness,
+                                corner_radius - wall_thickness,
+                                c + eps, c + eps);
+}
+
+// Male underside seat fits the rim frustum at the SAME assembled Z. Its bottom
+// clears the lowered posts; the plate above still rests on the flat outer rim.
+module cover_rim_insert() {
+    if (cover_insert_depth > 0)
+        translate([0, 0, -cover_insert_depth])
+            rounded_rectangle_taper(box_width - 2 * wall_thickness,
+                                    box_depth - 2 * wall_thickness,
+                                    corner_radius - wall_thickness,
+                                    cover_insert_depth + eps,
+                                    cover_insert_depth + eps);
 }
 
 module box(pattern = exterior_pattern, show = pattern_on_box) {
@@ -400,7 +435,8 @@ module box(pattern = exterior_pattern, show = pattern_on_box) {
                     // Leave full-height corner posts connected to the walls.
                     corner_positions() circle(r = post_r);
                 }
-        corner_positions() pocket_from_top(box_height);
+        corner_positions()
+            pocket_from_top(box_height, inner_edge_chamfer + box_magnet_pocket_h);
         if (inner_edge_chamfer > 0) top_rim_chamfer();
     }
 }
@@ -423,6 +459,7 @@ module boxcover(pattern = exterior_pattern, show = pattern_on_cover) {
         union() {
             linear_extrude(cover_thickness)
                 rounded_rectangle(box_width, box_depth, corner_radius);
+            cover_rim_insert();
             // Sample the assembled Z so the cover's pattern continues from the
             // box across the closed seam.
             exterior_relief(cover_thickness, show, box_height, pattern);
@@ -437,15 +474,17 @@ module boxcover(pattern = exterior_pattern, show = pattern_on_cover) {
         }
         // Female seat widens to the original opening size at the cover top.
         // Keeping that top outline preserves the wall around the latch magnet.
-        // The underside throat opens a 45-degree chamfer over the first c of rise.
+        // Extend the opening through the insert and start its 45-degree throat
+        // chamfer at the new underside. The upper hinged-lid seat stays at its Z.
         capsule_loft(seat_throat_w, seat_throat_d,
                      concat(inner_edge_chamfer > 0
-                                ? [[-eps, inner_edge_chamfer], [inner_edge_chamfer, 0]]
+                                ? [[-cover_insert_depth - eps, inner_edge_chamfer + eps],
+                                   [inner_edge_chamfer - cover_insert_depth, 0]]
                                 : [[-eps, 0]],
                             [[seat_bottom_z, 0],
                              [cover_thickness + eps, seat_depth + eps]]));
         // Corner magnets face DOWN toward the box; the latch faces UP.
-        corner_positions() pocket_from_bottom(0);
+        corner_positions() pocket_from_bottom(-cover_insert_depth);
         translate([0, latch_y, 0]) pocket_from_top(cover_thickness);
         hinge_bore();
     }
@@ -527,19 +566,19 @@ module all_patterns() {
     for (i = [0:len(patterns) - 1])
         translate([0, (i - (len(patterns) - 1) / 2) * row_gap, 0]) {
             color([0.30, 0.40, 0.43]) box(patterns[i], true);
-            translate([col_gap, 0, 0])
+            translate([col_gap, 0, cover_insert_depth])
                 color([0.63, 0.74, 0.72]) boxcover(patterns[i], true);
         }
 }
 
 // Each export has its lowest surface at Z=0. No printable pin is generated.
 if (part == "box") box();
-else if (part == "boxcover") boxcover();
+else if (part == "boxcover") translate([0, 0, cover_insert_depth]) boxcover();
 else if (part == "boxcover_lid") translate([0, 0, -seat_bottom_z]) boxcover_lid();
 else if (part == "all_patterns") all_patterns();
 else if (part == "print_layout") {
     box();
-    translate([0, outer_depth + layout_gap, 0]) boxcover();
+    translate([0, outer_depth + layout_gap, cover_insert_depth]) boxcover();
     translate([outer_width / 2 + layout_gap + lid_w / 2, 0, -seat_bottom_z]) boxcover_lid();
 }
 else if (part == "exploded") assembly(exploded_distance);
