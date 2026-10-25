@@ -96,6 +96,13 @@ thumb_tip_chamfer = 1;
 thumb_head_width = 13; // across flats
 thumb_head_height = 5;
 
+/* [Screw printing] */
+// All screws print lying on a flat of the head, so the layers run along the
+// shank and it does not snap between them. This share of the thread diameter
+// is cut off their underside, through the shank and the head, which leaves a
+// flat they both stand on, so they print without support.
+screw_cut = 0.2;
+
 /* [Quality] */
 $fn = 64;
 
@@ -141,7 +148,7 @@ assert(wallcover_lip_clearance >= wallcover_thickness * tan(wall_angle),
 if (part == "print_layout") print_layout();
 else if (part == "assembly") assembly();
 else if (part == "frame") translate([0, 0, softbox_depth]) frame();
-else if (part == "screw") screw();
+else if (part == "screw") screw_lying();
 else if (part == "thumb_screw") thumb_screw_lying();
 else if (part == "wallcover_big") wallcover(top_x);
 else if (part == "wallcover_small") wallcover(top_y);
@@ -164,8 +171,8 @@ module assembly() {
 }
 
 // Every part in its print orientation: the frame on its front rim, the rest
-// as noted at their modules. All screws print inside the frame, the thumb
-// screws lying, and the covers in two rows behind it. About 300 x 290 mm with
+// as noted at their modules. All screws print lying inside the frame, and
+// the covers in two rows behind it. About 300 x 290 mm with
 // the default sizes.
 module print_layout() {
     g = layout_gap;
@@ -175,7 +182,7 @@ module print_layout() {
         translate([(i - 1.5) * thumb_pitch, (j - 1.5) * (thumb_head_height + thumb_screw_length + g), 0])
             thumb_screw_lying();
     for (s = [-1, 1])
-        translate([s * (2 * thumb_pitch + (g + screw_head_width / cos(30)) / 2), 0, 0]) screw();
+        translate([s * (2 * thumb_pitch + (g + screw_head_width / cos(30)) / 2), 0, 0]) screw_lying();
     // Covers span y from -cover_bottom_v to 0; one big and one small per row.
     big = cover_bottom_half(top_x);
     small = cover_bottom_half(top_y);
@@ -260,7 +267,7 @@ module thumb_thread_hole(depth) {
     }
 }
 
-// Printed head down.
+// Light clamp screw.
 module screw()
     hex_screw(thread_diameter, thread_pitch, screw_length, screw_head_width, screw_head_height,
               chamfer);
@@ -269,11 +276,24 @@ module thumb_screw()
     hex_screw(thumb_thread_diameter, thumb_thread_pitch, thumb_screw_length,
               thumb_head_width, thumb_head_height, thumb_tip_chamfer);
 
-// Lies on a flat of the head, centred on the origin, so the layers run along
-// the shank and it does not snap between them. The shank needs support.
+module screw_lying()
+    lying(thread_diameter, screw_length, screw_head_width, screw_head_height) screw();
+
 module thumb_screw_lying()
-    translate([0, -(thumb_head_height + thumb_screw_length) / 2, thumb_head_width / 2])
-        rotate([-90, 0, 0]) thumb_screw();
+    lying(thumb_thread_diameter, thumb_screw_length, thumb_head_width, thumb_head_height)
+        thumb_screw();
+
+// Lays a screw (the children, upright as hex_screw makes it) on a flat of its
+// head, centred on the origin, and cuts off everything below screw_cut * d
+// above the shank's lowest point. The cut is the print bed, z = 0.
+module lying(d, length, head_width, head_height) {
+    axis_z = d * (0.5 - screw_cut);
+    translate([0, -(head_height + length) / 2, axis_z]) difference() {
+        rotate([-90, 0, 0]) children();
+        translate([-head_width, -1, -axis_z - head_width])
+            cube([2 * head_width, head_height + length + 2, head_width]);
+    }
+}
 
 // Hex head with bevelled corners on z = 0, shank upwards.
 module hex_screw(d, pitch, length, head_width, head_height, tip) {
