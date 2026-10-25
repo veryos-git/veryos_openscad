@@ -5,10 +5,10 @@
 // screws threaded straight into the frame wall, two above and two below the
 // window.
 //
-// The fabric clamp ring of V2 is gone. Instead a flat lip sticks out from the
-// front edge in the middle of each side. Lay the diffusion fabric over the
-// front opening, pull it taut and clip it to the four lips with clothespins
-// (see clothespin/image.png). Without the ring's groove and screws the front
+// The fabric clamp ring of V2 is gone. Instead a flat lip sticks out
+// diagonally from each corner of the front edge. Lay the diffusion fabric
+// over the front opening, pull it taut and clip its corners to the four lips
+// with clothespins (see clothespin/image.png). Without the ring's groove and screws the front
 // rim is narrower, so the front opening is bigger than in V2.
 //
 // Print 1 frame, 1-2 screws, 2 wallcover_big, 2 wallcover_small and 16 thumb
@@ -66,12 +66,13 @@ wallcover_lip_clearance = 1.2;
 wallcover_screw_inset = 8;
 
 /* [Clothespin lips] */
-// Flat tab flush with the front face, one in the middle of each side. The
-// clothespin's jaws grip it from the front and the back.
+// Flat tab flush with the front face, one at each corner, pointing
+// diagonally outwards. The clothespin's jaws grip it from the front and the
+// back.
 lip_thickness = 3;
-// How far the lip sticks out beyond the frame's outer edge.
+// How far the lip sticks out beyond the frame corner, along the diagonal.
 lip_length = 12;
-// Along the side; leaves room to slide the clothespin to either side.
+// Across the lip; leaves room to slide the clothespin to either side.
 lip_width = 20;
 
 /* [Light clamp screw] */
@@ -177,8 +178,10 @@ module print_layout() {
     big = cover_bottom_half(top_x);
     small = cover_bottom_half(top_y);
     row_half = big + small + g / 2;
+    // How far the corner lips reach beyond the frame sides.
+    lip_reach = (lip_length + lip_width / 2 - chamfer) / sqrt(2);
     for (k = [0, 1])
-        translate([0, front_half.y + lip_length + g + cover_bottom_v + k * (cover_bottom_v + g), 0]) {
+        translate([0, front_half.y + lip_reach + g + cover_bottom_v + k * (cover_bottom_v + g), 0]) {
             translate([big - row_half, 0, 0]) wallcover(top_x);
             translate([row_half - small, 0, 0]) wallcover(top_y);
         }
@@ -187,8 +190,8 @@ module print_layout() {
 module frame() {
     pyramid();
     for (s = [-1, 1]) translate([s * clamp_x, 0, 0]) clamp();
-    for (f = side_faces) rotate([0, 0, f[0]])
-        translate([0, f[2] + grow * softbox_depth, -softbox_depth])
+    for (i = [-1, 1], j = [-1, 1])
+        translate([i * front_half.x, j * front_half.y, -softbox_depth]) rotate(atan2(j, i) - 90)
             linear_extrude(lip_thickness) lip_outline();
 }
 
@@ -330,15 +333,15 @@ function cover_screws(top_half) =
 module face_frame(dist)
     translate([0, dist, 0]) rotate([90 + wall_angle, 0, 0]) children();
 
-// A clothespin lip in the front plane: x along the side, y outwards from the
-// frame's outer edge. It starts halfway into the rim; the outer corners are
+// A clothespin lip in the front plane: y outwards along the diagonal from the
+// frame corner, x across it. Its back edge cuts across the corner just inside
+// the frame's outer edges, so it ends in the rim. The outer corners are
 // bevelled so they do not snag the fabric.
 module lip_outline() {
     w = lip_width / 2;
     l = lip_length;
     c = chamfer;
-    polygon([[-w, -rail_width / 2], [w, -rail_width / 2], [w, l - c], [w - c, l],
-             [c - w, l], [-w, l - c]]);
+    polygon([[-w, -w - 1], [w, -w - 1], [w, l - c], [w - c, l], [c - w, l], [-w, l - c]]);
 }
 
 // Frame-shaped frustum between two depths below the frame top, inset
