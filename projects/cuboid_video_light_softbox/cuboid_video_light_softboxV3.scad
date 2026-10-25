@@ -101,7 +101,7 @@ thumb_head_height = 5;
 // shank and it does not snap between them. This share of the thread diameter
 // is cut off their underside, through the shank and the head, which leaves a
 // flat they both stand on, so they print without support.
-screw_cut = 0.2;
+screw_cut = 0.1;
 
 /* [Quality] */
 $fn = 64;
