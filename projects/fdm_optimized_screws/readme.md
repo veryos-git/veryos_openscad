@@ -1,4 +1,4 @@
-the goal is to create a usable fdm printable screw with no supports. 
+the goal is to create a openSCAD script or module that can generate usable fdm printable screw with no supports. 
 
 so far i found out: 
     - a 45 degrees angled thread works best for fmd printing
@@ -9,7 +9,43 @@ so far i found out:
     - it would be better to print the screws with the screw cylinder horizontally layed on the printbed 
         - to prevent support, it is required to cut off a part of the screw
 
-    ![preview](preview.png)
+## test results
+
+Both tests were printed in PETG. The clearance is per side and all of it is in
+the nut, so the nut thread is the screw diameter + 2 x clearance: 0.15, 0.2
+and 0.25 mm make it 0.3, 0.4 and 0.5 mm bigger than the screw.
+
+### test 1: 3, 4 and 5 mm
+
+- 3 mm: broke while screwing it in.
+- 4 mm: went into the 0.25 nut easily, but twisted and almost deformed for
+  good when there was resistance.
+- 5 mm: works well.
+- The first layer of the small screws was tiny dots of plastic: with
+  `screw_cut` 0.1 only the thread tips touch the bed. The first print failed
+  and needed a brim. `screw_cut` was raised to 0.15 after this test.
+
+### test 2: 4, 5 and 6 mm
+
+![test 2](tests/image.png)
+
+Every screw goes into all three nuts of its diameter, 0.15, 0.2 and 0.25 mm.
+
+- 4 mm: very small and bends easily, but works.
+- 5 mm: works.
+- 6 mm: works.
+
+### conclusion
+
+- Smallest screw: 5 mm. 4 mm works but bends easily, 3 mm breaks.
+- Clearance: 0.25 mm, so a 5 mm screw gets a 5.5 mm nut thread. 0.15 and 0.2
+  work too, but 0.25 still has little play and is safer on printers that are
+  not perfectly calibrated.
+- 45 degree thread, 2 mm pitch, 1 mm tip chamfer.
+- Print the screw lying flat, with the underside cut off (`screw_cut` 0.15).
+- Next: the same test in PLA, expected to print the same or better.
+
+![preview](preview.png)
 
 `fdm_optimized_screws.scad` generates a hex head screw and a matching nut that
 print without support. The thread is the 45 degree thread of the softbox screws
@@ -19,7 +55,7 @@ print without support. The thread is the 45 degree thread of the softbox screws
 
 Set `part = "print_layout"` to get the screw and the nut in their print
 orientation.
-- screw: lying on a flat of its head. `screw_cut` (default 0.1) is the share of
+- screw: lying on a flat of its head. `screw_cut` (default 0.15) is the share of
   the thread diameter cut off its underside, through the shank and the head, so
   both stand on the bed.
 - nut: flat on the bed. Both ends of the hole have a 45 degree lead-in.

@@ -44,8 +44,8 @@ screw_head_height = 5;
 // 45 degree chamfer on the shank tip; eases the start into the nut.
 tip_chamfer = 1;
 // This share of the thread diameter is cut off the underside of the lying
-// screw. 0.1 has printed well.
-screw_cut = 0.1;
+// screw. 0.15 has printed well.
+screw_cut = 0.15;
 
 /* [Nut] */
 nut_width = 13; // across flats
