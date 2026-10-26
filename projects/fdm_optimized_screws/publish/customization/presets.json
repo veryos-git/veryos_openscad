@@ -1,0 +1,23 @@
+{
+  "fileFormatVersion": "1",
+  "parameterSets": {
+    "Small": {
+      "thread_diameter": "6",
+      "screw_length": "15",
+      "screw_head_width": "10",
+      "nut_width": "10",
+      "thread_pitch": "1.5"
+    },
+    "Everyday": {},
+    "Long": {
+      "screw_length": "35"
+    },
+    "Large": {
+      "thread_diameter": "12",
+      "screw_length": "30",
+      "screw_head_width": "18",
+      "nut_width": "18",
+      "nut_height": "10"
+    }
+  }
+}

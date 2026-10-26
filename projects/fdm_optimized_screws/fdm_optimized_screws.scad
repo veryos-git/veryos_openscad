@@ -8,12 +8,16 @@
 // right-hand with 45 degree flanks (90 degree included angle). Thread and
 // screw code as in cuboid_video_light_softbox/cuboid_video_light_softboxV3.scad.
 //
+// part = "testing" lays out a screw and a nut for every test diameter and
+// clearance. The clearance is engraved on the screw head and on a side of
+// the nut, so the pairs can be told apart.
+//
 // Origin: screw axis on z, underside of the head on z = 0.
 //
 // Units: mm. No external libraries needed.
 
 /* [View] */
-part = "print_layout"; // [print_layout:Screw and nut on bed,assembly:Assembly preview,screw:Screw (lying),nut:Nut]
+part = "print_layout"; // [print_layout:Screw and nut on bed,assembly:Assembly preview,screw:Screw (lying),nut:Nut,testing:Clearance test set]
 
 /* [Thread] */
 // Major diameter. 5 mm is the smallest that has worked so far.
@@ -39,6 +43,17 @@ screw_cut = 0.1;
 nut_width = 13; // across flats
 nut_height = 8;
 
+/* [Testing] */
+test_diameters = [3, 4, 5, 6, 7];
+// Radial gap between screw and nut, all of it in the nut, as thread_clearance.
+test_clearances = [0.15, 0.2, 0.25];
+// Head and nut width (across flats) of all test parts; wide enough for the
+// labels.
+test_width = 15;
+label_size = 2.5;
+label_depth = 0.6;
+font = "Liberation Sans:style=Bold";
+
 /* [Quality] */
 $fn = 64;
 
@@ -49,11 +64,27 @@ if (part == "print_layout") print_layout();
 else if (part == "assembly") assembly();
 else if (part == "screw") screw_lying();
 else if (part == "nut") nut();
+else if (part == "testing") testing();
 
 module print_layout() {
     g = 5;
     screw_lying();
     translate([(screw_head_width + nut_width) / (2 * cos(30)) + g, 0, 0]) nut();
+}
+
+// One row per diameter, one screw and nut pair per clearance.
+module testing() {
+    g = 5;
+    corners = test_width / cos(30);
+    cols = len(test_clearances);
+    rows = len(test_diameters);
+    for (i = [0:cols - 1], j = [0:rows - 1])
+        translate([(i - (cols - 1) / 2) * 2 * (corners + g),
+                   (j - (rows - 1) / 2) * (screw_head_height + screw_length + g), 0]) {
+            screw_lying(test_diameters[j], test_width, str(test_clearances[i]));
+            translate([corners + g, 0, 0])
+                nut(test_diameters[j], test_clearances[i], test_width, str(test_clearances[i]));
+        }
 }
 
 // Nut on the shank, a whole number of pitches above the head so the threads
@@ -64,41 +95,50 @@ module assembly() {
         nut();
 }
 
-module screw() {
-    hex(screw_head_width, screw_head_height);
+module screw(d = thread_diameter, head_width = screw_head_width) {
+    hex(head_width, screw_head_height);
     translate([0, 0, screw_head_height - eps]) intersection() {
-        threaded_rod(thread_diameter, screw_length + eps, thread_pitch);
-        cylinder(h = screw_length + eps, r1 = thread_diameter / 2 - tip_chamfer + screw_length,
-                 r2 = thread_diameter / 2 - tip_chamfer);
+        threaded_rod(d, screw_length + eps, thread_pitch);
+        cylinder(h = screw_length + eps, r1 = d / 2 - tip_chamfer + screw_length,
+                 r2 = d / 2 - tip_chamfer);
     }
 }
 
 // Lays the screw on a flat of its head, centred on the origin, and cuts off
-// everything below screw_cut * thread_diameter above the shank's lowest point.
-// The cut is the print bed, z = 0.
-module screw_lying() {
-    axis_z = thread_diameter * (0.5 - screw_cut);
+// everything below screw_cut * d above the shank's lowest point. The cut is
+// the print bed, z = 0. The label goes in the end face of the head, centred
+// on what the cut leaves of it.
+module screw_lying(d = thread_diameter, head_width = screw_head_width, label = "") {
+    axis_z = d * (0.5 - screw_cut);
     length = screw_head_height + screw_length;
     translate([0, -length / 2, axis_z]) difference() {
-        rotate([-90, 0, 0]) screw();
-        translate([-screw_head_width, -1, -axis_z - screw_head_width])
-            cube([2 * screw_head_width, length + 2, screw_head_width]);
+        rotate([-90, 0, 0]) screw(d, head_width);
+        translate([-head_width, -1, -axis_z - head_width])
+            cube([2 * head_width, length + 2, head_width]);
+        translate([0, label_depth, (head_width / 2 - axis_z) / 2]) rotate([90, 0, 0]) label(label);
     }
 }
 
 // From z = 0 to nut_height, with a 45 degree lead-in at both ends. The hole's
-// thread starts a whole pitch below z = 0, in phase with the screw's.
-module nut() {
-    hole_r = thread_diameter / 2 + thread_clearance;
+// thread starts a whole pitch below z = 0, in phase with the screw's. The
+// label goes in the side facing -y.
+module nut(d = thread_diameter, clearance = thread_clearance, width = nut_width, label = "") {
+    hole_r = d / 2 + clearance;
     thread_h = 0.4 * thread_pitch;
     difference() {
-        hex(nut_width, nut_height);
+        hex(width, nut_height);
         translate([0, 0, -thread_pitch])
             threaded_rod(2 * hole_r, nut_height + 2 * thread_pitch, thread_pitch);
         for (m = [0, 1]) translate([0, 0, m * nut_height]) mirror([0, 0, m])
             translate([0, 0, -1]) cylinder(r1 = hole_r + 1, r2 = hole_r - thread_h, h = 1 + thread_h);
+        translate([0, label_depth - width / 2, nut_height / 2]) rotate([90, 0, 0]) label(label);
     }
 }
+
+// Text for engraving, from z = 0 to label_depth + 1.
+module label(s)
+    linear_extrude(label_depth + 1)
+        text(s, size = label_size, font = font, halign = "center", valign = "center");
 
 // Hex prism with bevelled corners, from z = 0 to h.
 module hex(width, h) {

@@ -1,0 +1,39 @@
+{
+  "source": "../../fdm_optimized_screws.scad",
+  "variants": [
+    {
+      "name": "Small",
+      "label": "Ø6 × 15 mm",
+      "params": {
+        "thread_diameter": 6,
+        "screw_length": 15,
+        "screw_head_width": 10,
+        "nut_width": 10,
+        "thread_pitch": 1.5
+      }
+    },
+    {
+      "name": "Everyday",
+      "label": "Ø8 × 20 mm",
+      "params": {}
+    },
+    {
+      "name": "Long",
+      "label": "Ø8 × 35 mm",
+      "params": {
+        "screw_length": 35
+      }
+    },
+    {
+      "name": "Large",
+      "label": "Ø12 × 30 mm",
+      "params": {
+        "thread_diameter": 12,
+        "screw_length": 30,
+        "screw_head_width": 18,
+        "nut_width": 18,
+        "nut_height": 10
+      }
+    }
+  ]
+}

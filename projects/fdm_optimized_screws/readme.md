@@ -36,3 +36,21 @@ head and nut (across flats). Change `thread_diameter`, `thread_pitch`,
 `thread_clearance` (default 0.15 mm) is the radial gap between the screw and
 the nut. Raise it if the nut is tight, lower it if it is loose.
 `part = "assembly"` shows the nut on the screw.
+
+## testing
+
+`part = "testing"` lays out a screw and a nut for every diameter in
+`test_diameters` (3, 4, 5, 6, 7 mm) and every clearance in `test_clearances`
+(0.15, 0.2, 0.25 mm), 15 pairs in all. The clearance is engraved on the end
+face of the screw head and on one side of the nut. All of it is in the nut, as
+with `thread_clearance`, so screws of the same diameter are the same and the
+number tells which nut they belong to. All parts have the 2 mm pitch and a
+15 mm head and nut (`test_width`), wide enough for the numbers.
+
+Screw each screw into its nut and set `thread_clearance` to the smallest
+clearance that runs smoothly.
+
+![testing](testing.png)
+
+The set takes about 130 x 145 mm of the bed. Rendering it (F6) can take 20
+minutes in OpenSCAD 2021.01.
