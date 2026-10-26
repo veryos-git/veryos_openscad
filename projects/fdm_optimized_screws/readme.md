@@ -47,6 +47,10 @@ with `thread_clearance`, so screws of the same diameter are the same and the
 number tells which nut they belong to. All parts have the 2 mm pitch and a
 15 mm head and nut (`test_width`), wide enough for the numbers.
 
+The nuts lie on a side, with the number on top, so their holes run parallel to
+the bed. That leaves an overhang inside the thread, which is what this set
+tests: how well the thread prints sideways.
+
 Screw each screw into its nut and set `thread_clearance` to the smallest
 clearance that runs smoothly.
 
