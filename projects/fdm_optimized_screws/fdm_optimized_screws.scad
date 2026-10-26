@@ -9,8 +9,8 @@
 // screw code as in cuboid_video_light_softbox/cuboid_video_light_softboxV3.scad.
 //
 // part = "testing" lays out a screw and a nut for every test diameter and
-// clearance. The clearance is engraved on the screw head and on a side of
-// the nut, so the pairs can be told apart. The nuts lie on a side, so their
+// clearance. The diameter and clearance are engraved on the screw head and
+// on a side of the nut, so the pairs can be told apart. The nuts lie on a side, so their
 // holes run parallel to the bed and the thread overhangs inside, on purpose.
 //
 // part = "dodecahedron" is a nut shaped like a regular dodecahedron, with a
@@ -95,10 +95,11 @@ module testing() {
     for (i = [0:cols - 1], j = [0:rows - 1])
         translate([(i - (cols - 1) / 2) * 2 * (corners + g),
                    (j - (rows - 1) / 2) * (screw_head_height + screw_length + g), 0]) {
-            screw_lying(test_diameters[j], test_width, str(test_clearances[i]));
+            lines = [str(test_diameters[j]), str(test_clearances[i])];
+            screw_lying(test_diameters[j], test_width, lines);
             translate([corners + g, 0, test_width / 2]) rotate([-90, 0, 0])
                 translate([0, 0, -nut_height / 2])
-                    nut(test_diameters[j], test_clearances[i], test_width, str(test_clearances[i]));
+                    nut(test_diameters[j], test_clearances[i], test_width, lines);
         }
 }
 
@@ -144,7 +145,7 @@ module screw(d = thread_diameter, head_width = screw_head_width) {
 // everything below screw_cut * d above the shank's lowest point. The cut is
 // the print bed, z = 0. The label goes in the end face of the head, centred
 // on what the cut leaves of it.
-module screw_lying(d = thread_diameter, head_width = screw_head_width, label = "") {
+module screw_lying(d = thread_diameter, head_width = screw_head_width, label = []) {
     axis_z = d * (0.5 - screw_cut);
     length = screw_head_height + screw_length;
     translate([0, -length / 2, axis_z]) difference() {
@@ -156,7 +157,7 @@ module screw_lying(d = thread_diameter, head_width = screw_head_width, label = "
 }
 
 // From z = 0 to nut_height. The label goes in the side facing -y.
-module nut(d = thread_diameter, clearance = thread_clearance, width = nut_width, label = "") {
+module nut(d = thread_diameter, clearance = thread_clearance, width = nut_width, label = []) {
     difference() {
         hex(width, nut_height);
         thread_hole(d, clearance, nut_height);
@@ -174,10 +175,13 @@ module thread_hole(d, clearance, h) {
         translate([0, 0, -1]) cylinder(r1 = hole_r + 1, r2 = hole_r - thread_h, h = 1 + thread_h);
 }
 
-// Text for engraving, from z = 0 to label_depth + 1.
-module label(s)
+// Lines of text for engraving, centred as a block, from z = 0 to
+// label_depth + 1.
+module label(lines)
     linear_extrude(label_depth + 1)
-        text(s, size = label_size, font = font, halign = "center", valign = "center");
+        for (k = [0:1:len(lines) - 1])
+            translate([0, ((len(lines) - 1) / 2 - k) * 1.4 * label_size])
+                text(lines[k], size = label_size, font = font, halign = "center", valign = "center");
 
 // Hex prism with bevelled corners, from z = 0 to h.
 module hex(width, h) {

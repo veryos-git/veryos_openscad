@@ -41,8 +41,9 @@ the nut. Raise it if the nut is tight, lower it if it is loose.
 
 `part = "testing"` lays out a screw and a nut for every diameter in
 `test_diameters` (3, 4, 5, 6, 7 mm) and every clearance in `test_clearances`
-(0.15, 0.2, 0.25 mm), 15 pairs in all. The clearance is engraved on the end
-face of the screw head and on one side of the nut. All of it is in the nut, as
+(0.15, 0.2, 0.25 mm), 15 pairs in all. The diameter (top line) and the
+clearance (bottom line) are engraved on the end face of the screw head and on
+one side of the nut. All of it is in the nut, as
 with `thread_clearance`, so screws of the same diameter are the same and the
 number tells which nut they belong to. All parts have the 2 mm pitch and a
 15 mm head and nut (`test_width`), wide enough for the numbers.
