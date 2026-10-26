@@ -20,12 +20,17 @@ there are the following parts:
 
 ## use
 
-1. Push the slider's bar into the sleeve.
-2. Put the screw through the end wall and start it in the bar.
-3. Lay the phone between the hooks and tighten the screw until both hooks grip
-   the phone's edges.
+1. Push the slider's bar into the sleeve and pull it out far enough for the
+   phone.
+2. Lay the phone between the hooks and push the slider in by hand until both
+   hooks touch the phone's edges.
+3. Put the screw through the end wall and screw it into the bar. It is tight
+   after about 5 turns.
 4. Screw the slider's outer end onto the tripod. The phone then stands in
    landscape, with the screw head on top.
+
+To take the phone out, loosen the screw by those 5 turns and pull the slider
+out.
 
 ## printing
 
@@ -45,9 +50,15 @@ inspiration. If it prints rough, deburr it so the bar slides freely.
 ## sizes
 
 The defaults clamp phones from 60 to 90 mm wide and up to 12 mm thick, case
-included (`grip_min`, `grip_max`, `phone_thickness`). The guide bar, sleeve
-and screw lengths follow from these. The lock thread is 8 mm with a 2 mm
-pitch, as in `fdm_optimized_screws`, so the whole range takes 15 turns.
+included (`grip_min`, `grip_max`, `phone_thickness`). The guide bar and
+sleeve lengths follow from these.
+
+The screw is cut to your phone (`phone_width`, default 75 mm with case). It
+has a smooth shank and a 10 mm thread at its tip (`screw_thread_length`). The
+thread reaches the bar just as the hooks touch the phone. With the 8 mm, 2 mm
+pitch thread of `fdm_optimized_screws`, that is 5 turns from first bite to
+tight. A narrower phone takes more turns. For a wider phone, print a screw
+with its `phone_width`; the brackets stay the same.
 
 ## thread fit
 

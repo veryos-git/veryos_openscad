@@ -27,6 +27,10 @@ grip_min = 60;
 grip_max = 90;
 // Height of the hook cavities: the thickest phone, with case.
 phone_thickness = 12;
+// Your phone's width, with case. Sets the lock screw's length: its thread
+// reaches the bar just as the hooks touch the phone. Narrower phones take
+// more turns; for a wider one, print a screw for its width.
+phone_width = 75;
 
 /* [Brackets] */
 // Along the phone; also the print height. Keep it narrow enough to miss the
@@ -60,8 +64,10 @@ lock_thread_diameter = 8;
 lock_thread_pitch = 2;
 // Radial gap between the lock screw and the bar's thread.
 lock_thread_clearance = 0.15;
-// Thread engaged in the bar at grip_max.
-min_engagement = 10;
+// Threaded part at the screw's tip, all of it in the bar when the screw
+// seats; screw_thread_length / lock_thread_pitch turns from first bite to
+// tight. The rest of the shank is smooth.
+screw_thread_length = 10;
 screw_head_width = 16; // across flats
 screw_head_height = 8;
 // This share of the thread diameter is cut off the underside of the lying
@@ -87,12 +93,15 @@ sleeve_start = slider_stop - grip_min;
 bar_length = channel_end - sleeve_start - 1;
 // End face of the body to the bar tip at grip_min.
 gap_min = back - (sleeve_start + bar_length);
-// Shank below the head.
-screw_length = gap_min + grip_max - grip_min + min_engagement;
+// Shank below the head: smooth through the end wall and up to the bar tip
+// at phone_width, then threaded.
+screw_length = gap_min + phone_width - grip_min + screw_thread_length;
+// Deep enough for the screw down to grip_min.
 lock_depth = screw_length - gap_min + 1;
 layout_gap = 5;
 
 assert(grip_max > grip_min, "grip_max must be larger than grip_min.");
+assert(phone_width >= grip_min && phone_width <= grip_max, "phone_width must lie between grip_min and grip_max.");
 assert(bar_length - (grip_max - grip_min) >= 15,
        "Less than 15 mm of guide bar stays in the sleeve at grip_max; narrow the grip range.");
 assert(bar_length - lock_depth >= 2, "The lock screw thread runs through the bar; narrow the grip range.");
@@ -105,9 +114,9 @@ else if (part == "slider") lay() slider();
 else if (part == "lock_screw") lock_screw_lying();
 else if (part == "thread_test") thread_test();
 
-// Slider halfway between grip_min and grip_max, with a phone ghost.
+// Clamped on a phone_width phone, shown as a ghost.
 module assembly() {
-    grip = (grip_min + grip_max) / 2;
+    grip = phone_width;
     color("dodgerblue") body();
     color("deepskyblue") translate([0, -grip, 0]) slider();
     color("orange") translate([0, back + screw_head_height, guide_z]) rotate([90, 0, 0]) lock_screw();
@@ -184,12 +193,15 @@ module guide_section() {
 
 // Hex head on z = 0, shank upwards.
 module lock_screw() {
+    d = lock_thread_diameter;
+    smooth = screw_length - screw_thread_length;
     hex(screw_head_width, screw_head_height);
-    translate([0, 0, screw_head_height - eps]) intersection() {
-        lock_thread(lock_thread_diameter, screw_length + eps);
+    // At the thread's root diameter, so it passes through the bar's thread.
+    translate([0, 0, screw_head_height - eps]) cylinder(d = d - 0.8 * lock_thread_pitch, h = smooth + 2 * eps);
+    translate([0, 0, screw_head_height + smooth]) intersection() {
+        lock_thread(d, screw_thread_length);
         // 45 degree tip chamfer eases the start into the thread.
-        cylinder(h = screw_length + eps, r1 = lock_thread_diameter / 2 - 1 + screw_length,
-                 r2 = lock_thread_diameter / 2 - 1);
+        cylinder(h = screw_thread_length, r1 = d / 2 - 1 + screw_thread_length, r2 = d / 2 - 1);
     }
 }
 
