@@ -1,0 +1,74 @@
+[
+  {
+    "project": "babywipesboxV2",
+    "preset": "Everyday",
+    "identical_to_D_overrides": true,
+    "method": "OpenSCAD Customizer"
+  },
+  {
+    "project": "babywipesboxV2",
+    "preset": "Cube",
+    "identical_to_D_overrides": true,
+    "method": "OpenSCAD Customizer"
+  },
+  {
+    "project": "babywipesboxV2",
+    "preset": "Long",
+    "identical_to_D_overrides": true,
+    "method": "OpenSCAD Customizer"
+  },
+  {
+    "project": "babywipesboxV2",
+    "preset": "Tall",
+    "identical_to_D_overrides": true,
+    "method": "OpenSCAD Customizer"
+  },
+  {
+    "project": "biclightercase2",
+    "preset": "Fine ribs",
+    "identical_to_D_overrides": true,
+    "method": "OpenSCAD Customizer"
+  },
+  {
+    "project": "biclightercase2",
+    "preset": "Broad flutes",
+    "identical_to_D_overrides": true,
+    "method": "OpenSCAD Customizer"
+  },
+  {
+    "project": "biclightercase2",
+    "preset": "Spiral",
+    "identical_to_D_overrides": true,
+    "method": "OpenSCAD Customizer"
+  },
+  {
+    "project": "biclightercase2",
+    "preset": "Diamond",
+    "identical_to_D_overrides": true,
+    "method": "OpenSCAD Customizer"
+  },
+  {
+    "project": "simple_cylindrical_screwing_containerV2",
+    "preset": "Pocket",
+    "identical_to_D_overrides": true,
+    "method": "OpenSCAD Customizer"
+  },
+  {
+    "project": "simple_cylindrical_screwing_containerV2",
+    "preset": "Everyday",
+    "identical_to_D_overrides": true,
+    "method": "OpenSCAD Customizer"
+  },
+  {
+    "project": "simple_cylindrical_screwing_containerV2",
+    "preset": "Wide",
+    "identical_to_D_overrides": true,
+    "method": "OpenSCAD Customizer"
+  },
+  {
+    "project": "simple_cylindrical_screwing_containerV2",
+    "preset": "Tall",
+    "identical_to_D_overrides": true,
+    "method": "OpenSCAD Customizer"
+  }
+]

@@ -1,0 +1,4 @@
+Suggested order: thumbnail_4x3.png, then thumbnail_3x4.png if useful.
+Use listing.md for title, description and tags.
+Offer the linked original SCAD source with its dependencies and license, plus presets.json/variants.json.
+Renders are digital previews. Assembly STL files are not included in this publication pack.

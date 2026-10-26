@@ -1,0 +1,38 @@
+{
+  "source": "../../bic_lighter_case.scad",
+  "variants": [
+    {
+      "name": "Fine ribs",
+      "label": "24 repeats",
+      "params": {
+        "exterior_pattern": "ribs",
+        "pattern_count": 24
+      }
+    },
+    {
+      "name": "Broad flutes",
+      "label": "12 repeats",
+      "params": {
+        "exterior_pattern": "flutes",
+        "pattern_count": 12
+      }
+    },
+    {
+      "name": "Spiral",
+      "label": "180° twist",
+      "params": {
+        "exterior_pattern": "spiral",
+        "pattern_count": 24,
+        "pattern_twist": 180
+      }
+    },
+    {
+      "name": "Diamond",
+      "label": "10 mm pitch",
+      "params": {
+        "exterior_pattern": "diamond",
+        "pattern_count": 24
+      }
+    }
+  ]
+}

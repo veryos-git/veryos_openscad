@@ -1,0 +1,22 @@
+{
+  "fileFormatVersion": "1",
+  "parameterSets": {
+    "Fine ribs": {
+      "exterior_pattern": "ribs",
+      "pattern_count": "24"
+    },
+    "Broad flutes": {
+      "exterior_pattern": "flutes",
+      "pattern_count": "12"
+    },
+    "Spiral": {
+      "exterior_pattern": "spiral",
+      "pattern_count": "24",
+      "pattern_twist": "180"
+    },
+    "Diamond": {
+      "exterior_pattern": "diamond",
+      "pattern_count": "24"
+    }
+  }
+}

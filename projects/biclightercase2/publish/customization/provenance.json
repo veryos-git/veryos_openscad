@@ -1,0 +1,79 @@
+{
+  "source": "projects/biclightercase2/bic_lighter_case.scad",
+  "source_sha256": "f0b3ca10085615529764433b54adc08514695aed4688c2ba7b3239aad2324b31",
+  "tools": {
+    "format": "OFF",
+    "backend": "Manifold",
+    "openscad": "OpenSCAD version 2026.10.25",
+    "blender": "Blender 5.1.0"
+  },
+  "exports": [
+    {
+      "source": "biclightercase2/bic_lighter_case.scad",
+      "source_sha256": "f0b3ca10085615529764433b54adc08514695aed4688c2ba7b3239aad2324b31",
+      "dependencies_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "params": {
+        "exterior_pattern": "ribs",
+        "pattern_count": 24
+      },
+      "tools": {
+        "format": "OFF",
+        "backend": "Manifold",
+        "openscad": "OpenSCAD version 2026.10.25",
+        "blender": "Blender 5.1.0"
+      }
+    },
+    {
+      "source": "biclightercase2/bic_lighter_case.scad",
+      "source_sha256": "f0b3ca10085615529764433b54adc08514695aed4688c2ba7b3239aad2324b31",
+      "dependencies_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "params": {
+        "exterior_pattern": "flutes",
+        "pattern_count": 12
+      },
+      "tools": {
+        "format": "OFF",
+        "backend": "Manifold",
+        "openscad": "OpenSCAD version 2026.10.25",
+        "blender": "Blender 5.1.0"
+      }
+    },
+    {
+      "source": "biclightercase2/bic_lighter_case.scad",
+      "source_sha256": "f0b3ca10085615529764433b54adc08514695aed4688c2ba7b3239aad2324b31",
+      "dependencies_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "params": {
+        "exterior_pattern": "spiral",
+        "pattern_count": 24,
+        "pattern_twist": 180
+      },
+      "tools": {
+        "format": "OFF",
+        "backend": "Manifold",
+        "openscad": "OpenSCAD version 2026.10.25",
+        "blender": "Blender 5.1.0"
+      }
+    },
+    {
+      "source": "biclightercase2/bic_lighter_case.scad",
+      "source_sha256": "f0b3ca10085615529764433b54adc08514695aed4688c2ba7b3239aad2324b31",
+      "dependencies_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "params": {
+        "exterior_pattern": "diamond",
+        "pattern_count": 24
+      },
+      "tools": {
+        "format": "OFF",
+        "backend": "Manifold",
+        "openscad": "OpenSCAD version 2026.10.25",
+        "blender": "Blender 5.1.0"
+      }
+    }
+  ],
+  "font": "DejaVu Sans Mono",
+  "requested_font": "Consolas",
+  "font_substitution": true,
+  "geometry": "OpenSCAD-exported meshes; no AI-generated or scaled surrogate geometry",
+  "scale": "same orthographic scale for all four variants within a project",
+  "preset_notes": "Dimensions describe the named source parameters; see listing for external relief and allowances."
+}

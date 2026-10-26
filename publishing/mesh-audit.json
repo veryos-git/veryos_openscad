@@ -1,0 +1,254 @@
+[
+  {
+    "project": "babywipesboxV2",
+    "variant": "Everyday",
+    "triangles": 14054,
+    "watertight": true,
+    "winding_consistent": true,
+    "volume_mm3": 333928.90624741773,
+    "bounds_mm": [
+      [
+        -101.5,
+        -61.5,
+        0.0
+      ],
+      [
+        101.5,
+        61.5,
+        75.65
+      ]
+    ],
+    "components": 2
+  },
+  {
+    "project": "babywipesboxV2",
+    "variant": "Cube",
+    "triangles": 14116,
+    "watertight": true,
+    "winding_consistent": true,
+    "volume_mm3": 328935.21859928156,
+    "bounds_mm": [
+      [
+        -61.5,
+        -61.5,
+        0.0
+      ],
+      [
+        61.5,
+        61.5,
+        130.65
+      ]
+    ],
+    "components": 2
+  },
+  {
+    "project": "babywipesboxV2",
+    "variant": "Long",
+    "triangles": 14054,
+    "watertight": true,
+    "winding_consistent": true,
+    "volume_mm3": 364726.9684613505,
+    "bounds_mm": [
+      [
+        -131.5,
+        -51.5,
+        0.0
+      ],
+      [
+        131.5,
+        51.5,
+        75.65
+      ]
+    ],
+    "components": 2
+  },
+  {
+    "project": "babywipesboxV2",
+    "variant": "Tall",
+    "triangles": 14118,
+    "watertight": true,
+    "winding_consistent": true,
+    "volume_mm3": 445259.9979521016,
+    "bounds_mm": [
+      [
+        -81.5,
+        -61.5,
+        0.0
+      ],
+      [
+        81.5,
+        61.5,
+        155.65
+      ]
+    ],
+    "components": 2
+  },
+  {
+    "project": "biclightercase2",
+    "variant": "Fine ribs",
+    "triangles": 4224,
+    "watertight": true,
+    "winding_consistent": true,
+    "volume_mm3": 5952.278894652573,
+    "bounds_mm": [
+      [
+        -14.32,
+        -9.07,
+        0.0
+      ],
+      [
+        14.32,
+        9.07,
+        70.9
+      ]
+    ],
+    "components": 1
+  },
+  {
+    "project": "biclightercase2",
+    "variant": "Broad flutes",
+    "triangles": 6048,
+    "watertight": true,
+    "winding_consistent": true,
+    "volume_mm3": 6449.397152098183,
+    "bounds_mm": [
+      [
+        -14.32,
+        -9.07,
+        0.0
+      ],
+      [
+        14.32,
+        9.07,
+        70.9
+      ]
+    ],
+    "components": 1
+  },
+  {
+    "project": "biclightercase2",
+    "variant": "Spiral",
+    "triangles": 81200,
+    "watertight": true,
+    "winding_consistent": true,
+    "volume_mm3": 5949.782200042156,
+    "bounds_mm": [
+      [
+        -14.32,
+        -9.07,
+        0.0
+      ],
+      [
+        14.32,
+        9.07,
+        70.9
+      ]
+    ],
+    "components": 1
+  },
+  {
+    "project": "biclightercase2",
+    "variant": "Diamond",
+    "triangles": 188888,
+    "watertight": true,
+    "winding_consistent": true,
+    "volume_mm3": 5884.207279525043,
+    "bounds_mm": [
+      [
+        -14.3077,
+        -9.05774,
+        0.0
+      ],
+      [
+        14.3077,
+        9.05774,
+        70.9
+      ]
+    ],
+    "components": 1
+  },
+  {
+    "project": "simple_cylindrical_screwing_containerV2",
+    "variant": "Pocket",
+    "triangles": 20930,
+    "watertight": true,
+    "winding_consistent": true,
+    "volume_mm3": 9743.254219063887,
+    "bounds_mm": [
+      [
+        -16.6,
+        -16.6,
+        0.0
+      ],
+      [
+        16.6,
+        16.6,
+        50.2
+      ]
+    ],
+    "components": 2
+  },
+  {
+    "project": "simple_cylindrical_screwing_containerV2",
+    "variant": "Everyday",
+    "triangles": 27906,
+    "watertight": true,
+    "winding_consistent": true,
+    "volume_mm3": 18993.832372058445,
+    "bounds_mm": [
+      [
+        -20.6,
+        -20.6,
+        0.0
+      ],
+      [
+        20.6,
+        20.6,
+        80.2
+      ]
+    ],
+    "components": 2
+  },
+  {
+    "project": "simple_cylindrical_screwing_containerV2",
+    "variant": "Wide",
+    "triangles": 203426,
+    "watertight": true,
+    "winding_consistent": true,
+    "volume_mm3": 26884.314497026193,
+    "bounds_mm": [
+      [
+        -35.5966,
+        -35.5966,
+        0.0
+      ],
+      [
+        35.5966,
+        35.5966,
+        50.2
+      ]
+    ],
+    "components": 2
+  },
+  {
+    "project": "simple_cylindrical_screwing_containerV2",
+    "variant": "Tall",
+    "triangles": 132178,
+    "watertight": true,
+    "winding_consistent": true,
+    "volume_mm3": 28402.997405784863,
+    "bounds_mm": [
+      [
+        -23.1,
+        -23.1,
+        0.0
+      ],
+      [
+        23.1,
+        23.1,
+        120.2
+      ]
+    ],
+    "components": 2
+  }
+]

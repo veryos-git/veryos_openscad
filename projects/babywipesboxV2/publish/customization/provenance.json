@@ -1,0 +1,92 @@
+{
+  "source": "projects/babywipesboxV2/babywipesboxV2.scad",
+  "source_sha256": "13e09659cdc8faa4b368e189360884f8287216b27145edae9e6273e4c57a1a3b",
+  "tools": {
+    "format": "OFF",
+    "backend": "Manifold",
+    "openscad": "OpenSCAD version 2026.10.25",
+    "blender": "Blender 5.1.0"
+  },
+  "exports": [
+    {
+      "source": "babywipesboxV2/babywipesboxV2.scad",
+      "source_sha256": "13e09659cdc8faa4b368e189360884f8287216b27145edae9e6273e4c57a1a3b",
+      "dependencies_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "params": {
+        "box_width": 200,
+        "box_depth": 120,
+        "box_height": 65,
+        "part": "assembly",
+        "lid_angle": 0
+      },
+      "tools": {
+        "format": "OFF",
+        "backend": "Manifold",
+        "openscad": "OpenSCAD version 2026.10.25",
+        "blender": "Blender 5.1.0"
+      }
+    },
+    {
+      "source": "babywipesboxV2/babywipesboxV2.scad",
+      "source_sha256": "13e09659cdc8faa4b368e189360884f8287216b27145edae9e6273e4c57a1a3b",
+      "dependencies_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "params": {
+        "box_width": 120,
+        "box_depth": 120,
+        "box_height": 120,
+        "hinge_middle_length": 12,
+        "opening_width": 68,
+        "part": "assembly",
+        "lid_angle": 0
+      },
+      "tools": {
+        "format": "OFF",
+        "backend": "Manifold",
+        "openscad": "OpenSCAD version 2026.10.25",
+        "blender": "Blender 5.1.0"
+      }
+    },
+    {
+      "source": "babywipesboxV2/babywipesboxV2.scad",
+      "source_sha256": "13e09659cdc8faa4b368e189360884f8287216b27145edae9e6273e4c57a1a3b",
+      "dependencies_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "params": {
+        "box_width": 260,
+        "box_depth": 100,
+        "box_height": 65,
+        "part": "assembly",
+        "lid_angle": 0
+      },
+      "tools": {
+        "format": "OFF",
+        "backend": "Manifold",
+        "openscad": "OpenSCAD version 2026.10.25",
+        "blender": "Blender 5.1.0"
+      }
+    },
+    {
+      "source": "babywipesboxV2/babywipesboxV2.scad",
+      "source_sha256": "13e09659cdc8faa4b368e189360884f8287216b27145edae9e6273e4c57a1a3b",
+      "dependencies_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "params": {
+        "box_width": 160,
+        "box_depth": 120,
+        "box_height": 145,
+        "part": "assembly",
+        "lid_angle": 0
+      },
+      "tools": {
+        "format": "OFF",
+        "backend": "Manifold",
+        "openscad": "OpenSCAD version 2026.10.25",
+        "blender": "Blender 5.1.0"
+      }
+    }
+  ],
+  "font": "DejaVu Sans Mono",
+  "requested_font": "Consolas",
+  "font_substitution": true,
+  "geometry": "OpenSCAD-exported meshes; no AI-generated or scaled surrogate geometry",
+  "scale": "same orthographic scale for all four variants within a project",
+  "preset_notes": "Dimensions describe the named source parameters; see listing for external relief and allowances."
+}

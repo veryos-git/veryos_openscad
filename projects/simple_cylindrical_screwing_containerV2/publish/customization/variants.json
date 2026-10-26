@@ -1,0 +1,49 @@
+{
+  "source": "../../simple_cylindrical_screwing_containerV2.scad",
+  "variants": [
+    {
+      "name": "Pocket",
+      "label": "Ø32 × 50 mm",
+      "params": {
+        "outer_diameter": 32,
+        "full_height": 50,
+        "lid_height": 15,
+        "view": "assembled",
+        "exterior_pattern": "ribs",
+        "pattern_count": 36
+      }
+    },
+    {
+      "name": "Everyday",
+      "label": "Ø40 × 80 mm",
+      "params": {
+        "view": "assembled",
+        "exterior_pattern": "flutes",
+        "pattern_count": 36
+      }
+    },
+    {
+      "name": "Wide",
+      "label": "Ø70 × 50 mm",
+      "params": {
+        "outer_diameter": 70,
+        "full_height": 50,
+        "lid_height": 15,
+        "view": "assembled",
+        "exterior_pattern": "diamond",
+        "pattern_count": 36
+      }
+    },
+    {
+      "name": "Tall",
+      "label": "Ø45 × 120 mm",
+      "params": {
+        "outer_diameter": 45,
+        "full_height": 120,
+        "view": "assembled",
+        "exterior_pattern": "spiral",
+        "pattern_count": 36
+      }
+    }
+  ]
+}

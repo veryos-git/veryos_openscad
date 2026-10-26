@@ -1,0 +1,33 @@
+{
+  "fileFormatVersion": "1",
+  "parameterSets": {
+    "Pocket": {
+      "outer_diameter": "32",
+      "full_height": "50",
+      "lid_height": "15",
+      "view": "assembled",
+      "exterior_pattern": "ribs",
+      "pattern_count": "36"
+    },
+    "Everyday": {
+      "view": "assembled",
+      "exterior_pattern": "flutes",
+      "pattern_count": "36"
+    },
+    "Wide": {
+      "outer_diameter": "70",
+      "full_height": "50",
+      "lid_height": "15",
+      "view": "assembled",
+      "exterior_pattern": "diamond",
+      "pattern_count": "36"
+    },
+    "Tall": {
+      "outer_diameter": "45",
+      "full_height": "120",
+      "view": "assembled",
+      "exterior_pattern": "spiral",
+      "pattern_count": "36"
+    }
+  }
+}

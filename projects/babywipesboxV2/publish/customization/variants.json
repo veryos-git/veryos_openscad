@@ -1,0 +1,51 @@
+{
+  "source": "../../babywipesboxV2.scad",
+  "variants": [
+    {
+      "name": "Everyday",
+      "label": "200 × 120 × 65 mm",
+      "params": {
+        "box_width": 200,
+        "box_depth": 120,
+        "box_height": 65,
+        "part": "assembly",
+        "lid_angle": 0
+      }
+    },
+    {
+      "name": "Cube",
+      "label": "120 × 120 × 120 mm",
+      "params": {
+        "box_width": 120,
+        "box_depth": 120,
+        "box_height": 120,
+        "hinge_middle_length": 12,
+        "opening_width": 68,
+        "part": "assembly",
+        "lid_angle": 0
+      }
+    },
+    {
+      "name": "Long",
+      "label": "260 × 100 × 65 mm",
+      "params": {
+        "box_width": 260,
+        "box_depth": 100,
+        "box_height": 65,
+        "part": "assembly",
+        "lid_angle": 0
+      }
+    },
+    {
+      "name": "Tall",
+      "label": "160 × 120 × 145 mm",
+      "params": {
+        "box_width": 160,
+        "box_depth": 120,
+        "box_height": 145,
+        "part": "assembly",
+        "lid_angle": 0
+      }
+    }
+  ]
+}

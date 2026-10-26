@@ -1,0 +1,90 @@
+{
+  "source": "projects/simple_cylindrical_screwing_containerV2/simple_cylindrical_screwing_containerV2.scad",
+  "source_sha256": "0620b3a06304e42d5ca0ab19a7037649983464ec77b4bd8a14f086677850bed0",
+  "tools": {
+    "format": "OFF",
+    "backend": "Manifold",
+    "openscad": "OpenSCAD version 2026.10.25",
+    "blender": "Blender 5.1.0"
+  },
+  "exports": [
+    {
+      "source": "simple_cylindrical_screwing_containerV2/simple_cylindrical_screwing_containerV2.scad",
+      "source_sha256": "0620b3a06304e42d5ca0ab19a7037649983464ec77b4bd8a14f086677850bed0",
+      "dependencies_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "params": {
+        "outer_diameter": 32,
+        "full_height": 50,
+        "lid_height": 15,
+        "view": "assembled",
+        "exterior_pattern": "ribs",
+        "pattern_count": 36
+      },
+      "tools": {
+        "format": "OFF",
+        "backend": "Manifold",
+        "openscad": "OpenSCAD version 2026.10.25",
+        "blender": "Blender 5.1.0"
+      }
+    },
+    {
+      "source": "simple_cylindrical_screwing_containerV2/simple_cylindrical_screwing_containerV2.scad",
+      "source_sha256": "0620b3a06304e42d5ca0ab19a7037649983464ec77b4bd8a14f086677850bed0",
+      "dependencies_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "params": {
+        "view": "assembled",
+        "exterior_pattern": "flutes",
+        "pattern_count": 36
+      },
+      "tools": {
+        "format": "OFF",
+        "backend": "Manifold",
+        "openscad": "OpenSCAD version 2026.10.25",
+        "blender": "Blender 5.1.0"
+      }
+    },
+    {
+      "source": "simple_cylindrical_screwing_containerV2/simple_cylindrical_screwing_containerV2.scad",
+      "source_sha256": "0620b3a06304e42d5ca0ab19a7037649983464ec77b4bd8a14f086677850bed0",
+      "dependencies_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "params": {
+        "outer_diameter": 70,
+        "full_height": 50,
+        "lid_height": 15,
+        "view": "assembled",
+        "exterior_pattern": "diamond",
+        "pattern_count": 36
+      },
+      "tools": {
+        "format": "OFF",
+        "backend": "Manifold",
+        "openscad": "OpenSCAD version 2026.10.25",
+        "blender": "Blender 5.1.0"
+      }
+    },
+    {
+      "source": "simple_cylindrical_screwing_containerV2/simple_cylindrical_screwing_containerV2.scad",
+      "source_sha256": "0620b3a06304e42d5ca0ab19a7037649983464ec77b4bd8a14f086677850bed0",
+      "dependencies_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "params": {
+        "outer_diameter": 45,
+        "full_height": 120,
+        "view": "assembled",
+        "exterior_pattern": "spiral",
+        "pattern_count": 36
+      },
+      "tools": {
+        "format": "OFF",
+        "backend": "Manifold",
+        "openscad": "OpenSCAD version 2026.10.25",
+        "blender": "Blender 5.1.0"
+      }
+    }
+  ],
+  "font": "DejaVu Sans Mono",
+  "requested_font": "Consolas",
+  "font_substitution": true,
+  "geometry": "OpenSCAD-exported meshes; no AI-generated or scaled surrogate geometry",
+  "scale": "same orthographic scale for all four variants within a project",
+  "preset_notes": "Dimensions describe the named source parameters; see listing for external relief and allowances."
+}

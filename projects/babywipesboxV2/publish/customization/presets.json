@@ -1,0 +1,35 @@
+{
+  "fileFormatVersion": "1",
+  "parameterSets": {
+    "Everyday": {
+      "box_width": "200",
+      "box_depth": "120",
+      "box_height": "65",
+      "part": "assembly",
+      "lid_angle": "0"
+    },
+    "Cube": {
+      "box_width": "120",
+      "box_depth": "120",
+      "box_height": "120",
+      "hinge_middle_length": "12",
+      "opening_width": "68",
+      "part": "assembly",
+      "lid_angle": "0"
+    },
+    "Long": {
+      "box_width": "260",
+      "box_depth": "100",
+      "box_height": "65",
+      "part": "assembly",
+      "lid_angle": "0"
+    },
+    "Tall": {
+      "box_width": "160",
+      "box_depth": "120",
+      "box_height": "145",
+      "part": "assembly",
+      "lid_angle": "0"
+    }
+  }
+}
