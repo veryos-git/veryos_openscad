@@ -1,5 +1,24 @@
 the goal is to create  a openSCAD script that can generate a phone holder that has a internal camera thread so that it can be threaded onto a camera tripod or ballhead.
 
+# V3
+
+![preview](V3/preview.png)
+
+`V3/phone_camera_thread_holderV3.scad` is V2 with the lock screw set to the
+tested values of `fdm_optimized_screws` (see its test results):
+- `screw_cut` 0.15 instead of 0.1. The smooth part of the shank is as thick
+  as the thread's root, so at 0.1 it only touched the bed along a line. At
+  0.15 the shank stands on a flat strip about 3 mm wide (109 instead of
+  29 mm² on the bed).
+- `lock_thread_clearance` 0.25 mm instead of 0.15. It still has little play
+  and is safer on printers that are not perfectly calibrated.
+- no 45 degree roof over the lock screw thread in the guide bar. The test nuts
+  of `fdm_optimized_screws` printed lying on their side, with 45 degree
+  threads and no roof, and all of them worked. So the bar's thread now goes
+  all the way round. The tripod thread and the end wall hole keep their roofs.
+
+The parts, use, printing and sizes are otherwise the same as V2 below.
+
 # V2
 
 ![preview](V2/preview.png)
