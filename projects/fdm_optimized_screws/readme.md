@@ -39,25 +39,25 @@ the nut. Raise it if the nut is tight, lower it if it is loose.
 
 ## testing
 
-`part = "testing"` lays out a screw and a nut for every diameter in
-`test_diameters` (3, 4, 5, 6, 7 mm) and every clearance in `test_clearances`
-(0.15, 0.2, 0.25 mm), 15 pairs in all. The diameter (top line) and the
-clearance (bottom line) are engraved on the end face of the screw head and on
-one side of the nut. All of it is in the nut, as
-with `thread_clearance`, so screws of the same diameter are the same and the
-number tells which nut they belong to. All parts have the 2 mm pitch and a
-15 mm head and nut (`test_width`), wide enough for the numbers.
+`part = "testing"` lays out one row per diameter in `test_diameters` (3, 4, 5,
+6, 7 mm): a screw, then a nut for every clearance in `test_clearances` (0.15,
+0.2, 0.25 mm). The clearance is the radial gap between screw and nut, and all
+of it is in the nut, as with `thread_clearance`. So one screw fits all nuts of
+its diameter. The end face of the screw head is engraved with the diameter;
+one side of each nut with the diameter (top line) and the clearance (bottom
+line). All parts have the 2 mm pitch and a 15 mm head and nut (`test_width`),
+wide enough for the numbers.
 
 The nuts lie on a side, with the number on top, so their holes run parallel to
 the bed. That leaves an overhang inside the thread, which is what this set
 tests: how well the thread prints sideways.
 
-Screw each screw into its nut and set `thread_clearance` to the smallest
-clearance that runs smoothly.
+Try each screw in the nuts of its diameter and set `thread_clearance` to the
+smallest clearance that runs smoothly.
 
 ![testing](testing.png)
 
-The set takes about 130 x 145 mm of the bed. Rendering it (F6) can take 20
+The set takes about 85 x 145 mm of the bed. Rendering it (F6) takes about 7
 minutes in OpenSCAD 2021.01.
 
 ## dodecahedron test

@@ -8,10 +8,12 @@
 // right-hand with 45 degree flanks (90 degree included angle). Thread and
 // screw code as in cuboid_video_light_softbox/cuboid_video_light_softboxV3.scad.
 //
-// part = "testing" lays out a screw and a nut for every test diameter and
-// clearance. The diameter and clearance are engraved on the screw head and
-// on a side of the nut, so the pairs can be told apart. The nuts lie on a side, so their
-// holes run parallel to the bed and the thread overhangs inside, on purpose.
+// part = "testing" lays out a screw for every test diameter and a nut for
+// every diameter and clearance. All the clearance is in the nut, so one screw
+// fits all nuts of its diameter. The screw head is engraved with the
+// diameter, a side of each nut with the diameter and clearance. The nuts lie
+// on a side, so their holes run parallel to the bed and the thread overhangs
+// inside, on purpose.
 //
 // part = "dodecahedron" is a nut shaped like a regular dodecahedron, with a
 // threaded hole from each face to the opposite one, and a screw to test them.
@@ -84,23 +86,25 @@ module print_layout() {
     translate([(screw_head_width + nut_width) / (2 * cos(30)) + g, 0, 0]) nut();
 }
 
-// One row per diameter, one screw and nut pair per clearance. Each nut lies
+// One row per diameter: the screw, then a nut per clearance. Each nut lies
 // on the side opposite its label, hole along y, to test the thread printed
 // with its overhang.
 module testing() {
     g = 5;
-    corners = test_width / cos(30);
-    cols = len(test_clearances);
+    step = test_width / cos(30) + g;
+    cols = len(test_clearances) + 1;
     rows = len(test_diameters);
-    for (i = [0:cols - 1], j = [0:rows - 1])
-        translate([(i - (cols - 1) / 2) * 2 * (corners + g),
+    for (j = [0:rows - 1]) {
+        d = test_diameters[j];
+        translate([-(cols - 1) / 2 * step,
                    (j - (rows - 1) / 2) * (screw_head_height + screw_length + g), 0]) {
-            lines = [str(test_diameters[j]), str(test_clearances[i])];
-            screw_lying(test_diameters[j], test_width, lines);
-            translate([corners + g, 0, test_width / 2]) rotate([-90, 0, 0])
-                translate([0, 0, -nut_height / 2])
-                    nut(test_diameters[j], test_clearances[i], test_width, lines);
+            screw_lying(d, test_width, [str(d)]);
+            for (i = [1:cols - 1])
+                translate([i * step, 0, test_width / 2]) rotate([-90, 0, 0])
+                    translate([0, 0, -nut_height / 2])
+                        nut(d, test_clearances[i - 1], test_width, [str(d), str(test_clearances[i - 1])]);
         }
+    }
 }
 
 // The dodecahedron on a face, with the screw beside it. Each pair of opposite
