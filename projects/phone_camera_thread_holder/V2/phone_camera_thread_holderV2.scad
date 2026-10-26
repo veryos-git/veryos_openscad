@@ -1,17 +1,18 @@
 // Copyright (C) 2026 Jonas Immanuel Frey - Licensed under GPL. See LICENSE file for details
 // V2: hook clamp phone holder in the style of V2/inspiration. Two brackets
 // hook over the phone's long edges. The slider's guide bar runs in the
-// body's sleeve; a star knob screw through the body's end wall threads into
+// body's sleeve; a hex head screw through the body's end wall threads into
 // the bar and pulls the slider in until both hooks grip the phone. The
 // slider's outer end has a printed 1/4"-20 UNC thread for a tripod or ball
-// head, so the phone stands in landscape with the knob on top.
+// head, so the phone stands in landscape with the screw head on top.
 //
 // Print 1 body and 1 slider lying on their side, as in the inspiration
 // photo: every layer is the hook profile, and the guide's 45 degree points
 // face up and down, so neither needs support. The horizontal holes get a 45
-// degree roof on top instead of sagging. Print the lock screw standing on
-// its knob.
-// Origin: the body's hook, centre of its cavity at y = 0, phone back on z = 0
+// degree roof on top instead of sagging. The lock screw prints lying on a
+// flat of its head with its underside cut off, as in fdm_optimized_screws,
+// so the layers run along the shank.
+// Origin: the body's hook, back of its cavity at y = 0, phone back on z = 0
 // with the screen facing +z.
 //
 // Units: mm. No external libraries needed.
@@ -24,7 +25,7 @@ part = "print_layout"; // [print_layout:All parts on bed,assembly:Assembly previ
 // clamp.
 grip_min = 60;
 grip_max = 90;
-// Diameter of the hook cavities: the thickest phone, with case.
+// Height of the hook cavities: the thickest phone, with case.
 phone_thickness = 12;
 
 /* [Brackets] */
@@ -32,13 +33,19 @@ phone_thickness = 12;
 // side buttons.
 holder_width = 30;
 hook_wall = 3;
+// How far the hooks reach over the phone's front, from the cavity back.
+lip_length = 5;
+// Radius in the two inner corners of each hook cavity. Small, so the phone's
+// edge sits square against the back of the hook and cannot ride out.
+cavity_rounding = 1.5;
 // Height of the guide bar, which holds the lock screw thread.
 guide_height = 12;
-// Sleeve wall around the guide.
+// Sleeve wall around the guide, and the wall between the tripod thread and
+// the guide bar.
 wall = 2;
 // Gap between the guide bar and the sleeve, all round.
 slide_clearance = 0.2;
-// End wall of the sleeve, under the knob.
+// End wall of the sleeve, under the screw head.
 end_wall = 5;
 
 /* [Tripod thread] */
@@ -49,35 +56,38 @@ tripod_thread_clearance = 0.3;
 
 /* [Lock screw] */
 lock_thread_diameter = 8;
-// Coarse, so the full range takes few turns.
-lock_thread_pitch = 2.5;
+// 2 mm prints best (fdm_optimized_screws).
+lock_thread_pitch = 2;
 // Radial gap between the lock screw and the bar's thread.
 lock_thread_clearance = 0.15;
 // Thread engaged in the bar at grip_max.
 min_engagement = 10;
-knob_diameter = 24;
-knob_height = 10;
+screw_head_width = 16; // across flats
+screw_head_height = 8;
+// This share of the thread diameter is cut off the underside of the lying
+// screw, through the shank and the head. 0.1 has printed well.
+screw_cut = 0.1;
 
 /* [Quality] */
 $fn = 64;
 
 /* [Hidden] */
 eps = 0.01;
-// Hook cavity radius.
-cavity_r = phone_thickness / 2;
-// From a hook's cavity centre to the bracket's outer end.
-back = cavity_r + hook_wall;
-hook_top = 2 * cavity_r + hook_wall;
+// From a hook's cavity back to the bracket's outer end.
+back = hook_wall;
+hook_top = phone_thickness + hook_wall;
 // Height of the sleeve and the slider's jaw block, below the phone.
 block_h = guide_height + 2 * (slide_clearance + wall);
 guide_z = -block_h / 2;
 channel_end = back - end_wall;
-// The slider's jaw block meets the sleeve at grip_min.
-sleeve_start = 2 * cavity_r - grip_min;
+// The slider's jaw block holds the tripod thread. Its inner face, where the
+// guide bar starts, meets the sleeve at grip_min.
+slider_stop = tripod_thread_depth + wall - back;
+sleeve_start = slider_stop - grip_min;
 bar_length = channel_end - sleeve_start - 1;
 // End face of the body to the bar tip at grip_min.
 gap_min = back - (sleeve_start + bar_length);
-// Shank below the knob.
+// Shank below the head.
 screw_length = gap_min + grip_max - grip_min + min_engagement;
 lock_depth = screw_length - gap_min + 1;
 layout_gap = 5;
@@ -87,35 +97,34 @@ assert(bar_length - (grip_max - grip_min) >= 15,
        "Less than 15 mm of guide bar stays in the sleeve at grip_max; narrow the grip range.");
 assert(bar_length - lock_depth >= 2, "The lock screw thread runs through the bar; narrow the grip range.");
 assert(lock_thread_diameter / 2 + 1.5 <= guide_height / 2, "The lock screw is too thick for the guide bar.");
-assert(tripod_thread_depth <= back, "The tripod thread reaches into the guide bar.");
 
 if (part == "print_layout") print_layout();
 else if (part == "assembly") assembly();
-else if (part == "body") body();
-else if (part == "slider") slider();
-else if (part == "lock_screw") lock_screw();
+else if (part == "body") lay() body();
+else if (part == "slider") lay() slider();
+else if (part == "lock_screw") lock_screw_lying();
 else if (part == "thread_test") thread_test();
 
 // Slider halfway between grip_min and grip_max, with a phone ghost.
 module assembly() {
     grip = (grip_min + grip_max) / 2;
     color("dodgerblue") body();
-    color("deepskyblue") translate([0, 2 * cavity_r - grip, 0]) slider();
-    color("orange") translate([0, back + knob_height, guide_z]) rotate([90, 0, 0]) lock_screw();
-    %translate([-75, cavity_r - grip, 0]) cube([150, grip, phone_thickness]);
+    color("deepskyblue") translate([0, -grip, 0]) slider();
+    color("orange") translate([0, back + screw_head_height, guide_z]) rotate([90, 0, 0]) lock_screw();
+    %translate([-75, -grip, 0]) cube([150, grip, phone_thickness]);
 }
 
 // Every part in its print orientation, side by side.
 module print_layout() {
     translate([0, -(sleeve_start + back) / 2, 0]) lay() body();
-    translate([block_h + hook_top + layout_gap, -(bar_length - back) / 2, 0]) lay() slider();
-    translate([-(hook_top + layout_gap + knob_diameter / 2), 0, 0]) lock_screw();
+    translate([block_h + hook_top + layout_gap, -(slider_stop + bar_length - back) / 2, 0]) lay() slider();
+    translate([-(hook_top + layout_gap + screw_head_width / (2 * cos(30))), 0, 0]) lock_screw_lying();
 }
 
 // Lays a bracket on its -x side, x upwards.
 module lay() translate([0, 0, holder_width / 2]) rotate([0, -90, 0]) children();
 
-// Hook with the sleeve, open towards -y; the knob sits on the end wall.
+// Hook with the sleeve, open towards -y; the screw head sits on the end wall.
 module body() {
     difference() {
         bracket(sleeve_start);
@@ -129,21 +138,21 @@ module body() {
     }
 }
 
-// Hook open towards +y with the guide bar. Origin at its cavity centre.
+// Hook open towards +y with the guide bar. Origin at its cavity back.
 module slider() {
     difference() {
         union() {
-            mirror([0, 1, 0]) bracket(0);
-            translate([0, -eps, guide_z]) rotate([-90, 0, 0])
+            mirror([0, 1, 0]) bracket(-slider_stop);
+            translate([0, slider_stop - eps, guide_z]) rotate([-90, 0, 0])
                 linear_extrude(bar_length + eps) offset(delta = -slide_clearance) guide_section();
         }
         translate([0, -back, guide_z]) rotate([-90, 0, 0]) tripod_thread_hole();
-        translate([0, bar_length, guide_z]) rotate([90, 0, 0]) lock_thread_hole(lock_depth);
+        translate([0, slider_stop + bar_length, guide_z]) rotate([90, 0, 0]) lock_thread_hole(lock_depth);
     }
 }
 
 // Hook profile plus a block below the phone from y = start to the outer end,
-// extruded across the holder width, with rounded outer corners.
+// extruded across the holder width, with 1 mm rounded outer corners.
 module bracket(start)
     rotate([90, 0, 90]) linear_extrude(holder_width, center = true)
         offset(r = 1) offset(delta = -1) {
@@ -151,16 +160,18 @@ module bracket(start)
             translate([start, -block_h]) square([back - start, block_h]);
         }
 
-// Cavity centred on y = 0 and tangent to the phone back, open towards -y,
-// with a flat back, a 45 degree bevel on the outer top corner and a round tip
-// over the screen.
+// Back wall and a lip over the phone's front around a square cavity, open
+// towards -y, with a 45 degree bevel on the outer top corner.
 module hook_profile() {
-    difference() {
-        polygon([[0, 0], [back, 0], [back, hook_top - hook_wall], [back - hook_wall, hook_top],
-                 [0, hook_top]]);
-        translate([0, cavity_r]) circle(cavity_r);
+    t = phone_thickness;
+    r = cavity_rounding;
+    polygon([[0, 0], [back, 0], [back, hook_top - hook_wall], [back - hook_wall, hook_top],
+             [-lip_length, hook_top], [-lip_length, t], [0, t]]);
+    // Fillets in the cavity's corners at the phone's back and front.
+    for (z = [0, t - r]) translate([-r, z]) difference() {
+        square(r);
+        translate([0, z == 0 ? r : 0]) circle(r);
     }
-    translate([0, hook_top - hook_wall / 2]) circle(d = hook_wall);
 }
 
 // Sleeve channel: flat towards the phone and the back, 45 degree points
@@ -171,19 +182,36 @@ module guide_section() {
     polygon([[-w, 0], [h - w, h], [w - h, h], [w, 0], [w - h, -h], [h - w, -h]]);
 }
 
-// Star knob on z = 0, shank upwards.
+// Hex head on z = 0, shank upwards.
 module lock_screw() {
-    r = knob_diameter / 2;
-    lobe = 0.18 * knob_diameter;
-    linear_extrude(knob_height) offset(r = -1.5) offset(delta = 1.5) {
-        circle(r - lobe);
-        for (i = [0:5]) rotate(i * 60) translate([r - lobe, 0]) circle(lobe);
-    }
-    translate([0, 0, knob_height - eps]) intersection() {
+    hex(screw_head_width, screw_head_height);
+    translate([0, 0, screw_head_height - eps]) intersection() {
         lock_thread(lock_thread_diameter, screw_length + eps);
         // 45 degree tip chamfer eases the start into the thread.
         cylinder(h = screw_length + eps, r1 = lock_thread_diameter / 2 - 1 + screw_length,
                  r2 = lock_thread_diameter / 2 - 1);
+    }
+}
+
+// Lays the screw on a flat of its head, centred on the origin, and cuts off
+// everything below screw_cut * d above the shank's lowest point. The cut is
+// the print bed, z = 0.
+module lock_screw_lying() {
+    axis_z = lock_thread_diameter * (0.5 - screw_cut);
+    length = screw_head_height + screw_length;
+    w = screw_head_width;
+    translate([0, -length / 2, axis_z]) difference() {
+        rotate([-90, 0, 0]) lock_screw();
+        translate([-w, -1, -axis_z - w]) cube([2 * w, length + 2, w]);
+    }
+}
+
+// Hex prism with bevelled corners, from z = 0 to h.
+module hex(width, h) {
+    w = width / 2;
+    intersection() {
+        cylinder(r = w / cos(30), h = h, $fn = 6);
+        rotate_extrude() polygon([[0, 0], [w, 0], [w + 1, 1], [w + 1, h - 1], [w, h], [0, h]]);
     }
 }
 
@@ -226,7 +254,7 @@ module tripod_thread_hole() {
     }
 }
 
-// The lock screw's thread: 45 degree flanks, as in the softbox screws.
+// The lock screw's thread: 45 degree flanks, as in fdm_optimized_screws.
 module lock_thread(d, h)
     threaded_rod(d, h, lock_thread_pitch, 0.4 * lock_thread_pitch, 0.05 * lock_thread_pitch, 45);
 

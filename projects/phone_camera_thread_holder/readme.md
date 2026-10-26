@@ -5,25 +5,27 @@ the goal is to create  a openSCAD script that can generate a phone holder that h
 ![preview](V2/preview.png)
 
 `V2/phone_camera_thread_holderV2.scad` generates a hook clamp in the style of
-`V2/inspiration`. Two brackets hook over the phone's long edges, and a star
-knob screw pulls one bracket into the other.
+`V2/inspiration`. Two brackets hook over the phone's long edges, and a screw
+pulls one bracket into the other. The hooks have a flat back and a flat lip
+over the phone's front with only small fillets in the corners
+(`cavity_rounding`, 1.5 mm), so the phone can't ride out of them.
 
 there are the following parts:
 - body: a hook with a sleeve, which has a hexagonal guide channel and an end
-  wall under the knob
+  wall under the screw head
 - slider: a hook with a guide bar that runs in the sleeve. The bar has the
   lock screw thread, and the slider's outer end has the 1/4"-20 UNC tripod
   thread.
-- lock screw: a star knob screw through the body's end wall into the bar
+- lock screw: a hex head screw through the body's end wall into the bar
 
 ## use
 
 1. Push the slider's bar into the sleeve.
 2. Put the screw through the end wall and start it in the bar.
-3. Lay the phone between the hooks and tighten the knob until both hooks grip
+3. Lay the phone between the hooks and tighten the screw until both hooks grip
    the phone's edges.
 4. Screw the slider's outer end onto the tripod. The phone then stands in
-   landscape, with the knob on top.
+   landscape, with the screw head on top.
 
 ## printing
 
@@ -33,7 +35,9 @@ Set `part = "print_layout"` to get all parts in their print orientation.
   guide's 45 degree points face up and down, so the channel needs no support.
   The horizontal holes (tripod thread, bar thread, end wall hole) have a
   45 degree roof on top so they don't sag.
-- lock screw: standing on its knob.
+- lock screw: lying on a flat of its head, with the underside of the shank and
+  head cut flat (`screw_cut`), as in `fdm_optimized_screws`. The layers then
+  run along the shank, so it doesn't snap between them.
 
 The bottom point of the guide bar hangs 2.2 mm above the bed, as in the
 inspiration. If it prints rough, deburr it so the bar slides freely.
@@ -42,8 +46,8 @@ inspiration. If it prints rough, deburr it so the bar slides freely.
 
 The defaults clamp phones from 60 to 90 mm wide and up to 12 mm thick, case
 included (`grip_min`, `grip_max`, `phone_thickness`). The guide bar, sleeve
-and screw lengths follow from these. The lock thread has a 2.5 mm pitch, so
-the whole range takes 12 turns.
+and screw lengths follow from these. The lock thread is 8 mm with a 2 mm
+pitch, as in `fdm_optimized_screws`, so the whole range takes 15 turns.
 
 ## thread fit
 
