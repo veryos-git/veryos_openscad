@@ -14,3 +14,14 @@ reflective material such as aluminium foil can be glued onto the inside faces of
 
 the thread used for the screw is a custom 45 degrees angled thread (optimized for fdm manufacturing)
 
+
+## V4
+
+`cuboid_video_light_softboxV4.scad` is V3 with the screws set to the tested
+values of `fdm_optimized_screws`:
+- the 16 thumb screws for the wall covers are 5 mm with a 2 mm pitch and a
+  10 mm head, instead of 6 mm with a 1.5 mm pitch and a 13 mm head. They print
+  lying with 0.15 of their diameter cut off (`thumb_screw_cut`).
+- all threads have 0.25 mm clearance instead of 0.15.
+- the light clamp screws stay 12 mm, with the 0.1 cut that printed well
+  (`screw_cut`); their wide tip spreads the pressure on the light.
