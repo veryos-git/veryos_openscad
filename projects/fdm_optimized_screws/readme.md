@@ -54,3 +54,21 @@ clearance that runs smoothly.
 
 The set takes about 130 x 145 mm of the bed. Rendering it (F6) can take 20
 minutes in OpenSCAD 2021.01.
+
+## dodecahedron test
+
+`part = "dodecahedron"` is a nut shaped like a regular dodecahedron (pentagon
+faces), with a threaded hole from each face to the opposite one, and a screw
+to test them. It uses the thread settings above (`thread_diameter`,
+`thread_pitch`, `thread_clearance`).
+
+![dodecahedron](dodecahedron.png)
+
+It prints on a face without support. That gives the six holes two directions
+to the bed: one stands upright and the other five rise at 26.6 degrees. Each
+hole can be tested from both ends.
+
+The holes cross in the middle, so each one has whole thread only from about
+1.1 x `thread_diameter` out from the centre to the face. `dodecahedron_size`
+(default 36 mm) is the distance between opposite faces; with the default 8 mm
+thread that leaves about 4 turns at each end of a hole.
