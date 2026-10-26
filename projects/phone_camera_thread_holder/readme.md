@@ -1,10 +1,65 @@
 the goal is to create  a openSCAD script that can generate a phone holder that has a internal camera thread so that it can be threaded onto a camera tripod or ballhead.
 
-![preview](preview.png)
+# V2
 
-`phone_camera_thread_holder.scad` generates a screw clamp phone holder with a
-printed 1/4"-20 UNC thread in the underside of its base, the standard thread of
-camera tripods and ball heads.
+![preview](V2/preview.png)
+
+`V2/phone_camera_thread_holderV2.scad` generates a hook clamp in the style of
+`V2/inspiration`. Two brackets hook over the phone's long edges, and a star
+knob screw pulls one bracket into the other.
+
+there are the following parts:
+- body: a hook with a sleeve, which has a hexagonal guide channel and an end
+  wall under the knob
+- slider: a hook with a guide bar that runs in the sleeve. The bar has the
+  lock screw thread, and the slider's outer end has the 1/4"-20 UNC tripod
+  thread.
+- lock screw: a star knob screw through the body's end wall into the bar
+
+## use
+
+1. Push the slider's bar into the sleeve.
+2. Put the screw through the end wall and start it in the bar.
+3. Lay the phone between the hooks and tighten the knob until both hooks grip
+   the phone's edges.
+4. Screw the slider's outer end onto the tripod. The phone then stands in
+   landscape, with the knob on top.
+
+## printing
+
+Set `part = "print_layout"` to get all parts in their print orientation.
+- body and slider: lying on their side, like the parts in the inspiration
+  photo. Every layer is the hook profile, so the hooks are strong. The
+  guide's 45 degree points face up and down, so the channel needs no support.
+  The horizontal holes (tripod thread, bar thread, end wall hole) have a
+  45 degree roof on top so they don't sag.
+- lock screw: standing on its knob.
+
+The bottom point of the guide bar hangs 2.2 mm above the bed, as in the
+inspiration. If it prints rough, deburr it so the bar slides freely.
+
+## sizes
+
+The defaults clamp phones from 60 to 90 mm wide and up to 12 mm thick, case
+included (`grip_min`, `grip_max`, `phone_thickness`). The guide bar, sleeve
+and screw lengths follow from these. The lock thread has a 2.5 mm pitch, so
+the whole range takes 12 turns.
+
+## thread fit
+
+The tripod hole is 9 mm deep (`tripod_thread_depth`). That has to be more than
+the length of the tripod screw. Print `part = "thread_test"` first. It is a
+small block with the same thread, printed lying like the slider. If the tripod
+screw is tight, raise `tripod_thread_clearance` (default 0.3 mm on the
+diameter). If it is loose, lower it.
+
+# V1
+
+![preview](V1/preview.png)
+
+`V1/phone_camera_thread_holder.scad` generates a screw clamp phone holder with
+a printed 1/4"-20 UNC thread in the underside of its base, the standard thread
+of camera tripods and ball heads.
 
 there are the following parts:
 - body: the fixed bottom jaw with the tripod thread, and a tube that rises

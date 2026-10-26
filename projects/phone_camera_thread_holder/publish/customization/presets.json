@@ -1,0 +1,25 @@
+{
+  "fileFormatVersion": "1",
+  "parameterSets": {
+    "Slim phone": {
+      "grip_min": "60",
+      "grip_max": "80",
+      "phone_thickness": "8",
+      "part": "assembly"
+    },
+    "Everyday": {
+      "part": "assembly"
+    },
+    "Large phone": {
+      "grip_min": "70",
+      "grip_max": "100",
+      "part": "assembly"
+    },
+    "Thick case": {
+      "grip_min": "70",
+      "grip_max": "100",
+      "phone_thickness": "16",
+      "part": "assembly"
+    }
+  }
+}
