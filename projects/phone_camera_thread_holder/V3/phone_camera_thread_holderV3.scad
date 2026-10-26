@@ -2,20 +2,26 @@
 // V3: V2 with the lock screw set to the tested fdm_optimized_screws values:
 // 0.25 mm thread clearance, a 0.15 cut so the smooth shank stands on the bed,
 // and no roof over the bar's thread, since 45 degree threads print sideways
-// without one.
+// without one. A keel under the guide bar reaches the print bed, so the bar
+// no longer hangs in the air, and a second tripod thread sits in the back of
+// the slider.
 //
 // Hook clamp phone holder in the style of V2/inspiration. Two brackets
 // hook over the phone's long edges. The slider's guide bar runs in the
 // body's sleeve; a hex head screw through the body's end wall threads into
 // the bar and pulls the slider in until both hooks grip the phone. The
 // slider's outer end has a printed 1/4"-20 UNC thread for a tripod or ball
-// head, so the phone stands in landscape with the screw head on top.
+// head, so the phone stands in landscape with the screw head on top. A second
+// one in the slider's back holds the phone with its back to the tripod:
+// lying flat on a tripod, or turned to any angle on a ball head tilted 90
+// degrees.
 //
 // Print 1 body and 1 slider lying on their side, as in the inspiration
-// photo: every layer is the hook profile, and the guide's 45 degree points
-// face up and down, so neither needs support. The tripod thread and the end
-// wall hole get a 45 degree roof on top instead of sagging; the lock screw
-// thread in the bar needs none. The lock screw prints lying on a
+// photo: every layer is the hook profile, the guide's 45 degree points face
+// up and down, and the keel runs from the bar's lower point down to the bed,
+// so neither needs support. The tripod threads and the end wall hole get a
+// 45 degree roof on top instead of sagging; the lock screw thread in the bar
+// needs none. The lock screw prints lying on a
 // flat of its head with its underside cut off, as in fdm_optimized_screws,
 // so the layers run along the shank.
 // Origin: the body's hook, back of its cavity at y = 0, phone back on z = 0
@@ -55,6 +61,9 @@ guide_height = 12;
 wall = 2;
 // Gap between the guide bar and the sleeve, all round.
 slide_clearance = 0.2;
+// Keel from the guide bar's lower point to the side the parts print on, so
+// the bar stands on the bed. The sleeve has a slot for it.
+keel_width = 6;
 // End wall of the sleeve, under the screw head.
 end_wall = 5;
 
@@ -107,6 +116,10 @@ gap_min = back - (sleeve_start + bar_length);
 screw_length = gap_min + phone_width - grip_min + screw_thread_length;
 // Deep enough for the screw down to grip_min.
 lock_depth = screw_length - gap_min + 1;
+// The end and back tripod holes sit this far either side of the middle, so
+// the back hole's roof stays `wall` clear of the end hole.
+tripod_r = (25.4 / 4 + tripod_thread_clearance) / 2;
+tripod_offset = (tripod_r * (1 + sqrt(2)) + wall) / 2;
 layout_gap = 5;
 
 assert(grip_max > grip_min, "grip_max must be larger than grip_min.");
@@ -115,6 +128,7 @@ assert(bar_length - (grip_max - grip_min) >= 15,
        "Less than 15 mm of guide bar stays in the sleeve at grip_max; narrow the grip range.");
 assert(bar_length - lock_depth >= 2, "The lock screw thread runs through the bar; narrow the grip range.");
 assert(lock_thread_diameter / 2 + 1.5 <= guide_height / 2, "The lock screw is too thick for the guide bar.");
+assert(keel_width <= guide_height - 4, "The keel is too wide; the sleeve's slot would not hold the bar.");
 
 if (part == "print_layout") print_layout();
 else if (part == "assembly") assembly();
@@ -162,9 +176,11 @@ module slider() {
         union() {
             mirror([0, 1, 0]) bracket(-slider_stop);
             translate([0, slider_stop - eps, guide_z]) rotate([-90, 0, 0])
-                linear_extrude(bar_length + eps) offset(delta = -slide_clearance) guide_section();
+                linear_extrude(bar_length + eps) bar_section();
         }
-        translate([0, -back, guide_z]) rotate([-90, 0, 0]) tripod_thread_hole();
+        translate([tripod_offset, -back, guide_z]) rotate([-90, 0, 0]) tripod_thread_hole();
+        // In the back, in the middle of the jaw block.
+        translate([-tripod_offset, (slider_stop - back) / 2, -block_h]) tripod_thread_hole();
         translate([0, slider_stop + bar_length, guide_z]) rotate([90, 0, 0]) lock_thread_hole(lock_depth);
     }
 }
@@ -193,12 +209,22 @@ module hook_profile() {
 }
 
 // Sleeve channel: flat towards the phone and the back, 45 degree points
-// towards the sides, which face up and down on the print bed.
+// towards the sides, which face up and down on the print bed, and the slot
+// for the keel through the -x side, the one on the bed.
 module guide_section() {
     w = holder_width / 2 - wall;
     h = guide_height / 2 + slide_clearance;
     polygon([[-w, 0], [h - w, h], [w - h, h], [w, 0], [w - h, -h], [h - w, -h]]);
+    translate([-holder_width / 2 - 1, -keel_width / 2 - slide_clearance])
+        square([holder_width / 2 + 1, keel_width + 2 * slide_clearance]);
 }
+
+// The guide bar with its keel, ending flush with the -x side.
+module bar_section()
+    intersection() {
+        offset(delta = -slide_clearance) guide_section();
+        translate([-holder_width / 2, -guide_height]) square([holder_width, 2 * guide_height]);
+    }
 
 // Hex head on z = 0, shank upwards.
 module lock_screw() {

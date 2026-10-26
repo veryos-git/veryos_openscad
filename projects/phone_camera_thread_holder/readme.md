@@ -17,6 +17,24 @@ tested values of `fdm_optimized_screws` (see its test results):
   threads and no roof, and all of them worked. So the bar's thread now goes
   all the way round. The tripod thread and the end wall hole keep their roofs.
 
+It also changes two things of the brackets:
+- a keel under the guide bar (`keel_width`, 6 mm). In V2 the bar's lower
+  point hung 2.2 mm above the bed and needed support. The keel runs from that
+  point down to the side the parts print on, so the bar stands on the bed.
+  The sleeve has a slot for the keel, and the bar's 45 degree faces above the
+  slot still hold it in the sleeve.
+- a second 1/4"-20 UNC thread, in the back of the slider. On a tripod the
+  phone then lies flat, screen up. On a ball head tilted 90 degrees, the
+  holder turns freely around the screw, for portrait or landscape. The thread
+  in the slider's outer end still holds the phone in landscape. Both sit 5 mm
+  to the side of the middle, because the slider is too small for both in the
+  middle.
+
+![back](V3/back.png)
+
+The side faces of the brackets have no tripod thread: they are in the middle
+of the phone's length, so the phone would hit the tripod head.
+
 The parts, use, printing and sizes are otherwise the same as V2 below.
 
 # V2
