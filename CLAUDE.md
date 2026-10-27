@@ -75,7 +75,7 @@ after each update please do a git commit and a git push
 VeryOS brand and identity: veryos stands for very open source. the core phylosophy is sharing knowledge openly to everything. 
 
 ---
-projects: each project should have the veryos logo engraved if possible. if  a project contains multiple parts, the logo should be engraved on each part. 
+projects:projects are stored and worked on in the 'projects' folder. each project should contain a .md file that describes the project. each project should have the veryos logo engraved if possible. if  a project contains multiple parts, the logo should be engraved on each part. 
  if this is not possible because of missing space, it can be omitted.
 
 ---
