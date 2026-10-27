@@ -1,0 +1,72 @@
+[
+  {
+    "preset": "Shallow",
+    "part": "frame",
+    "bounds_max_error_mm": 0.0,
+    "relative_volume_error": 4.6679711830663336e-08,
+    "passed": true
+  },
+  {
+    "preset": "Standard",
+    "part": "frame",
+    "bounds_max_error_mm": 0.0,
+    "relative_volume_error": 1.2951511921519408e-07,
+    "passed": true
+  },
+  {
+    "preset": "Deep",
+    "part": "frame",
+    "bounds_max_error_mm": 0.0,
+    "relative_volume_error": 2.3219451530809482e-07,
+    "passed": true
+  },
+  {
+    "preset": "Wide flare",
+    "part": "frame",
+    "bounds_max_error_mm": 0.0,
+    "relative_volume_error": 1.254800972681045e-07,
+    "passed": true
+  },
+  {
+    "preset": "Narrow flare",
+    "part": "frame",
+    "bounds_max_error_mm": 0.0,
+    "relative_volume_error": 4.52178043662995e-08,
+    "passed": true
+  },
+  {
+    "preset": "Small light",
+    "part": "frame",
+    "bounds_max_error_mm": 0.0,
+    "relative_volume_error": 4.678414207514122e-08,
+    "passed": true
+  },
+  {
+    "preset": "Large light",
+    "part": "frame",
+    "bounds_max_error_mm": 0.0,
+    "relative_volume_error": 2.4741013295385198e-08,
+    "passed": true
+  },
+  {
+    "preset": "Small cutout",
+    "part": "wallcover_tripod",
+    "bounds_max_error_mm": 0.0,
+    "relative_volume_error": 0.0,
+    "passed": true
+  },
+  {
+    "preset": "Default cutout",
+    "part": "wallcover_tripod",
+    "bounds_max_error_mm": 0.0,
+    "relative_volume_error": 0.0,
+    "passed": true
+  },
+  {
+    "preset": "Large cutout",
+    "part": "wallcover_tripod",
+    "bounds_max_error_mm": 0.0,
+    "relative_volume_error": 0.0,
+    "passed": true
+  }
+]

@@ -1,0 +1,15 @@
+{
+  "source": "../cuboid_video_light_softboxV5.scad",
+  "source_sha256": "d1fd3a91c88309ef0294544fa7da1f4a2c2373502b59942220e5e07296ca37be",
+  "openscad": "OpenSCAD version 2026.09.16",
+  "backend": "Manifold",
+  "geometry": "Original V5 modules and source assembly/print-layout transforms. No mesh scaling between variants.",
+  "presentation": "Graphite frame, ivory covers and amber screws. Assembly previews have two covers removed, as in the source.",
+  "font_requested": "Consolas",
+  "validation": "Digital geometry checks only; pictured variants are not fit-tested.",
+  "font_used": "DejaVu Sans Mono",
+  "font_substitution": true,
+  "veryos_logo": "../../../veryos_logo.svg",
+  "openscad_logo": "../../biclightercase2/publish/source/assets/openscad.png",
+  "blender": "Blender 5.2.1 LTS"
+}

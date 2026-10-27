@@ -1,0 +1,200 @@
+[
+  {
+    "id": "shallow",
+    "camera_direction": [
+      1.05,
+      -1.7,
+      1.05
+    ],
+    "camera_target_mm": [
+      0,
+      0,
+      62
+    ],
+    "orthographic_width_mm": 310,
+    "resolution": [
+      1800,
+      1500
+    ]
+  },
+  {
+    "id": "standard",
+    "camera_direction": [
+      1.05,
+      -1.7,
+      1.05
+    ],
+    "camera_target_mm": [
+      0,
+      0,
+      62
+    ],
+    "orthographic_width_mm": 310,
+    "resolution": [
+      1800,
+      1500
+    ]
+  },
+  {
+    "id": "deep",
+    "camera_direction": [
+      1.05,
+      -1.7,
+      1.05
+    ],
+    "camera_target_mm": [
+      0,
+      0,
+      62
+    ],
+    "orthographic_width_mm": 310,
+    "resolution": [
+      1800,
+      1500
+    ]
+  },
+  {
+    "id": "wide",
+    "camera_direction": [
+      1.05,
+      -1.7,
+      1.05
+    ],
+    "camera_target_mm": [
+      0,
+      0,
+      62
+    ],
+    "orthographic_width_mm": 310,
+    "resolution": [
+      1800,
+      1500
+    ]
+  },
+  {
+    "id": "narrow",
+    "camera_direction": [
+      1.05,
+      -1.7,
+      1.05
+    ],
+    "camera_target_mm": [
+      0,
+      0,
+      62
+    ],
+    "orthographic_width_mm": 310,
+    "resolution": [
+      1800,
+      1500
+    ]
+  },
+  {
+    "id": "small_light",
+    "camera_direction": [
+      1.05,
+      -1.7,
+      1.05
+    ],
+    "camera_target_mm": [
+      0,
+      0,
+      62
+    ],
+    "orthographic_width_mm": 310,
+    "resolution": [
+      1800,
+      1500
+    ]
+  },
+  {
+    "id": "large_light",
+    "camera_direction": [
+      1.05,
+      -1.7,
+      1.05
+    ],
+    "camera_target_mm": [
+      0,
+      0,
+      62
+    ],
+    "orthographic_width_mm": 310,
+    "resolution": [
+      1800,
+      1500
+    ]
+  },
+  {
+    "id": "cutout_small",
+    "camera_direction": [
+      0,
+      -0.12,
+      1
+    ],
+    "camera_target_mm": [
+      0,
+      -29,
+      -1
+    ],
+    "orthographic_width_mm": 200,
+    "resolution": [
+      1800,
+      1500
+    ]
+  },
+  {
+    "id": "cutout_default",
+    "camera_direction": [
+      0,
+      -0.12,
+      1
+    ],
+    "camera_target_mm": [
+      0,
+      -29,
+      -1
+    ],
+    "orthographic_width_mm": 200,
+    "resolution": [
+      1800,
+      1500
+    ]
+  },
+  {
+    "id": "cutout_large",
+    "camera_direction": [
+      0,
+      -0.12,
+      1
+    ],
+    "camera_target_mm": [
+      0,
+      -29,
+      -1
+    ],
+    "orthographic_width_mm": 200,
+    "resolution": [
+      1800,
+      1500
+    ]
+  },
+  {
+    "id": "print_layout",
+    "camera_direction": [
+      0.35,
+      -1,
+      2.5
+    ],
+    "camera_target_mm": [
+      22.204572677612305,
+      66.44364166259766,
+      36.33329772949219
+    ],
+    "orthographic_width_mm": 443.8789123535156,
+    "resolution": [
+      1800,
+      1500
+    ]
+  }
+]

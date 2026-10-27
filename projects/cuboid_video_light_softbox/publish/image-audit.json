@@ -1,0 +1,248 @@
+[
+  {
+    "file": "thumbnail_4x3.png",
+    "size": [
+      2400,
+      1800
+    ],
+    "mode": "RGB",
+    "bytes": 898283
+  },
+  {
+    "file": "thumbnail_3x4.png",
+    "size": [
+      1800,
+      2400
+    ],
+    "mode": "RGB",
+    "bytes": 928237
+  },
+  {
+    "file": "images/01_four_shapes.png",
+    "size": [
+      2400,
+      1800
+    ],
+    "mode": "RGB",
+    "bytes": 525585
+  },
+  {
+    "file": "images/02_depth.png",
+    "size": [
+      2400,
+      1800
+    ],
+    "mode": "RGB",
+    "bytes": 500079
+  },
+  {
+    "file": "images/03_wall_angle.png",
+    "size": [
+      2400,
+      1800
+    ],
+    "mode": "RGB",
+    "bytes": 449662
+  },
+  {
+    "file": "images/04_light_fit.png",
+    "size": [
+      2400,
+      1800
+    ],
+    "mode": "RGB",
+    "bytes": 487041
+  },
+  {
+    "file": "images/05_tripod_clearance.png",
+    "size": [
+      2400,
+      1800
+    ],
+    "mode": "RGB",
+    "bytes": 196318
+  },
+  {
+    "file": "images/06_printable_parts.png",
+    "size": [
+      2400,
+      1800
+    ],
+    "mode": "RGB",
+    "bytes": 673625
+  },
+  {
+    "file": "contact-sheet.png",
+    "size": [
+      1600,
+      1200
+    ],
+    "mode": "RGB",
+    "bytes": 456661
+  },
+  {
+    "file": "renders/cutout_default.png",
+    "size": [
+      1800,
+      1500
+    ],
+    "mode": "RGBA",
+    "bytes": 675768,
+    "visible_bounds": [
+      135,
+      489,
+      1665,
+      1040
+    ]
+  },
+  {
+    "file": "renders/cutout_large.png",
+    "size": [
+      1800,
+      1500
+    ],
+    "mode": "RGBA",
+    "bytes": 659698,
+    "visible_bounds": [
+      135,
+      489,
+      1665,
+      1040
+    ]
+  },
+  {
+    "file": "renders/cutout_small.png",
+    "size": [
+      1800,
+      1500
+    ],
+    "mode": "RGBA",
+    "bytes": 686397,
+    "visible_bounds": [
+      135,
+      489,
+      1665,
+      1040
+    ]
+  },
+  {
+    "file": "renders/deep.png",
+    "size": [
+      1800,
+      1500
+    ],
+    "mode": "RGBA",
+    "bytes": 1067366,
+    "visible_bounds": [
+      76,
+      303,
+      1724,
+      1431
+    ]
+  },
+  {
+    "file": "renders/large_light.png",
+    "size": [
+      1800,
+      1500
+    ],
+    "mode": "RGBA",
+    "bytes": 1038599,
+    "visible_bounds": [
+      63,
+      381,
+      1736,
+      1432
+    ]
+  },
+  {
+    "file": "renders/narrow.png",
+    "size": [
+      1800,
+      1500
+    ],
+    "mode": "RGBA",
+    "bytes": 856628,
+    "visible_bounds": [
+      240,
+      457,
+      1560,
+      1354
+    ]
+  },
+  {
+    "file": "renders/print_layout.png",
+    "size": [
+      1800,
+      1500
+    ],
+    "mode": "RGBA",
+    "bytes": 1059962,
+    "visible_bounds": [
+      239,
+      114,
+      1494,
+      1406
+    ]
+  },
+  {
+    "file": "renders/shallow.png",
+    "size": [
+      1800,
+      1500
+    ],
+    "mode": "RGBA",
+    "bytes": 826761,
+    "visible_bounds": [
+      236,
+      534,
+      1564,
+      1356
+    ]
+  },
+  {
+    "file": "renders/small_light.png",
+    "size": [
+      1800,
+      1500
+    ],
+    "mode": "RGBA",
+    "bytes": 823167,
+    "visible_bounds": [
+      265,
+      481,
+      1535,
+      1349
+    ]
+  },
+  {
+    "file": "renders/standard.png",
+    "size": [
+      1800,
+      1500
+    ],
+    "mode": "RGBA",
+    "bytes": 902004,
+    "visible_bounds": [
+      183,
+      457,
+      1617,
+      1381
+    ]
+  },
+  {
+    "file": "renders/wide.png",
+    "size": [
+      1800,
+      1500
+    ],
+    "mode": "RGBA",
+    "bytes": 972772,
+    "visible_bounds": [
+      60,
+      457,
+      1740,
+      1438
+    ]
+  }
+]

@@ -1,0 +1,56 @@
+{
+  "fileFormatVersion": "1",
+  "parameterSets": {
+    "Shallow": {
+      "softbox_depth": "45",
+      "part": "assembly"
+    },
+    "Standard": {
+      "part": "assembly"
+    },
+    "Deep": {
+      "softbox_depth": "90",
+      "part": "assembly"
+    },
+    "Wide flare": {
+      "wall_angle": "35",
+      "wallcover_lip_clearance": "1.5",
+      "part": "assembly"
+    },
+    "Narrow flare": {
+      "wall_angle": "18",
+      "part": "assembly"
+    },
+    "Small light": {
+      "light_length": "90",
+      "light_width": "55",
+      "light_height": "14",
+      "clamp_length": "18",
+      "side_notch_width": "38",
+      "logo_width": "24",
+      "frame_logo_width": "9",
+      "part": "assembly"
+    },
+    "Large light": {
+      "light_length": "150",
+      "light_width": "90",
+      "light_height": "22",
+      "part": "assembly"
+    },
+    "Small cutout": {
+      "side_notch_width": "36",
+      "tripod_cutout_depth": "8",
+      "tripod_cutout_radius": "2",
+      "part": "wallcover_tripod"
+    },
+    "Default cutout": {
+      "part": "wallcover_tripod"
+    },
+    "Large cutout": {
+      "side_notch_width": "60",
+      "tripod_cutout_depth": "20",
+      "tripod_cutout_radius": "6",
+      "part": "wallcover_tripod"
+    }
+  }
+}

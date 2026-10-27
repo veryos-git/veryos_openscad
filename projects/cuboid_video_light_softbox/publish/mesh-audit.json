@@ -1,0 +1,569 @@
+[
+  {
+    "mesh": "shallow_frame",
+    "vertices": 27436,
+    "triangles": 54908,
+    "watertight": true,
+    "winding_consistent": true,
+    "volume_mm3": 143531.3059,
+    "bounds_mm": [
+      [
+        -96.6774,
+        -72.1774,
+        -45.005
+      ],
+      [
+        96.6774,
+        72.1774,
+        25.0
+      ]
+    ],
+    "sha256": "d092435c564eb7d92a522b309f76430e7b23d351dfb67f327160c8c90434938e"
+  },
+  {
+    "mesh": "shallow_covers",
+    "vertices": 1463,
+    "triangles": 2950,
+    "watertight": true,
+    "winding_consistent": true,
+    "volume_mm3": 25773.1409,
+    "bounds_mm": [
+      [
+        -82.5815,
+        -58.0815,
+        -41.0
+      ],
+      [
+        78.2544,
+        53.7544,
+        0.81347
+      ]
+    ],
+    "sha256": "ab4a8a3704ec56c15cbdd499334435f4e494fab6ba067aea1a5bfe5a2401633a"
+  },
+  {
+    "mesh": "shallow_screws",
+    "vertices": 27148,
+    "triangles": 54256,
+    "watertight": true,
+    "winding_consistent": true,
+    "volume_mm3": 10083.5516,
+    "bounds_mm": [
+      [
+        -85.929,
+        -61.429,
+        -37.4459
+      ],
+      [
+        71.5035,
+        47.0035,
+        41.0
+      ]
+    ],
+    "sha256": "ce5d5a7d6d1fc86844b8df0ca5af0e9518961aeb5ddd8b9d4278da1349cfc62a"
+  },
+  {
+    "mesh": "standard_frame",
+    "vertices": 27431,
+    "triangles": 54898,
+    "watertight": true,
+    "winding_consistent": true,
+    "volume_mm3": 152105.7937,
+    "bounds_mm": [
+      [
+        -103.356,
+        -78.8559,
+        -60.005
+      ],
+      [
+        103.356,
+        78.8559,
+        25.0
+      ]
+    ],
+    "sha256": "959342542c62c69705eaaf72396e65029ebb7d1985988437fdfeec581c190037"
+  },
+  {
+    "mesh": "standard_covers",
+    "vertices": 1462,
+    "triangles": 2948,
+    "watertight": true,
+    "winding_consistent": true,
+    "volume_mm3": 42676.7817,
+    "bounds_mm": [
+      [
+        -89.2599,
+        -64.7599,
+        -56.0
+      ],
+      [
+        84.9328,
+        60.4328,
+        0.81347
+      ]
+    ],
+    "sha256": "b6874b9839a7b604fea64234dc2b39bd395f01d66f03b6aebd9e05ada6c190f5"
+  },
+  {
+    "mesh": "standard_screws",
+    "vertices": 27148,
+    "triangles": 54256,
+    "watertight": true,
+    "winding_consistent": true,
+    "volume_mm3": 10083.5518,
+    "bounds_mm": [
+      [
+        -92.6074,
+        -68.1074,
+        -52.4459
+      ],
+      [
+        78.1819,
+        53.6819,
+        41.0
+      ]
+    ],
+    "sha256": "34c5e9a2d8202cefd128f221b47fd34587ae2f92717f05fab39a26b359ca6127"
+  },
+  {
+    "mesh": "deep_frame",
+    "vertices": 27430,
+    "triangles": 54896,
+    "watertight": true,
+    "winding_consistent": true,
+    "volume_mm3": 169254.6439,
+    "bounds_mm": [
+      [
+        -116.713,
+        -92.2127,
+        -90.005
+      ],
+      [
+        116.713,
+        92.2127,
+        25.0
+      ]
+    ],
+    "sha256": "9b867268b90fa6524a1a739bab35b940c6cd289ae317b639fcd095178bbbaba5"
+  },
+  {
+    "mesh": "deep_covers",
+    "vertices": 1463,
+    "triangles": 2950,
+    "watertight": true,
+    "winding_consistent": true,
+    "volume_mm3": 81747.662,
+    "bounds_mm": [
+      [
+        -102.617,
+        -78.1168,
+        -86.0
+      ],
+      [
+        98.2897,
+        73.7897,
+        0.81347
+      ]
+    ],
+    "sha256": "8b3fc8041f8873a3ce0575c016d1b766ae12d12b5d544a29b8e1726d80924984"
+  },
+  {
+    "mesh": "deep_screws",
+    "vertices": 27148,
+    "triangles": 54256,
+    "watertight": true,
+    "winding_consistent": true,
+    "volume_mm3": 10083.5604,
+    "bounds_mm": [
+      [
+        -105.964,
+        -81.4643,
+        -82.4459
+      ],
+      [
+        91.5388,
+        67.0388,
+        41.0
+      ]
+    ],
+    "sha256": "a00c404cd000c836b225406e793e602261ecdbec0f6f7da3ddf079dafb66a434"
+  },
+  {
+    "mesh": "wide_frame",
+    "vertices": 27369,
+    "triangles": 54774,
+    "watertight": true,
+    "winding_consistent": true,
+    "volume_mm3": 169748.0354,
+    "bounds_mm": [
+      [
+        -118.655,
+        -94.1546,
+        -60.005
+      ],
+      [
+        118.655,
+        94.1546,
+        25.0
+      ]
+    ],
+    "sha256": "75f0e969a68303d8249a1211eaac21fd9940a1349dd6f52df9ca1faaba6dcc7b"
+  },
+  {
+    "mesh": "wide_covers",
+    "vertices": 1462,
+    "triangles": 2948,
+    "watertight": true,
+    "winding_consistent": true,
+    "volume_mm3": 54328.9741,
+    "bounds_mm": [
+      [
+        -103.35,
+        -78.8499,
+        -56.0
+      ],
+      [
+        99.2116,
+        74.7116,
+        1.14715
+      ]
+    ],
+    "sha256": "8bd0d776f46230b75e938f1fbb6ba29d3f742705607b4bc2922ac3afb10b1738"
+  },
+  {
+    "mesh": "wide_screws",
+    "vertices": 27148,
+    "triangles": 54256,
+    "watertight": true,
+    "winding_consistent": true,
+    "volume_mm3": 10083.5355,
+    "bounds_mm": [
+      [
+        -105.725,
+        -81.225,
+        -53.3056
+      ],
+      [
+        90.4323,
+        65.9323,
+        41.0
+      ]
+    ],
+    "sha256": "0414ee7d30b87cc2b5b28f5698b3b5ba3560408f8751643934bd349c05c9f5a6"
+  },
+  {
+    "mesh": "narrow_frame",
+    "vertices": 27590,
+    "triangles": 55216,
+    "watertight": true,
+    "winding_consistent": true,
+    "volume_mm3": 143748.6866,
+    "bounds_mm": [
+      [
+        -96.1373,
+        -71.6373,
+        -60.005
+      ],
+      [
+        96.1373,
+        71.6373,
+        25.0
+      ]
+    ],
+    "sha256": "65bde048bb7b252ce63f126e05cf4c44d79831de27663ee43800161e9df195e0"
+  },
+  {
+    "mesh": "narrow_covers",
+    "vertices": 1463,
+    "triangles": 2950,
+    "watertight": true,
+    "winding_consistent": true,
+    "volume_mm3": 38275.7072,
+    "bounds_mm": [
+      [
+        -82.5976,
+        -58.0976,
+        -56.0
+      ],
+      [
+        78.1955,
+        53.6955,
+        0.61803
+      ]
+    ],
+    "sha256": "cf0e1d18019623b8af022669c034984986a422a6af559bf0987711855b46b6c4"
+  },
+  {
+    "mesh": "narrow_screws",
+    "vertices": 27148,
+    "triangles": 54256,
+    "watertight": true,
+    "winding_consistent": true,
+    "volume_mm3": 10083.5431,
+    "bounds_mm": [
+      [
+        -86.4258,
+        -61.9258,
+        -52.5288
+      ],
+      [
+        72.4638,
+        47.9638,
+        41.0
+      ]
+    ],
+    "sha256": "b61e7855882f030d0fa185e85fdc6d3c86aa44c4e710274f6be0efd0b8a0d2b1"
+  },
+  {
+    "mesh": "small_light_frame",
+    "vertices": 27439,
+    "triangles": 54914,
+    "watertight": true,
+    "winding_consistent": true,
+    "volume_mm3": 121836.1555,
+    "bounds_mm": [
+      [
+        -90.3559,
+        -72.8559,
+        -60.005
+      ],
+      [
+        90.3559,
+        72.8559,
+        23.0
+      ]
+    ],
+    "sha256": "30776befa16f2d667de4fae01c7908c5d197d10748e272fafa5b2c2e808ed74b"
+  },
+  {
+    "mesh": "small_light_covers",
+    "vertices": 1462,
+    "triangles": 2948,
+    "watertight": true,
+    "winding_consistent": true,
+    "volume_mm3": 35835.1857,
+    "bounds_mm": [
+      [
+        -76.2599,
+        -58.7599,
+        -56.0
+      ],
+      [
+        71.9328,
+        54.4328,
+        0.81347
+      ]
+    ],
+    "sha256": "5a0f091cc5ac96ff3d865c28091f4d9e9e3fd86df45c2fb3160f49e1779d7a58"
+  },
+  {
+    "mesh": "small_light_screws",
+    "vertices": 27148,
+    "triangles": 54256,
+    "watertight": true,
+    "winding_consistent": true,
+    "volume_mm3": 10083.5518,
+    "bounds_mm": [
+      [
+        -79.6074,
+        -62.1074,
+        -52.4459
+      ],
+      [
+        65.1819,
+        47.6819,
+        39.0
+      ]
+    ],
+    "sha256": "d2c33b5b6f3f7a8d2c0c15c042573e8e6015952116ad1ef19921aea41479c06d"
+  },
+  {
+    "mesh": "large_light_frame",
+    "vertices": 27436,
+    "triangles": 54908,
+    "watertight": true,
+    "winding_consistent": true,
+    "volume_mm3": 189967.9679,
+    "bounds_mm": [
+      [
+        -120.356,
+        -90.3559,
+        -60.005
+      ],
+      [
+        120.356,
+        90.3559,
+        31.0
+      ]
+    ],
+    "sha256": "bf25f4ae7c82678853135f5ce63bdbb96c4520c0976e472cfbd3135d503d5d55"
+  },
+  {
+    "mesh": "large_light_covers",
+    "vertices": 1463,
+    "triangles": 2950,
+    "watertight": true,
+    "winding_consistent": true,
+    "volume_mm3": 53499.042,
+    "bounds_mm": [
+      [
+        -106.26,
+        -76.2599,
+        -56.0
+      ],
+      [
+        101.933,
+        71.9328,
+        0.81347
+      ]
+    ],
+    "sha256": "2cb71cd0927c1e7f8f63c08322d9aca1959cc6a6d76fe0858f4f71f927dd0034"
+  },
+  {
+    "mesh": "large_light_screws",
+    "vertices": 27148,
+    "triangles": 54256,
+    "watertight": true,
+    "winding_consistent": true,
+    "volume_mm3": 10083.5665,
+    "bounds_mm": [
+      [
+        -109.607,
+        -79.6074,
+        -52.4459
+      ],
+      [
+        95.1819,
+        65.1819,
+        47.0
+      ]
+    ],
+    "sha256": "bd7f3c00d899bf5227849af41a9879129482566816f92131bee7b3d84ffd2064"
+  },
+  {
+    "mesh": "cutout_small_panel",
+    "vertices": 934,
+    "triangles": 1880,
+    "watertight": true,
+    "winding_consistent": true,
+    "volume_mm3": 25836.3894,
+    "bounds_mm": [
+      [
+        -84.9328,
+        -61.2996,
+        0.0
+      ],
+      [
+        84.9328,
+        0.0,
+        4.0
+      ]
+    ],
+    "sha256": "6813d02349b7f7b2a97573af30648ab71b0ed40b027795186d1f95cc1fe0e504"
+  },
+  {
+    "mesh": "cutout_default_panel",
+    "vertices": 934,
+    "triangles": 1880,
+    "watertight": true,
+    "winding_consistent": true,
+    "volume_mm3": 25247.9065,
+    "bounds_mm": [
+      [
+        -84.9328,
+        -61.2996,
+        0.0
+      ],
+      [
+        84.9328,
+        0.0,
+        4.0
+      ]
+    ],
+    "sha256": "9914b7531b566af93625399ff7f90f6f7318967c0d0cd7b0eea0e367295dbe57"
+  },
+  {
+    "mesh": "cutout_large_panel",
+    "vertices": 939,
+    "triangles": 1890,
+    "watertight": true,
+    "winding_consistent": true,
+    "volume_mm3": 23461.1962,
+    "bounds_mm": [
+      [
+        -84.9328,
+        -61.2996,
+        0.0
+      ],
+      [
+        84.9328,
+        0.0,
+        4.0
+      ]
+    ],
+    "sha256": "d199dcb245a6c7827ed6f3e6e5770f4acad92684b6618e70d4f41bc4799e5e1a"
+  },
+  {
+    "mesh": "print_frame",
+    "vertices": 27431,
+    "triangles": 54898,
+    "watertight": true,
+    "winding_consistent": true,
+    "volume_mm3": 152105.8134,
+    "bounds_mm": [
+      [
+        -103.356,
+        -78.8559,
+        -0.005
+      ],
+      [
+        103.356,
+        78.8559,
+        85.0
+      ]
+    ],
+    "sha256": "e9f9645b2cc4c5a1616fd379ed15ed37fb49e0e39bcf3b627b4ef50eca2f5b4c"
+  },
+  {
+    "mesh": "print_covers",
+    "vertices": 2852,
+    "triangles": 5752,
+    "watertight": true,
+    "winding_consistent": true,
+    "volume_mm3": 86514.6418,
+    "bounds_mm": [
+      [
+        -147.866,
+        83.8559,
+        0.0
+      ],
+      [
+        147.866,
+        211.455,
+        4.0
+      ]
+    ],
+    "sha256": "b79a61222e02958dd36b60ddf3ddee66b12d260067232e101ad5ff8b9ec13abc"
+  },
+  {
+    "mesh": "print_screws",
+    "vertices": 42468,
+    "triangles": 84864,
+    "watertight": true,
+    "winding_consistent": true,
+    "volume_mm3": 11718.6992,
+    "bounds_mm": [
+      [
+        -52.7543,
+        -29.9,
+        0.0
+      ],
+      [
+        52.7543,
+        29.9,
+        12.3
+      ]
+    ],
+    "sha256": "c04a22bd4caaef456f9022e1699bd8f49dac075c6690a9c49c30d8c10108a599"
+  }
+]
