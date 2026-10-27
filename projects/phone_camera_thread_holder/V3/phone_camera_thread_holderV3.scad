@@ -38,11 +38,11 @@ part = "print_layout"; // [print_layout:All parts on bed,assembly:Assembly previ
 grip_min = 60;
 grip_max = 90;
 // Height of the hook cavities: the thickest phone, with case.
-phone_thickness = 12;
+phone_thickness = 15;
 // Your phone's width, with case. Sets the lock screw's length: its thread
 // reaches the bar just as the hooks touch the phone. Narrower phones take
 // more turns; for a wider one, print a screw for its width.
-phone_width = 75;
+phone_width = 80;
 
 /* [Brackets] */
 // Along the phone; also the print height. Keep it narrow enough to miss the
@@ -58,7 +58,7 @@ cavity_rounding = 1.5;
 guide_height = 12;
 // Sleeve wall around the guide, and the wall between the tripod thread and
 // the guide bar.
-wall = 2;
+wall = 3;
 // Gap between the guide bar and the sleeve, all round.
 slide_clearance = 0.2;
 // Keel from the guide bar's lower point to the side the parts print on, so

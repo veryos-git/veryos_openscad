@@ -66,7 +66,16 @@ Strong success criteria let you loop independently. Weak criteria ("make it work
 
 
 #license 
-- First line of every source file: `// Copyright (C) [year] [Jonas Immanuel Frey] - Licensed under GPL. See LICENSE file for details`
+- First line of every source file: `// Copyright (C) [Jonas Immanuel Frey] - Licensed under GPL`
 
 ---
 after each update please do a git commit and a git push
+
+---
+VeryOS brand and identity: veryos stands for very open source. the core phylosophy is sharing knowledge openly to everything. 
+
+---
+projects: each project should have the veryos logo engraved if possible. if  a project contains multiple parts, the logo should be engraved on each part. 
+ if this is not possible because of missing space, it can be omitted.
+
+---

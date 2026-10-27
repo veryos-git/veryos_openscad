@@ -10,3 +10,5 @@ always use the veryos_logo.svg
 on the thumbnail use a short text that describes the product
 
 generate a title, description and tags in a .md file
+
+do only generate compressed .png images , no .jpg images
