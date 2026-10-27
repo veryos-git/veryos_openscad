@@ -19,11 +19,15 @@ the enclosure should have parts:
 
 ![preview](preview.png)
 
-`RGBW_pucklight_holder.scad` generates the three parts of the Onshape model
+`RGBW_pucklight_holderV2.scad` generates the three parts of the Onshape model
 in `onshape_model`, parametric. The puck's size comes from the
 manufacturer's CAD model in `rgbw_light_specs`: 62 mm wide, 26.8 mm high
 (the spec sheet says 62.2 x 27.6). The Onshape model was built around the
 CAD model too.
+
+`RGBW_pucklight_holderV1.scad` is the first version. Like the Onshape model,
+it has a flat step from the screw's recess to the thread, which overhangs
+2.8 mm in the top part; V2 makes it 45 degrees (see below).
 
 ![section](section.png)
 

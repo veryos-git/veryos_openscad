@@ -1,4 +1,9 @@
 // Copyright (C) Jonas Immanuel Frey - Licensed under GPL
+// V2: V1 with a 45 degree step from the screw's recess to the thread instead
+// of a flat one, which overhung 2.8 mm in the top part. The bottom screw's
+// flange ends in a matching cone and is lower, so the thread still engages
+// over screw_thread_length.
+//
 // Holder for an RGBW puck light (62 mm KC007), after the working Onshape
 // model in onshape_model. The puck lies loose in a square top part, on the
 // floor of a ring that screws into the top part from below. Its dome pokes
@@ -12,8 +17,9 @@
 // Print every part standing as it is used, bottom on the bed: the ribs
 // bridge the window, the cavity's shoulder and the step from the screw's
 // recess to the thread are 45 degrees, and the threads have 45 degree
-// flanks, as in fdm_optimized_screws, so nothing needs support. The VeryOS logo is engraved in the front of the top part, in the
-// bottom of the screw ring and in the top of the click base's disc.
+// flanks, as in fdm_optimized_screws, so nothing needs support. The VeryOS
+// logo is engraved in the front of the top part, in the bottom of the screw
+// ring and in the top of the click base's disc.
 // Origin: centre of the top part's bottom face, which is also the ring's
 // bottom face when it is screwed in flush.
 //
