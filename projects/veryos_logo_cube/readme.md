@@ -21,3 +21,17 @@ smooth at any size.
 The model comes lying on its back: every layer is the logo outline, so it
 prints without support. The top face is the front; the bed side shows the logo
 mirrored. The engraving sits on a wall and reads correctly from outside.
+
+## V2: the same logo from the front and from the side
+
+![V2 preview](V2/preview.png)
+
+`V2/veryos_logo_cubeV2.scad` extrudes the logo through the front and through
+the side and keeps only what both share, like the two sided Star Wars sign in
+`exampletwoside`. The front and the right side each show the whole logo, holes
+see-through; the back and the left side show it mirrored. The logo is engraved
+in the square bottom face. `logo_width` sets the width and the depth.
+
+Print it standing on its bottom face. The tops of the holes overhang, most at
+the top of the ring and under the middle of the S, so they need supports or a
+printer that bridges well.
