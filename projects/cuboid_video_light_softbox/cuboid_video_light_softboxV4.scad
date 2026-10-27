@@ -4,7 +4,7 @@
 // of 6 mm with a 1.5 mm pitch and a 13 mm head, and all threads have 0.25 mm
 // clearance. The light clamp screws stay 12 mm: their wide tip spreads the
 // pressure on the light. The VeryOS logo is engraved in the outside of the
-// big wall covers.
+// big wall covers, and small in the top of one light clamp on the back.
 //
 // V3: softbox frame for a flat cuboid video light (Ulanzi VL120 RGB). Same
 // frame and exchangeable wall covers as V2 (cuboid_video_light_softboxV2.scad):
@@ -77,6 +77,9 @@ wallcover_screw_inset = 8;
 // The VeryOS logo engraved in the outside of the big wall covers, centred on
 // the window, where the lip makes the cover twice as thick.
 logo_width = 30;
+// The small logo in the top of the +x light clamp, beside the screw.
+frame_logo_width = 12;
+// Both logos.
 logo_depth = 1;
 
 /* [Clothespin lips] */
@@ -232,7 +235,7 @@ module print_layout() {
 
 module frame() {
     pyramid();
-    for (s = [-1, 1]) translate([s * clamp_x, 0, 0]) clamp();
+    for (s = [-1, 1]) translate([s * clamp_x, 0, 0]) clamp(s == 1);
     for (f = side_faces) rotate([0, 0, f[0]])
         translate([0, f[2] + grow * softbox_depth, -softbox_depth])
             linear_extrude(lip_thickness) lip_outline(rail_width / 2);
@@ -279,7 +282,10 @@ module windows() {
 }
 
 // Tunnel the light slides through, with a threaded hole in its roof.
-module clamp() {
+// If with_logo, the small logo is engraved in the top, on the +y side of the
+// screw, midway to the bevel. +y is up when the light hangs from its 1/4"
+// thread, so it reads correctly from behind.
+module clamp(with_logo = false) {
     hole_d = thread_diameter + 2 * thread_clearance;
     hole_minor_r = hole_d / 2 - 0.4 * thread_pitch;
     difference() {
@@ -288,6 +294,10 @@ module clamp() {
         translate([0, 0, cavity_h - 1]) threaded_rod(hole_d, clamp_roof + 2, thread_pitch);
         translate([0, 0, clamp_h - chamfer])
             cylinder(r1 = hole_minor_r, r2 = hole_minor_r + chamfer + 1, h = chamfer + 1);
+        if (with_logo)
+            translate([0, (hole_minor_r + top_y) / 2, clamp_h - logo_depth])
+                linear_extrude(logo_depth + 1)
+                    scale(frame_logo_width / logo_w) translate([0, -logo_r]) logo();
     }
 }
 

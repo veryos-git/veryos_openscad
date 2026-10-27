@@ -29,3 +29,6 @@ values of `fdm_optimized_screws`:
   covers (`logo_width`, `logo_depth`), in the middle of the window, where the
   lip makes the cover 4 mm thick. It is cut into the side that prints on the
   bed, mirrored, so it reads correctly from outside.
+- a small logo, 12 mm wide (`frame_logo_width`), is engraved in the top of the
+  +x light clamp, on the back of the frame, beside the screw. It is upright
+  when the light hangs from its 1/4" thread and prints on a top surface.
