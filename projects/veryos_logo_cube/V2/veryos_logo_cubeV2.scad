@@ -4,7 +4,8 @@
 // in ../exampletwoside. Every height of the logo has material in both
 // extrusions, so the front and the right side each show the whole logo, its
 // holes see-through. The back and the left side show it mirrored.
-// The logo is engraved in the bottom face, as in V1.
+// The bottom face holds an engraving test: the logo in several widths, to
+// find the smallest one that prints.
 // The logo is built from circles and rectangles with the measures of
 // veryos_logo.svg, so the file needs no external SVG and the curves stay
 // smooth at any size.
@@ -21,9 +22,13 @@
 // Also the depth, since the side shows the same logo.
 logo_width = 50;
 
-/* [Engraving] */
-// The logo in the bottom face is as large as fits inside this margin.
-engraving_margin = 3;
+/* [Engraving test] */
+// Widths of the logos engraved in the bottom face, smallest first. Seen from
+// below they read like text, two to a row, the smallest at the top left. The
+// default fills the 24 mm square bottom face of a 50 mm wide logo.
+test_widths = [6, 7, 8, 9, 10, 11];
+// Between the logos.
+test_gap = 1;
 engraving_depth = 1;
 
 /* [Quality] */
@@ -43,6 +48,7 @@ logo_b = logo_r * (1 - sin(logo_angle)) / cos(logo_angle);
 // middle of the ring's stroke at the top.
 logo_arm = (2 * logo_r - logo_stroke / 2 * (1 + sin(logo_angle))) / cos(logo_angle);
 logo_w = 2 * (logo_b + logo_arm * sin(logo_angle));
+logo_h = 2 * logo_r;
 // The S in the ring: two half rings around half discs, all strokes
 // logo_stroke wide.
 ring_in = logo_r - logo_stroke;
@@ -50,9 +56,13 @@ s_small = (2 * ring_in - logo_stroke) / 4;
 s_big = s_small + logo_stroke;
 
 logo_scale = logo_width / logo_w;
-// The bottom face is a square of this side.
-bottom_width = 2 * logo_b * logo_scale;
-engraving_scale = (bottom_width - 2 * engraving_margin) / logo_w;
+
+// Height of row r of the engraving test, set by its wider logo.
+function test_row_h(r) = max(test_widths[2 * r],
+    test_widths[min(2 * r + 1, len(test_widths) - 1)]) * logo_h / logo_w;
+// From the top of the engraving test to the top of row r.
+function test_row_top(r) = r == 0 ? 0 : test_row_top(r - 1) + test_row_h(r - 1) + test_gap;
+test_height = test_row_top(ceil(len(test_widths) / 2)) - test_gap;
 
 // The logo at the size of veryos_logo.svg, bottom edge on y = 0, centred on
 // x = 0.
@@ -85,6 +95,20 @@ module s_hole() {
     translate([0, ring_in - s_small]) circle(r = s_small);
 }
 
+// The logos of the engraving test as read from below, centred on the origin.
+module engraving_test() {
+    n = len(test_widths);
+    for (i = [0 : n - 1]) {
+        r = floor(i / 2);
+        // each row centred, test_gap between its two logos
+        x = i % 2 == 1 ? (test_gap + test_widths[i - 1]) / 2
+          : i + 1 < n ? -(test_gap + test_widths[i + 1]) / 2 : 0;
+        // the logos of a row stand on one line, like letters
+        translate([x, test_height / 2 - test_row_top(r) - test_row_h(r)])
+            scale(test_widths[i] / logo_w) logo();
+    }
+}
+
 // Longer than the logo is wide, so the cut faces do not coincide.
 module logo_extrusion() {
     linear_extrude(logo_width + 1, center = true) scale(logo_scale) logo();
@@ -99,5 +123,5 @@ difference() {
     }
     // reads from below
     translate([0, 0, -eps]) linear_extrude(engraving_depth + eps)
-        mirror([1, 0]) scale(engraving_scale) translate([0, -logo_r]) logo();
+        mirror([1, 0]) engraving_test();
 }
