@@ -5,16 +5,26 @@ the goal is to create  a openSCAD script that can generate a phone holder that h
 ![preview](V4/preview.png)
 
 `V4/phone_camera_thread_holderV4.scad` is V3 with the VeryOS logo engraved
-in the back of the body, the face away from the phone. The logo is 20 mm
-wide (`logo_width`) and 1 mm deep (`logo_depth`), and is centred on the body's
-back. It reads correctly from behind, with its top towards the screw head,
-which is the top of the holder in landscape on a tripod. The sleeve wall
-under the logo is 3 mm (`wall`), so 2 mm stay behind the engraving.
+in every part, 1 mm deep (`logo_depth`):
+- body: 20 mm wide (`body_logo_width`), centred on its back, the face away
+  from the phone. The sleeve wall under it is 3 mm (`wall`), so 2 mm stay
+  behind the engraving.
+- slider: 12 mm wide (`slider_logo_width`), in the back of its jaw block,
+  behind the tripod thread in its end and beside the one in its back.
+- lock screw: 10 mm wide (`screw_logo_width`), in the end of its head,
+  between the flat cut and the far edge.
+
+The two in the back read correctly from behind, with their top towards the
+screw head, which is the top of the holder in landscape on a tripod.
 
 ![back](V4/back.png)
 
-The body prints lying on its side as before, so the logo sits in a standing
-wall, as in `veryos_logo_cube`, and needs no support.
+![screw](V4/screw.png)
+
+All parts print as before, so the logos sit in standing walls, as in
+`veryos_logo_cube`, and need no support. The strokes of the small logos on
+the slider and the screw are only about 1.1-1.4 mm wide; print them with a
+0.4 mm nozzle or finer.
 
 The defaults are those of V3 with a 15 mm thick phone (`phone_thickness`), an
 80 mm wide phone (`phone_width`) and 3 mm walls (`wall`). The parts, use,

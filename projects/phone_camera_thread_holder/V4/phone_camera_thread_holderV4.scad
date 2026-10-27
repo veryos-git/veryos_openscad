@@ -1,7 +1,8 @@
 // Copyright (C) Jonas Immanuel Frey - Licensed under GPL
-// V4: V3 with the VeryOS logo engraved in the back of the body, the face away
-// from the phone. It reads from behind with its top towards the screw head,
-// the top of the holder in landscape on a tripod.
+// V4: V3 with the VeryOS logo engraved in every part: in the back of the body
+// and of the slider, the face away from the phone, and in the end of the lock
+// screw's head. The two in the back read from behind with their top towards
+// the screw head, the top of the holder in landscape on a tripod.
 //
 // V3: V2 with the lock screw set to the tested fdm_optimized_screws values:
 // 0.25 mm thread clearance, a 0.15 cut so the smooth shank stands on the bed,
@@ -25,7 +26,7 @@
 // up and down, and the keel runs from the bar's lower point down to the bed,
 // so neither needs support. The tripod threads and the end wall hole get a
 // 45 degree roof on top instead of sagging; the lock screw thread in the bar
-// needs none. The logo is engraved in a standing wall, as in
+// needs none. The logos are engraved in standing walls, as in
 // veryos_logo_cube. The lock screw prints lying on a
 // flat of its head with its underside cut off, as in fdm_optimized_screws,
 // so the layers run along the shank.
@@ -73,10 +74,14 @@ keel_width = 6;
 end_wall = 5;
 
 /* [Logo] */
-// The VeryOS logo engraved in the back of the body, centred on it, across
-// the holder width.
-logo_width = 20;
-// Into the sleeve wall; keep it below wall.
+// The VeryOS logo engraved in every part. In the back of the body, centred
+// on it, across the holder width.
+body_logo_width = 20;
+// In the back of the slider's jaw block, behind the tripod thread in its end.
+slider_logo_width = 12;
+// In the end of the lock screw's head.
+screw_logo_width = 10;
+// Into the walls; keep it below wall.
 logo_depth = 1;
 
 /* [Tripod thread] */
@@ -132,6 +137,12 @@ lock_depth = screw_length - gap_min + 1;
 // the back hole's roof stays `wall` clear of the end hole.
 tripod_r = (25.4 / 4 + tripod_thread_clearance) / 2;
 tripod_offset = (tripod_r * (1 + sqrt(2)) + wall) / 2;
+// Height of the lying lock screw's axis above the bed. The cut is this far
+// from the axis, at +y of the upright screw.
+screw_axis_z = lock_thread_diameter * (0.5 - screw_cut);
+// The screw's logo sits midway between the cut and the far edge of the
+// head's end.
+screw_logo_y = (screw_axis_z - screw_head_width / 2) / 2;
 layout_gap = 5;
 // The logo at the size of veryos_logo.svg, as in veryos_logo_cube: a ring and
 // the two arms of a V, all logo_stroke wide. The arms stand logo_angle off
@@ -159,7 +170,11 @@ assert(bar_length - (grip_max - grip_min) >= 15,
 assert(bar_length - lock_depth >= 2, "The lock screw thread runs through the bar; narrow the grip range.");
 assert(lock_thread_diameter / 2 + 1.5 <= guide_height / 2, "The lock screw is too thick for the guide bar.");
 assert(keel_width <= guide_height - 4, "The keel is too wide; the sleeve's slot would not hold the bar.");
-assert(logo_width + 4 <= holder_width, "The logo is wider than the back of the body; lower logo_width.");
+assert(body_logo_width + 4 <= holder_width, "The logo is wider than the back of the body; lower body_logo_width.");
+assert(slider_logo_width * 2 * logo_r / logo_w + 2 <= slider_stop + back,
+       "The slider's logo is longer than its jaw block; lower slider_logo_width.");
+assert(norm([screw_logo_width / 2, screw_logo_y - screw_logo_width * logo_r / logo_w]) <= screw_head_width / 2,
+       "The screw's logo is larger than the end of its head; lower screw_logo_width.");
 
 if (part == "print_layout") print_layout();
 else if (part == "assembly") assembly();
@@ -198,10 +213,7 @@ module body() {
             cylinder(d = d, h = end_wall + 2);
             roof(d / 2, end_wall + 2);
         }
-        // Mirrored, so it reads correctly from behind, with its top at +y.
-        translate([0, (sleeve_start + back) / 2, -block_h - 1])
-            linear_extrude(logo_depth + 1) mirror([1, 0])
-                scale(logo_width / logo_w) translate([0, -logo_r]) logo();
+        translate([0, (sleeve_start + back) / 2, -block_h]) logo_cut(body_logo_width);
     }
 }
 
@@ -216,6 +228,8 @@ module slider() {
         translate([tripod_offset, -back, guide_z]) rotate([-90, 0, 0]) tripod_thread_hole();
         // In the back, in the middle of the jaw block.
         translate([-tripod_offset, (slider_stop - back) / 2, -block_h]) tripod_thread_hole();
+        // Behind the tripod thread in the end, beside the one in the back.
+        translate([tripod_offset, (slider_stop - back) / 2, -block_h]) logo_cut(slider_logo_width);
         translate([0, slider_stop + bar_length, guide_z]) rotate([90, 0, 0]) lock_thread_hole(lock_depth);
     }
 }
@@ -261,6 +275,13 @@ module bar_section()
         translate([-holder_width / 2, -guide_height]) square([holder_width, 2 * guide_height]);
     }
 
+// The logo, width wide and centred on the origin, to cut logo_depth deep
+// into a face on z = 0 from below. Mirrored, so it reads correctly from
+// outside, from -z, with its top at +y.
+module logo_cut(width)
+    translate([0, 0, -1]) linear_extrude(logo_depth + 1) mirror([1, 0])
+        scale(width / logo_w) translate([0, -logo_r]) logo();
+
 // The VeryOS logo at the size of veryos_logo.svg, bottom edge on y = 0,
 // centred on x = 0, as in veryos_logo_cube.
 module logo() {
@@ -296,7 +317,12 @@ module s_hole() {
 module lock_screw() {
     d = lock_thread_diameter;
     smooth = screw_length - screw_thread_length;
-    hex(screw_head_width, screw_head_height);
+    difference() {
+        hex(screw_head_width, screw_head_height);
+        // In the end of the head, upright on the lying screw: its top away
+        // from the cut.
+        translate([0, screw_logo_y, 0]) rotate(180) logo_cut(screw_logo_width);
+    }
     // At the thread's root diameter, so it passes through the bar's thread.
     translate([0, 0, screw_head_height - eps]) cylinder(d = d - 0.8 * lock_thread_pitch, h = smooth + 2 * eps);
     translate([0, 0, screw_head_height + smooth]) intersection() {
@@ -310,12 +336,11 @@ module lock_screw() {
 // everything below screw_cut * d above the shank's lowest point. The cut is
 // the print bed, z = 0.
 module lock_screw_lying() {
-    axis_z = lock_thread_diameter * (0.5 - screw_cut);
     length = screw_head_height + screw_length;
     w = screw_head_width;
-    translate([0, -length / 2, axis_z]) difference() {
+    translate([0, -length / 2, screw_axis_z]) difference() {
         rotate([-90, 0, 0]) lock_screw();
-        translate([-w, -1, -axis_z - w]) cube([2 * w, length + 2, w]);
+        translate([-w, -1, -screw_axis_z - w]) cube([2 * w, length + 2, w]);
     }
 }
 
