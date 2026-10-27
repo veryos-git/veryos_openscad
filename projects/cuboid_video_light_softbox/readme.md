@@ -32,3 +32,22 @@ values of `fdm_optimized_screws`:
 - a small logo, 12 mm wide (`frame_logo_width`), is engraved in the top of the
   +x light clamp, on the back of the frame, beside the screw. It is upright
   when the light hangs from its 1/4" thread and prints on a top surface.
+
+## V5
+
+`cuboid_video_light_softboxV5.scad` adds an open cutout to one long wall
+cover so the tripod ballhead can be screwed onto the video light without
+cutting the printed panel. Install `wallcover_tripod` on the **-y long side**,
+with the cutout at the light-side edge, aligned with the existing frame notch.
+
+The cutout defaults to **48.7 mm wide, 12 mm deep along the panel**, with
+3 mm inside corner radii. Its width follows `side_notch_width`; adjust
+`tripod_cutout_width`, `tripod_cutout_depth`, and `tripod_cutout_radius` for
+your ballhead. The depth is estimated from `problem2/image.png`, not measured
+from the hardware.
+
+The print layout includes one `wallcover_tripod`, one plain `wallcover_big`,
+and two `wallcover_small`. The assembly preview shows the cutout on the
+correct side. The frame, screws, and other covers retain their V4 geometry;
+an existing V4 build only needs the replacement `wallcover_tripod` printed
+flat with its lip facing up.
