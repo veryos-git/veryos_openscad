@@ -25,3 +25,7 @@ values of `fdm_optimized_screws`:
 - all threads have 0.25 mm clearance instead of 0.15.
 - the light clamp screws stay 12 mm, with the 0.1 cut that printed well
   (`screw_cut`); their wide tip spreads the pressure on the light.
+- the VeryOS logo is engraved 1 mm deep in the outside of the two big wall
+  covers (`logo_width`, `logo_depth`), in the middle of the window, where the
+  lip makes the cover 4 mm thick. It is cut into the side that prints on the
+  bed, mirrored, so it reads correctly from outside.

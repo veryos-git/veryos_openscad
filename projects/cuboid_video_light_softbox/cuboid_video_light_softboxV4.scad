@@ -1,9 +1,10 @@
-// Copyright (C) 2026 Jonas Immanuel Frey - Licensed under GPL. See LICENSE file for details
+// Copyright (C) Jonas Immanuel Frey - Licensed under GPL
 // V4: V3 with the screws set to the tested values of fdm_optimized_screws.
 // The cover thumb screws are 5 mm with a 2 mm pitch and a 10 mm head, instead
 // of 6 mm with a 1.5 mm pitch and a 13 mm head, and all threads have 0.25 mm
 // clearance. The light clamp screws stay 12 mm: their wide tip spreads the
-// pressure on the light.
+// pressure on the light. The VeryOS logo is engraved in the outside of the
+// big wall covers.
 //
 // V3: softbox frame for a flat cuboid video light (Ulanzi VL120 RGB). Same
 // frame and exchangeable wall covers as V2 (cuboid_video_light_softboxV2.scad):
@@ -71,6 +72,12 @@ wallcover_thickness = 2;
 wallcover_lip_clearance = 1.2;
 // Distance of the thumb screw rows from the cover's top and bottom edges.
 wallcover_screw_inset = 8;
+
+/* [Logo] */
+// The VeryOS logo engraved in the outside of the big wall covers, centred on
+// the window, where the lip makes the cover twice as thick.
+logo_width = 30;
+logo_depth = 1;
 
 /* [Clothespin lips] */
 // Flat tab flush with the front face, one in the middle of each side and one
@@ -148,6 +155,24 @@ window_top_z = -((wallcover_screw_inset + thumb_hole_r) * cos(wall_angle)
                  + cover_hole_depth * sin(wall_angle) + hole_margin);
 window_bottom_z = -(cover_bottom_v - wallcover_screw_inset - thumb_hole_r - hole_margin) * cos(wall_angle);
 layout_gap = 5;
+// The logo at the size of veryos_logo.svg, as in veryos_logo_cube: a ring and
+// the two arms of a V, all logo_stroke wide. The arms stand logo_angle off
+// vertical, their outer edges tangent to the ring, their inner edges tangent
+// to its hole.
+logo_r = 15.6264133379; // outer radius of the ring
+logo_stroke = 5;
+logo_angle = 22.5;
+// Half the flat bottom edge, which is tangent to the ring's bottom.
+logo_b = logo_r * (1 - sin(logo_angle)) / cos(logo_angle);
+// Outer edge of an arm. The middle of its square end is level with the
+// middle of the ring's stroke at the top.
+logo_arm = (2 * logo_r - logo_stroke / 2 * (1 + sin(logo_angle))) / cos(logo_angle);
+logo_w = 2 * (logo_b + logo_arm * sin(logo_angle));
+// The S in the ring: two half rings around half discs, all strokes
+// logo_stroke wide.
+ring_in = logo_r - logo_stroke;
+s_small = (2 * ring_in - logo_stroke) / 4;
+s_big = s_small + logo_stroke;
 
 assert(clamp_length < light_length / 2, "Clamps must not meet in the middle.");
 assert(opening_half.x > 0 && opening_half.y > 0, "Plate overlap is larger than the light.");
@@ -159,14 +184,14 @@ else if (part == "assembly") assembly();
 else if (part == "frame") translate([0, 0, softbox_depth]) frame();
 else if (part == "screw") screw_lying();
 else if (part == "thumb_screw") thumb_screw_lying();
-else if (part == "wallcover_big") wallcover(top_x);
+else if (part == "wallcover_big") wallcover(top_x, true);
 else if (part == "wallcover_small") wallcover(top_y);
 
 module assembly() {
     color("dimgray") frame();
     // One cover of each size, so the frame stays visible.
     for (f = [side_faces[0], side_faces[2]]) rotate([0, 0, f[0]]) face_frame(f[2]) {
-        color("silver") translate([0, 0, -wallcover_thickness]) wallcover(f[1]);
+        color("silver") translate([0, 0, -wallcover_thickness]) wallcover(f[1], f[1] == top_x);
         for (p = cover_screws(f[1]))
             color("orange")
                 translate([p.x, p.y, -wallcover_thickness - thumb_head_height]) thumb_screw();
@@ -200,7 +225,7 @@ module print_layout() {
     lip_reach = max(lip_length, (lip_length + lip_width / 2 - chamfer) / sqrt(2));
     for (k = [0, 1])
         translate([0, front_half.y + lip_reach + g + cover_bottom_v + k * (cover_bottom_v + g), 0]) {
-            translate([big - row_half, 0, 0]) wallcover(top_x);
+            translate([big - row_half, 0, 0]) wallcover(top_x, true);
             translate([row_half - small, 0, 0]) wallcover(top_y);
         }
 }
@@ -321,8 +346,9 @@ module hex_screw(d, pitch, length, head_width, head_height, tip) {
 }
 
 // Printed flat, lip up. The plate covers the whole side face and the lip sits
-// inside the window.
-module wallcover(top_half) {
+// inside the window. If with_logo, the VeryOS logo is engraved in the
+// outside, the face on the bed, mirrored so it reads correctly from outside.
+module wallcover(top_half, with_logo = false) {
     difference() {
         union() {
             linear_extrude(wallcover_thickness) cover_outline(top_half);
@@ -332,6 +358,10 @@ module wallcover(top_half) {
         }
         for (p = cover_screws(top_half))
             translate([p.x, p.y, -1]) cylinder(d = thumb_thread_diameter + 0.6, h = wallcover_thickness + 2);
+        if (with_logo)
+            translate([0, (window_top_z + window_bottom_z) / (2 * cos(wall_angle)), -1])
+                linear_extrude(logo_depth + 1) mirror([1, 0])
+                    scale(logo_width / logo_w) translate([0, -logo_r]) logo();
     }
 }
 
@@ -355,6 +385,37 @@ module window_outline(top_half) {
     w = top_half - strut;
     s = sin(wall_angle);
     polygon([[-w - v0 * s, -v0], [w + v0 * s, -v0], [w + v1 * s, -v1], [-w - v1 * s, -v1]]);
+}
+
+// The VeryOS logo at the size of veryos_logo.svg, bottom edge on y = 0,
+// centred on x = 0, as in veryos_logo_cube.
+module logo() {
+    difference() {
+        union() {
+            translate([0, logo_r]) circle(r = logo_r);
+            for (m = [0, 1]) mirror([m, 0])
+                translate([logo_b, 0]) rotate(-logo_angle)
+                    translate([-logo_stroke, 0]) square([logo_stroke, logo_arm]);
+            // between the arms, below the ring's middle
+            polygon([[-logo_b, 0], [logo_b, 0],
+                     [logo_b + logo_r * tan(logo_angle), logo_r],
+                     [-logo_b - logo_r * tan(logo_angle), logo_r]]);
+        }
+        translate([0, logo_r]) for (a = [0, 180]) rotate(a) s_hole();
+    }
+}
+
+// One of the two holes the S leaves in the ring: the right half of the ring's
+// hole above the lower half ring, and the upper half disc.
+module s_hole() {
+    difference() {
+        intersection() {
+            circle(r = ring_in);
+            translate([0, -ring_in]) square(2 * ring_in);
+        }
+        translate([0, -(ring_in - s_small)]) circle(r = s_big);
+    }
+    translate([0, ring_in - s_small]) circle(r = s_small);
 }
 
 // Two rows above and below the window, set in from its corners.
