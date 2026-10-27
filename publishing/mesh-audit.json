@@ -250,5 +250,89 @@
       ]
     ],
     "components": 2
+  },
+  {
+    "project": "phone_camera_thread_holder",
+    "variant": "Everyday",
+    "triangles": 28874,
+    "watertight": true,
+    "winding_consistent": true,
+    "volume_mm3": 39621.08968289111,
+    "bounds_mm": [
+      [
+        -15.0,
+        -78.0,
+        -18.4
+      ],
+      [
+        15.0,
+        11.0,
+        15.0
+      ]
+    ],
+    "components": 1
+  },
+  {
+    "project": "phone_camera_thread_holder",
+    "variant": "Compact phone",
+    "triangles": 27338,
+    "watertight": true,
+    "winding_consistent": true,
+    "volume_mm3": 36980.90902561887,
+    "bounds_mm": [
+      [
+        -15.0,
+        -69.0,
+        -18.4
+      ],
+      [
+        15.0,
+        11.0,
+        15.0
+      ]
+    ],
+    "components": 1
+  },
+  {
+    "project": "phone_camera_thread_holder",
+    "variant": "Thick case",
+    "triangles": 28874,
+    "watertight": true,
+    "winding_consistent": true,
+    "volume_mm3": 43039.83527852934,
+    "bounds_mm": [
+      [
+        -15.0,
+        -83.0,
+        -18.4
+      ],
+      [
+        15.0,
+        11.0,
+        19.0
+      ]
+    ],
+    "components": 1
+  },
+  {
+    "project": "phone_camera_thread_holder",
+    "variant": "Wide hooks",
+    "triangles": 28874,
+    "watertight": true,
+    "winding_consistent": true,
+    "volume_mm3": 57730.05120692981,
+    "bounds_mm": [
+      [
+        -22.0,
+        -78.0,
+        -18.4
+      ],
+      [
+        22.0,
+        11.0,
+        15.0
+      ]
+    ],
+    "components": 1
   }
 ]

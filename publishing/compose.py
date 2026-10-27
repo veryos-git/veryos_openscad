@@ -118,11 +118,11 @@ for p in cfg['projects']:
 # A browsable Markdown index and a contact sheet, without touching older packs.
 lines=['# Customization publishing pack','',f'{len(ready)} model packs, with four actual CAD variants each. Both cover orientations keep the variants at the same scale.','',
        'Open the overview image to review the collection; follow a project link for copy, individual renders and presets.','',
-       '[Full collection contact sheet](overview.jpg)','','| Project | Landscape | Portrait | Listing |','| --- | --- | --- | --- |']
+       '[Full collection contact sheet](overview.png)','','| Project | Landscape | Portrait | Listing |','| --- | --- | --- | --- |']
 for p in ready:
     base='../projects/'+p['folder']+'/publish/customization/'
     lines.append(f"| {p['title']} | [4:3]({base}thumbnail_4x3.png) | [3:4]({base}thumbnail_3x4.png) | [Copy + presets]({base}listing.md) |")
-lines+=['','Only the latest lighter case, wipes box and screw-top container are included, as requested.','']
+lines+=['','Only the latest lighter case, wipes box, screw-top container and phone mount are included, as requested.','']
 lines+=['','## Typography and source fidelity','',f'The requested typeface is Consolas. This machine resolves it to **{FONT_FAMILY}**, which is used consistently here. Set `PUBLISH_FONT` and `PUBLISH_FONT_BOLD` to local Consolas font files and rerun the composition stage to replace it. The VeryOS mark is rendered from the root `veryos_logo.svg`; the OpenSCAD logo comes from the existing publishing assets.', '',
        'Every pictured variant was exported from the named source. The source hash, parameter overrides and camera scale accompany each pack. New dimensional combinations are digital examples, not claims of print testing or fit. Older publishing material is preserved.', '',
        'Rebuild instructions are in [README.md](README.md).']
@@ -135,6 +135,6 @@ if ready:
         thumb=Image.open(root/'projects'/p['folder']/'publish/customization/thumbnail_4x3.png');thumb.thumbnail((tilew-28,504),Image.Resampling.LANCZOS)
         x=(i%cols)*tilew;y=(i//cols)*tileh
         sheet.paste(thumb,(x+14,y+12));sd.text((x+18,y+530),p['title'],font=font(23,True),fill=INK)
-    sheet.save(root/'publishing/overview.jpg',quality=92,subsampling=0,icc_profile=icc)
+    sheet.save(root/'publishing/overview.png',optimize=True,icc_profile=icc)
 print(json.dumps({'ok':not missing,'composed':len(ready),'missing':missing,'font':FONT_FAMILY}))
 if missing:sys.exit(1)

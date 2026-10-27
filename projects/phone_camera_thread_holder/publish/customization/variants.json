@@ -1,39 +1,47 @@
 {
-  "source": "../../V1/phone_camera_thread_holder.scad",
+  "source": "../../V3/phone_camera_thread_holderV3.scad",
   "variants": [
     {
-      "name": "Slim phone",
-      "label": "60–80 mm / 8 mm thick",
-      "params": {
-        "grip_min": 60,
-        "grip_max": 80,
-        "phone_thickness": 8,
-        "part": "assembly"
-      }
-    },
-    {
       "name": "Everyday",
-      "label": "60–90 mm / 12 mm thick",
+      "label": "75 × 12 mm phone · 30 mm hooks",
       "params": {
+        "phone_width": 75,
+        "phone_thickness": 12,
+        "holder_width": 30,
         "part": "assembly"
       }
     },
     {
-      "name": "Large phone",
-      "label": "70–100 mm / 12 mm thick",
+      "name": "Compact phone",
+      "label": "66 × 12 mm phone · 30 mm hooks",
       "params": {
-        "grip_min": 70,
-        "grip_max": 100,
+        "phone_width": 66,
+        "phone_thickness": 12,
+        "holder_width": 30,
+        "grip_min": 55,
+        "grip_max": 80,
         "part": "assembly"
       }
     },
     {
       "name": "Thick case",
-      "label": "70–100 mm / 16 mm thick",
+      "label": "80 × 16 mm phone · 30 mm hooks",
       "params": {
-        "grip_min": 70,
-        "grip_max": 100,
+        "phone_width": 80,
         "phone_thickness": 16,
+        "holder_width": 30,
+        "grip_min": 65,
+        "grip_max": 95,
+        "part": "assembly"
+      }
+    },
+    {
+      "name": "Wide hooks",
+      "label": "75 × 12 mm phone · 44 mm hooks",
+      "params": {
+        "phone_width": 75,
+        "phone_thickness": 12,
+        "holder_width": 44,
         "part": "assembly"
       }
     }

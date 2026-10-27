@@ -1,0 +1,90 @@
+{
+  "source": "projects/phone_camera_thread_holder/V3/phone_camera_thread_holderV3.scad",
+  "source_sha256": "af1e3417a062d96b4235341734e54058b51b94fae12a7f434bc1976a73fde9b9",
+  "tools": {
+    "format": "OFF",
+    "backend": "Manifold",
+    "openscad": "OpenSCAD version 2026.10.25",
+    "blender": "Blender 5.1.0"
+  },
+  "exports": [
+    {
+      "source": "phone_camera_thread_holder/V3/phone_camera_thread_holderV3.scad",
+      "source_sha256": "af1e3417a062d96b4235341734e54058b51b94fae12a7f434bc1976a73fde9b9",
+      "dependencies_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "params": {
+        "phone_width": 75,
+        "phone_thickness": 12,
+        "holder_width": 30,
+        "part": "assembly"
+      },
+      "tools": {
+        "format": "OFF",
+        "backend": "Manifold",
+        "openscad": "OpenSCAD version 2026.10.25",
+        "blender": "Blender 5.1.0"
+      }
+    },
+    {
+      "source": "phone_camera_thread_holder/V3/phone_camera_thread_holderV3.scad",
+      "source_sha256": "af1e3417a062d96b4235341734e54058b51b94fae12a7f434bc1976a73fde9b9",
+      "dependencies_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "params": {
+        "phone_width": 66,
+        "phone_thickness": 12,
+        "holder_width": 30,
+        "grip_min": 55,
+        "grip_max": 80,
+        "part": "assembly"
+      },
+      "tools": {
+        "format": "OFF",
+        "backend": "Manifold",
+        "openscad": "OpenSCAD version 2026.10.25",
+        "blender": "Blender 5.1.0"
+      }
+    },
+    {
+      "source": "phone_camera_thread_holder/V3/phone_camera_thread_holderV3.scad",
+      "source_sha256": "af1e3417a062d96b4235341734e54058b51b94fae12a7f434bc1976a73fde9b9",
+      "dependencies_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "params": {
+        "phone_width": 80,
+        "phone_thickness": 16,
+        "holder_width": 30,
+        "grip_min": 65,
+        "grip_max": 95,
+        "part": "assembly"
+      },
+      "tools": {
+        "format": "OFF",
+        "backend": "Manifold",
+        "openscad": "OpenSCAD version 2026.10.25",
+        "blender": "Blender 5.1.0"
+      }
+    },
+    {
+      "source": "phone_camera_thread_holder/V3/phone_camera_thread_holderV3.scad",
+      "source_sha256": "af1e3417a062d96b4235341734e54058b51b94fae12a7f434bc1976a73fde9b9",
+      "dependencies_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "params": {
+        "phone_width": 75,
+        "phone_thickness": 12,
+        "holder_width": 44,
+        "part": "assembly"
+      },
+      "tools": {
+        "format": "OFF",
+        "backend": "Manifold",
+        "openscad": "OpenSCAD version 2026.10.25",
+        "blender": "Blender 5.1.0"
+      }
+    }
+  ],
+  "font": "DejaVu Sans Mono",
+  "requested_font": "Consolas",
+  "font_substitution": true,
+  "geometry": "OpenSCAD-exported meshes; no AI-generated or scaled surrogate geometry",
+  "scale": "same orthographic scale for all four variants within a project",
+  "preset_notes": "Dimensions describe the named source parameters; see listing for external relief and allowances."
+}

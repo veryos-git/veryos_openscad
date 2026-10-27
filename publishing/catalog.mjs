@@ -1,5 +1,5 @@
 // Copyright (C) 2026 Jonas Immanuel Frey - Licensed under GPL. See LICENSE file for details
-// Current scope: the latest lighter case, wipes box and screw-top container.
+// Current scope: the latest lighter case, wipes box, screw-top container and phone mount.
 export default [
   {
     "id": "babywipesboxV2",
@@ -167,6 +167,73 @@ export default [
           "pattern_count": 36
         }
       }
+    ]
+  },
+  {
+    "id": "phone_camera_thread_holder",
+    "folder": "phone_camera_thread_holder",
+    "source": "V3/phone_camera_thread_holderV3.scad",
+    "title": "Phone mount",
+    "subtitle": "Holds your phone on any tripod or ball head.",
+    "description": "A hook clamp that holds your phone on a tripod or ball head. Two 1/4\"-20 camera threads are printed straight into the slider: the one in its end holds the phone upright in landscape, the one in its back holds it flat or at any angle on a ball head tilted 90°. Push the hooks onto the phone by hand, then a short screw pulls the slider into the body and locks the grip in about five turns.",
+    "customize": "Phone width and thickness with case, the clamping range, the hook width, how far the lips reach over the screen and the cavity corner radius. The lock screw is cut to phone_width, so a different phone needs only a new screw. The tripod threads, the guide and the lock screw each have their own fit clearance.",
+    "notes": "Labels show phone_width × phone_thickness and the hook width (holder_width). The renders show the assembly; export part=\"print_layout\" for the three printable parts. Body and slider print lying on their side, with a keel that carries the guide bar on the bed, and the screw lies on a flat cut, all without supports. Print part=\"thread_test\" first to tune the 1/4\"-20 fit with tripod_thread_clearance. These variants are digital examples and have not been print-tested.",
+    "tags": "phone mount, phone holder, tripod mount, phone tripod adapter, 1/4-20, camera thread, ball head, smartphone, photography, vlogging",
+    "variants": [
+      {
+        "name": "Everyday",
+        "label": "75 × 12 mm phone · 30 mm hooks",
+        "params": {
+          "phone_width": 75,
+          "phone_thickness": 12,
+          "holder_width": 30,
+          "part": "assembly"
+        }
+      },
+      {
+        "name": "Compact phone",
+        "label": "66 × 12 mm phone · 30 mm hooks",
+        "params": {
+          "phone_width": 66,
+          "phone_thickness": 12,
+          "holder_width": 30,
+          "grip_min": 55,
+          "grip_max": 80,
+          "part": "assembly"
+        }
+      },
+      {
+        "name": "Thick case",
+        "label": "80 × 16 mm phone · 30 mm hooks",
+        "params": {
+          "phone_width": 80,
+          "phone_thickness": 16,
+          "holder_width": 30,
+          "grip_min": 65,
+          "grip_max": 95,
+          "part": "assembly"
+        }
+      },
+      {
+        "name": "Wide hooks",
+        "label": "75 × 12 mm phone · 44 mm hooks",
+        "params": {
+          "phone_width": 75,
+          "phone_thickness": 12,
+          "holder_width": 44,
+          "part": "assembly"
+        }
+      }
+    ],
+    "rotation": [
+      90,
+      0,
+      0
+    ],
+    "camera": [
+      1,
+      -1.8,
+      1.1
     ]
   }
 ];

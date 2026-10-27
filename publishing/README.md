@@ -1,12 +1,13 @@
 # Customization publishing packs
 
-The current collection covers three projects:
+The current collection covers four projects:
 
 - `biclightercase2` — four exterior patterns on the same lighter fit.
 - `babywipesboxV2` — everyday, cubic, elongated and tall body proportions.
 - `simple_cylindrical_screwing_containerV2` — pocket, everyday, wide and tall jars with different textures.
+- `phone_camera_thread_holder` — the V3 phone mount for everyday, compact and thick-case phones, and with wide hooks.
 
-Open [index.md](index.md) for links to all deliverables or [overview.jpg](overview.jpg) for a visual overview. Each project keeps its pack in `publish/customization/`, alongside existing publication material.
+Open [index.md](index.md) for links to all deliverables or [overview.png](overview.png) for a visual overview. Each project keeps its pack in `publish/customization/`, alongside existing publication material.
 
 Each pack contains landscape and portrait four-variant covers (2400 × 1800 and 1800 × 2400), four transparent 1200 × 1000 renders, title/description/tags in `listing.md`, parameter presets, an export helper and source provenance. All four examples use the same physical scale within each cover. Geometry comes directly from the original OpenSCAD source; source models are unchanged.
 
@@ -25,7 +26,7 @@ node publishing/build.mjs --stage=render
 node publishing/build.mjs --stage=compose
 ```
 
-Add `--only=babywipesboxV2`, `--only=biclightercase2` or `--only=simple_cylindrical_screwing_containerV2` to rebuild one project. `PUBLISH_JOBS` controls concurrent mesh exports (default 4); `PUBLISH_RENDER_JOBS` controls Blender processes (default 2). Successful exports/renders are cached by hash, with logs in `.gitignored/publishing/`.
+Add `--only=babywipesboxV2`, `--only=biclightercase2`, `--only=simple_cylindrical_screwing_containerV2` or `--only=phone_camera_thread_holder` to rebuild one project. `PUBLISH_JOBS` controls concurrent mesh exports (default 4); `PUBLISH_RENDER_JOBS` controls Blender processes (default 2). Successful exports/renders are cached by hash, with logs in `.gitignored/publishing/`.
 
 `catalog.mjs` contains the copy and exact parameter overrides. `studio.py` imports indexed OFF meshes and assigns presentation materials. `compose.py` typesets both covers and generates the listings/index. OFF preserves vertex indices that STL import can lose when welding coincident points in an assembly.
 
