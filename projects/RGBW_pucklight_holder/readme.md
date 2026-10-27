@@ -54,8 +54,10 @@ stays loose.
   30 mm (`rib_contact_d`), where the dome touches, and slopes down to the
   window's edge. Beside the window they stand on 45 degree feet.
 - `bottom_screw`: a ring, 10.4 mm high (`screw_height`), with a 3.5 mm thread
-  (`screw_thread_length`) over a wider flange. Its floor is 5 mm high
-  (`lip_height`), and so is the bar.
+  (`screw_thread_length`) over a wider flange. The flange narrows to the
+  thread in a 45 degree cone, and so does its recess in the top part, so the
+  top part has no overhang there. Its floor is 5 mm high (`lip_height`), and
+  so is the bar.
 - `clickbase`: 2 mm plate (`base_thickness`) with 5 mm pins and the 50 mm
   disc (`press_d`).
 
@@ -71,6 +73,10 @@ or one part.
 
 - the cavity's shoulder above the thread is a 45 degree cone instead of the
   rounded fillet, so it prints without support.
+- the step from the screw's recess to the thread is a 45 degree cone, in the
+  top part and on the screw's flange, instead of flat, which overhung 2.8 mm
+  in the top part. The flange is 4 mm high instead of 6.9, so the thread
+  still engages over 3.5 mm.
 - the bar is flush with the floor (0.2 mm higher in Onshape).
 - the threads are 0.8 mm deep (0.94 in Onshape).
 - the pins sit in the middle between the sides and the recess for the screw,

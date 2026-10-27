@@ -10,9 +10,9 @@
 // disc has a slot for it.
 //
 // Print every part standing as it is used, bottom on the bed: the ribs
-// bridge the window, the cavity's shoulder is 45 degrees, and the threads
-// have 45 degree flanks, as in fdm_optimized_screws, so nothing needs
-// support. The VeryOS logo is engraved in the front of the top part, in the
+// bridge the window, the cavity's shoulder and the step from the screw's
+// recess to the thread are 45 degrees, and the threads have 45 degree
+// flanks, as in fdm_optimized_screws, so nothing needs support. The VeryOS logo is engraved in the front of the top part, in the
 // bottom of the screw ring and in the top of the click base's disc.
 // Origin: centre of the top part's bottom face, which is also the ring's
 // bottom face when it is screwed in flush.
@@ -55,7 +55,8 @@ rib_contact_d = 30;
 
 /* [Bottom screw] */
 screw_height = 10.4;
-// Threaded part at the top; the rest is a wider flange.
+// Thread at the top that fully engages the top part's; below it a wider
+// flange.
 screw_thread_length = 3.5;
 // Floor under the puck. Also the height of the bar you turn the screw with.
 lip_height = 5;
@@ -116,11 +117,16 @@ screw_d = 2 * (bore_r + screw_wall + thread_depth);
 hole_d = screw_d + 2 * thread_clearance;
 hole_minor_r = hole_d / 2 - thread_depth;
 // The flange below the screw's thread fills a recess in the bottom of the
-// top part, 0.5 mm wider than the flange.
-flange_h = screw_height - screw_thread_length;
+// top part, 0.5 mm wider than the flange. Both narrow to the thread in a 45
+// degree cone; a flat step would overhang in the top part. The top part's
+// cone reaches its thread's crests where screw_thread_length begins, the
+// flange's lies seat_gap below it.
 flange_r = hole_d / 2 + 1.5;
 recess_r = flange_r + 0.5;
-recess_top = flange_h + seat_gap;
+screw_root_r = screw_d / 2 - thread_depth;
+thread_start = screw_height - screw_thread_length;
+recess_top = thread_start - (recess_r - hole_minor_r);
+flange_h = recess_r + recess_top - seat_gap - flange_r;
 half = recess_r + wall;
 body_w = 2 * half;
 // Gap between the cavity and the puck at its highest, pushed up by the disc.
@@ -181,7 +187,7 @@ assert(window_d > puck_dome_d, "The window must be wider than the dome.");
 assert(window_r <= ceiling_r, "window_d is too wide for the cavity's shoulder.");
 assert(touch_z > top_z, "The dome does not reach above the top part.");
 assert(rib_contact_d < window_d, "rib_contact_d must be smaller than window_d.");
-assert(screw_thread_length < screw_height, "screw_thread_length must be shorter than screw_height.");
+assert(flange_h >= 1, "screw_thread_length is too long for screw_height: no flange left below the thread.");
 assert(shoulder_z >= screw_height + seat_gap, "The cavity's shoulder starts below the bottom screw's top.");
 assert(bore_r - opening_r >= 2, "press_d is too large: the bottom screw's floor must be at least 2 mm wide.");
 assert(logo_h(toppart_logo_width) + 2 <= top_z - recess_top && toppart_logo_width + 10 <= body_w,
@@ -241,7 +247,7 @@ module toppart() {
     difference() {
         translate([-half, -half, 0]) cube([body_w, body_w, top_z]);
         rotate_extrude() polygon([
-            [0, -1], [recess_r, -1], [recess_r, recess_top], [hole_minor_r, recess_top],
+            [0, -1], [recess_r, -1], [recess_r, recess_top], [hole_minor_r, thread_start],
             [hole_minor_r, shoulder_z], [ceiling_r, ceiling_z], [window_r, ceiling_z],
             [window_r + top_thickness + 1, top_z + 1], [0, top_z + 1]]);
         // From z = 0 like the screw's thread, so the bar lies along y when
@@ -275,7 +281,9 @@ module rib() {
 module bottom_screw() {
     difference() {
         union() {
-            cylinder(r = flange_r, h = flange_h);
+            rotate_extrude() polygon([[0, 0], [flange_r, 0], [flange_r, flange_h],
+                                      [screw_root_r, flange_h + flange_r - screw_root_r],
+                                      [0, flange_h + flange_r - screw_root_r]]);
             intersection() {
                 threaded_rod(screw_d, screw_height);
                 // 45 degree chamfer at the top eases the start into the thread.
