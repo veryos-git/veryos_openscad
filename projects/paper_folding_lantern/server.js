@@ -4,16 +4,17 @@
 // The model parameters, defaults and ranges are read from the SCAD source so
 // the web controls cannot drift away from the actual template.
 import { spawn } from "node:child_process";
-import { mkdtemp, readFile, rm } from "node:fs/promises";
+import { mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import { createServer } from "node:http";
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
+import { f_a_decoration, f_o_geometry, f_s_svg } from "./svg_geometry.js";
 
 const s_directory = dirname(fileURLToPath(import.meta.url));
-const s_model = join(s_directory, "paper_folding_lantern.scad");
+const s_source_model = join(s_directory, "paper_folding_lantern.scad");
 const s_logo = join(s_directory, "veryos_logo.svg");
-const s_source = await readFile(s_model, "utf8");
+const s_source = await readFile(s_source_model, "utf8");
 
 // Read the OpenSCAD Customizer lines: name = default; // [min:step:max] or
 // [choice, choice, ...]. The internal output switch is not a user setting.
@@ -55,7 +56,7 @@ export function f_o_parameters(o_input) {
     }));
 }
 
-async function f_render(s_output, s_path, o_parameters, n_timeout = 60000) {
+async function f_render(s_output, s_path, o_parameters, s_model = s_source_model, n_timeout = 60000) {
     const a_s_argument = [
         "--hardwarnings",
         "-o", s_path,
@@ -125,13 +126,23 @@ function f_s_evenodd(s_svg) {
 }
 
 export async function f_o_render(o_input) {
-    const o_parameters = f_o_parameters(o_input);
+    if (!o_input || typeof o_input !== "object" || Array.isArray(o_input)) {
+        throw new Error("Expected a settings object.");
+    }
+    const { decorations = [], ...o_values } = o_input;
+    const o_parameters = f_o_parameters(o_values);
+    const a_o_decoration = f_a_decoration(decorations);
     const s_temp = await mkdtemp(join(tmpdir(), "paper-lantern-"));
     try {
+        // Large polygon arrays cannot travel on the command line, so the
+        // wrapper defines them before including the real model.
+        const s_wrapper = join(s_temp, "model.scad");
+        await writeFile(s_wrapper,
+            `app_decorations = ${JSON.stringify(a_o_decoration)};\ninclude <${s_source_model}>\n`);
         const a_o_result = await Promise.allSettled([
-            f_render("cut", join(s_temp, "cut.svg"), o_parameters),
-            f_render("folded", join(s_temp, "folded.stl"), o_parameters),
-            f_render("fold_lines", join(s_temp, "fold.svg"), o_parameters),
+            f_render("cut", join(s_temp, "cut.svg"), o_parameters, s_wrapper),
+            f_render("folded", join(s_temp, "folded.stl"), o_parameters, s_wrapper),
+            f_render("fold_lines", join(s_temp, "fold.svg"), o_parameters, s_wrapper),
         ]);
         for (const o_result of a_o_result) {
             if (o_result.status === "rejected") throw o_result.reason;
@@ -153,13 +164,29 @@ export async function f_o_render(o_input) {
             n_width,
             n_height,
             o_parameters,
+            n_decorations: a_o_decoration.length,
         };
     } finally {
         await rm(s_temp, { recursive: true, force: true });
     }
 }
 
-async function f_o_body(o_request, n_limit = 65536) {
+export async function f_o_import_svg(o_tree) {
+    const s_svg = f_s_svg(o_tree);
+    const s_temp = await mkdtemp(join(tmpdir(), "paper-lantern-svg-"));
+    try {
+        const s_upload = join(s_temp, "upload.svg");
+        const s_import = join(s_temp, "import.scad");
+        await writeFile(s_upload, s_svg);
+        await writeFile(s_import, `$fn = 96;\nimport(${JSON.stringify(s_upload)}, dpi = 96);\n`);
+        await f_render("cut", join(s_temp, "shape.svg"), {}, s_import);
+        return f_o_geometry(await readFile(join(s_temp, "shape.svg"), "utf8"));
+    } finally {
+        await rm(s_temp, { recursive: true, force: true });
+    }
+}
+
+async function f_o_body(o_request, n_limit = 2000000) {
     const a_n_chunk = [];
     let n_size = 0;
     for await (const o_chunk of o_request.body) {
@@ -174,6 +201,8 @@ const o_file = {
     "/": ["index.html", "text/html"],
     "/index.html": ["index.html", "text/html"],
     "/app.js": ["app.js", "text/javascript"],
+    "/decorations.js": ["decorations.js", "text/javascript"],
+    "/svg_geometry.js": ["svg_geometry.js", "text/javascript"],
     "/veryos_logo.svg": ["veryos_logo.svg", "image/svg+xml"],
 };
 
@@ -196,10 +225,17 @@ export async function f_o_response(o_request) {
             });
         }
     }
-    if (o_request.method === "POST" && o_url.pathname === "/api/render") {
+    if (o_request.method === "POST" && ["/api/render", "/api/import-svg"].includes(o_url.pathname)) {
         const s_origin = o_request.headers.get("origin");
         if (s_origin && s_origin !== o_url.origin) {
             return new Response("Forbidden", { status: 403 });
+        }
+        if (o_url.pathname === "/api/import-svg") {
+            try {
+                return Response.json(await f_o_import_svg(await f_o_body(o_request).then(JSON.parse)));
+            } catch (o_error) {
+                return Response.json({ error: o_error.message }, { status: 400 });
+            }
         }
         if (b_rendering) {
             return Response.json({ error: "Another render is running. Try again shortly." },

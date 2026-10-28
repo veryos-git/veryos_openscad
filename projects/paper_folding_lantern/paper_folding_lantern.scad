@@ -29,13 +29,10 @@ wall_height = 65; // [55:1:100]
 // Height of the pyramid roof above the eaves.
 roof_height = 30; // [10:1:60]
 
-/* [Cutouts] */
-// generic puts one arched four-pane window on every wall.
-window_style = "generic"; // [generic, mixed, bat, web, spider, arch, none]
+/* [Windows] */
+// Every wall gets one arched four-pane window cut.
 window_width = 27; // [10:1:45]
 window_height = 33; // [10:1:70]
-// mixed uses bats on the front/back roof faces and spiders on the sides.
-roof_decoration = "mixed"; // [mixed, bat, spider, none]
 
 /* [Hanger] */
 // The square opening at the roof apex, and the width of the hanger tab.
@@ -50,12 +47,16 @@ fold_dash_length = 2.6; // [1:0.1:5]
 fold_dash_gap = 2; // [1:0.5:5]
 
 /* [Hidden] */
+// The app supplies [surface, centre_x, centre_y, width, points, paths, rotation].
+// Surfaces 0-3 are walls; 4-7 are the roof faces above them.
+decorations = is_undef(app_decorations) ? [] : app_decorations;
 logo_file = "veryos_logo.svg";
 logo_width = 18;
 logo_line = 0.42;
 logo_dash_pitch = 1.35;
 logo_dash_width = 0.7;
 mullion_width = 2.2;
+pattern_border = 2;
 cap_overlap = 1.2;
 fold_lap = paper_thickness;
 fold_end_gap = 1.4;
@@ -77,23 +78,9 @@ z_eave = paper_thickness + wall_height;
 z_roof_top = z_eave + roof_height * (1 - apex_width / lantern_width);
 roof_angle = atan2(lantern_width / 2, roof_height);
 window_center = wall_height * 0.47;
-mixed_windows = ["bat", "web", "bat", "web"];
-mixed_roofs = ["bat", "spider", "bat", "spider"];
-
-function f_wall_style(index) =
-    window_style == "mixed" ? mixed_windows[index] : window_style;
-function f_roof_style(index) =
-    roof_decoration == "mixed" ? mixed_roofs[index] : roof_decoration;
-function f_roof_width(n_s) = lantern_width * (1 - n_s / roof_slant);
 
 assert(output == "flat" || output == "cut" || output == "folded" || output == "fold_lines",
        "Choose flat, cut, folded or fold_lines output.");
-assert(window_style == "generic" || window_style == "mixed" || window_style == "bat"
-       || window_style == "web" || window_style == "spider" || window_style == "arch"
-       || window_style == "none", "Unknown window style.");
-assert(roof_decoration == "mixed" || roof_decoration == "bat"
-       || roof_decoration == "spider" || roof_decoration == "none",
-       "Unknown roof decoration.");
 assert(lantern_width >= 20 && wall_height >= 20 && roof_height > 0 && paper_thickness > 0,
        "The lantern body must be positive and at least 20 mm wide and tall.");
 assert(glue_tab > 0 && glue_tab <= lantern_width / 3,
@@ -109,19 +96,14 @@ assert(roof_top > roof_slant * 0.25,
 assert(fold_slit_width > 0 && fold_slit_width < fold_dash_length
        && fold_dash_gap >= fold_slit_width && fold_dash_gap > 0,
        "Fold slits need a positive width, a longer dash and a gap at least as wide as the slit.");
-assert(window_style == "none" ||
-       (window_width > 0 && window_height > 0
-        && window_width <= lantern_width - 2 * (corner_clear + 2)
-        && window_height <= wall_height - 2 * 5
-        && window_center - window_height / 2 > glue_tab + 2
-        && window_center + window_height / 2 < wall_height - 4),
+assert(window_width > 0 && window_height > 0
+       && window_width <= lantern_width - 2 * (corner_clear + 2)
+       && window_height <= wall_height - 2 * 5
+       && window_center - window_height / 2 > glue_tab + 2
+       && window_center + window_height / 2 < wall_height - 4,
        "The window must leave at least 4 mm of paper at the wall edges and clear the floor fold.");
-assert((window_style != "generic" && window_style != "arch")
-       || window_height > window_width / 2 + 2,
+assert(window_height > window_width / 2 + 2,
        "An arched window needs enough height for its round top.");
-assert(f_roof_style(0) == "none" ||
-       (roof_top > 14 && f_roof_width(roof_top * 0.45) > 12),
-       "The roof is too small for the selected decoration.");
 
 echo(str("Flat template: ", flat_width, " x ", (net_top - net_bottom),
          " mm; folded body: ", lantern_width, " x ", lantern_width, " x ",
@@ -129,49 +111,6 @@ echo(str("Flat template: ", flat_width, " x ", (net_top - net_bottom),
 
 // ---------------------------------------------------------------------------
 // Two-dimensional artwork
-
-// A stylised bat with scalloped wings, in a unit box centred on the origin.
-module bat_2d(n_width, n_height) {
-    translate([0, -0.155 * n_height])
-        scale([n_width, n_height]) {
-            translate([0, 0.02]) scale([0.09, 0.25]) circle(d = 1);
-            translate([0, 0.27]) scale([0.07, 0.07]) circle(d = 1);
-            for (n_side = [-1, 1])
-                scale([n_side, 1])
-                    polygon([
-                        [0.015, 0.29], [0.055, 0.49], [0.095, 0.29],
-                        [0.04, 0.20]
-                    ]);
-            for (n_side = [-1, 1])
-                scale([n_side, 1])
-                    polygon([
-                        [0.025, 0.20], [0.11, 0.28], [0.22, 0.30],
-                        [0.32, 0.25], [0.49, 0.34], [0.43, 0.16],
-                        [0.49, 0.02], [0.35, 0.05], [0.27, -0.11],
-                        [0.19, 0.02], [0.10, -0.16], [0.045, -0.02]
-                    ]);
-        }
-}
-
-// A small spider. Body, head and eight bent legs are all one cutout shape.
-module spider_2d(n_width, n_height) {
-    scale([n_width, n_height]) {
-        translate([0, -0.10]) scale([0.20, 0.26]) circle(d = 1);
-        translate([0, 0.16]) scale([0.13, 0.13]) circle(d = 1);
-        for (n_side = [-1, 1])
-            for (n_leg = [0:3]) {
-                n_y = 0.10 - n_leg * 0.14;
-                n_knee_y = n_y + (n_leg < 2 ? 0.16 : -0.12);
-                scale([n_side, 1])
-                    polygon([
-                        [0.06, n_y], [0.30, n_knee_y], [0.43, n_knee_y + 0.2],
-                        [0.50, n_knee_y + 0.26], [0.46, n_knee_y + 0.30],
-                        [0.36, n_knee_y + 0.08], [0.22, n_knee_y - 0.02],
-                        [0.10, n_y - 0.04]
-                    ]);
-            }
-    }
-}
 
 module arch_2d(n_width, n_height) {
     n_radius = n_width / 2;
@@ -183,71 +122,16 @@ module arch_2d(n_width, n_height) {
         }
 }
 
-// Paper strands that remain inside a web window. They join the window edge,
-// so every cut region stays supported by the wall.
-module web_strands_2d(n_width, n_height) {
-    n_x0 = -n_width / 2;
-    n_y0 = n_height / 2;
-    n_strand = 1.7;
-    n_length = sqrt(pow(n_width, 2) + pow(n_height, 2));
-    translate([n_x0, n_y0]) {
-        for (n_angle = [12:18:84])
-            rotate(n_angle)
-                translate([-n_strand / 2, -n_length])
-                    square([n_strand, n_length + 1]);
-        for (n_ring = [1:3])
-            difference() {
-                circle(r = n_ring * min(n_width, n_height) / 4 + n_strand / 2);
-                circle(r = n_ring * min(n_width, n_height) / 4 - n_strand / 2);
-            }
-    }
-}
-
-module window_cutout_2d(index) {
-    n_style = f_wall_style(index);
-    translate([0, window_center]) {
-        if (n_style == "generic")
-            difference() {
-                arch_2d(window_width, window_height);
-                translate([-mullion_width / 2, -window_height / 2])
-                    square([mullion_width, window_height]);
-                translate([-window_width / 2, -mullion_width / 2])
-                    square([window_width, mullion_width]);
-            }
-        else if (n_style == "arch")
+// One generic window per wall: an arched opening with a paper cross mullion.
+module window_cutout_2d() {
+    translate([0, window_center])
+        difference() {
             arch_2d(window_width, window_height);
-        else if (n_style == "bat")
-            bat_2d(window_width, window_height * 0.86);
-        else if (n_style == "spider")
-            spider_2d(min(window_width, window_height) * 0.78,
-                      min(window_width, window_height) * 0.78);
-        else if (n_style == "web") {
-            n_rect = [window_width, window_height];
-            difference() {
-                square(n_rect, center = true);
-                intersection() {
-                    square(n_rect, center = true);
-                    web_strands_2d(n_rect[0], n_rect[1]);
-                }
-            }
+            translate([-mullion_width / 2, -window_height / 2])
+                square([mullion_width, window_height]);
+            translate([-window_width / 2, -mullion_width / 2])
+                square([window_width, mullion_width]);
         }
-    }
-}
-
-// Roof artwork sits in the face's local x/s coordinates.
-module roof_cutout_2d(index) {
-    n_style = f_roof_style(index);
-    if (n_style != "none") {
-        n_center = roof_top * 0.46;
-        n_max_width = f_roof_width(n_center + 6) - 4;
-        if (n_style == "bat")
-            translate([0, n_center])
-                bat_2d(min(22, n_max_width), min(11, n_max_width * 0.5));
-        else if (n_style == "spider")
-            translate([0, n_center])
-                spider_2d(min(13, n_max_width * 0.7),
-                          min(13, n_max_width * 0.7));
-    }
 }
 
 // A dashed engraving of the VeryOS mark. The outline is broken into small
@@ -274,12 +158,26 @@ module logo_engraving_2d() {
 // ---------------------------------------------------------------------------
 // Flat net
 
+module wall_patterns_2d(index) {
+    intersection() {
+        translate([-lantern_width / 2 + pattern_border, pattern_border])
+            square([lantern_width - 2 * pattern_border,
+                    wall_height - 2 * pattern_border]);
+        for (d = decorations)
+            if (d[0] == index)
+                translate([d[1] - lantern_width / 2, d[2]])
+                    rotate(-d[6])
+                        scale(d[3])
+                            polygon(points = d[4], paths = d[5]);
+    }
+}
+
 module wall_local_2d(index) {
     difference() {
         translate([-lantern_width / 2, 0])
             square([lantern_width, wall_height]);
-        if (f_wall_style(index) != "none")
-            window_cutout_2d(index);
+        window_cutout_2d();
+        wall_patterns_2d(index);
     }
 }
 
@@ -308,15 +206,31 @@ module floor_2d() {
     }
 }
 
+module roof_face_polygon_2d() {
+    polygon([
+        [-lantern_width / 2, 0],
+        [lantern_width / 2, 0],
+        [apex_width / 2, roof_top],
+        [-apex_width / 2, roof_top]
+    ]);
+}
+
+module roof_patterns_2d(index) {
+    intersection() {
+        offset(delta = -pattern_border) roof_face_polygon_2d();
+        for (d = decorations)
+            if (d[0] == 4 + index)
+                translate([d[1] - lantern_width / 2, d[2]])
+                    rotate(-d[6])
+                        scale(d[3])
+                            polygon(points = d[4], paths = d[5]);
+    }
+}
+
 module roof_face_local_2d(index) {
     difference() {
-        polygon([
-            [-lantern_width / 2, 0],
-            [lantern_width / 2, 0],
-            [apex_width / 2, roof_top],
-            [-apex_width / 2, roof_top]
-        ]);
-        roof_cutout_2d(index);
+        roof_face_polygon_2d();
+        roof_patterns_2d(index);
     }
 }
 

@@ -1,4 +1,6 @@
 // Copyright (C) [Jonas Immanuel Frey] - Licensed under GPL
+import { f_o_decorations } from "./decorations.js";
+
 const f_o_element = (s_id) => document.getElementById(s_id);
 const o_form = f_o_element("settings");
 const o_status = f_o_element("status");
@@ -11,6 +13,7 @@ const o_fold_overlay = f_o_element("fold-overlay");
 const o_download_svg = f_o_element("download-svg");
 const o_download_stl = f_o_element("download-stl");
 const o_dimensions = f_o_element("dimensions");
+const o_surface_editor = f_o_element("surface-editor");
 let a_o_parameter = [];
 let o_current = null;
 let n_revision = 0;
@@ -18,6 +21,7 @@ let n_timer;
 let b_running = false;
 let b_pending = false;
 let b_webgl_problem = false;
+let o_decorations = null;
 let s_view = "folded";
 
 const o_text = {
@@ -25,10 +29,8 @@ const o_text = {
     lantern_width: "Lantern width",
     wall_height: "Wall height",
     roof_height: "Roof height",
-    window_style: "Window style",
     window_width: "Window width",
     window_height: "Window height",
-    roof_decoration: "Roof decoration",
     hanger_width: "Hanger opening",
     hanger_height: "Hanger tab",
     hanger_hole: "Hanging hole",
@@ -39,7 +41,7 @@ const o_text = {
 };
 const a_o_group = [
     { s_title: "Lantern", a_s_name: ["lantern_width", "wall_height", "roof_height"] },
-    { s_title: "Cutouts", a_s_name: ["window_style", "window_width", "window_height", "roof_decoration"] },
+    { s_title: "Windows", a_s_name: ["window_width", "window_height"] },
     { s_title: "Hanger", a_s_name: ["hanger_width", "hanger_height", "hanger_hole"] },
     { s_title: "Paper, glue & folds", a_s_name: ["paper_thickness", "glue_tab", "fold_slit_width", "fold_dash_length", "fold_dash_gap"] },
 ];
@@ -241,11 +243,14 @@ function f_set_view(s_next) {
     s_view = s_next;
     o_canvas.hidden = s_view !== "folded";
     o_cut.hidden = s_view !== "cut";
+    o_surface_editor.hidden = s_view !== "decorate";
     o_fold_overlay.hidden = s_view !== "cut" || !f_o_element("show-folds").checked;
     f_o_element("view-folded").setAttribute("aria-pressed", String(s_view === "folded"));
     f_o_element("view-cut").setAttribute("aria-pressed", String(s_view === "cut"));
+    f_o_element("view-decorate").setAttribute("aria-pressed", String(s_view === "decorate"));
     f_o_element("reset-view").hidden = s_view !== "folded";
     f_o_element("fold-toggle").hidden = s_view !== "cut";
+    f_o_element("hint").hidden = s_view === "decorate";
     f_o_element("hint").textContent = s_view === "cut"
         ? "Orange dashes are cut through the paper as dashed slits · download the SVG at 100%"
         : "Drag to turn · scroll to zoom";
@@ -253,15 +258,17 @@ function f_set_view(s_next) {
 
 f_o_element("view-folded").onclick = () => f_set_view("folded");
 f_o_element("view-cut").onclick = () => f_set_view("cut");
+f_o_element("view-decorate").onclick = () => f_set_view("decorate");
 f_o_element("reset-view").onclick = () => o_mesh_viewer?.f_reset();
 f_o_element("show-folds").onchange = () => {
     o_fold_overlay.hidden = !f_o_element("show-folds").checked;
 };
+const s_initial_view = new URLSearchParams(location.search).get("view");
 if (!o_mesh_viewer) {
     f_o_element("view-folded").disabled = true;
-    f_set_view("cut");
+    f_set_view(s_initial_view === "decorate" ? "decorate" : "cut");
 } else {
-    f_set_view(new URLSearchParams(location.search).get("view") === "cut" ? "cut" : "folded");
+    f_set_view(["cut", "decorate"].includes(s_initial_view) ? s_initial_view : "folded");
 }
 
 function f_schedule() {
@@ -285,6 +292,11 @@ async function f_update() {
             o_form.reportValidity();
             continue;
         }
+        if (o_decorations && !o_decorations.f_valid()) {
+            o_status.textContent = "Check the pattern width and position fields.";
+            o_viewer.setAttribute("aria-busy", "false");
+            continue;
+        }
         const n_request_revision = n_revision;
         o_viewer.setAttribute("aria-busy", "true");
         o_status.textContent = "Rendering the folded lantern and cutting template…";
@@ -292,7 +304,7 @@ async function f_update() {
             const o_response = await fetch("/api/render", {
                 method: "POST",
                 headers: { "content-type": "application/json" },
-                body: JSON.stringify(f_parameters()),
+                body: JSON.stringify({ ...f_parameters(), ...(o_decorations ? o_decorations.f_payload() : {}) }),
             });
             const o_result = await o_response.json();
             if (n_request_revision !== n_revision) continue;
@@ -326,9 +338,9 @@ async function f_update() {
     b_running = false;
 }
 
-o_form.addEventListener("input", f_schedule);
+o_form.addEventListener("input", () => { o_decorations?.f_parameters_changed(); f_schedule(); });
 o_form.addEventListener("submit", (o_event) => { o_event.preventDefault(); f_schedule(); });
-o_form.addEventListener("reset", () => setTimeout(f_schedule, 0));
+o_form.addEventListener("reset", () => setTimeout(() => { o_decorations?.f_reset(); f_schedule(); }, 0));
 
 function f_o_download(o_blob, s_name) {
     const s_url = URL.createObjectURL(o_blob);
@@ -397,6 +409,8 @@ try {
     if (!o_response.ok) throw new Error("Could not load settings.");
     a_o_parameter = await o_response.json();
     f_build_controls();
+    o_decorations = f_o_decorations(f_schedule, f_parameters);
+    o_decorations.f_parameters_changed();
     f_schedule();
 } catch (o_problem) {
     o_error.textContent = `${o_problem.message} Start the local server and reload this page.`;

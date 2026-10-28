@@ -1,17 +1,17 @@
 # Foldable paper haunted-house lantern
 
 A parametric, one-piece paper lantern for a cutting machine, with a small local
-web app that previews the folded lantern and the flat cutting template. The
-template is an SVG; the folded model is rendered by OpenSCAD and can be
-downloaded as STL.
+web app that previews the folded lantern, the flat cutting template, and an
+8-surface pattern editor. The template is an SVG; the folded model is rendered by
+OpenSCAD and can be downloaded as STL.
 
 ![Folded lantern preview](preview-folded.png)
 
 The default lantern is a 45 × 45 mm square house with 65 mm walls, a 30 mm
-pyramid roof and a **generic four-pane window on every side**. The flat net is
-**186 × 166 mm**, so it fits on A4 at 100 % scale. All dimensions are in
-millimetres. The bat and spiderweb windows from the inspiration are included as
-optional `window_style` choices.
+pyramid roof and a **generic four-pane window on every side**. The roof faces are
+plain; add your own SVG cut-out pattern to any wall or roof face in the app. The
+flat net is **186 × 166 mm**, so it fits on A4 at 100 % scale. All dimensions are
+in millimetres.
 
 ## What makes the template special
 
@@ -23,14 +23,21 @@ optional `window_style` choices.
   connected while making the folds easy and accurate. There are no printed
   score guides that a cutter would ignore.
 - **One generic window per side.** Every wall gets an arched four-pane window
-  with a paper cross mullion by default. The `mixed`, `bat`, `web` and `spider`
-  styles are optional interpretations of the inspiration; the roof faces keep
-  their bat and spider cutouts.
+  with a paper cross mullion. The roof has no built-in decoration.
+- **Custom SVG cut-outs.** Upload a pattern, then drag, resize and rotate it
+  directly on any of the eight faces. The pattern is cut through the paper and
+  clipped 2 mm inside the folds. One pattern per surface is enough to make each
+  wall and roof face different.
 - **A real hanger.** The top of the pyramid has a square cap and a vertical tab
   with a round hanging hole.
 - **VeryOS engraved.** A dashed engraving of the VeryOS mark is cut into the
   floor. Because the outline is broken into dashes, the logo remains attached
   and does not fall out. It can project a faint mark when a light is inside.
+
+![Custom pattern editor](preview-patterns.png)
+
+The screenshots use a sample star pattern on the front wall and front roof. The
+default net has the generic windows only; no pattern is required.
 
 ![Cutting template preview](preview-template.png)
 
@@ -65,20 +72,69 @@ the browser does not keep a second copy of the geometry.
 - **Cutting template** — cream paper, dark cutouts and orange perforated fold
   lines. The **Show fold lines** checkbox hides the orange overlay; the slits
   are still part of the cut SVG.
-- **Download SVG** saves the current flat cutting file. **Download 3D model**
+- **Add patterns** — pick one of the four walls or four roof faces, load an SVG,
+  and place the cut-out pattern. See the section below.
+- **Download SVG** saves the current flat cutting file, including the generic
+  windows, every custom pattern and all perforated folds. **Download 3D model**
   saves the folded mesh as STL. Both are disabled while the preview is out of
   date.
-- **Reset settings** restores every OpenSCAD default.
+- **Reset settings** restores every OpenSCAD default and removes all patterns.
 
-The cursor and controls update automatically, but OpenSCAD is a real external
-process: a full update takes a few seconds.
+A full update runs OpenSCAD, so it takes a few seconds. Switching between wall
+and roof tabs in the pattern editor is instant.
+
+## Place a custom SVG pattern
+
+1. Switch to **Add patterns**.
+2. Choose **Front wall**, **Right wall**, **Back wall**, **Left wall**, **Front
+   roof**, **Right roof**, **Back roof** or **Left roof**. A small dot on a tab
+   means that surface already has a pattern.
+3. Click **+ Load SVG** and choose a file. Choose an SVG that already looks like
+   the silhouette you want to cut: every filled shape becomes a hole.
+4. Drag the pattern to move it. Drag the square corner handle to resize it with
+   the aspect ratio locked, or drag the round handle above it to rotate. Hold
+   Shift while rotating to snap to 15°.
+5. Use the exact fields when you need them: **Width**, **Center from left**,
+   **Center above floor** (walls) or **Center above eave** (roofs), and
+   **Rotation** clockwise as seen from outside. With the editor focused, the
+   arrow keys move the pattern by 0.5 mm; Shift + arrow moves it by 2 mm.
+   Delete/Backspace or **Remove pattern** removes it.
+6. Look at **Cutting template** or **Folded lantern**. The editor shows the
+   uploaded pattern in translucent orange; the cut views show the actual hole.
+
+**The generic window stays.** A wall pattern is additional to the window; if it
+overlaps the window, the cut regions merge. The pattern is clipped 2 mm inside
+the folds and outer edges so it cannot destroy a fold or the outer outline. The
+orange selection box shows the whole pattern, including any part that falls
+outside the cuttable area.
+
+**One pattern per surface.** Uploading another SVG to the same surface replaces
+the geometry while keeping its placement and size. The pattern belongs to the
+current browser session; download the SVG/STL before reloading. **Reset
+settings** clears all patterns.
+
+### SVG rules
+
+The browser sanitises the upload, then the server flattens it through OpenSCAD.
+Supported geometry includes paths, curves, transforms, basic shapes and local
+`<use>` references. Text must be converted to paths. Images, clipping, masks,
+filters and active content are not supported. Stylesheets are ignored, so every
+shape becomes a cut even if CSS would hide it.
+
+- Use **stencil designs**. Enclosed paper islands inside a closed cut-out fall
+  out unless you attach them to a backing sheet.
+- Convert strokes and text to paths before uploading.
+- Keep uploads below **500 KB** and avoid extremely detailed artwork.
+- Colours are ignored. The shape is what matters.
+- The app accepts one file per surface, so you can give each wall and each roof
+  face its own design.
 
 ## Fold and glue
 
 1. **Cut.** Import the SVG at 100 % scale in millimetres. Cut the outline, the
-   window and roof cutouts, and the dashed fold slits. Keep the bridges between
-   the slits; they hold the net together. The logo on the floor is also a set of
-   dashed slits, not a loose insert.
+   generic windows, your SVG patterns, and the dashed fold slits. Keep the
+   bridges between the slits; they hold the net together. The logo on the floor
+   is also a set of dashed slits, not a loose insert.
 2. **Pre-fold.** Gently fold every perforated line in both directions. The floor
    fold is the line between wall 1 and the square floor. The three other bottom
    lines are the bottom flaps. The four eave lines and the roof seam lines make
@@ -106,16 +162,14 @@ glue clearance for your cardstock.
 Open the `.scad` file in OpenSCAD and use the Customizer, or edit the top-level
 parameters. No libraries are required.
 
-| Parameter | Default | Range / options | Purpose |
+| Parameter | Default | Range | Purpose |
 | --- | ---: | --- | --- |
 | `paper_thickness` | 0.3 | 0.1–0.8 | Thickness of the folded 3D model; does not change the SVG |
 | `lantern_width` | 45 | 38–60 | Outside width of the square footprint |
 | `wall_height` | 65 | 55–100 | Wall height from floor to eaves |
 | `roof_height` | 30 | 10–60 | Height of the pyramid above the eaves |
-| `window_style` | `generic` | `generic`, `mixed`, `bat`, `web`, `spider`, `arch`, `none` | One arched four-pane window per wall by default; `mixed` alternates bats and webs |
-| `window_width` | 27 | 10–45 | Window envelope width |
-| `window_height` | 33 | 10–70 | Window envelope height |
-| `roof_decoration` | `mixed` | `mixed`, `bat`, `spider`, `none` | Roof cutouts |
+| `window_width` | 27 | 10–45 | Generic window envelope width |
+| `window_height` | 33 | 10–70 | Generic window envelope height |
 | `hanger_width` | 10 | 6–20 | Side of the square roof opening and hanger tab width |
 | `hanger_height` | 16 | 8–30 | Height of the vertical hanger tab |
 | `hanger_hole` | 4.5 | 2–10 | Diameter of the hanging hole |
@@ -126,7 +180,8 @@ parameters. No libraries are required.
 
 `output` is internal: `flat` for a thin flat STL, `cut` for the 2D SVG/DXF,
 `folded` for the assembled model, and `fold_lines` for the orange overlay. The
-web app sets it automatically.
+web app sets it automatically. Patterns are not a parameter; they live in the
+app session and are passed to OpenSCAD as polygon data for the render.
 
 Some individually valid settings are incompatible together. The app shows the
 OpenSCAD assertion message when, for example, a window would eat through a
@@ -139,7 +194,7 @@ the template still fits A4.
 Run from this project directory so the logo import resolves:
 
 ```sh
-# Flat cutting template (the required SVG).
+# Flat cutting template with the generic windows and fold slits.
 openscad -o lantern.svg -D 'output="cut"' paper_folding_lantern.scad
 openscad -o lantern.dxf -D 'output="cut"' paper_folding_lantern.scad
 
@@ -158,14 +213,22 @@ openscad -o lantern.svg -D 'output="cut"' \
   /absolute/path/to/paper_folding_lantern.scad
 ```
 
+**Custom patterns are app-side.** The command-line exports above contain the
+generic windows only. To get a cutting file with your patterns, use **Download
+SVG** in the app (or download the STL). The app writes the patterns into the
+same OpenSCAD render.
+
 For GUI export, press **F6 / Render** before exporting. The SVG/DXF contain the
 cut slits for every fold. The orange guide overlay exists only in the app and in
 the `fold_lines` debug output; it is never part of the downloaded cut file.
 
 ### Notes on the exports
 
-- The **SVG/DXF are the authoritative cutting files.** They use millimetres and
-  the exact net outline, including the perforated folds and the VeryOS engraving.
+- The **SVG downloaded from the app is the authoritative cutting file.** It uses
+  millimetres and the exact net outline, including the perforated folds, generic
+  windows, custom patterns and the VeryOS engraving. The command-line SVG/DXF
+  contain the generic windows and folds only; use the app download if you need
+  your custom patterns in the file.
 - The **folded STL is a visualization model**, not a paper-cut file. It uses
   ideal folds and small overlaps at the glue joints so the result looks like a
   finished, glued lantern. It does not model paper bend radius or the thickness
@@ -178,9 +241,9 @@ the `fold_lines` debug output; it is never part of the downloaded cut file.
 ## Verify changes
 
 The tests render the real OpenSCAD model, check the default A4 template, verify
-the dashed slits and SVG dimensions, parse the folded mesh, exercise an
-alternative style and resized lantern, check a few invalid settings, and test
-the API’s validation and same-origin rule.
+the dashed slits and SVG dimensions, parse the folded mesh, import an SVG and
+place it on all eight surfaces, exercise a resized lantern, check invalid
+settings and test the API’s validation, same-origin rule and SVG import.
 
 ```sh
 npm test
@@ -202,9 +265,9 @@ model and the cutting template.
 - The fold slit width is a compromise: too narrow and the slits may not cut;
   too wide and the bridges become weak. `fold_slit_width = 0.45 mm` works in the
   default template preview; tune it for your machine and material.
-- The generic window is an arched four-pane window. The bat, web, spider and
-  plain arch styles are included as alternatives; they are not required by the
-  default design.
+- Patterns are cut-outs, not printed or engraved artwork. They are clipped 2 mm
+  inside the folds; very detailed artwork may need path simplification. The
+  pattern session is not saved to a database.
 - The app is a local workshop tool, not a hosted service. It binds to
   `127.0.0.1`, writes only temporary files and keeps no database.
 
@@ -212,12 +275,13 @@ model and the cutting template.
 
 | File | Purpose |
 | --- | --- |
-| [paper_folding_lantern.scad](paper_folding_lantern.scad) | Parametric net, folded assembly, fold slits and logo import |
-| [server.js](server.js) | Local Node server, OpenSCAD invocation, SVG/mesh API |
-| [index.html](index.html), [app.js](app.js) | Web interface and the WebGL folded preview |
+| [paper_folding_lantern.scad](paper_folding_lantern.scad) | Parametric net, folded assembly, generic windows, fold slits, pattern cuts and logo import |
+| [server.js](server.js) | Local Node server, OpenSCAD invocation, SVG import and mesh API |
+| [svg_geometry.js](svg_geometry.js) | Sanitises uploaded SVGs and converts them to normalised cut polygons |
+| [index.html](index.html), [app.js](app.js), [decorations.js](decorations.js) | Web interface, folded preview and 8-surface pattern editor |
 | [veryos_logo.svg](veryos_logo.svg) | VeryOS mark, engraved into the floor |
 | [server_test.js](server_test.js) | Integration tests against the real OpenSCAD model |
-| [image.png](image.png) | Inspiration for the lantern shapes and cutouts |
+| [image.png](image.png) | Inspiration for the lantern shapes |
 
 ## License and brand
 

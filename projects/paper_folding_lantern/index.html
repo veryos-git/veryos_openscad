@@ -68,6 +68,28 @@
     #cut-sheet { filter: drop-shadow(0 18px 24px #00000077); }
     #cut-sheet svg path { fill: var(--paper); stroke: none; }
     #fold-overlay svg path { fill: var(--accent); stroke: none; opacity: .9; }
+    .viewer:has(#surface-editor:not([hidden])) { min-height: 700px; }
+    #surface-editor { position: absolute; inset: 0; z-index: 3; display: flex; flex-direction: column; gap: 10px; padding: 18px 22px; overflow: auto; background: radial-gradient(ellipse at 50% 40%, #2b1c30 0%, #1a121d 60%, #120e14 100%); }
+    .surface-tabs { display: flex; gap: 5px; flex-wrap: wrap; }
+    .surface-tabs button { border: 1px solid #4a394e; border-radius: 5px; background: #1b131e; color: var(--muted); padding: 6px 9px; font-size: 11px; }
+    .surface-tabs button[aria-pressed=true] { background: #3a293f; border-color: #6b526f; color: var(--ink); }
+    #surface-stage { width: 100%; flex: 1; min-height: 270px; display: block; touch-action: none; overflow: hidden; }
+    #surface-stage .surface-face { fill: var(--paper); stroke: #b89f7d; stroke-width: .25; }
+    #surface-stage .surface-window { fill: #130f16; }
+    #surface-stage .surface-bar { fill: var(--paper); }
+    #surface-stage .surface-fold { stroke: var(--accent); stroke-width: .45; stroke-dasharray: 2 1.4; }
+    #surface-stage .surface-pattern { fill: #e9a45f33; stroke: var(--accent); stroke-width: .3; cursor: move; }
+    #surface-stage .surface-bounds { fill: none; stroke: var(--accent); stroke-width: .3; stroke-dasharray: 1.5 1; pointer-events: none; }
+    #surface-stage .surface-handle { fill: var(--accent); stroke: #1b121e; stroke-width: .3; cursor: nwse-resize; }
+    #surface-stage .surface-handle-line { stroke: var(--accent); stroke-width: .35; pointer-events: none; }
+    #surface-stage [data-rotate] { cursor: grab; }
+    .surface-tools { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+    #surface-settings { display: flex; flex-wrap: wrap; gap: 10px; align-items: end; }
+    #surface-settings label { display: grid; gap: 4px; color: var(--muted); font-size: 11px; }
+    #surface-settings input { width: 92px; padding: 7px; border: 1px solid #4a394e; border-radius: 4px; background: #130f16; color: var(--ink); }
+    #surface-settings input:invalid { border-color: #d16a4e; box-shadow: 0 0 0 1px #d16a4e; }
+    .surface-note { color: var(--muted); font-size: 11px; line-height: 1.5; margin: 0; }
+    #surface-error { color: #ffcab4; margin: 0; font-size: 12px; }
     #hint { position: absolute; bottom: 15px; left: 15px; right: 15px; text-align: center; color: var(--muted); font-size: 11px; pointer-events: none; z-index: 2; }
     .legend { position: absolute; top: 14px; right: 18px; z-index: 2; display: flex; gap: 14px; font-size: 10px; color: var(--dim); letter-spacing: .2px; }
     .legend i { display: inline-block; width: 18px; height: 2px; background: var(--accent); vertical-align: middle; margin-right: 5px; }
@@ -112,7 +134,7 @@
   <main>
     <div class="intro">
       <div><div class="eyebrow">One sheet · four walls · one pyramid roof</div><h1>Paper <em>lantern</em></h1></div>
-      <p>A haunted little house you can hang. Shape the walls and roof, turn the folded model around, then cut the perforated template and fold it into life.</p>
+      <p>A haunted little house you can hang. Shape the walls and roof, add your own SVG cut-out patterns to any side or roof face, then cut the perforated template and fold it into life.</p>
     </div>
     <div class="workspace">
       <aside>
@@ -127,6 +149,7 @@
           <div class="view-buttons" aria-label="Preview view">
             <button type="button" id="view-folded" aria-pressed="true">Folded lantern</button>
             <button type="button" id="view-cut" aria-pressed="false">Cutting template</button>
+            <button type="button" id="view-decorate" aria-pressed="false">Add patterns</button>
           </div>
           <label class="fold-toggle" id="fold-toggle"><input id="show-folds" type="checkbox" checked> Show fold lines</label>
           <button id="reset-view" type="button" class="text-button">Reset view</button>
@@ -139,6 +162,33 @@
               <div id="fold-overlay" aria-hidden="true"></div>
             </div>
             <div class="legend"><span><b></b>paper</span><span><i></i>perforated folds</span></div>
+          </div>
+          <div id="surface-editor" hidden>
+            <div class="surface-tabs" aria-label="Surface to decorate">
+              <button type="button" data-surface="0" data-label="Front wall" aria-pressed="true">Front wall</button>
+              <button type="button" data-surface="1" data-label="Right wall" aria-pressed="false">Right wall</button>
+              <button type="button" data-surface="2" data-label="Back wall" aria-pressed="false">Back wall</button>
+              <button type="button" data-surface="3" data-label="Left wall" aria-pressed="false">Left wall</button>
+              <button type="button" data-surface="4" data-label="Front roof" aria-pressed="false">Front roof</button>
+              <button type="button" data-surface="5" data-label="Right roof" aria-pressed="false">Right roof</button>
+              <button type="button" data-surface="6" data-label="Back roof" aria-pressed="false">Back roof</button>
+              <button type="button" data-surface="7" data-label="Left roof" aria-pressed="false">Left roof</button>
+            </div>
+            <p class="surface-note">Outside view. The generic window stays on every wall. The pattern is cut out and clipped 2 mm inside the folds.</p>
+            <svg id="surface-stage" xmlns="http://www.w3.org/2000/svg" tabindex="0" role="img" aria-label="Surface pattern editor"></svg>
+            <div class="surface-tools">
+              <button id="upload-surface-svg" class="secondary" type="button" disabled>+ Load SVG</button>
+              <input id="surface-svg-file" type="file" accept=".svg,image/svg+xml" hidden>
+              <button id="remove-surface-decoration" class="text-button" type="button" hidden>Remove pattern</button>
+            </div>
+            <form id="surface-settings" hidden>
+              <label>Width (mm)<input id="surface-width" type="number" min="1" max="200" step="0.1" required></label>
+              <label>Center from left (mm)<input id="surface-x" type="number" min="0" step="0.1" required></label>
+              <label><span id="surface-y-label">Center above floor (mm)</span><input id="surface-y" type="number" min="0" step="0.1" required></label>
+              <label>Rotation (° clockwise)<input id="surface-rotation" type="number" min="-360" max="360" step="any" required></label>
+            </form>
+            <p id="surface-error" role="alert" hidden></p>
+            <p class="surface-note">Patterns are cut through the paper. Use stencil designs; enclosed paper islands fall out. Colors are ignored; convert text and strokes to paths first.</p>
           </div>
           <div id="hint">Drag to turn · scroll to zoom</div>
         </div>
@@ -153,7 +203,7 @@
       </section>
     </div>
     <div class="steps">
-      <p><strong><span>01</span>Cut the one-piece net</strong>Use the SVG at 100% scale. The outer outline, cutouts and every dashed fold slit are cut; the paper bridges keep the net together.</p>
+      <p><strong><span>01</span>Cut the one-piece net</strong>Use the SVG at 100% scale. The generic windows, your SVG patterns and every dashed fold slit are cut; the paper bridges keep the net together.</p>
       <p><strong><span>02</span>Fold, tuck and glue</strong>Fold the floor in, fold the walls up, tuck the roof faces and cap, then glue the tabs inside. The glue tab closes the fourth corner.</p>
       <p><strong><span>03</span>Hang a little light</strong>Place a battery LED inside and hang the lantern by the tab. Use LEDs only; paper lanterns are not for candles.</p>
     </div>
