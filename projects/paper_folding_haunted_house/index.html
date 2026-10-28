@@ -54,6 +54,7 @@
     .viewer[data-current=false] #wall-shape { opacity: .4; }
     #wall-stage [data-decoration] { cursor: move; }
     #wall-stage [data-resize] { cursor: nwse-resize; }
+    #wall-stage [data-rotate] { cursor: grab; }
     .decoration-tools { border-top: 1px solid var(--line); padding-top: 12px; display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
     .decoration-tools label { font-size: 12px; }
     #decoration-list { max-width: 200px; padding: 7px; font-size: 12px; border: 1px solid var(--line); border-radius: 5px; background: white; }
@@ -123,7 +124,7 @@
               <button type="button" data-wall="2" aria-pressed="false" title="Bottom wall of the flat net">Back</button>
               <button type="button" data-wall="3" aria-pressed="false" title="Right wall of the flat net">Right</button>
             </div>
-            <p class="decoration-note">Outside view. Upload an SVG, drag to place it, and drag the corner to scale.</p>
+            <p class="decoration-note">Outside view. Upload an SVG, drag to place it, drag the corner to scale and the round handle to rotate.</p>
             <svg id="wall-stage" xmlns="http://www.w3.org/2000/svg" tabindex="0" role="img" aria-label="Front wall decoration editor. Use arrow keys to move a selected decoration."></svg>
             <div class="decoration-tools">
               <button id="upload-svg" class="secondary" type="button" disabled>+ Load SVG</button>
@@ -135,6 +136,7 @@
               <label>Width (mm)<input id="decoration-width" type="number" min="1" max="200" step="0.1" required></label>
               <label>Center from left<input id="decoration-x" type="number" min="0" max="90" step="0.1" required></label>
               <label>Center above floor<input id="decoration-y" type="number" min="0" max="140" step="0.1" required></label>
+              <label>Rotation (° clockwise)<input id="decoration-rotation" type="number" min="-360" max="360" step="any" required></label>
               <button id="remove-decoration" class="text-button" type="button">Remove</button>
             </form>
             <p id="decoration-error" role="alert" hidden></p>

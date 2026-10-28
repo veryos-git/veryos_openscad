@@ -150,6 +150,7 @@ export function f_a_decoration(a_o_input) {
         if (!o || !Number.isInteger(o.n_wall) || o.n_wall < 0 || o.n_wall > 3
             || ![o.n_x, o.n_y, o.n_width].every(Number.isFinite)
             || o.n_x < 0 || o.n_x > 200 || o.n_y < 0 || o.n_y > 200 || o.n_width < 1 || o.n_width > 200
+            || !(o.n_rotation === undefined || (Number.isFinite(o.n_rotation) && Math.abs(o.n_rotation) <= 360))
             || !Array.isArray(o.a_a_n_point) || o.a_a_n_point.length < 3 || o.a_a_n_point.length > 12000
             || !o.a_a_n_point.every((a) => Array.isArray(a) && a.length === 2 && a.every((n) => Number.isFinite(n) && Math.abs(n) <= 100))
             || !Array.isArray(o.a_a_n_path) || !o.a_a_n_path.length || o.a_a_n_path.length > 12000
@@ -160,6 +161,6 @@ export function f_a_decoration(a_o_input) {
         n_points += o.a_a_n_point.length;
         n_indices += o.a_a_n_path.reduce((n, a) => n + a.length, 0);
         if (n_points > 30000 || n_indices > 60000) throw new Error("Too many decoration points. Simplify the SVGs or remove some copies.");
-        return [o.n_wall, o.n_x, o.n_y, o.n_width, o.a_a_n_point, o.a_a_n_path];
+        return [o.n_wall, o.n_x, o.n_y, o.n_width, o.a_a_n_point, o.a_a_n_path, o.n_rotation ?? 0];
     });
 }

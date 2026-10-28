@@ -33,7 +33,8 @@ export function f_o_decorations(f_changed, f_parameters) {
         for (const o_item of a_o_decoration.filter((o) => o.n_wall === n_wall)) {
             const b_selected = o_item.n_id === n_selected;
             const n_width = o_item.n_width, n_height = n_width * o_item.n_ratio;
-            const o_group = f_svg("g", { "data-decoration": o_item.n_id });
+            // SVG rotation is clockwise on screen, matching the outside view of the cut.
+            const o_group = f_svg("g", { "data-decoration": o_item.n_id, transform: `rotate(${o_item.n_rotation} ${o_item.n_x} ${-o_item.n_y})` });
             o_group.append(f_svg("rect", {
                 x: o_item.n_x - n_width / 2, y: -o_item.n_y - n_height / 2, width: n_width, height: n_height,
                 fill: "transparent", stroke: b_selected ? "#d58b35" : "transparent", "stroke-width": .45, "stroke-dasharray": "1.5 1",
@@ -48,6 +49,9 @@ export function f_o_decorations(f_changed, f_parameters) {
                     x: o_item.n_x + n_width / 2 - 1.5, y: -o_item.n_y + n_height / 2 - 1.5,
                     width: 3, height: 3, rx: .4, fill: "#d58b35", stroke: "#fffcf7", "stroke-width": .3, "data-resize": "true",
                 }));
+                const n_top = -o_item.n_y - n_height / 2;
+                o_group.append(f_svg("line", { x1: o_item.n_x, x2: o_item.n_x, y1: n_top, y2: n_top - 4, stroke: "#d58b35", "stroke-width": .3, "pointer-events": "none" }));
+                o_group.append(f_svg("circle", { cx: o_item.n_x, cy: n_top - 5.5, r: 1.6, fill: "#d58b35", stroke: "#fffcf7", "stroke-width": .3, "data-rotate": "true" }));
             }
             o_content.append(o_group);
         }
@@ -59,7 +63,7 @@ export function f_o_decorations(f_changed, f_parameters) {
         o_list.replaceChildren(...(a_o_wall.length ? a_o_wall.map((o) => new Option(o.s_name, o.n_id, false, o.n_id === n_selected)) : [new Option("No decorations yet", "")]));
         f_el("wall-window").checked = a_b_window[n_wall];
         o_form.hidden = !o_selected;
-        for (const [s_field, s_key] of [["width", "n_width"], ["x", "n_x"], ["y", "n_y"]]) {
+        for (const [s_field, s_key] of [["width", "n_width"], ["x", "n_x"], ["y", "n_y"], ["rotation", "n_rotation"]]) {
             const o_input = f_el(`decoration-${s_field}`);
             o_input.disabled = !o_selected;
             if (o_selected) o_input.value = f_round(o_selected[s_key]);
@@ -96,6 +100,7 @@ export function f_o_decorations(f_changed, f_parameters) {
             o.n_width = Number(f_el("decoration-width").value);
             o.n_x = Number(f_el("decoration-x").value);
             o.n_y = Number(f_el("decoration-y").value);
+            o.n_rotation = Number(f_el("decoration-rotation").value);
             f_draw();
         }
         f_changed();
@@ -118,7 +123,7 @@ export function f_o_decorations(f_changed, f_parameters) {
                 const o = f_parameters();
                 const n_width = Math.max(1, f_round(Math.min(o.house_size - 2 * (o.glue_tab_width + 3), (o.wall_height - 8) / o_geometry.n_ratio, 28)));
                 const o_item = { ...o_geometry, s_name: o_file.name, n_id: ++n_next_id, n_wall: n_target_wall,
-                    n_x: f_round(o.house_size / 2), n_y: f_round(o.wall_height / 2), n_width };
+                    n_x: f_round(o.house_size / 2), n_y: f_round(o.wall_height / 2), n_width, n_rotation: 0 };
                 if (!a_o_decoration.some((o) => o.n_wall === n_target_wall)) a_b_window[n_target_wall] = false;
                 a_o_decoration.push(o_item);
                 if (n_wall === n_target_wall) n_selected = o_item.n_id;
@@ -140,15 +145,26 @@ export function f_o_decorations(f_changed, f_parameters) {
         if (!o_target) return;
         n_selected = Number(o_target.dataset.decoration);
         const o = f_selected(), o_point = f_point(o_event);
-        o_drag = { n_x: o.n_x, n_y: o.n_y, n_start_x: o_point.x, n_start_y: o_point.y, b_resize: o_event.target.hasAttribute("data-resize") };
+        o_drag = { n_x: o.n_x, n_y: o.n_y, n_start_x: o_point.x, n_start_y: o_point.y,
+            b_resize: o_event.target.hasAttribute("data-resize"), b_rotate: o_event.target.hasAttribute("data-rotate") };
         o_stage.setPointerCapture(o_event.pointerId); o_stage.focus();
         o_event.preventDefault(); f_controls();
     };
     o_stage.onpointermove = (o_event) => {
         if (!o_drag) return;
         const o = f_selected(), o_point = f_point(o_event), o_parameters = f_parameters();
-        if (o_drag.b_resize) o.n_width = f_round(Math.max(1, Math.min(200, 2 * Math.max(o_point.x - o.n_x, (o_point.y + o.n_y) / o.n_ratio))));
-        else {
+        const n_dx = o_point.x - o.n_x, n_dy = o_point.y + o.n_y;
+        if (o_drag.b_rotate) {
+            // Handle points up at 0°; Shift snaps to 15° steps.
+            const n_angle = Math.atan2(n_dx, -n_dy) * 180 / Math.PI;
+            o.n_rotation = o_event.shiftKey ? Math.round(n_angle / 15) * 15 : Math.round(n_angle);
+        } else if (o_drag.b_resize) {
+            // Measure the corner in the decoration's unrotated frame.
+            const n_angle = o.n_rotation * Math.PI / 180;
+            const n_local_x = n_dx * Math.cos(n_angle) + n_dy * Math.sin(n_angle);
+            const n_local_y = -n_dx * Math.sin(n_angle) + n_dy * Math.cos(n_angle);
+            o.n_width = f_round(Math.max(1, Math.min(200, 2 * Math.max(n_local_x, n_local_y / o.n_ratio))));
+        } else {
             o.n_x = f_round(Math.max(0, Math.min(o_parameters.house_size, o_drag.n_x + o_point.x - o_drag.n_start_x)));
             const n_height = o_parameters.wall_height + (o_parameters.roof_style === "flat" ? 0 : o_parameters.roof_height);
             o.n_y = f_round(Math.max(0, Math.min(n_height, o_drag.n_y - o_point.y + o_drag.n_start_y)));

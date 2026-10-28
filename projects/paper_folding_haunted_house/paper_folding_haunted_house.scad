@@ -29,7 +29,7 @@ glue_tab_width = 6; // [3:0.5:12]
 tab_inset = 2; // [1:0.5:5]
 
 /* [Hidden] */
-// The app supplies normalized polygons: [wall, centre_x, centre_y, width, points, paths].
+// The app supplies normalized polygons: [wall, centre_x, centre_y, width, points, paths, rotation].
 decorations = is_undef(app_decorations) ? [] : app_decorations;
 wall_windows = is_undef(app_wall_windows) ? [true, true, true, true] : app_wall_windows;
 wall_index = 0;
@@ -116,8 +116,9 @@ module wall_2d(index) {
                 for (decoration = decorations)
                     if (decoration[0] == index)
                         // The editor uses the outside view; the flat net faces inward.
+                        // Rotation is in degrees clockwise as seen from outside.
                         translate([house_size - decoration[1], decoration[2]])
-                            scale([-decoration[3], decoration[3]])
+                            scale([-1, 1]) rotate(-decoration[6]) scale(decoration[3])
                                 polygon(points = decoration[4], paths = decoration[5]);
         }
     }

@@ -94,6 +94,22 @@ Deno.test("each wall gets its own decoration with outside orientation and matchi
     }
 });
 
+Deno.test("decorations rotate clockwise as seen from outside", async () => {
+    const o_geometry = await f_o_import_svg(f_tree("M20 30H100V50H40V75H85V95H40V150H20Z"));
+    const o_result = await f_o_render({
+        wall_windows: [false, true, true, true],
+        decorations: [{ ...o_geometry, n_wall: 0, n_x: 25, n_y: 25, n_width: 12, n_rotation: 90 }],
+    });
+    f_check_mesh(o_result.a_n_position);
+    const s_hole = o_result.s_wall_svg.split(/\bM /)[2];
+    const a_a_point = [...s_hole.matchAll(/(-?[\d.]+),(-?[\d.]+)/g)].map((a) => [Number(a[1]), Number(a[2])]);
+    const f_has = (n_x, n_y) => a_a_point.some(([x, y]) => Math.abs(x - n_x) < .01 && Math.abs(y + n_y) < .01);
+    // The stem foot's corners (19,16) and (22,16) both swing to the upper left.
+    f_assert(f_has(16, 31) && f_has(16, 28), "Stem foot turns clockwise to the upper left.");
+    f_assert(!f_has(34, 22), "Counterclockwise rotation would put the stem foot on the right.");
+    f_assert(!f_has(19, 16), "Unrotated F must not remain.");
+});
+
 Deno.test("large decorations preserve floor folds, glue borders and connected walls", async () => {
     const o_geometry = await f_o_import_svg(f_tree("M0 0H10V10H0Z", "0 0 10 10"));
     const o_result = await f_o_render({
@@ -120,6 +136,12 @@ Deno.test("SVG upload refuses active content, external references, and invalid p
     try { f_a_decoration([{ n_wall: 0, n_x: 20, n_y: 20, n_width: 10, a_a_n_point: [[0, 0], [1, 0], [0, 1]], a_a_n_path: [[0, 1, 30]] }]); }
     catch { b_rejected = true; }
     f_assert(b_rejected, "Polygon indices must reference existing points.");
+    for (const v_rotation of ["90", 400, NaN]) {
+        b_rejected = false;
+        try { f_a_decoration([{ n_wall: 0, n_x: 20, n_y: 20, n_width: 10, n_rotation: v_rotation, a_a_n_point: [[0, 0], [1, 0], [0, 1]], a_a_n_path: [[0, 1, 2]] }]); }
+        catch { b_rejected = true; }
+        f_assert(b_rejected, `Reject rotation ${v_rotation}.`);
+    }
 });
 
 Deno.test("every roof renders connected folded geometry and the correct window cutouts", async () => {

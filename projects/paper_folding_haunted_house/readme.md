@@ -49,7 +49,9 @@ The app binds to your computer's loopback interface; stop it with Ctrl+C.
    enable **Keep standard window** to combine it with your decorations.
 3. Drag a decoration to position it. Drag its orange corner to resize it with
    the aspect ratio locked, or enter **Width**, **Center from left**, and
-   **Center above floor** in millimetres. Select overlapping decorations using
+   **Center above floor** in millimetres. Drag the round handle above it to
+   rotate it; hold Shift to snap to 15° steps. **Rotation** sets the exact
+   angle in degrees, clockwise as seen from outside. Select overlapping decorations using
    the dropdown. With the editor focused, arrow keys move the selection by
    0.5 mm; Shift + arrow moves it by 2 mm.
 4. Switch to **Folded lantern** or **Cutting template** to inspect the result,
