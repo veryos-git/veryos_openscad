@@ -126,3 +126,10 @@ deno test --no-config --allow-read=.,/tmp --allow-write=/tmp \
 The tests render all roof/window combinations, check connected watertight
 folded meshes, verify vector dimensions and window counts, and exercise invalid
 settings. No physical cardstock assembly has been tested yet.
+
+
+---
+extension 1 
+
+the generic window decorations are great but even better would be this option: 
+allow the user to load and scale and place svg decorations on each side of the house directly in the app. 
