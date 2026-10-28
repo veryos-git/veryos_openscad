@@ -45,6 +45,25 @@
     #cut-preview { padding: 28px; }
     #cut-preview svg { width: 100%; height: 100%; display: block; overflow: visible; }
     #cut-preview svg path { fill: #56364b; stroke: none; }
+    #wall-editor { position: absolute; inset: 0; display: flex; flex-direction: column; padding: 18px 22px; gap: 12px; }
+    .wall-tabs { display: flex; gap: 6px; flex-wrap: wrap; }
+    .wall-tabs button, .secondary { border: 1px solid var(--line); border-radius: 5px; background: #fffcf7; padding: 8px 12px; color: var(--ink); font-size: 12px; }
+    .wall-tabs button[aria-pressed=true] { background: var(--accent); border-color: var(--accent); color: white; }
+    #wall-stage { width: 100%; flex: 1; min-height: 160px; touch-action: none; overflow: hidden; }
+    #wall-shape { fill: #56364b; stroke: none; }
+    .viewer[data-current=false] #wall-shape { opacity: .4; }
+    #wall-stage [data-decoration] { cursor: move; }
+    #wall-stage [data-resize] { cursor: nwse-resize; }
+    .decoration-tools { border-top: 1px solid var(--line); padding-top: 12px; display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+    .decoration-tools label { font-size: 12px; }
+    #decoration-list { max-width: 200px; padding: 7px; font-size: 12px; border: 1px solid var(--line); border-radius: 5px; background: white; }
+    #decoration-settings { display: flex; flex-wrap: wrap; gap: 10px; align-items: end; }
+    #decoration-settings label { display: grid; gap: 4px; color: var(--muted); font-size: 11px; }
+    #decoration-settings input { width: 90px; padding: 7px; border: 1px solid var(--line); border-radius: 4px; }
+    #decoration-settings input:invalid { border-color: #b5482f; box-shadow: 0 0 0 1px #b5482f; }
+    .decoration-note { color: var(--muted); font-size: 11px; line-height: 1.5; margin: 0; }
+    #decoration-error { color: #8b3434; margin: 0; font-size: 12px; }
+    .viewer:has(#wall-editor:not([hidden])) { min-height: 610px; }
     #hint { position: absolute; bottom: 16px; left: 15px; right: 15px; text-align: center; color: var(--muted); font-size: 11px; pointer-events: none; }
     .info { padding: 18px 22px; display: flex; justify-content: space-between; align-items: center; gap: 18px; border-top: 1px solid var(--line); }
     #dimensions { font-weight: 600; font-size: 13px; margin: 0 0 5px; }
@@ -90,12 +109,37 @@
           <div class="view-buttons" aria-label="Preview view">
             <button type="button" id="view-folded" aria-pressed="true">Folded lantern</button>
             <button type="button" id="view-cut" aria-pressed="false">Cutting template</button>
+            <button type="button" id="view-decorate" aria-pressed="false">Decorate a wall</button>
           </div>
           <button id="reset-view" type="button" class="text-button">Reset view</button>
         </div>
         <div id="viewer" class="viewer" data-current="false" aria-busy="true">
           <canvas id="folded-preview" tabindex="0" aria-label="Folded lantern. Drag or use arrow keys to rotate, plus and minus to zoom."></canvas>
           <div id="cut-preview" hidden></div>
+          <div id="wall-editor" hidden>
+            <div class="wall-tabs" aria-label="Wall to decorate">
+              <button type="button" data-wall="0" aria-pressed="true" title="Top wall of the flat net">Front</button>
+              <button type="button" data-wall="1" aria-pressed="false" title="Left wall of the flat net">Left</button>
+              <button type="button" data-wall="2" aria-pressed="false" title="Bottom wall of the flat net">Back</button>
+              <button type="button" data-wall="3" aria-pressed="false" title="Right wall of the flat net">Right</button>
+            </div>
+            <p class="decoration-note">Outside view. Upload an SVG, drag to place it, and drag the corner to scale.</p>
+            <svg id="wall-stage" xmlns="http://www.w3.org/2000/svg" tabindex="0" role="img" aria-label="Front wall decoration editor. Use arrow keys to move a selected decoration."></svg>
+            <div class="decoration-tools">
+              <button id="upload-svg" class="secondary" type="button" disabled>+ Load SVG</button>
+              <input id="svg-file" type="file" accept=".svg,image/svg+xml" multiple hidden>
+              <label><input id="wall-window" type="checkbox" checked> Keep standard window</label>
+              <select id="decoration-list" aria-label="Selected decoration"><option value="">No decorations yet</option></select>
+            </div>
+            <form id="decoration-settings" hidden>
+              <label>Width (mm)<input id="decoration-width" type="number" min="1" max="200" step="0.1" required></label>
+              <label>Center from left<input id="decoration-x" type="number" min="0" max="90" step="0.1" required></label>
+              <label>Center above floor<input id="decoration-y" type="number" min="0" max="140" step="0.1" required></label>
+              <button id="remove-decoration" class="text-button" type="button">Remove</button>
+            </form>
+            <p id="decoration-error" role="alert" hidden></p>
+            <p class="decoration-note">Shapes become cutouts; size stays proportional. Cuts stop short of folds and glue edges. Use stencil designs: enclosed paper islands fall out.</p>
+          </div>
           <div id="hint">Drag to turn · scroll to zoom</div>
         </div>
         <p id="error" role="alert" hidden></p>

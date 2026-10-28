@@ -1,6 +1,7 @@
 // Copyright (C) [Jonas Immanuel Frey] - Licensed under GPL
 
 // Local app; requires Deno and OpenSCAD. See readme.md for the launch command.
+import { f_s_svg, f_o_geometry, f_a_decoration } from "./svg_geometry.js";
 const o_source_url = new URL("./paper_folding_haunted_house.scad", import.meta.url);
 const s_source = await Deno.readTextFile(o_source_url);
 const s_directory = decodeURIComponent(new URL(".", import.meta.url).pathname);
@@ -44,13 +45,13 @@ export function f_o_parameters(o_input) {
     }));
 }
 
-async function f_render(s_path, s_output, o_parameters) {
+async function f_render(s_path, s_output, o_parameters, s_model = decodeURIComponent(o_source_url.pathname)) {
     const a_s_argument = ["--hardwarnings", "-o", s_path, "-D", `output=${JSON.stringify(s_output)}`];
     if (s_path.endsWith(".stl")) a_s_argument.push("--export-format", "binstl");
     for (const [s_name, v_value] of Object.entries(o_parameters)) {
         a_s_argument.push("-D", `${s_name}=${JSON.stringify(v_value)}`);
     }
-    a_s_argument.push(decodeURIComponent(o_source_url.pathname));
+    a_s_argument.push(s_model);
     const o_process = new Deno.Command("openscad", {
         args: a_s_argument,
         env: { QT_QPA_PLATFORM: "offscreen" },
@@ -75,13 +76,22 @@ async function f_render(s_path, s_output, o_parameters) {
 }
 
 export async function f_o_render(o_input) {
-    const o_parameters = f_o_parameters(o_input);
+    const { decorations = [], wall_windows = [true, true, true, true], editor_wall = 0, ...o_values } = o_input;
+    const o_parameters = f_o_parameters(o_values);
+    const a_decoration = f_a_decoration(decorations);
+    if (!Array.isArray(wall_windows) || wall_windows.length !== 4 || !wall_windows.every((b) => typeof b === "boolean")
+        || !Number.isInteger(editor_wall) || editor_wall < 0 || editor_wall > 3) throw new Error("Invalid wall selection.");
     const s_temp = await Deno.makeTempDir({ dir: "/tmp", prefix: "haunted-house-" });
     try {
-        // Wait for both processes before removing their shared temporary folder.
+        // Keep large polygon arrays in a file instead of exceeding command-line limits.
+        const s_model = `${s_temp}/model.scad`;
+        await Deno.writeTextFile(s_model,
+            `app_decorations = ${JSON.stringify(a_decoration)};\napp_wall_windows = ${JSON.stringify(wall_windows)};\ninclude <${decodeURIComponent(o_source_url.pathname)}>\n`);
+        // Wait for all processes before removing their shared temporary folder.
         const a_o_result = await Promise.allSettled([
-            f_render(`${s_temp}/cut.svg`, "cut", o_parameters),
-            f_render(`${s_temp}/folded.stl`, "assembled", o_parameters),
+            f_render(`${s_temp}/cut.svg`, "cut", o_parameters, s_model),
+            f_render(`${s_temp}/folded.stl`, "assembled", o_parameters, s_model),
+            f_render(`${s_temp}/wall.svg`, "wall", { ...o_parameters, wall_index: editor_wall }, s_model),
         ]);
         for (const o_result of a_o_result) {
             if (o_result.status === "rejected") throw o_result.reason;
@@ -97,7 +107,20 @@ export async function f_o_render(o_input) {
                 a_n_position.push(o_view.getFloat32(84 + n_face * 50 + 12 + n_coordinate * 4, true));
             }
         }
-        return { s_svg, a_n_position, o_parameters };
+        return { s_svg, s_wall_svg: await Deno.readTextFile(`${s_temp}/wall.svg`), editor_wall, a_n_position, o_parameters };
+    } finally {
+        await Deno.remove(s_temp, { recursive: true });
+    }
+}
+
+export async function f_o_import_svg(o_tree) {
+    const s_svg = f_s_svg(o_tree);
+    const s_temp = await Deno.makeTempDir({ dir: "/tmp", prefix: "haunted-svg-" });
+    try {
+        await Deno.writeTextFile(`${s_temp}/upload.svg`, s_svg);
+        await Deno.writeTextFile(`${s_temp}/import.scad`, `$fn = 96;\nimport(${JSON.stringify(`${s_temp}/upload.svg`)}, dpi = 96);\n`);
+        await f_render(`${s_temp}/shape.svg`, "cut", {}, `${s_temp}/import.scad`);
+        return f_o_geometry(await Deno.readTextFile(`${s_temp}/shape.svg`));
     } finally {
         await Deno.remove(s_temp, { recursive: true });
     }
@@ -108,7 +131,10 @@ export async function f_o_response(o_request) {
     const o_url = new URL(o_request.url);
     if (o_request.method === "GET") {
         if (o_url.pathname === "/api/parameters") return Response.json(a_o_parameter);
-        const o_files = { "/": ["index.html", "text/html"], "/app.js": ["app.js", "text/javascript"] };
+        const o_files = {
+            "/": ["index.html", "text/html"], "/app.js": ["app.js", "text/javascript"],
+            "/decorations.js": ["decorations.js", "text/javascript"], "/svg_geometry.js": ["svg_geometry.js", "text/javascript"],
+        };
         const a_s_file = o_files[o_url.pathname];
         if (a_s_file) {
             return new Response(await Deno.readTextFile(`${s_directory}${a_s_file[0]}`), {
@@ -116,9 +142,13 @@ export async function f_o_response(o_request) {
             });
         }
     }
-    if (o_request.method === "POST" && o_url.pathname === "/api/render") {
+    if (o_request.method === "POST" && ["/api/render", "/api/import-svg"].includes(o_url.pathname)) {
         const s_origin = o_request.headers.get("origin");
         if (s_origin && s_origin !== o_url.origin) return new Response("Forbidden", { status: 403 });
+        if (o_url.pathname === "/api/import-svg") {
+            try { return Response.json(await f_o_import_svg(await o_request.json())); }
+            catch (o_error) { return Response.json({ error: o_error.message }, { status: 400 }); }
+        }
         if (b_rendering) return Response.json({ error: "Another render is running. Try again shortly." }, { status: 503 });
         b_rendering = true;
         try {

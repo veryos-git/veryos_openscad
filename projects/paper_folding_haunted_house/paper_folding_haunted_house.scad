@@ -4,7 +4,7 @@
 // Roof shapes are upright silhouettes; the folded lantern is open on top.
 
 /* [Output] */
-output = "flat"; // [flat:Flat STL, cut:2D SVG or DXF, assembled:Folded preview]
+output = "flat"; // [flat:Flat STL, cut:2D SVG or DXF, assembled:Folded preview, wall:Selected wall from outside]
 // Guides appear only in the flat F5 preview, never in exported cutting geometry.
 show_fold_guides = true;
 paper_thickness = 0.3; // [0.1:0.05:1]
@@ -29,14 +29,19 @@ glue_tab_width = 6; // [3:0.5:12]
 tab_inset = 2; // [1:0.5:5]
 
 /* [Hidden] */
+// The app supplies normalized polygons: [wall, centre_x, centre_y, width, points, paths].
+decorations = is_undef(app_decorations) ? [] : app_decorations;
+wall_windows = is_undef(app_wall_windows) ? [true, true, true, true] : app_wall_windows;
+wall_index = 0;
+has_windows = wall_windows[0] || wall_windows[1] || wall_windows[2] || wall_windows[3];
 minimum_border = 2;
 tab_taper = glue_tab_width * 0.6;
 guide_width = 0.25;
 mixed_roofs = ["crooked", "gable", "stepped", "gable"];
 flat_span = house_size + 2 * (wall_height + (roof_style == "flat" ? 0 : roof_height));
 
-assert(output == "flat" || output == "cut" || output == "assembled",
-       "Choose flat, cut or assembled output.");
+assert(output == "flat" || output == "cut" || output == "assembled" || output == "wall",
+       "Choose flat, cut, assembled or wall output.");
 assert(roof_style == "mixed" || roof_style == "gable" || roof_style == "crooked"
        || roof_style == "stepped" || roof_style == "flat", "Unknown roof style.");
 assert(window_style == "cross" || window_style == "plain", "Unknown window style.");
@@ -45,11 +50,13 @@ assert(house_size > 0 && wall_height > 0 && roof_height >= 0 && paper_thickness 
 assert(glue_tab_width > 0 && tab_inset > 0
        && wall_height > 2 * (tab_inset + tab_taper),
        "Tabs need positive width/inset and enough wall height for their tapered ends.");
-assert(window_width > 0 && window_height > 0
+assert(house_size > 2 * (glue_tab_width + minimum_border),
+       "House walls need room for both corner glue areas and a cutout.");
+assert(!has_windows || (window_width > 0 && window_height > 0
        && window_width <= house_size - 2 * (glue_tab_width + minimum_border)
-       && window_height <= wall_height - 2 * minimum_border,
+       && window_height <= wall_height - 2 * minimum_border),
        "Windows must leave 2 mm borders and space for the folded glue tabs.");
-assert(window_style != "cross" || (window_bar >= 1
+assert(!has_windows || window_style != "cross" || (window_bar >= 1
        && window_bar < min(window_width, window_height) - 2),
        "Window bars must be at least 1 mm wide and leave panes wider than 1 mm.");
 
@@ -98,7 +105,21 @@ module window_cutout_2d() {
 module wall_2d(index) {
     difference() {
         wall_outline_2d(wall_roof(index));
-        window_cutout_2d();
+        if (wall_windows[index]) window_cutout_2d();
+        // Protect the perimeter, floor fold and folded corner glue areas.
+        intersection() {
+            offset(delta = -minimum_border) wall_outline_2d(wall_roof(index));
+            translate([glue_tab_width + minimum_border, minimum_border])
+                square([house_size - 2 * (glue_tab_width + minimum_border),
+                        wall_height + roof_height]);
+            union()
+                for (decoration = decorations)
+                    if (decoration[0] == index)
+                        // The editor uses the outside view; the flat net faces inward.
+                        translate([house_size - decoration[1], decoration[2]])
+                            scale([-decoration[3], decoration[3]])
+                                polygon(points = decoration[4], paths = decoration[5]);
+        }
     }
 }
 
@@ -158,6 +179,8 @@ module assembled() {
 }
 
 if (output == "cut") net_2d();
+else if (output == "wall")
+    translate([house_size, 0]) mirror([1, 0]) wall_2d(wall_index);
 else if (output == "assembled") assembled();
 else {
     color("#56364b") linear_extrude(paper_thickness) net_2d();

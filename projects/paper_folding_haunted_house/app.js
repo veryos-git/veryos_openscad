@@ -1,4 +1,5 @@
 // Copyright (C) [Jonas Immanuel Frey] - Licensed under GPL
+import { f_o_decorations } from "./decorations.js";
 
 const f_o_element = (s_id) => document.getElementById(s_id);
 const o_form = f_o_element("settings");
@@ -15,6 +16,12 @@ let n_timer;
 let b_running = false;
 let b_pending = false;
 let s_view = "folded";
+function f_parameters() {
+    return Object.fromEntries(a_o_parameter.map((o) => [
+        o.s_name, o.a_n_range ? Number(o_form.elements[o.s_name].value) : o_form.elements[o.s_name].value,
+    ]));
+}
+const o_decorations = f_o_decorations(f_schedule, f_parameters);
 
 // A small, dependency-free WebGL viewer for the actual OpenSCAD triangle mesh.
 function f_o_viewer() {
@@ -149,15 +156,19 @@ function f_set_view(s_next) {
     s_view = s_next;
     o_canvas.hidden = s_view !== "folded";
     o_cut.hidden = s_view !== "cut";
+    f_o_element("wall-editor").hidden = s_view !== "decorate";
     f_o_element("view-folded").setAttribute("aria-pressed", String(s_view === "folded"));
     f_o_element("view-cut").setAttribute("aria-pressed", String(s_view === "cut"));
-    f_o_element("reset-view").hidden = s_view === "cut";
+    f_o_element("view-decorate").setAttribute("aria-pressed", String(s_view === "decorate"));
+    f_o_element("reset-view").hidden = s_view !== "folded";
+    f_o_element("hint").hidden = s_view === "decorate";
     f_o_element("hint").textContent = s_view === "cut"
         ? "Orange = score by hand · downloaded SVG contains cuts only"
         : "Drag to turn · scroll to zoom";
 }
 f_o_element("view-folded").onclick = () => f_set_view("folded");
 f_o_element("view-cut").onclick = () => f_set_view("cut");
+f_o_element("view-decorate").onclick = () => f_set_view("decorate");
 f_o_element("reset-view").onclick = () => o_mesh_viewer?.f_reset();
 if (!o_mesh_viewer) f_set_view("cut");
 
@@ -205,10 +216,13 @@ async function f_update() {
             o_form.reportValidity();
             continue;
         }
+        if (!o_decorations.f_valid()) {
+            o_status.textContent = "Check the decoration size and position in Decorate a wall.";
+            o_viewer.setAttribute("aria-busy", "false");
+            continue;
+        }
         const n_request_revision = n_revision;
-        const o_parameters = Object.fromEntries(a_o_parameter.map((o) => [
-            o.s_name, o.a_n_range ? Number(o_form.elements[o.s_name].value) : o_form.elements[o.s_name].value,
-        ]));
+        const o_parameters = { ...f_parameters(), ...o_decorations.f_payload() };
         o_viewer.setAttribute("aria-busy", "true");
         if (o_mesh_viewer) o_error.hidden = true;
         try {
@@ -220,6 +234,7 @@ async function f_update() {
             if (!o_response.ok) throw new Error(o_result.error || "Could not update the preview.");
             o_mesh_viewer?.f_set_mesh(o_result.a_n_position);
             f_show_cut(o_result.s_svg, o_result.o_parameters);
+            o_decorations.f_rendered(o_result);
             o_current = o_result;
             const o_svg = new DOMParser().parseFromString(o_result.s_svg, "image/svg+xml").documentElement;
             const n_width = parseFloat(o_svg.getAttribute("width"));
@@ -241,9 +256,9 @@ async function f_update() {
     b_running = false;
 }
 
-o_form.addEventListener("input", f_schedule);
+o_form.addEventListener("input", () => { o_decorations.f_parameters_changed(); f_schedule(); });
 o_form.addEventListener("submit", (o_event) => { o_event.preventDefault(); f_schedule(); });
-o_form.addEventListener("reset", () => setTimeout(f_schedule, 0));
+o_form.addEventListener("reset", () => setTimeout(() => { o_decorations.f_reset(); f_schedule(); }, 0));
 o_download.onclick = () => {
     if (!o_current || o_download.disabled) return;
     const s_url = URL.createObjectURL(new Blob([o_current.s_svg], { type: "image/svg+xml" }));
@@ -291,6 +306,7 @@ try {
         }
         f_o_element("controls").append(o_fieldset);
     }
+    o_decorations.f_parameters_changed();
     f_schedule();
 } catch (o_problem) {
     o_error.textContent = `${o_problem.message} Start the local server and reload this page.`;

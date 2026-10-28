@@ -40,6 +40,47 @@ The browser does not maintain a separate copy of the house geometry. Restart
 the server and reload the page after editing the SCAD parameter definitions.
 The app binds to your computer's loopback interface; stop it with Ctrl+C.
 
+## SVG decorations on each wall
+
+1. Open **Decorate a wall** and choose **Front**, **Left**, **Back**, or **Right**.
+   These correspond to the top, left, bottom, and right arms of the flat net.
+2. Click **Load SVG**. You can upload multiple files and use different designs
+   on every wall. The first upload replaces that wall's standard window;
+   enable **Keep standard window** to combine it with your decorations.
+3. Drag a decoration to position it. Drag its orange corner to resize it with
+   the aspect ratio locked, or enter **Width**, **Center from left**, and
+   **Center above floor** in millimetres. Select overlapping decorations using
+   the dropdown. With the editor focused, arrow keys move the selection by
+   0.5 mm; Shift + arrow moves it by 2 mm.
+4. Switch to **Folded lantern** or **Cutting template** to inspect the result,
+   then **Download SVG**. The downloaded paths include your decorations, with
+   no editor handles or fold guides.
+
+The editor shows each wall **from outside**. Asymmetric artwork therefore
+reads correctly on the folded lantern; it appears mirrored in the flat net,
+whose upper face becomes the inside of the house. Positions are measured from
+the outside view's left edge and the floor fold.
+
+SVG geometry becomes **cutouts**, regardless of its colour. OpenSCAD resolves
+paths, curves, transforms, basic shapes, local shape references and compound
+holes before the artwork reaches the editor. Convert text and stroked artwork
+to paths first; images, clipping, masks, filters and active content are not
+supported. Stylesheets, such as Illustrator's default `<style>` block, are
+ignored, so every shape is cut even if CSS would hide it. See the [OpenSCAD SVG import documentation](https://files.openscad.org/documentation/manual/SVG_Import.html)
+for its underlying geometry rules.
+
+Cuts are clipped to leave a 2 mm wall perimeter and clear the folded corner
+glue areas. The orange selection outline shows the whole uploaded decoration,
+including any part that falls outside the cuttable area. Use connected stencil
+designs: isolated paper islands inside closed cutouts will fall out unless you
+attach them to a backing sheet.
+
+Use up to 16 decorations per house, with SVG uploads below 500 KB. Very detailed
+artwork may need path simplification. **Remove** deletes the selected decoration;
+removing the last one from a wall restores its standard window. **Reset
+settings** clears all uploads and restores the house defaults. Decorations
+live in the current page session, so download your template before reloading.
+
 ## OpenSCAD parameters
 
 Open the `.scad` file in OpenSCAD and use the Customizer, or edit its top-level
@@ -47,7 +88,7 @@ parameters. No OpenSCAD libraries are required.
 
 | Parameter | Purpose |
 | --- | --- |
-| `output` | `flat`: thin extrusion for STL; `cut`: 2D SVG/DXF; `assembled`: folded preview |
+| `output` | `flat`: thin extrusion for STL; `cut`: 2D SVG/DXF; `assembled`: folded preview; `wall`: selected wall from outside |
 | `house_size`, `wall_height` | Square floor size and wall height up to the eaves |
 | `roof_height` | Height above the eaves; zero removes the roof silhouettes |
 | `roof_style` | `mixed`, `gable`, `crooked`, `stepped`, or `flat` |
@@ -125,11 +166,13 @@ deno test --no-config --allow-read=.,/tmp --allow-write=/tmp \
 
 The tests render all roof/window combinations, check connected watertight
 folded meshes, verify vector dimensions and window counts, and exercise invalid
-settings. No physical cardstock assembly has been tested yet.
+settings. Decoration tests cover curves, compound holes, all four walls,
+outside orientation, scaling, placement, protected edges and rejected SVG
+content. No physical cardstock assembly has been tested yet.
 
 
 ---
-extension 1 
+extension 1
 
-the generic window decorations are great but even better would be this option: 
-allow the user to load and scale and place svg decorations on each side of the house directly in the app. 
+the generic window decorations are great but even better would be this option:
+allow the user to load and scale and place svg decorations on each side of the house directly in the app.

@@ -1,6 +1,7 @@
 // Copyright (C) [Jonas Immanuel Frey] - Licensed under GPL
 
-import { a_o_parameter, f_o_parameters, f_o_render, f_o_response } from "./server.js";
+import { a_o_parameter, f_o_parameters, f_o_render, f_o_response, f_o_import_svg } from "./server.js";
+import { f_s_svg, f_a_decoration } from "./svg_geometry.js";
 
 function f_assert(b_condition, s_message) {
     if (!b_condition) throw new Error(s_message);
@@ -40,6 +41,85 @@ Deno.test("web controls read defaults from the SCAD source and reject unknown va
         try { f_o_parameters(o_bad); } catch { b_rejected = true; }
         f_assert(b_rejected, `Should reject ${JSON.stringify(o_bad)}`);
     }
+});
+
+function f_tree(s_d, s_view_box = "10 20 100 140") {
+    return { s_tag: "svg", o_attribute: { viewBox: s_view_box }, a_o_child: [
+        { s_tag: "path", o_attribute: { d: s_d }, a_o_child: [] },
+    ] };
+}
+
+Deno.test("SVG upload preserves asymmetric shapes and compound path holes", async () => {
+    const o_f = await f_o_import_svg(f_tree("M20 30H100V50H40V75H85V95H40V150H20Z"));
+    f_assert(Math.abs(o_f.n_ratio - 1.5) < .001, "Imported proportions must exclude blank viewBox margins.");
+    f_assert(o_f.a_a_n_path.length === 1, "F silhouette must be one contour.");
+    f_assert(o_f.a_a_n_point.some(([x, y]) => Math.abs(x + .5) < .001 && Math.abs(y + .75) < .001), "Preserve the upright left stem.");
+    const o_ring = await f_o_import_svg(f_tree("M0 0H40V40H0Z M10 10V30H30V10Z", "0 0 40 40"));
+    f_assert(o_ring.a_a_n_path.length === 2, "Keep compound holes instead of filling them.");
+    const o_curve = await f_o_import_svg(f_tree("M0 20C0 0 40 0 40 20C40 40 0 40 0 20Z", "0 0 40 40"));
+    f_assert(o_curve.a_a_n_point.length > 10, "Resolve curved paths into cuttable polygons.");
+    const o_evenodd = f_tree("M0 0H40V40H0Z M10 10H30V30H10Z", "0 0 40 40");
+    o_evenodd.a_o_child[0].o_attribute["fill-rule"] = "evenodd";
+    f_assert((await f_o_import_svg(o_evenodd)).a_a_n_path.length === 2, "Respect even-odd compound paths with matching winding.");
+    const o_references = { s_tag: "svg", o_attribute: { viewBox: "0 0 60 40" }, a_o_child: [
+        { s_tag: "defs", o_attribute: {}, a_o_child: [{ s_tag: "rect", o_attribute: { id: "tile", x: "0", y: "0", width: "10", height: "20" }, a_o_child: [] }] },
+        { s_tag: "use", o_attribute: { "xlink:href": "#tile", x: "5", y: "5" }, a_o_child: [] },
+        { s_tag: "use", o_attribute: { "xlink:href": "#tile", x: "30", y: "5" }, a_o_child: [] },
+    ] };
+    f_assert((await f_o_import_svg(o_references)).a_a_n_path.length === 2, "Resolve local SVG references without importing unused definitions.");
+});
+
+Deno.test("custom-only walls do not inherit unused standard-window size constraints", async () => {
+    const o_result = await f_o_render({ house_size: 30, wall_windows: [false, false, false, false] });
+    f_check_mesh(o_result.a_n_position);
+    f_assert((o_result.s_svg.match(/\bM /g) || []).length === 1, "All standard windows are disabled.");
+});
+
+Deno.test("each wall gets its own decoration with outside orientation and matching exports", async () => {
+    const o_geometry = await f_o_import_svg(f_tree("M20 30H100V50H40V75H85V95H40V150H20Z"));
+    for (let n_wall = 0; n_wall < 4; n_wall++) {
+        const a_b_window = [true, true, true, true]; a_b_window[n_wall] = false;
+        const o_result = await f_o_render({
+            wall_windows: a_b_window, editor_wall: n_wall,
+            decorations: [{ ...o_geometry, n_wall, n_x: 17, n_y: 25, n_width: 12 }],
+        });
+        f_check_mesh(o_result.a_n_position);
+        f_assert((o_result.s_svg.match(/\bM /g) || []).length === 14, "Replace only this wall's four panes with one decoration.");
+        f_assert((o_result.s_wall_svg.match(/\bM /g) || []).length === 2, "Selected wall must have one outside contour and the F cutout.");
+        const s_hole = o_result.s_wall_svg.split(/\bM /)[2];
+        const a_a_point = [...s_hole.matchAll(/(-?[\d.]+),(-?[\d.]+)/g)].map((a) => [Number(a[1]), Number(a[2])]);
+        f_assert(a_a_point.some(([x, y]) => Math.abs(x - 11) < .01 && Math.abs(y + 16) < .01), "F stem stays on the left from outside.");
+        f_assert(a_a_point.some(([x, y]) => Math.abs(x - 23) < .01 && Math.abs(y + 34) < .01), "Width, height, and position remain in millimetres.");
+        f_assert(!a_a_point.some(([x, y]) => Math.abs(x - 23) < .01 && Math.abs(y + 16) < .01), "Do not mirror the F in the wall editor.");
+    }
+});
+
+Deno.test("large decorations preserve floor folds, glue borders and connected walls", async () => {
+    const o_geometry = await f_o_import_svg(f_tree("M0 0H10V10H0Z", "0 0 10 10"));
+    const o_result = await f_o_render({
+        wall_windows: [false, false, false, false],
+        decorations: [0, 1, 2, 3].map((n_wall) => ({ ...o_geometry, n_wall, n_x: 25, n_y: 27.5, n_width: 200 })),
+    });
+    f_check_mesh(o_result.a_n_position);
+    f_assert(o_result.s_svg.includes('width="196mm" height="196mm"'), "Imported shapes must never extend the cutting outline.");
+    f_assert((o_result.s_svg.match(/\bM /g) || []).length === 5, "All four protected wall frames stay connected.");
+});
+
+Deno.test("SVG upload refuses active content, external references, and invalid polygon indices", () => {
+    for (const o_tree of [
+        { s_tag: "svg", o_attribute: {}, a_o_child: [{ s_tag: "script", o_attribute: {}, a_o_child: [] }] },
+        { s_tag: "svg", o_attribute: { onload: "alert(1)" }, a_o_child: [] },
+        { s_tag: "svg", o_attribute: {}, a_o_child: [{ s_tag: "use", o_attribute: { "xlink:href": "file:///tmp/private.svg" }, a_o_child: [] }] },
+        { s_tag: "svg", o_attribute: {}, a_o_child: [{ s_tag: "use", o_attribute: { id: "loop", "xlink:href": "#loop" }, a_o_child: [] }] },
+    ]) {
+        let b_rejected = false;
+        try { f_s_svg(o_tree); } catch { b_rejected = true; }
+        f_assert(b_rejected, "Reject non-geometry SVG content.");
+    }
+    let b_rejected = false;
+    try { f_a_decoration([{ n_wall: 0, n_x: 20, n_y: 20, n_width: 10, a_a_n_point: [[0, 0], [1, 0], [0, 1]], a_a_n_path: [[0, 1, 30]] }]); }
+    catch { b_rejected = true; }
+    f_assert(b_rejected, "Polygon indices must reference existing points.");
 });
 
 Deno.test("every roof renders connected folded geometry and the correct window cutouts", async () => {
