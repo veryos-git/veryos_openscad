@@ -1,0 +1,116 @@
+<!-- Copyright (C) [Jonas Immanuel Frey] - Licensed under GPL -->
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Design a little paper haunted house. Adjust the shape, preview the folded lantern, and download your cutting template.">
+  <title>Paper haunted house · veryos</title>
+  <style>
+    :root { color-scheme: light; --ink: #332b35; --muted: #716775; --paper: #faf7f0; --line: #ddd5d0; --accent: #603b59; }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--paper); color: var(--ink); font-family: system-ui, sans-serif; }
+    button, input, select { font: inherit; }
+    button { cursor: pointer; }
+    button:disabled { cursor: default; opacity: .45; }
+    :focus-visible { outline: 3px solid #c77838; outline-offset: 3px; }
+    header { max-width: 1440px; margin: auto; padding: 25px 40px; border-bottom: 1px solid var(--line); display: flex; align-items: center; justify-content: space-between; gap: 20px; }
+    .brand { font-weight: 750; font-size: 23px; letter-spacing: -1px; }
+    .eyebrow { font-size: 11px; font-weight: 650; text-transform: uppercase; letter-spacing: 2px; color: var(--muted); }
+    .brand span { margin-left: 18px; letter-spacing: 1.5px; font-size: 10px; font-weight: 500; }
+    header p { margin: 0; color: var(--muted); font-size: 12px; }
+    main { max-width: 1440px; margin: auto; padding: 35px 40px 45px; }
+    .intro { display: flex; align-items: end; gap: 30px; justify-content: space-between; margin-bottom: 30px; }
+    h1 { font: 46px/1.07 Georgia, serif; font-weight: 400; letter-spacing: -1.4px; margin: 8px 0 12px; }
+    .intro p { color: var(--muted); line-height: 1.6; max-width: 430px; margin: 0; font-size: 14px; }
+    .workspace { display: grid; grid-template-columns: 285px minmax(0, 1fr); border: 1px solid var(--line); border-radius: 12px; overflow: hidden; background: #fffcf7; }
+    aside { padding: 24px; border-right: 1px solid var(--line); }
+    fieldset { border: 0; margin: 0 0 22px; padding: 0; min-width: 0; }
+    legend { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.3px; margin-bottom: 13px; color: var(--accent); }
+    .control { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 10px; font-size: 12px; }
+    .control input, .control select { width: 100px; min-width: 0; border: 1px solid var(--line); border-radius: 5px; padding: 7px 8px; background: white; color: var(--ink); }
+    .control select { width: 112px; }
+    .unit { font-size: 10px; color: var(--muted); margin: -5px 0 15px; }
+    .text-button { background: transparent; border: 0; padding: 5px 0; font-size: 12px; text-decoration: underline; color: var(--muted); }
+    .preview-column { min-width: 0; display: flex; flex-direction: column; }
+    .preview-toolbar { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 18px 22px; flex-wrap: wrap; }
+    .view-buttons { padding: 3px; display: flex; gap: 3px; border-radius: 7px; background: #eee8e3; }
+    .view-buttons button { border: none; background: transparent; color: var(--muted); border-radius: 5px; padding: 8px 12px; font-size: 12px; }
+    .view-buttons button[aria-pressed=true] { background: #fffdf8; color: var(--ink); box-shadow: 0 1px 3px #332b3518; }
+    .viewer { position: relative; flex: 1; min-height: 450px; overflow: hidden; background: radial-gradient(ellipse at 50% 45%, #f8f0dd, #eee7e1 78%); }
+    .viewer[data-current=false] canvas, .viewer[data-current=false] #cut-preview { opacity: .35; }
+    canvas, #cut-preview { width: 100%; height: 100%; position: absolute; inset: 0; transition: opacity .2s; }
+    canvas { touch-action: none; cursor: grab; }
+    canvas:active { cursor: grabbing; }
+    #cut-preview { padding: 28px; }
+    #cut-preview svg { width: 100%; height: 100%; display: block; overflow: visible; }
+    #cut-preview svg path { fill: #56364b; stroke: none; }
+    #hint { position: absolute; bottom: 16px; left: 15px; right: 15px; text-align: center; color: var(--muted); font-size: 11px; pointer-events: none; }
+    .info { padding: 18px 22px; display: flex; justify-content: space-between; align-items: center; gap: 18px; border-top: 1px solid var(--line); }
+    #dimensions { font-weight: 600; font-size: 13px; margin: 0 0 5px; }
+    #status { margin: 0; font-size: 12px; color: var(--muted); }
+    .primary { border: 0; background: var(--accent); color: #fff9ee; padding: 13px 20px; border-radius: 6px; font-size: 13px; white-space: nowrap; }
+    #error { margin: 0; padding: 16px 22px; color: #8b3434; background: #fff0e9; font-size: 13px; line-height: 1.6; border-top: 1px solid #eac9bc; }
+    .steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 30px; padding-top: 26px; }
+    .steps p { margin: 0; font-size: 12px; line-height: 1.7; color: var(--muted); }
+    .steps strong { display: block; color: var(--ink); font-size: 13px; margin-bottom: 3px; font-weight: 600; }
+    .steps span { color: #a9774c; margin-right: 7px; font: italic 16px Georgia, serif; }
+    [hidden] { display: none !important; }
+    @media (max-width: 760px) {
+      header { padding: 18px 20px; } .brand span { display: none; } main { padding: 25px 18px; }
+      h1 { font-size: 38px; } .intro { display: block; } .intro p { margin-top: 15px; }
+      .workspace { grid-template-columns: 1fr; } aside { border-right: 0; border-top: 1px solid var(--line); order: 2; padding: 22px; }
+      #controls { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; } fieldset { margin-bottom: 0; }
+      .viewer { min-height: 360px; } .steps { gap: 15px; } .info { padding: 16px; } .primary { padding: 12px; }
+    }
+    @media (max-width: 440px) { #controls, .steps { grid-template-columns: 1fr; } .info { align-items: stretch; flex-direction: column; } }
+    @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="brand">veryos<span>THE PAPER WORKSHOP</span></div>
+    <p>Cut. Fold. Add a little glow.</p>
+  </header>
+  <main>
+    <div class="intro">
+      <div><div class="eyebrow">Make something a little spooky</div><h1>Paper haunted house</h1></div>
+      <p>Shape your own open-top lantern. Adjust the details, turn it around, then cut and fold it into life.</p>
+    </div>
+    <div class="workspace">
+      <aside>
+        <form id="settings">
+          <p class="unit">All dimensions in millimetres. Updates automatically.</p>
+          <div id="controls"></div>
+          <button id="reset" class="text-button" type="reset">Reset settings</button>
+        </form>
+      </aside>
+      <section class="preview-column" aria-label="Lantern preview">
+        <div class="preview-toolbar">
+          <div class="view-buttons" aria-label="Preview view">
+            <button type="button" id="view-folded" aria-pressed="true">Folded lantern</button>
+            <button type="button" id="view-cut" aria-pressed="false">Cutting template</button>
+          </div>
+          <button id="reset-view" type="button" class="text-button">Reset view</button>
+        </div>
+        <div id="viewer" class="viewer" data-current="false" aria-busy="true">
+          <canvas id="folded-preview" tabindex="0" aria-label="Folded lantern. Drag or use arrow keys to rotate, plus and minus to zoom."></canvas>
+          <div id="cut-preview" hidden></div>
+          <div id="hint">Drag to turn · scroll to zoom</div>
+        </div>
+        <p id="error" role="alert" hidden></p>
+        <div class="info">
+          <div><p id="dimensions">Your paper lantern</p><p id="status" role="status" aria-live="polite">Preparing preview…</p></div>
+          <button id="download" class="primary" type="button" disabled>Download SVG ↓</button>
+        </div>
+      </section>
+    </div>
+    <div class="steps">
+      <p><strong><span>01</span>Cut the template</strong>Import the SVG at 100% scale. Cut the outline and windows from cardstock.</p>
+      <p><strong><span>02</span>Score, fold & glue</strong>Score the four floor edges and four tab roots. Fold up the walls and glue tabs inside the corners.</p>
+      <p><strong><span>03</span>Add a little light</strong>Line the windows with translucent paper if you like. Use a battery LED, never a candle.</p>
+    </div>
+  </main>
+  <script type="module" src="/app.js"></script>
+</body>
+</html>
