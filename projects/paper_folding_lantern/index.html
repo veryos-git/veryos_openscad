@@ -1,0 +1,167 @@
+<!-- Copyright (C) [Jonas Immanuel Frey] - Licensed under GPL -->
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Design and cut a foldable paper haunted-house lantern. Preview the folded lantern, inspect the perforated cutting template, and download SVG and STL files.">
+  <title>Paper lantern · veryos</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --ink: #f3e9dd;
+      --muted: #a998a5;
+      --dim: #7d6b7a;
+      --night: #151017;
+      --panel: #1d151f;
+      --panel-2: #251b28;
+      --line: #3a2a3e;
+      --accent: #e9a45f;
+      --accent-soft: #f0bd86;
+      --purple: #8b5a90;
+      --paper: #efe0c6;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--night); color: var(--ink); font-family: system-ui, sans-serif; }
+    button, input, select { font: inherit; }
+    button { cursor: pointer; }
+    button:disabled { cursor: default; opacity: .42; }
+    :focus-visible { outline: 3px solid var(--accent); outline-offset: 3px; }
+    .brand-mark { width: 24px; height: 24px; filter: invert(1); opacity: .92; }
+    header { max-width: 1440px; margin: auto; padding: 24px 40px; border-bottom: 1px solid var(--line); display: flex; align-items: center; justify-content: space-between; gap: 20px; }
+    .brand { display: flex; align-items: center; gap: 12px; font-weight: 750; font-size: 23px; letter-spacing: -1px; }
+    .brand span { margin-left: 6px; letter-spacing: 1.5px; font-size: 10px; font-weight: 550; color: var(--dim); }
+    header p { margin: 0; color: var(--muted); font-size: 12px; letter-spacing: .3px; }
+    main { max-width: 1440px; margin: auto; padding: 35px 40px 45px; }
+    .intro { display: flex; align-items: end; gap: 30px; justify-content: space-between; margin-bottom: 30px; }
+    .eyebrow { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 2px; color: var(--accent); }
+    h1 { font: 48px/1.02 Georgia, serif; font-weight: 400; letter-spacing: -1.6px; margin: 8px 0 12px; }
+    h1 em { font-style: italic; color: var(--accent-soft); }
+    .intro p { color: var(--muted); line-height: 1.65; max-width: 440px; margin: 0; font-size: 14px; }
+    .workspace { display: grid; grid-template-columns: 300px minmax(0, 1fr); border: 1px solid var(--line); border-radius: 14px; overflow: hidden; background: var(--panel); box-shadow: 0 30px 80px #00000055; }
+    aside { padding: 24px; border-right: 1px solid var(--line); background: linear-gradient(180deg, #211825, #1a131c); }
+    fieldset { border: 0; margin: 0 0 23px; padding: 0; min-width: 0; }
+    legend { font-size: 10px; font-weight: 750; text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 13px; color: var(--accent); }
+    .control { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 10px; font-size: 12px; color: #d8cbd6; }
+    .control input, .control select { width: 104px; min-width: 0; border: 1px solid #4a394e; border-radius: 6px; padding: 7px 8px; background: #130f16; color: var(--ink); }
+    .control select { width: 116px; }
+    .control input:invalid { border-color: #d16a4e; box-shadow: 0 0 0 1px #d16a4e; }
+    .unit { font-size: 10px; color: var(--dim); margin: -4px 0 15px; line-height: 1.5; }
+    .text-button { background: transparent; border: 0; padding: 5px 0; font-size: 12px; text-decoration: underline; color: var(--muted); }
+    .preview-column { min-width: 0; display: flex; flex-direction: column; background: #17111a; }
+    .preview-toolbar { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 16px 22px; flex-wrap: wrap; }
+    .view-buttons { padding: 3px; display: flex; gap: 3px; border-radius: 8px; background: #130f16; border: 1px solid #36283a; }
+    .view-buttons button { border: none; background: transparent; color: var(--muted); border-radius: 6px; padding: 8px 13px; font-size: 12px; }
+    .view-buttons button[aria-pressed=true] { background: #3a293f; color: var(--ink); box-shadow: inset 0 0 0 1px #57435d; }
+    .fold-toggle { display: flex; align-items: center; gap: 7px; color: var(--muted); font-size: 11px; }
+    .fold-toggle input { accent-color: var(--accent); }
+    .viewer { position: relative; flex: 1; min-height: 580px; overflow: hidden; background: radial-gradient(ellipse at 50% 62%, #302036 0%, #1b121e 52%, #120e14 100%); }
+    .viewer::after { content: ""; position: absolute; left: 12%; right: 12%; bottom: -12%; height: 45%; background: radial-gradient(ellipse at 50% 50%, #e9a45f24, transparent 68%); pointer-events: none; }
+    .viewer[data-current=false] canvas, .viewer[data-current=false] #cut-preview { opacity: .3; }
+    canvas, #cut-preview { width: 100%; height: 100%; position: absolute; inset: 0; transition: opacity .2s; }
+    canvas { touch-action: none; cursor: grab; z-index: 1; }
+    canvas:active { cursor: grabbing; }
+    #cut-preview { padding: 30px; z-index: 1; }
+    .cut-stage { position: relative; width: 100%; height: 100%; }
+    #cut-sheet, #fold-overlay { position: absolute; inset: 0; }
+    #cut-sheet svg, #fold-overlay svg { width: 100%; height: 100%; display: block; overflow: visible; }
+    #cut-sheet { filter: drop-shadow(0 18px 24px #00000077); }
+    #cut-sheet svg path { fill: var(--paper); stroke: none; }
+    #fold-overlay svg path { fill: var(--accent); stroke: none; opacity: .9; }
+    #hint { position: absolute; bottom: 15px; left: 15px; right: 15px; text-align: center; color: var(--muted); font-size: 11px; pointer-events: none; z-index: 2; }
+    .legend { position: absolute; top: 14px; right: 18px; z-index: 2; display: flex; gap: 14px; font-size: 10px; color: var(--dim); letter-spacing: .2px; }
+    .legend i { display: inline-block; width: 18px; height: 2px; background: var(--accent); vertical-align: middle; margin-right: 5px; }
+    .legend b { display: inline-block; width: 12px; height: 12px; background: var(--paper); vertical-align: middle; margin-right: 5px; border-radius: 2px; }
+    .info { padding: 17px 22px; display: flex; justify-content: space-between; align-items: center; gap: 18px; border-top: 1px solid var(--line); background: #19121c; }
+    #dimensions { font-weight: 600; font-size: 13px; margin: 0 0 5px; }
+    #status { margin: 0; font-size: 12px; color: var(--muted); }
+    .actions { display: flex; gap: 9px; flex-wrap: wrap; }
+    .primary, .secondary { border-radius: 6px; padding: 12px 16px; font-size: 12px; white-space: nowrap; }
+    .primary { border: 0; background: var(--accent); color: #24160b; font-weight: 650; }
+    .secondary { border: 1px solid #57435d; background: #251b28; color: var(--ink); }
+    .primary:hover:not(:disabled) { background: var(--accent-soft); }
+    .secondary:hover:not(:disabled) { border-color: var(--accent); }
+    #error { margin: 0; padding: 15px 22px; color: #ffcab4; background: #3a1d1c; font-size: 13px; line-height: 1.6; border-top: 1px solid #6a3831; }
+    .steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 30px; padding-top: 26px; }
+    .steps p { margin: 0; font-size: 12px; line-height: 1.7; color: var(--muted); }
+    .steps strong { display: block; color: var(--ink); font-size: 13px; margin-bottom: 3px; font-weight: 600; }
+    .steps span { color: var(--accent); margin-right: 7px; font: italic 16px Georgia, serif; }
+    footer { max-width: 1440px; margin: auto; padding: 0 40px 35px; color: var(--dim); font-size: 11px; display: flex; justify-content: space-between; gap: 16px; }
+    footer a { color: var(--muted); }
+    [hidden] { display: none !important; }
+    @media (max-width: 900px) {
+      header { padding: 18px 20px; } .brand span { display: none; } main { padding: 25px 18px; }
+      h1 { font-size: 38px; } .intro { display: block; } .intro p { margin-top: 15px; }
+      .workspace { grid-template-columns: 1fr; } aside { border-right: 0; border-bottom: 1px solid var(--line); order: 2; }
+      #controls { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; } fieldset { margin-bottom: 0; }
+      .viewer { min-height: 430px; } .steps { gap: 15px; } footer { padding: 0 20px 30px; }
+    }
+    @media (max-width: 560px) {
+      #controls, .steps { grid-template-columns: 1fr; } .info { align-items: stretch; flex-direction: column; }
+      .actions { flex-direction: column; } .primary, .secondary { width: 100%; }
+      h1 { font-size: 32px; } footer { flex-direction: column; }
+    }
+    @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="brand"><img class="brand-mark" src="/veryos_logo.svg" alt=""><span>veryos</span><span>THE PAPER WORKSHOP</span></div>
+    <p>Cut. Fold. Add a little glow.</p>
+  </header>
+  <main>
+    <div class="intro">
+      <div><div class="eyebrow">One sheet · four walls · one pyramid roof</div><h1>Paper <em>lantern</em></h1></div>
+      <p>A haunted little house you can hang. Shape the walls and roof, turn the folded model around, then cut the perforated template and fold it into life.</p>
+    </div>
+    <div class="workspace">
+      <aside>
+        <form id="settings">
+          <p class="unit">All dimensions in millimetres. Changes update the real OpenSCAD model automatically.</p>
+          <div id="controls"></div>
+          <button id="reset" class="text-button" type="reset">Reset settings</button>
+        </form>
+      </aside>
+      <section class="preview-column" aria-label="Lantern preview">
+        <div class="preview-toolbar">
+          <div class="view-buttons" aria-label="Preview view">
+            <button type="button" id="view-folded" aria-pressed="true">Folded lantern</button>
+            <button type="button" id="view-cut" aria-pressed="false">Cutting template</button>
+          </div>
+          <label class="fold-toggle" id="fold-toggle"><input id="show-folds" type="checkbox" checked> Show fold lines</label>
+          <button id="reset-view" type="button" class="text-button">Reset view</button>
+        </div>
+        <div id="viewer" class="viewer" data-current="false" aria-busy="true">
+          <canvas id="folded-preview" tabindex="0" aria-label="Folded paper lantern. Drag or use arrow keys to rotate; plus and minus to zoom."></canvas>
+          <div id="cut-preview" hidden>
+            <div class="cut-stage">
+              <div id="cut-sheet" role="img" aria-label="Flat cutting template"></div>
+              <div id="fold-overlay" aria-hidden="true"></div>
+            </div>
+            <div class="legend"><span><b></b>paper</span><span><i></i>perforated folds</span></div>
+          </div>
+          <div id="hint">Drag to turn · scroll to zoom</div>
+        </div>
+        <p id="error" role="alert" hidden></p>
+        <div class="info">
+          <div><p id="dimensions">Your paper lantern</p><p id="status" role="status" aria-live="polite">Preparing preview…</p></div>
+          <div class="actions">
+            <button id="download-svg" class="primary" type="button" disabled>Download SVG ↓</button>
+            <button id="download-stl" class="secondary" type="button" disabled>Download 3D model</button>
+          </div>
+        </div>
+      </section>
+    </div>
+    <div class="steps">
+      <p><strong><span>01</span>Cut the one-piece net</strong>Use the SVG at 100% scale. The outer outline, cutouts and every dashed fold slit are cut; the paper bridges keep the net together.</p>
+      <p><strong><span>02</span>Fold, tuck and glue</strong>Fold the floor in, fold the walls up, tuck the roof faces and cap, then glue the tabs inside. The glue tab closes the fourth corner.</p>
+      <p><strong><span>03</span>Hang a little light</strong>Place a battery LED inside and hang the lantern by the tab. Use LEDs only; paper lanterns are not for candles.</p>
+    </div>
+  </main>
+  <footer>
+    <span>veryos — very open source. Make it, share it, improve it.</span>
+    <span>GPL · OpenSCAD + Node · no tracking, no cloud</span>
+  </footer>
+  <script type="module" src="/app.js"></script>
+</body>
+</html>

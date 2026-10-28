@@ -1,0 +1,11 @@
+{
+  "name": "paper-folding-lantern",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Parametric foldable paper haunted-house lantern with a local OpenSCAD web designer.",
+  "scripts": {
+    "start": "node server.js",
+    "test": "node --test server_test.js"
+  }
+}
