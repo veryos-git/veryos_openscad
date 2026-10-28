@@ -70,9 +70,15 @@ the light in, then tighten the thumb screws.
 
 The print layout fits the front frame on its front face, the top frame on its
 split face beside it (turned 90 degrees), all four covers, 16 thumb screws and
-the two light clamp screws into about 298 x 288 mm. The covers, screws and
-tripod cutout are unchanged from V5; a V5 build only needs the two new frame
-parts printed.
+the two light clamp screws into about 298 x 288 mm. The covers and screws are
+unchanged from V5; a V5 build only needs the two new frame parts printed.
+
+The tripod cutout on the `-y` long cover is now as wide as the cover allows.
+With the default sizes it grows from V5's 48.7 mm to 94.8 mm. The width is
+computed from the top-row cover screw positions and stops `hole_margin`
+(0.8 mm) short of the screw heads, so the heads stay fully supported.
+`tripod_cutout_width = 0` selects this automatic maximum; set a smaller
+positive value to narrow the cutout.
 
 The top frame prints standing on its split face: the band is on the bed, the
 top plate above it and the clamp towers on top. The front frame prints on its

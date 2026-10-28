@@ -4,8 +4,9 @@
 // and take over the pillars' job. frame_top holds the top plate, the two light
 // clamps and the upper row of cover screws. frame_front holds the front rim,
 // the clothespin lips and the lower row of cover screws. The four corner
-// pillars and all side wall between the two screw bands are gone. Covers,
-// screws and the tripod cutout are unchanged from V5.
+// pillars and all side wall between the two screw bands are gone. Covers and
+// screws are unchanged from V5; the tripod cutout is now as wide as the cover
+// screw heads allow.
 //
 // V5: one big wall cover has a rounded, open cutout at its light-side edge
 // for fitting and turning the tripod ballhead. Fit this cover on the -y
@@ -90,8 +91,9 @@ wallcover_screw_inset = 8;
 
 /* [Tripod clearance] */
 // Width across the long cover, centred below the light's 1/4" thread.
-// By default it follows the existing top-plate notch.
-tripod_cutout_width = side_notch_width;
+// 0 uses the widest cutout that still leaves hole_margin between the cutout
+// and the top-row cover screw heads. Set a smaller positive value to narrow it.
+tripod_cutout_width = 0;
 // Depth from the light-side edge, measured along the sloping cover.
 // Estimated from problem2/image.png; increase for a larger ballhead wheel.
 tripod_cutout_depth = 12;
@@ -209,20 +211,27 @@ logo_w = 2 * (logo_b + logo_arm * sin(logo_angle));
 ring_in = logo_r - logo_stroke;
 s_small = (2 * ring_in - logo_stroke) / 4;
 s_big = s_small + logo_stroke;
+// Widest tripod cutout that keeps the top-row cover screw heads fully seated.
+tripod_cutout_width_max = 2 * (abs(cover_screws(top_x)[0].x)
+                               - thumb_head_width / (2 * cos(30))
+                               - hole_margin - eps);
+tripod_cutout_width_actual = tripod_cutout_width > 0
+                             ? tripod_cutout_width
+                             : tripod_cutout_width_max;
 
 assert(clamp_length < light_length / 2, "Clamps must not meet in the middle.");
 assert(opening_half.x > 0 && opening_half.y > 0, "Plate overlap is larger than the light.");
 assert(wallcover_lip_clearance >= wallcover_thickness * tan(wall_angle),
        "Wall cover lip would hit the frame; raise wallcover_lip_clearance.");
-assert(tripod_cutout_width > 0 &&
-       tripod_cutout_width / 2 + hole_margin <
+assert(tripod_cutout_width_actual > 0 &&
+       tripod_cutout_width_actual / 2 + hole_margin <
            abs(cover_screws(top_x)[0].x) - thumb_head_width / (2 * cos(30)),
        "Tripod cutout must leave room for the cover screws and their heads.");
 assert(tripod_cutout_depth > 0 &&
        tripod_cutout_depth < cover_bottom_v - wallcover_screw_inset - thumb_hole_r - hole_margin,
        "Tripod cutout must leave the front screw row and cover edge intact.");
 assert(tripod_cutout_radius >= 0 &&
-       tripod_cutout_radius <= min(tripod_cutout_width / 2, tripod_cutout_depth),
+       tripod_cutout_radius <= min(tripod_cutout_width_actual / 2, tripod_cutout_depth),
        "Tripod corner radius must fit within the cutout width and depth.");
 
 if (part == "print_layout") print_layout();
@@ -450,7 +459,7 @@ module wallcover(top_half, with_logo = false, with_tripod_cutout = false) {
 // Open U-shaped notch at y = 0. Only the two inside corners are rounded;
 // the cutter extends beyond the edge and through the full lip thickness.
 module tripod_cutout() {
-    w = tripod_cutout_width;
+    w = tripod_cutout_width_actual;
     d = tripod_cutout_depth;
     r = tripod_cutout_radius;
     translate([0, 0, -eps]) linear_extrude(2 * wallcover_thickness + 2 * eps)
