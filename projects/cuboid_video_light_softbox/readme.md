@@ -3,7 +3,8 @@ this project is a openSCAD script that can generate a frame and screw for a vide
 
 
 there are the following parts: 
-- frame
+- frame top (top plate and light clamps, upper cover screw band)
+- frame front (front rim, fabric lips, lower cover screw band)
 - screw 
 - wallcover big
 - wallcover small
@@ -51,3 +52,28 @@ and two `wallcover_small`. The assembly preview shows the cutout on the
 correct side. The frame, screws, and other covers retain their V4 geometry;
 an existing V4 build only needs the replacement `wallcover_tripod` printed
 flat with its lip facing up.
+
+## V6
+
+`cuboid_video_light_softboxV6.scad` prints the frame as two parts and drops
+the four corner pillars:
+
+- `frame_top` has the top plate, both light clamp towers and the upper band
+  with the top row of cover screws.
+- `frame_front` has the front rim, the eight clothespin lips and the lower
+  band with the bottom row of cover screws.
+
+The side wall and the corner pillars between the two bands are gone. The four
+wall covers already screw onto those bands, so they now bridge the two frame
+parts and take over the pillars' job. Assemble the covers loosely first, slide
+the light in, then tighten the thumb screws.
+
+The print layout fits the front frame on its front face, the top frame on its
+split face beside it (turned 90 degrees), all four covers, 16 thumb screws and
+the two light clamp screws into about 298 x 288 mm. The covers, screws and
+tripod cutout are unchanged from V5; a V5 build only needs the two new frame
+parts printed.
+
+The top frame prints standing on its split face: the band is on the bed, the
+top plate above it and the clamp towers on top. The front frame prints on its
+front face, as the one-piece V5 frame did.
