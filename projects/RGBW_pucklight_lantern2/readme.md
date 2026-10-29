@@ -26,13 +26,15 @@ the eaves.
 
 ## OpenSCAD
 
-`RGBW_pucklight_lantern2.scad` is the generator. `part` shows the assembly on
-the click base, the assembly cut in half, all parts as printed, or one part.
-The holder is imported with a relative path, so keep both project folders side
-by side. OpenSCAD's `use` imports no variables, so the few holder dimensions
-the lantern needs are copied at the top of the hidden section (`holder_body_w`,
-`holder_top_z`, ...). If the holder changes, change it in its own project and
-update those.
+`RGBW_pucklight_lantern2.scad` is the generator. It works on its own, also in
+a browser OpenSCAD. `part` shows the assembly on the click base, the assembly
+cut in half, all parts as printed, or one part.
+
+The holder's code (its parameters, checks and modules) is copied from
+`../RGBW_pucklight_holder/RGBW_pucklight_holderV2.scad`. Its parameters are
+in the sections Puck light, Holder top part, Screw-in, Click base and Logo,
+with the same names as in the holder project. Changes to the holder project
+don't reach the lantern; copy them over.
 
 ![section](section.png)
 
