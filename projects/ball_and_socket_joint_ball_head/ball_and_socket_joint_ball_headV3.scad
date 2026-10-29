@@ -69,7 +69,8 @@ ball_clearance = 0.1;
 cup_angle = 25; // [0:1:45]
 // Flat top of the cup, inside its chamfer. Narrowed to leave a chamfer.
 cup_top_width = 1;
-slit_count = 4; // [0:1:8]
+// One points at a corner of the plate.
+slit_count = 3; // [0:1:8]
 slit_width = 0.8;
 // The slits reach down to this share of the ball's radius below its centre.
 slit_depth = 0.5;
@@ -257,11 +258,10 @@ module socket() {
         }
         plate_cuts();
         translate([0, 0, ball_z]) sphere(r = cavity_r);
-        // Turned so that, laid down, a finger is at the top and none of the
-        // 4 default slits is level: a level slit's upper face would droop
-        // onto the finger below.
+        // One slit points at the first hole's corner. With 3 slits and 3
+        // holes each points at a corner, and laid down one is at the top.
         z = ball_z - slit_depth * ball_r;
-        for (i = [0:1:slit_count - 1]) rotate(360 * i / slit_count - 90 - 180 / slit_count - lay_angle)
+        for (i = [0:1:slit_count - 1]) rotate(360 * i / slit_count)
             translate([0, -slit_width / 2, z]) cube([thread_d, slit_width, cup_top - z + 1]);
     }
 }

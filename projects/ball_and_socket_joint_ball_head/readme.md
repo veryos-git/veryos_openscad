@@ -29,9 +29,9 @@ prints like a horizontal hole. Turn the slicer's own supports off.
 
 ![the parts on their side, cut through the axis](print_section_v3.png)
 
-The slits are turned so that, laid down, a finger is on top and each of the
-4 slits is at 45 degrees. A level slit's upper face would droop onto the
-finger below.
+The cup has 3 slits (`slit_count`), one pointing at each corner of the
+plate. Laid down, one is at the top and the other two point at the lower
+corners, 30 degrees below level.
 
 Values that do not fit are changed as in V2. The hole circle grows until the
 screw heads clear the cup, the corners grow to fit the screw heads and to
