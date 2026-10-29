@@ -19,9 +19,9 @@ pillars.
   up to a ball. It has the female thread inside the band.
 - `screwin`: the holder's bottom screw. It holds the puck in the frame.
 - `clickbase`: the holder's click base.
-- `window` (4x): a flat 0.8 mm sheet, 65.7 mm wide at the bottom, 89.3 mm at
-  the top and 89.5 mm long. Print it in a translucent filament, or cut film
-  or paper to this shape.
+- `window` (4x): a flat 3 mm plate, 61.7 mm wide at the bottom, 85.3 mm at
+  the top and 89.5 mm long. Print it in a translucent filament, or cut it
+  from 3 mm acrylic.
 
 `part` shows the assembly on the click base, the assembly cut in half, all
 parts, or one part. The lantern is 199 mm high on the click base.
@@ -45,23 +45,24 @@ the light.
 
 ## windows and slits
 
-The slits are 1.4 mm wide (`window_thickness` plus 0.3 mm `slot_clearance`
+The slits are 3.6 mm wide (`window_thickness` plus 0.3 mm `slot_clearance`
 on each side), behind a 1.2 mm lip (`slot_lip`), and reach 3 mm
-(`window_overlap`) into each pillar. They run from 1 mm above the holder up
+(`window_overlap`) into each pillar. The pillars are 10 mm wide
+(`pillar_width`) to hold two slits. They run from 1 mm above the holder up
 through the frame's top. A window slides in from above and stands on the
 slits' floor in the rail; its top ends 0.3 mm under the frame's top, and
 the roof covers the slits.
 
 Between the pillars, at the top, there is no lip: the window lies in front
-of the band. For film or paper, set `window_thickness` to the sheet's
-thickness and the slits follow.
+of the band. For thinner windows, such as film or paper, set
+`window_thickness` to their thickness and the slits follow.
 
 ## the frame's top
 
 The band is the frame's top behind the slits. Its underside is a 45
 degree funnel that narrows to the neck's 82.4 mm bore, so it prints
-without support. Behind each window the funnel shows as an arch, 6 mm deep
-in the middle and about 22 mm at the pillars. In the corners it becomes 45
+without support. Behind each window the funnel shows as an arch, 4 mm deep
+in the middle and about 19 mm at the pillars. In the corners it becomes 45
 degree gussets.
 
 The neck has the roof's thread outside: 88 mm (`neck_d`), 6 mm high, 2 mm
@@ -105,8 +106,8 @@ The VeryOS logo is engraved in every part:
 - screwin and clickbase: the holder's.
 - roof: 12 mm wide (`roof_logo_width`), 1 mm deep, in the front of the
   band, following its lean.
-- window: 20 mm wide (`window_logo_width`), half through the window, on its
-  outside, 3 mm above the rail. It shows brighter when the light is on.
+- window: 20 mm wide (`window_logo_width`), half through the window (1.5
+  mm), on its outside, 3 mm above the rail. It shows brighter when the light is on.
 
 ## printing
 
@@ -116,7 +117,8 @@ flat with the logo up. Nothing needs support: the frame's funnel, the
 roof's cone and the ball's cone are 45 degrees, the threads have 45 degree
 flanks, the pillars lean out 7.6 degrees, and the holder's ribs bridge its
 window as in the holder. For the windows, a translucent or white filament
-at 0.8 mm (4 layers of 0.2 mm) diffuses the light.
+diffuses the light; at 3 mm it lets less light through than a thinner
+window.
 
 ## assembly
 
@@ -138,7 +140,9 @@ at 0.8 mm (4 layers of 0.2 mm) diffuses the light.
   around.
 - the roof is hollow in a 45 degree cone instead of a 1.8 mm shell, whose
   underside would overhang more than 60 degrees at the eaves.
-- the slits are 1.4 mm wide instead of 3 mm and follow `window_thickness`.
+- the slits are 3.6 mm wide instead of 3 mm: a 3 mm window and 0.3 mm
+  clearance on each side. They follow `window_thickness`.
+- the pillars are 10 mm wide, to hold two such slits.
 - the roof lines up through `roof_seat_gap` instead of the fine-tuning ring.
 - the ball stands on a 45 degree cone instead of a rounded neck.
 - the holder (top part, screw and click base) is the V2 holder project's,

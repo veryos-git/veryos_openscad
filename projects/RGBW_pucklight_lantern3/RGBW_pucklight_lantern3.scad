@@ -40,15 +40,15 @@ top_width = 100;
 frame_height = 90;
 // Width of a corner pillar on each side, and the frame's depth from the
 // outside in.
-pillar_width = 8;
+pillar_width = 10;
 frame_depth = 6;
 // The rail between the pillars, on the holder's top.
 rail_height = 6;
 
 /* [Windows] */
-// A window is a flat sheet: printed (part = "window") or cut from film or
-// paper of this thickness.
-window_thickness = 0.8;
+// A window is a flat plate: printed (part = "window") or cut from acrylic,
+// film or paper of this thickness.
+window_thickness = 3;
 // Gap on each side of a window in its slit, and at its edges.
 slot_clearance = 0.3;
 // Wall in front of the slits.
