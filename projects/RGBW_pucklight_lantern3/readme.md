@@ -30,13 +30,14 @@ parts, or one part. The lantern is 199 mm high on the click base.
 
 ## the holder
 
-The puck's mount is not modelled again. `toppart()`, `bottom_screw()`,
-`clickbase()`, `puck()`, `threaded_rod()` and the logo come from
-`../RGBW_pucklight_holder/RGBW_pucklight_holderV2.scad` through `use`, so
-keep both project folders side by side. A few of the holder's dimensions
-are copied into the hidden section of the generator (the 76 mm body, its
-29.1 mm top, and the click base's numbers for the assembly view). If the
-holder changes, update them there.
+The puck's mount is the holder project's. Its parameters, `toppart()`,
+`bottom_screw()`, `clickbase()`, `puck()`, `threaded_rod()` and the logo
+are copied unchanged from
+`../RGBW_pucklight_holder/RGBW_pucklight_holderV2.scad`, so the generator
+needs no other file and runs in a browser OpenSCAD playground too. The
+holder's parameters are in the Customizer under Puck light, Holder top
+part, Screwin and Click base, and the frame follows the top part's size.
+If the holder project changes, copy the change over by hand.
 
 It clicks as in the holder (see its readme): the lantern stands on the
 click base and floats on the puck's dome; pressing the lantern down clicks
@@ -76,7 +77,7 @@ chamfered top. Its bore lets the light into the roof.
   steeper towards the top. It ends 5 mm wide under a 12 mm ball, which
   stands on a 45 degree cone.
 - inside: the female thread, with 0.3 mm radial clearance
-  (`thread_clearance`) and a 45 degree lead-in, up to 7 mm, then a hollow
+  (`roof_thread_clearance`) and a 45 degree lead-in, up to 7 mm, then a hollow
   45 degree cone. So the roof is thicker towards the eaves; at its thinnest,
   in the middle of a face, it is 4.6 mm (measured horizontally).
 - slits: vertical, 2 mm wide (`slit_width`) and 1.6 mm apart
@@ -91,7 +92,7 @@ The roof is 76.9 mm high.
 ### lining the roof up
 
 Both threads are in phase: the roof is square to the frame when it is 0.4
-mm (`seat_gap`) above the frame's top. From there it can turn 72 degrees
+mm (`roof_seat_gap`) above the frame's top. From there it can turn 72 degrees
 further before it stops on the frame. So screw it on until it stops, then
 turn it back until its sides line up with the frame's. The thread is fine
 enough that it stays there. Without the gap, 0.1 mm of print tolerance
@@ -138,7 +139,7 @@ at 0.8 mm (4 layers of 0.2 mm) diffuses the light.
 - the roof is hollow in a 45 degree cone instead of a 1.8 mm shell, whose
   underside would overhang more than 60 degrees at the eaves.
 - the slits are 1.4 mm wide instead of 3 mm and follow `window_thickness`.
-- the roof lines up through `seat_gap` instead of the fine-tuning ring.
+- the roof lines up through `roof_seat_gap` instead of the fine-tuning ring.
 - the ball stands on a 45 degree cone instead of a rounded neck.
 - the holder (top part, screw and click base) is the V2 holder project's,
   with its pins and slot, instead of the plain click base.
