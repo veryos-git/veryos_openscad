@@ -19,7 +19,7 @@ the enclosure should have parts:
 
 ![preview](preview.png)
 
-`RGBW_pucklight_holderV2.scad` generates the three parts of the Onshape model
+`RGBW_pucklight_holderV3.scad` generates the three parts of the Onshape model
 in `onshape_model`, parametric. The puck's size comes from the
 manufacturer's CAD model in `rgbw_light_specs`: 62 mm wide, 26.8 mm high
 (the spec sheet says 62.2 x 27.6). The Onshape model was built around the
@@ -28,6 +28,12 @@ CAD model too.
 `RGBW_pucklight_holderV1.scad` is the first version. Like the Onshape model,
 it has a flat step from the screw's recess to the thread, which overhangs
 2.8 mm in the top part; V2 makes it 45 degrees (see below).
+
+`RGBW_pucklight_holderV2.scad` ends the cavity's shoulder on a flat ceiling
+around the window, which overhangs 2.1 mm over the puck (layer 102 in
+`slicer_overhang/image.png`). V3 runs the shoulder up to the window's edge,
+so the top surface is 1.1 mm higher, 30.2 instead of 29.1 mm. The ribs'
+tops stay at 34.5 mm.
 
 ![section](section.png)
 
@@ -75,8 +81,8 @@ or one part.
 
 ## differences from the Onshape model
 
-- the cavity's shoulder above the thread is a 45 degree cone instead of the
-  rounded fillet, so it prints without support.
+- the cavity's shoulder above the thread is a 45 degree cone up to the
+  window's edge instead of the rounded fillet, so it prints without support.
 - the step from the screw's recess to the thread is a 45 degree cone, in the
   top part and on the screw's flange, instead of flat, which overhung 2.8 mm
   in the top part. The flange is 4 mm high instead of 6.9, so the thread
