@@ -52,9 +52,9 @@ wall = 2.25;
 // Between the cavity's ceiling and the top; the window's edge has a 45
 // degree chamfer through it.
 top_thickness = 1;
-rib_width = 1;
+rib_width = 2;
 // Height of the ribs above the point where they touch the dome.
-rib_height = 1.4;
+rib_height = 2;
 // The ribs' underside is flat over this diameter and slopes down to the
 // window's edge outside it.
 rib_contact_d = 30;
