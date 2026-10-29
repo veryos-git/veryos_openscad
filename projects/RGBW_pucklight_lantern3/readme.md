@@ -16,7 +16,7 @@ pillars.
   band carries the neck the roof screws onto. Each pillar has a slit on
   both sides for the windows.
 - `roof`: a 12 mm band that continues the frame's sides, then curved sides
-  up to a ball. It has the female thread inside the band.
+  up to a ball, as a 2 mm shell. It has the female thread inside the band.
 - `screwin`: the holder's bottom screw. It holds the puck in the frame.
 - `clickbase`: the holder's click base.
 - `window` (4x): a flat 3 mm plate, 61.7 mm wide at the bottom, 85.3 mm at
@@ -24,7 +24,7 @@ pillars.
   from 3 mm acrylic.
 
 `part` shows the assembly on the click base, the assembly cut in half, all
-parts, or one part. The lantern is 199 mm high on the click base.
+parts, or one part. The lantern is 200 mm high on the click base.
 
 ![section](section.png)
 
@@ -33,11 +33,16 @@ parts, or one part. The lantern is 199 mm high on the click base.
 The puck's mount is the holder project's. Its parameters, `toppart()`,
 `bottom_screw()`, `clickbase()`, `puck()`, `threaded_rod()` and the logo
 are copied unchanged from
-`../RGBW_pucklight_holder/RGBW_pucklight_holderV2.scad`, so the generator
+`../RGBW_pucklight_holder/RGBW_pucklight_holderV3.scad`, so the generator
 needs no other file and runs in a browser OpenSCAD playground too. The
 holder's parameters are in the Customizer under Puck light, Holder top
 part, Screwin and Click base, and the frame follows the top part's size.
 If the holder project changes, copy the change over by hand.
+
+In V3 the cavity's 45 degree shoulder runs up to the window's edge, instead
+of ending on a flat ceiling that overhung 2.1 mm over the puck. So the top
+part, where the frame starts, is 30.2 mm high instead of 29.1, and the
+lantern is 1.1 mm higher.
 
 It clicks as in the holder (see its readme): the lantern stands on the
 click base and floats on the puck's dome; pressing the lantern down clicks
@@ -77,18 +82,26 @@ chamfered top. Its bore lets the light into the roof.
   the axis 60 mm (`roof_rise`) higher, 26 degrees steep at the eaves and
   steeper towards the top. It ends 5 mm wide under a 12 mm ball, which
   stands on a 45 degree cone.
-- inside: the female thread, with 0.3 mm radial clearance
-  (`roof_thread_clearance`) and a 45 degree lead-in, up to 7 mm, then a hollow
-  45 degree cone. So the roof is thicker towards the eaves; at its thinnest,
-  in the middle of a face, it is 4.6 mm (measured horizontally).
+- thread: female, with 0.3 mm radial clearance (`roof_thread_clearance`)
+  and a 45 degree lead-in, up to 7 mm, in a ring that meets the band's
+  walls in the middle of each face.
+- shell: around it the roof is a shell, 2 mm (`roof_wall`) thick square to
+  its surface, on a 2 mm floor; in the band's corners it is hollow down to
+  the floor. The lower 18 mm of the curve, above the eaves, is flatter than
+  45 degrees. There the inside stays a 45 degree plane, so it prints
+  without support, and the shell gets thicker towards the eaves: 4.6 mm at
+  the eaves in the middle of a face, more along the hips. The hollow ends
+  in a 2.7 mm wide flat ceiling under the tip of the ball's cone.
 - slits: vertical, 2 mm wide (`slit_width`) and 1.6 mm apart
   (`slit_spacing`), along each face, kept 2.5 mm (`slit_margin`) from the
   hips, the eaves, the middle of the face and the ball, with a row of 2 mm
-  squares along the eaves. They are cut from the thread's top up: over the
-  cone they go through and let the light out; outside it, near the eaves
-  and in the corners, they end blind in the band.
+  squares along the eaves. They are cut from the thread's top up and go
+  through the shell, except the squares at the eaves, which end blind in
+  the band.
 
-The roof is 76.9 mm high.
+The roof is 76.9 mm high and takes 53 cm³ of material (88 cm³ when it was
+hollow only in a 45 degree cone above the thread). A 2 mm shell all the way
+to the eaves would be 40 cm³, but it would need support under the eaves.
 
 ### lining the roof up
 
@@ -111,12 +124,13 @@ The VeryOS logo is engraved in every part:
 
 ## printing
 
-Print the frame standing (125 mm high with the neck), the roof standing on
+Print the frame standing (126 mm high with the neck), the roof standing on
 its band, the screwin and the click base as in the holder, and the windows
-flat with the logo up. Nothing needs support: the frame's funnel, the
-roof's cone and the ball's cone are 45 degrees, the threads have 45 degree
-flanks, the pillars lean out 7.6 degrees, and the holder's ribs bridge its
-window as in the holder. For the windows, a translucent or white filament
+flat with the logo up. Nothing needs support: the frame's funnel and the
+ball's cone are 45 degrees, the roof's inside is no flatter than 45
+degrees, its ceiling under the ball bridges 2.7 mm, the threads have 45
+degree flanks, the pillars lean out 7.6 degrees, and the holder's ribs
+bridge its window as in the holder. For the windows, a translucent or white filament
 diffuses the light; at 3 mm it lets less light through than a thinner
 window.
 
@@ -138,14 +152,14 @@ window.
 - the frame's top band sits behind the windows, with a 45 degree funnel
   under it, instead of a plate with a lip in front of the windows all
   around.
-- the roof is hollow in a 45 degree cone instead of a 1.8 mm shell, whose
-  underside would overhang more than 60 degrees at the eaves.
+- the roof is a 2 mm shell instead of 1.8 mm, and thicker near the eaves:
+  a shell of constant thickness would overhang more than 60 degrees there.
 - the slits are 3.6 mm wide instead of 3 mm: a 3 mm window and 0.3 mm
   clearance on each side. They follow `window_thickness`.
 - the pillars are 10 mm wide, to hold two such slits.
 - the roof lines up through `roof_seat_gap` instead of the fine-tuning ring.
 - the ball stands on a 45 degree cone instead of a rounded neck.
-- the holder (top part, screw and click base) is the V2 holder project's,
+- the holder (top part, screw and click base) is the V3 holder project's,
   with its pins and slot, instead of the plain click base.
 - the star cutouts in the roof (`cutout_star`) are not included.
 
@@ -153,7 +167,9 @@ window.
 
 Nothing here has been printed yet. The lantern's weight rests on the
 puck's dome while it stands on the click base; if that is enough to click
-the light, stand it on something else.
+the light, stand it on something else. In the roof's upper part the bars
+between the slits are 1.6 mm wide and only as deep as the 2 mm shell; if
+they are too weak, raise `roof_wall`.
 
 ## files
 

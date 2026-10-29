@@ -6,7 +6,7 @@
 // in it, the holder's bottom screw (the screwin) screws into it from below,
 // and the holder's click base clicks the light when the lantern is pressed
 // down. The holder's parameters and modules are copied from
-// ../RGBW_pucklight_holder/RGBW_pucklight_holderV2.scad, so this file runs
+// ../RGBW_pucklight_holder/RGBW_pucklight_holderV3.scad, so this file runs
 // on its own; copy changes to the holder over by hand. Above the top part
 // four corner pillars lean out to a wider top. Each pillar has a slit on
 // both sides; a window slides into the slits of two pillars from above and
@@ -16,15 +16,16 @@
 // shows as an arch behind each window.
 //
 // The roof continues the frame's sides in a band, then curves in to a ball
-// on top. Vertical slits through it let the light out at the top. Above its
-// thread it is hollow in a 45 degree cone.
+// on top. Vertical slits through it let the light out at the top. It is a
+// shell, roof_wall thick; near the eaves, where the curve is flatter than 45
+// degrees, its inside stays at 45 degrees, so the shell is thicker there.
 //
 // Print every part standing as it is used, bottom on the bed, and the
-// windows flat, all without support: the band's funnel, the roof's cone and
-// the ball's underside are 45 degrees, and the threads have 45 degree flanks
-// as in the holder. The VeryOS logo is engraved in the front of the frame
-// (the holder's), in the screwin and the click base (the holder's), in the
-// front of the roof's band and in each window.
+// windows flat, all without support: the band's funnel and the ball's
+// underside are 45 degrees, the roof's inside is no flatter, and the threads
+// have 45 degree flanks as in the holder. The VeryOS logo is engraved in the
+// front of the frame (the holder's), in the screwin and the click base (the
+// holder's), in the front of the roof's band and in each window.
 // Origin: centre of the frame's bottom face.
 //
 // Units: mm. No external files or libraries needed.
@@ -81,6 +82,10 @@ roof_curve_r = 100;
 // The curve ends where the roof is this wide, under the ball.
 roof_top_width = 5;
 finial_d = 12;
+// The roof is a shell this thick, square to its surface, on a floor as
+// thick. Where the curve is flatter than 45 degrees, near the eaves, the
+// inside stays at 45 degrees, so it prints without support.
+roof_wall = 2;
 // Vertical slits through the roof along each face, and a row of short ones
 // along the eaves.
 slit_width = 2;
@@ -105,13 +110,11 @@ puck_clearance = 0.5;
 puck_play = 0.7;
 
 /* [Holder top part] */
-// Round window over the dome.
+// Round window over the dome. The cavity's 45 degree shoulder runs up to its
+// edge, so it also sets the height of the top surface: wider is lower.
 window_d = 50;
 // Thinnest side wall of the square body, beside the bottom screw.
 wall = 2.25;
-// Between the cavity's ceiling and the top; the window's edge has a 45
-// degree chamfer through it.
-top_thickness = 1;
 rib_width = 2;
 // Height of the ribs above the point where they touch the dome.
 rib_height = 2;
@@ -177,7 +180,7 @@ eps = 0.01;
 layout_gap = 10;
 roof_steps = 30;
 
-// The holder, as in RGBW_pucklight_holderV2.scad.
+// The holder, as in RGBW_pucklight_holderV3.scad.
 puck_r = puck_d / 2;
 thread_depth = 0.4 * thread_pitch;
 // Inner wall of the bottom screw around the puck, and its opening for the
@@ -205,16 +208,15 @@ body_w = 2 * half;
 // Gap between the cavity and the puck at its highest, pushed up by the disc.
 cavity_gap = 0.5;
 lift_z = lip_height + press_height;
-ceiling_z = lift_z + puck_edge_height + cavity_gap;
-top_z = ceiling_z + top_thickness;
 // The cavity's shoulder is the 45 degree cone r + z = shoulder_c, cavity_gap
 // off the puck's rounded edge. It starts at the top of the thread and ends
-// on the ceiling.
+// at the window's edge on the top surface, so there is no flat ceiling to
+// overhang.
 shoulder_c = (puck_r - puck_edge_radius) + (lift_z + puck_edge_height - puck_edge_radius)
            + (puck_edge_radius + cavity_gap) * sqrt(2);
 shoulder_z = shoulder_c - hole_minor_r;
-ceiling_r = shoulder_c - ceiling_z;
 window_r = window_d / 2;
+top_z = shoulder_c - window_r;
 // The ribs' underside in the middle, puck_play above the puck lying on the
 // floor.
 touch_z = lip_height + puck_height + puck_play;
@@ -298,9 +300,22 @@ roof_top_h = cy - sqrt(roof_curve_r * roof_curve_r - pow(cx - roof_top_width / 2
 // The ball stands on a 45 degree cone as wide as the curve's end.
 finial_r = finial_d / 2;
 finial_z = roof_band_height + roof_top_h + finial_r * sqrt(2) - roof_top_width / 2;
-// Between the cone inside and the curve, in the middle of a face.
-function roof_wall(h) = roof_a(h) - (roof_thread_d / 2 - (roof_band_height + h - roof_thread_top));
-roof_min_wall = min([for (i = [0:50]) roof_wall(i / 50 * roof_top_h)]);
+// The shell's inside: the band's lean roof_wall in, and the arc of radius
+// in_r around the curve's centre. Below in_t above the band that arc is
+// flatter than 45 degrees, so there the inside is the 45 degree plane
+// tangent to it, r + h = in_c. roof_in(z) is its half width at z above the
+// roof's bottom.
+in_r = roof_curve_r + roof_wall;
+in_t = cy - in_r / sqrt(2);
+in_c = cx + cy - in_r * sqrt(2);
+function roof_in(z) = let (h = z - roof_band_height)
+    min(w1 + lean * z - roof_wall / cos(tilt),
+        h < in_t ? in_c - h : cx - sqrt(in_r * in_r - (h - cy) * (h - cy)));
+// The inside reaches from the floor up to the tip of the ball's cone.
+roof_in_top = finial_z - finial_r * sqrt(2);
+// Around the thread a ring, which meets the band's inside in the middle of
+// each face; in the corners the inside reaches down to the floor.
+roof_ring_r = w1 + lean * roof_thread_top - roof_wall / cos(tilt);
 slit_pitch = slit_width + slit_spacing;
 // The short slits at the eaves are square.
 eave_slit_y = a0 - slit_margin - slit_width;
@@ -309,7 +324,7 @@ eave_slit_y = a0 - slit_margin - slit_width;
 assert(seat_gap < puck_play, "seat_gap must stay below puck_play, or the bottom screw clamps the puck.");
 assert(press_height > puck_play, "press_height must exceed puck_play, or the base never pushes the button.");
 assert(window_d > puck_dome_d, "The window must be wider than the dome.");
-assert(window_r <= ceiling_r, "window_d is too wide for the cavity's shoulder.");
+assert(top_z >= lift_z + puck_edge_height + cavity_gap, "window_d is too wide for the cavity's shoulder.");
 assert(touch_z > top_z, "The dome does not reach above the top part.");
 assert(rib_contact_d < window_d, "rib_contact_d must be smaller than window_d.");
 assert(flange_h >= 1, "screw_thread_length is too long for screw_height: no flange left below the thread.");
@@ -332,7 +347,8 @@ assert(neck_d / 2 + 1 <= w1 - slot_in, "neck_d is too large: the neck must stay 
 assert(band_h < frame_height - rail_height, "frame_height is too small for the band.");
 assert(roof_curve_r > chord / 2 && cy >= roof_rise, "roof_curve_r is too small for the roof's width and rise.");
 assert(roof_thread_top + 2 <= roof_band_height, "roof_band_height must be 2 mm more than the thread.");
-assert(roof_min_wall >= 2, "The roof is thinner than 2 mm above its cone; raise roof_rise or roof_curve_r.");
+assert(roof_in(roof_thread_top) >= roof_thread_d / 2, "The roof's inside is narrower than its thread; lower roof_wall.");
+assert(roof_in(roof_in_top) >= 0.5, "roof_wall is too thick for the roof's top; lower roof_wall.");
 assert(logo_h(roof_logo_width) + 2 <= roof_band_height, "The roof's logo does not fit its band; lower roof_logo_width.");
 assert(window_logo_width + 4 <= 2 * win_bot_half && win_logo_y + logo_h(window_logo_width) / 2 < win_len,
        "The window's logo does not fit; lower window_logo_width.");
@@ -451,15 +467,21 @@ module frustum(inset, za, zb)
 module slab(half, ya, yb, z)
     translate([-half, ya, z]) cube([2 * half, yb - ya, eps]);
 
-// The roof as it is printed: the band, the curved sides and the ball,
-// hollowed by the thread and the 45 degree cone above it. The slits reach
-// from the cone through the sides; outside the cone they end in the band.
+// The roof as it is printed: the band, the curved sides and the ball, a
+// shell around the inside (roof_in) on a floor, with a ring around the
+// thread. The slits reach from the thread's top through the sides; at the
+// eaves they end in the band.
 module roof() {
     difference() {
         union() {
-            square_loft(concat([[w1, 0], [a0, roof_band_height]],
-                [for (i = [1:roof_steps]) let (h = i / roof_steps * roof_top_h)
-                    [roof_a(h), roof_band_height + h]]));
+            difference() {
+                square_loft(concat([[w1, 0], [a0, roof_band_height]],
+                    [for (i = [1:roof_steps]) let (h = i / roof_steps * roof_top_h)
+                        [roof_a(h), roof_band_height + h]]));
+                square_loft([for (i = [0:2 * roof_steps])
+                    let (z = roof_wall + i / (2 * roof_steps) * (roof_in_top - roof_wall)) [roof_in(z), z]]);
+            }
+            cylinder(r = roof_ring_r, h = roof_thread_top);
             translate([0, 0, finial_z]) {
                 sphere(r = finial_r);
                 translate([0, 0, -finial_r * sqrt(2)])
@@ -472,8 +494,6 @@ module roof() {
         // 45 degree lead-in at the bottom.
         translate([0, 0, -eps]) cylinder(h = 2 * thread_depth, r1 = roof_thread_d / 2 + thread_depth,
                                          r2 = roof_thread_d / 2 - thread_depth);
-        translate([0, 0, roof_thread_top - eps])
-            cylinder(h = roof_thread_d / 2, r1 = roof_thread_d / 2, r2 = 0);
         translate([0, 0, roof_thread_top])
             linear_extrude(roof_band_height + roof_top_h, convexity = 60) slit_pattern();
         // In the leaning front of the band.
@@ -531,7 +551,7 @@ module placed_window()
         rotate([90 - tilt, 0, 0]) rotate([0, 180, 0])
             translate([0, 0, -window_thickness / 2]) window();
 
-// The holder's modules, as in RGBW_pucklight_holderV2.scad.
+// The holder's modules, as in RGBW_pucklight_holderV3.scad.
 
 // Square body with the cavity, the internal thread, the pin holes and the
 // cross of ribs over the window.
@@ -540,8 +560,7 @@ module toppart() {
         translate([-half, -half, 0]) cube([body_w, body_w, top_z]);
         rotate_extrude() polygon([
             [0, -1], [recess_r, -1], [recess_r, recess_top], [hole_minor_r, thread_start],
-            [hole_minor_r, shoulder_z], [ceiling_r, ceiling_z], [window_r, ceiling_z],
-            [window_r + top_thickness + 1, top_z + 1], [0, top_z + 1]]);
+            [hole_minor_r, shoulder_z], [window_r - 1, top_z + 1], [0, top_z + 1]]);
         // From z = 0 like the screw's thread, so the bar lies along y when
         // the screw is flush.
         threaded_rod(hole_d, shoulder_z);
@@ -561,9 +580,8 @@ module rib() {
     rotate([90, 0, 0]) linear_extrude(rib_width, center = true) polygon([
         [-rib_r, top_z - eps], [-window_r, top_z - eps], [-c, touch_z], [c, touch_z],
         [window_r, top_z - eps], [rib_r, top_z - eps], [rib_r, rib_top], [-rib_r, rib_top]]);
-    foot_start = window_r + top_thickness;
     for (m = [0, 1]) mirror([m, 0, 0])
-        translate([foot_start, 0, 0]) rotate([90, 0, 90]) linear_extrude(rib_r - foot_start)
+        translate([window_r, 0, 0]) rotate([90, 0, 90]) linear_extrude(rib_r - window_r)
             polygon([[-foot_w / 2, top_z - eps], [foot_w / 2, top_z - eps],
                      [rib_width / 2, touch_z], [-rib_width / 2, touch_z]]);
 }
