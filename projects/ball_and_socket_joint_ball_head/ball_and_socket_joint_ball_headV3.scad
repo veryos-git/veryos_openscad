@@ -66,14 +66,15 @@ cup_floor = 1.5;
 // Radial gap between the ball and the cup.
 ball_clearance = 0.1;
 // The cup reaches this angle above the ball's equator; more snaps harder.
-cup_angle = 25; // [0:1:45]
+cup_angle = 35; // [0:1:45]
 // Flat top of the cup, inside its chamfer. Narrowed to leave a chamfer.
 cup_top_width = 1;
-// One points at a corner of the plate.
-slit_count = 3; // [0:1:8]
+// One points at a corner of the plate. Fewer, wider fingers are too stiff
+// for the nut to press them onto the ball.
+slit_count = 6; // [0:1:8]
 slit_width = 0.8;
 // The slits reach down to this share of the ball's radius below its centre.
-slit_depth = 0.5;
+slit_depth = 0.8;
 
 /* [Thread] */
 thread_pitch = 2;
@@ -258,8 +259,9 @@ module socket() {
         }
         plate_cuts();
         translate([0, 0, ball_z]) sphere(r = cavity_r);
-        // One slit points at the first hole's corner. With 3 slits and 3
-        // holes each points at a corner, and laid down one is at the top.
+        // One slit points at the first hole's corner. With 6 slits and 3
+        // holes every other one points at a corner, and laid down one is at
+        // the top.
         z = ball_z - slit_depth * ball_r;
         for (i = [0:1:slit_count - 1]) rotate(360 * i / slit_count)
             translate([0, -slit_width / 2, z]) cube([thread_d, slit_width, cup_top - z + 1]);

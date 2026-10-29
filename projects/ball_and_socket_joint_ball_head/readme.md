@@ -29,9 +29,12 @@ prints like a horizontal hole. Turn the slicer's own supports off.
 
 ![the parts on their side, cut through the axis](print_section_v3.png)
 
-The cup has 3 slits (`slit_count`), one pointing at each corner of the
-plate. Laid down, one is at the top and the other two point at the lower
-corners, 30 degrees below level.
+The cup has 6 slits (`slit_count`) that reach 0.8 of the ball's radius
+below its centre (`slit_depth`), as in the inspiration. Every other slit
+points at a corner of the plate. Laid down, one is at the top and one at
+the bottom, and the other four are 30 degrees from level. A print with 3
+slits reaching 0.5 of the radius had fingers too stiff to bend: the nut got
+tight, but the ball still turned.
 
 Values that do not fit are changed as in V2. The hole circle grows until the
 screw heads clear the cup, the corners grow to fit the screw heads and to
