@@ -1,5 +1,47 @@
 # ball and socket joint / ball head
 
+## V3: triangular plates, printed on the side
+
+`ball_and_socket_joint_ball_headV3.scad`. The joint of V2, with a snap-fit
+cup and a locking nut, with new plates and a new way to print.
+
+![print layout V3](preview_v3.png)
+
+- Plates: rounded triangles, as in `inspiration/image copy 3.png`, with a
+  countersunk M3 hole in each corner. A plate is the hull of a circle
+  (`plate_corner_r`, 5.5 mm) round each of the `hole_count` (3) holes, which
+  sit on a 28 mm circle (`hole_circle_d`). It is 35 mm across two corners.
+  The screw heads are just outside the nut, so the socket can be screwed
+  down with the joint assembled.
+- Printing: the ball and the socket print on their side. The plate stands on
+  one of its sides and the axis is level, so the layers run along the neck
+  and the fingers instead of across them. The nut prints standing, as in V2.
+  It is a thick ring, not a weak point, and standing it needs no support.
+
+`ball` and `socket` give the part on its side with its supports, and
+`print_layout` all three parts. The supports are separate bodies in the same
+file: blocks that stand on the bed under the neck and ball, under the cup, and
+under the plate's two lower corners. They keep `support_gap` (0.25 mm) from
+the part in every direction and reach only under the surface that overhangs
+by more than 45 degrees. Under the cup they follow its outline without the
+thread's grooves, so none goes inside the ball socket; the socket's inside
+prints like a horizontal hole. Turn the slicer's own supports off.
+
+![the parts on their side, cut through the axis](print_section_v3.png)
+
+The slits are turned so that, laid down, a finger is on top and each of the
+4 slits is at 45 degrees. A level slit's upper face would droop onto the
+finger below.
+
+Values that do not fit are changed as in V2. The hole circle grows until the
+screw heads clear the cup, the corners grow to fit the screw heads and to
+cover the cup, and the logo shrinks to fit between the cup and a side.
+`hole_count` goes from 3, the fewest that leave a side to stand on, to 8;
+with more, the sides next to the bed would overhang by more than 45 degrees.
+The VeryOS logo is engraved in the top of both plates.
+
+![section V3](section_v3.png)
+
 ## V2: snap-fit with locking nut
 
 `ball_and_socket_joint_ball_headV2.scad`, after the new pictures and STLs
