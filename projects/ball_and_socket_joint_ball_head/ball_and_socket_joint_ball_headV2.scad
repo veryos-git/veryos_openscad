@@ -85,6 +85,8 @@ $fn = 96;
 
 /* [Hidden] */
 eps = 0.01;
+// Less than the threads' axial play, 0.3 mm at the default clearance.
+assembly_gap = 0.2;
 
 ball_r = ball_d / 2;
 neck_r = neck_d / 2;
@@ -142,11 +144,12 @@ module print_layout() {
     translate([0, 2 * plate_r + g, 0]) ball_part();
 }
 
-// The ball upside down in the cup, the nut where its cone touches the cup,
-// turned so its thread lines up with the cup's.
+// The ball upside down in the cup, the nut assembly_gap above where its cone
+// touches the cup, turned so its thread lines up with the cup's. The gap
+// keeps the parts apart, so a slicer can split them.
 module assembly() {
     socket();
-    translate([0, 0, screw_bottom]) rotate(360 * screw_travel / thread_pitch) screw();
+    translate([0, 0, screw_bottom + assembly_gap]) rotate(360 * screw_travel / thread_pitch) screw();
     translate([0, 0, ball_z]) rotate([180, 0, 0]) translate([0, 0, -plate_thickness - neck_length])
         ball_part();
 }
