@@ -34,7 +34,7 @@
 // Units: mm. No external files or libraries needed.
 
 /* [View] */
-part = "assembly"; // [assembly:Assembly,section:Assembly cut in half,print_layout:All parts laid out to print,ball:Ball with supports,socket:Socket with supports,screw:Screw]
+part = "print_layout"; // [assembly:Assembly,section:Assembly cut in half,print_layout:All parts laid out to print,ball:Ball with supports,socket:Socket with supports,screw:Screw]
 
 /* [Ball] */
 // The head.
