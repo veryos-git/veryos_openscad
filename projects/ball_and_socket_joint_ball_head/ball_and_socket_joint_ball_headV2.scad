@@ -54,7 +54,7 @@ cup_wall = 1.2;
 // Under the ball. Raised if the nut would get less than a turn of thread.
 cup_floor = 1.5;
 // Radial gap between the ball and the cup.
-ball_clearance = 0.15;
+ball_clearance = 0.25;
 // The cup reaches this angle above the ball's equator; more snaps harder.
 cup_angle = 25; // [0:1:45]
 // Flat top of the cup, inside its chamfer. Narrowed to leave a chamfer.
