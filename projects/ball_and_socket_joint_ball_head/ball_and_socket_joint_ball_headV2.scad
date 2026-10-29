@@ -30,18 +30,20 @@ part = "assembly"; // [assembly:Assembly,section:Assembly cut in half,print_layo
 
 /* [Ball] */
 // The head.
-ball_d = 10;
-neck_d = 5;
-// From the ball plate's top to the ball's centre.
-neck_length = 10;
+ball_d = 10; // [4:0.5:60]
+// Thinned to fit if it does not pass the cup's opening.
+neck_d = 5; // [2:0.5:40]
+// Free neck between the fillet and the ball.
+neck_length = 3; // [0:0.5:50]
 // Fillet between the neck and the plate.
-neck_fillet = 2;
+neck_fillet = 2; // [0:0.5:10]
 
 /* [Plates] */
-plate_d = 30;
-plate_thickness = 3;
+// Grown to fit if the screw heads do not fit between the cup and the edge.
+plate_d = 30; // [10:1:150]
+plate_thickness = 3; // [1:0.5:10]
 // On a circle midway between the cup and the plate's edge.
-hole_count = 3;
+hole_count = 3; // [0:1:8]
 // Countersunk, for M3 screws by default.
 screw_hole_d = 3.4;
 screw_head_d = 6.5;
@@ -49,15 +51,15 @@ screw_head_d = 6.5;
 /* [Socket] */
 // Wall of the cup inside the thread's root.
 cup_wall = 1.2;
-// Under the ball.
+// Under the ball. Raised if the nut would get less than a turn of thread.
 cup_floor = 1.5;
 // Radial gap between the ball and the cup.
 ball_clearance = 0.15;
 // The cup reaches this angle above the ball's equator; more snaps harder.
-cup_angle = 25;
-// Flat top of the cup, inside its chamfer.
+cup_angle = 25; // [0:1:45]
+// Flat top of the cup, inside its chamfer. Narrowed to leave a chamfer.
 cup_top_width = 1;
-slit_count = 4;
+slit_count = 4; // [0:1:8]
 slit_width = 0.8;
 // The slits reach down to this share of the ball's radius below its centre.
 slit_depth = 0.5;
@@ -77,6 +79,7 @@ knurl_count = 30;
 knurl_r = 0.8;
 
 /* [Logo] */
+// Shrunk to fit between the holes; left out below 2 mm.
 plate_logo_width = 5;
 logo_depth = 0.6;
 
@@ -88,17 +91,28 @@ eps = 0.01;
 // Less than the threads' axial play, 0.3 mm at the default clearance.
 assembly_gap = 0.2;
 
+// Parameters that do not fit are changed to the nearest that do, with a
+// warning in the console.
+function fit(name, value, fitted) = value == fitted ? fitted
+    : echo(str("WARNING: ", name, " changed from ", value, " to ", fitted)) fitted;
+
 ball_r = ball_d / 2;
-neck_r = neck_d / 2;
-plate_r = plate_d / 2;
 thread_depth = 0.4 * thread_pitch;
 // The cup.
 cavity_r = ball_r + ball_clearance;
 thread_d = 2 * (cavity_r + cup_wall + thread_depth);
-ball_z = plate_thickness + cup_floor + ball_r;
-cup_top = ball_z + cavity_r * sin(cup_angle);
 opening_r = cavity_r * cos(cup_angle);
-chamfer = thread_d / 2 - opening_r - cup_top_width;
+top_width = fit("cup_top_width", cup_top_width, min(cup_top_width, thread_d / 2 - opening_r - 0.5));
+chamfer = thread_d / 2 - opening_r - top_width;
+neck_r = fit("neck_d", neck_d, min(neck_d, 2 * floor(5 * 0.9 * opening_r) / 5)) / 2;
+// From the ball plate's top to the ball's centre.
+ball_h = neck_fillet + neck_length + sqrt(ball_r * ball_r - neck_r * neck_r);
+plate_r = fit("plate_d", plate_d, max(plate_d, 2 * ceil(thread_d / 2 + screw_head_d + 0.6))) / 2;
+// Enough for a turn of thread in the nut.
+floor_h = fit("cup_floor", cup_floor, max(cup_floor, ceil(10 * (thread_pitch + screw_travel + thread_clearance
+    + chamfer - ball_r - cavity_r * sin(cup_angle))) / 10));
+ball_z = plate_thickness + floor_h + ball_r;
+cup_top = ball_z + cavity_r * sin(cup_angle);
 // The nut, where its cone just touches the chamfer. Its cone is the
 // chamfer's surface, r + z = cone_k, and it ends at the cup's top.
 hole_r = thread_d / 2 + thread_clearance;
@@ -118,14 +132,10 @@ ring_in = logo_r - logo_stroke;
 s_small = (2 * ring_in - logo_stroke) / 4;
 s_big = s_small + logo_stroke;
 function logo_h(width) = width * 2 * logo_r / logo_w;
-
-assert(neck_d < ball_d * cos(cup_angle), "The neck must pass the cup's opening; lower neck_d.");
-assert(cup_angle <= 45, "Above 45 degrees the cup's inside overhangs.");
-assert(chamfer > 0, "No room for the chamfer; lower cup_top_width.");
-assert(holes_r - screw_head_d / 2 >= thread_d / 2 + 0.3 && holes_r + screw_head_d / 2 <= plate_r - 0.3,
-       "The screw heads do not fit between the cup and the plate's edge; raise plate_d.");
-assert(neck_length > ball_r + neck_fillet, "The ball must clear its plate; raise neck_length.");
-assert(cone_k - hole_r > screw_bottom + thread_pitch, "The nut has less than a turn of thread.");
+// Between two holes, and between the cup and the plate's edge.
+logo_width = fit("plate_logo_width", plate_logo_width, min(plate_logo_width,
+    hole_count < 2 ? plate_logo_width : 2 * holes_r * sin(180 / hole_count) - screw_head_d - 1,
+    (plate_r - thread_d / 2 - 1) * logo_w / (2 * logo_r)));
 
 if (part == "assembly") assembly();
 else if (part == "section") difference() {
@@ -150,7 +160,7 @@ module print_layout() {
 module assembly() {
     socket();
     translate([0, 0, screw_bottom + assembly_gap]) rotate(360 * screw_travel / thread_pitch) screw();
-    translate([0, 0, ball_z]) rotate([180, 0, 0]) translate([0, 0, -plate_thickness - neck_length])
+    translate([0, 0, ball_z]) rotate([180, 0, 0]) translate([0, 0, -plate_thickness - ball_h])
         ball_part();
 }
 
@@ -160,13 +170,13 @@ module ball_part() {
         plate_cuts();
     }
     translate([0, 0, plate_thickness - eps]) {
-        cylinder(r = neck_r, h = neck_length + eps);
+        cylinder(r = neck_r, h = ball_h + eps);
         rotate_extrude() difference() {
             square([neck_r + neck_fillet, neck_fillet]);
             translate([neck_r + neck_fillet, neck_fillet]) circle(r = neck_fillet);
         }
     }
-    translate([0, 0, plate_thickness + neck_length]) sphere(r = ball_r);
+    translate([0, 0, plate_thickness + ball_h]) sphere(r = ball_r);
 }
 
 module socket() {
@@ -176,13 +186,13 @@ module socket() {
             plate();
             translate([0, 0, plate_thickness - eps]) intersection() {
                 threaded_rod(thread_d, h + eps, thread_pitch);
-                cylinder(h = h + eps, r1 = cone_k - plate_thickness + eps, r2 = opening_r + cup_top_width);
+                cylinder(h = h + eps, r1 = cone_k - plate_thickness + eps, r2 = opening_r + top_width);
             }
         }
         plate_cuts();
         translate([0, 0, ball_z]) sphere(r = cavity_r);
         z = ball_z - slit_depth * ball_r;
-        for (i = [0:slit_count - 1]) rotate(360 * i / slit_count)
+        for (i = [0:1:slit_count - 1]) rotate(360 * i / slit_count)
             translate([0, -slit_width / 2, z]) cube([thread_d, slit_width, cup_top - z + 1]);
     }
 }
@@ -215,12 +225,14 @@ module plate() {
 // The screw holes, countersunk from the plate's top, and the logo between
 // two of them.
 module plate_cuts() {
-    for (i = [0:hole_count - 1]) rotate(360 * i / hole_count) translate([holes_r, 0, 0]) {
+    for (i = [0:1:hole_count - 1]) rotate(360 * i / hole_count) translate([holes_r, 0, 0]) {
         translate([0, 0, -1]) cylinder(d = screw_hole_d, h = plate_thickness + 2);
         translate([0, 0, plate_thickness - (screw_head_d - screw_hole_d) / 2])
             cylinder(d1 = screw_hole_d, d2 = screw_head_d + 2 * eps, h = (screw_head_d - screw_hole_d) / 2 + eps);
     }
-    rotate(180 / hole_count) translate([holes_r, 0, plate_thickness]) rotate(-90) logo_cut(plate_logo_width);
+    if (logo_width >= 2)
+        rotate(hole_count > 0 ? 180 / hole_count : 0) translate([holes_r, 0, plate_thickness]) rotate(-90)
+            logo_cut(logo_width);
 }
 
 // The logo, width wide and centred on the origin, to cut logo_depth deep

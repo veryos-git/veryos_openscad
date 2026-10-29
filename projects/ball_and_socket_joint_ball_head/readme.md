@@ -25,6 +25,14 @@ fingers onto the ball, which locks the joint.
   and the edge, the same on both plates. The nut covers the socket's
   screws, so screw the socket down first.
 
+All parameters can be changed freely. A value that does not fit is changed
+to the nearest one that does, with a `WARNING` line in the console: the
+plate grows to fit the screw heads, the neck thins to pass the cup's
+opening, the cup's floor rises to give the nut a full turn of thread, and
+the logo shrinks to fit between the holes. `neck_length` is the free neck
+between the fillet and the ball, so it never conflicts with the ball's
+size.
+
 The neck tilts about 35 degrees each way. The thread is the same 45 degree,
 2 mm pitch thread as V1. Print every part standing, without support. The
 VeryOS logo is engraved in both plates. The nut's top ring is only about
