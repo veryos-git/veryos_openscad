@@ -8,6 +8,47 @@ pillars.
 
 ![preview](preview.png)
 
+## V6: hammered like copper
+
+`RGBW_pucklight_lantern3V6_hammered.scad`. V5 with the outside of the
+frame and the roof hammered, as in Kupfertreiben (pictures in
+`kupfertreiben_voronoi_texture`): covered with shallow round dents. The
+roof has no slits, so it is closed and the dents cover all of it. The
+light comes out through the windows only.
+
+![the V6 frame and roof](preview_v6.png)
+
+![the hammered texture close up](hammered_v6.png)
+
+- each dent is cut by a sphere with a random radius from
+  `hammer_radius_min` to `hammer_radius_max` (5 to 8 mm), reaching a random
+  `hammer_depth_min` to `hammer_depth_max` (0.3 to 0.6 mm) into the
+  surface. Its centre lies its radius minus that depth outside. The dents
+  are 3.4 to 6 mm across; larger spheres make flatter dents.
+- they lie in rows `hammer_spacing` (3.5 mm) apart along the outline, every
+  other row shifted by half, and each dent lies at random in its place
+  (`hammer_seed`). They overlap, so no flat surface is left between them.
+  The ridges where two dents meet form a net of cells, as in a Voronoi
+  diagram: for two spheres of the same size and depth the ridge lies
+  halfway between their centres.
+- they are on the holder's sides, the pillars, the rail, the roof's band
+  and its curve up to the ball: about 1900 on the frame and 1800 on the
+  roof. The ball stays smooth. None are cut where they would only cut the
+  air in the window openings.
+- only the outside changes. `hammer_depth_max` may be at most half of the
+  1.2 mm lip in front of the slits and of the roof's 2 mm wall, so the
+  slits, the windows, the thread and the light's way are as in V5. The
+  dents overhang at most 36 degrees on the leaning sides, so they print
+  without support.
+- without the roof's slits the keepout has no columns above them either.
+
+Each dent is a subtraction. The browser playground and current OpenSCAD
+render them quickly with the Manifold backend. OpenSCAD 2021.01's CGAL is
+slow with them: a 35 mm corner of the frame with about 230 dents took 1.3
+minutes, the whole parts much longer. The frame's body is rendered first
+(`render()`), so the preview works with this many dents; the images above
+are previews.
+
 ## V5: a keepout to subtract instead of an envelope
 
 `RGBW_pucklight_lantern3V5_decoration_keepout.scad`. V4 with the decoration
@@ -461,6 +502,8 @@ they are too weak, raise `roof_wall`.
   logos.
 - `RGBW_pucklight_lantern3V5_decoration_keepout.scad`: the generator with
   V4's star windows and a decoration keepout to subtract, without logos.
+- `RGBW_pucklight_lantern3V6_hammered.scad`: V5 with the frame's and the
+  roof's outside hammered.
 - `preview.png`: the assembly. `section.png`: the assembly cut in half.
 - `preview_v2.png`: the V2 assembly. `window_v2.png`: a V2 window's
   thickness map. `random_windows.png`: the 25 random windows' thickness map.
@@ -472,6 +515,10 @@ they are too weak, raise `roof_wall`.
 - `keepout_v5.png`: the lantern in the V5 keepout. `fill_v5.png`: the frame
   and the roof filled wherever a decoration may go.
   `decoration_example_v5.png`: the test decoration on the frame and the roof.
+- `preview_v6.png`: the V6 frame and roof. `hammered_v6.png`: the hammered
+  texture close up.
+- `kupfertreiben_voronoi_texture/`: pictures of hammered copper and a
+  Voronoi texture, as models for V6.
 - `problem_star_recognizability/`: a printed V2 window whose star stood out
   too little.
 - `readme_hgc.md`: the original description.
