@@ -86,4 +86,9 @@ socket's holes, beside the ball's neck, and in the face of the lever.
 
 `part` also shows the assembly, the two cuts, or one part.
 
+Three sizes are presets in `ball_socket_bracket.json`, which the Customizer
+offers: `small` (14 mm ball, M3), `medium` (the defaults) and `large`
+(30 mm ball, M5). Their STL files are in `publish/`, with
+[a readme](publish/readme.md) and a picture of all three.
+
 Not printed yet: the clamping force and the snap-in still need a test print.
