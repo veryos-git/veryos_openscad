@@ -425,9 +425,10 @@ module section() {
 }
 
 // Cuts away the half in front of y = 0, rendered so it keeps its colour.
+// union() keeps all of a loop's objects with lazy-union.
 module half_cut()
     render() difference() {
-        children();
+        union() children();
         translate([-200, -400, -200]) cube(400);
     }
 
@@ -547,12 +548,13 @@ module roof() {
 
 // The roof's slits seen from above. On each face, columns slit_width wide
 // beside a solid middle, each a long slit and a short one at the eave, kept
-// slit_margin inside the face's edges and away from the ball.
+// slit_margin inside the face's edges and away from the ball. The loops are
+// in union(), as in decorative_window(), so they work with lazy-union too.
 module slit_pattern()
     difference() {
-        for (a = [0:90:270]) rotate(a) intersection() {
+        union() for (a = [0:90:270]) rotate(a) intersection() {
             offset(delta = -slit_margin) polygon([[0, 0], [a0, a0], [-a0, a0]]);
-            for (s = [-1, 1], i = [0:ceil(a0 / slit_pitch)])
+            union() for (s = [-1, 1], i = [0:ceil(a0 / slit_pitch)])
                 translate([s * (slit_margin + slit_width / 2 + i * slit_pitch) - slit_width / 2, 0]) {
                     square([slit_width, eave_slit_y - slit_spacing]);
                     translate([0, eave_slit_y]) square([slit_width, a0]);
@@ -592,19 +594,21 @@ module window()
 // window's right half at a random angle and width, clipped to that half and
 // mirrored onto the left. Line i is cut down to i + 1 layers; where lines
 // cross, the deeper one wins. Each level is a flat floor, so it prints
-// without support. seed picks the pattern.
+// without support. seed picks the pattern. The loops are in union(): with
+// lazy-union, as in the browser playground, intersection() and difference()
+// would take each of a loop's objects as a child of its own.
 module decorative_window(seed = decoration_seed) {
     r = rands(0, 1, 4 * lines_per_half, seed);
     difference() {
         window();
         difference() {
-            for (m = [0, 1]) mirror([m, 0, 0]) intersection() {
+            union() for (m = [0, 1]) mirror([m, 0, 0]) intersection() {
                 linear_extrude(2 * window_thickness) intersection() {
                     polygon([[-deco_half(deco_y0), deco_y0], [deco_half(deco_y0), deco_y0],
                              [deco_half(deco_y1), deco_y1], [-deco_half(deco_y1), deco_y1]]);
                     translate([0, deco_y0]) square([win_top_half, deco_y1 - deco_y0]);
                 }
-                for (i = [0:lines_per_half - 1])
+                union() for (i = [0:lines_per_half - 1])
                     let (y = deco_y0 + r[4 * i] * (deco_y1 - deco_y0),
                          width = line_width_min + r[4 * i + 3] * (line_width_max - line_width_min))
                     translate([r[4 * i + 1] * deco_half(y), y, (i + 1) * layer_step])
