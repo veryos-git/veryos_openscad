@@ -51,8 +51,9 @@ cup_angle = 15; // [0:1:30]
 socket_floor = 3;
 // Round the ball, at its equator.
 ring_wall = 5;
-// Tightening the screw closes it.
-slot_width = 2;
+// Tightening the screw closes it. Only about a fifth of the closure reaches
+// the ball; at 2 mm the ears met before the small sizes held.
+slot_width = 4;
 // Each ear, along the screw. The lower one holds the thread.
 ear_length = 10;
 // The least wall round the screw holes.

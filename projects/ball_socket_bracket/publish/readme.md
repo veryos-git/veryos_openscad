@@ -48,5 +48,8 @@ openscad --export-format binstl -o socket.stl -p ball_socket_bracket.json -P sma
 `medium` is the script's defaults. These files were exported with
 `$fn = 96`.
 
-Not printed yet: the files are checked digitally (closed solids, on the bed,
-no collisions within the tilt), not by a test print.
+An earlier version of these files, with a 2 mm slot in the ring, was
+printed: only the large size held the ball. These files have a 4 mm slot
+(see the [project readme](../readme.md) for why). They are checked
+digitally (closed solids, on the bed, no collisions within the tilt), but
+not printed yet.

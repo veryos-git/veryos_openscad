@@ -13,16 +13,25 @@ other file.
   36 mm plate (`plate_width`). The neck flares into the plate with a 2 mm
   fillet.
 - `socket`: a ring round the ball, with a plate on one side and two ears on
-  the other. A 2 mm slot (`slot_width`) splits the ring between the ears.
+  the other. A 4 mm slot (`slot_width`) splits the ring between the ears.
   The upper ear has a clearance hole, the lower ear the thread.
 - `screw`: an 8 mm screw (`thread_d`) with a tall post and a 50 mm lever
   (`lever_length`) on top. The post lifts the lever at least 2 mm above
   the ring and the plates, so it swings over them.
 
-Tightening the screw pulls the ears together. The slot closes and the ring
-squeezes the ball. The slot has to close by about 1 mm before the ring
-touches the ball (`ball_clearance` 0.15 mm), which leaves another 1 mm to
-clamp it.
+Tightening the screw pulls the ears together. The slot closes, and the ring
+squeezes the ball on both sides of the slot and pushes it against the ring's
+far side. Only about a fifth of the slot's closure reaches the ball: the
+plate keeps the ring's back from bending.
+
+The first prints had a 2 mm slot, and only the large size held. A simple
+simulation of the socket (linear elastic, rigid ball, plate held down) shows
+why. In all three sizes the ears met at 150 to 300 N of screw tension, and
+tightening further only squeezed the ears. A 30 N push at the end of the
+lever gives an estimated 250 N. The large size held anyway, because the same
+squeeze holds a big ball better than a small one. With the 4 mm slot the
+ears stay apart up to 500 N, and at 300 to 500 N the ball holds 2 to 3 times
+as well in the small size, 1.6 to 2.4 times in the medium one.
 
 ![cut through the ball](section.png)
 
@@ -91,4 +100,5 @@ offers: `small` (14 mm ball, M3), `medium` (the defaults) and `large`
 (30 mm ball, M5). Their STL files are in `publish/`, with
 [a readme](publish/readme.md) and a picture of all three.
 
-Not printed yet: the clamping force and the snap-in still need a test print.
+Printed: the version with the 2 mm slot, in all three sizes; only the
+large one held. The 4 mm slot is not printed yet.
