@@ -551,9 +551,10 @@ module roof() {
                     cylinder(h = finial_r / sqrt(2), r1 = 0, r2 = finial_r / sqrt(2));
             }
         }
-        // In phase with the neck's thread roof_seat_gap higher.
+        // In phase with the neck's thread roof_seat_gap higher. eps above
+        // the ring, so the bore opens into the inside, which has no slits.
         translate([0, 0, -roof_seat_gap - thread_pitch])
-            threaded_rod(roof_thread_d, roof_thread_top + roof_seat_gap + thread_pitch);
+            threaded_rod(roof_thread_d, roof_thread_top + roof_seat_gap + thread_pitch + eps);
         // 45 degree lead-in at the bottom.
         translate([0, 0, -eps]) cylinder(h = 2 * thread_depth, r1 = roof_thread_d / 2 + thread_depth,
                                          r2 = roof_thread_d / 2 - thread_depth);

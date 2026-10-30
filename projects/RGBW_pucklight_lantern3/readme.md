@@ -44,10 +44,15 @@ light comes out through the windows only.
 
 Each dent is a subtraction. The browser playground and current OpenSCAD
 render them quickly with the Manifold backend. OpenSCAD 2021.01's CGAL is
-slow with them: a 35 mm corner of the frame with about 230 dents took 1.3
-minutes, the whole parts much longer. The frame's body is rendered first
+slow with them: the frame and the roof take about 21 minutes each, and
+each came out as one solid. The frame's body is rendered first
 (`render()`), so the preview works with this many dents; the images above
 are previews.
+
+The roof's thread bore is cut 0.01 mm higher than before, past the top of
+the ring around it. Where both ended at the same height, CGAL left a sheet
+of no thickness there, and without the slits that sheet closed the roof's
+inside off as a void.
 
 ## V5: a keepout to subtract instead of an envelope
 
