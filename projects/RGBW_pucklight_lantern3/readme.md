@@ -8,6 +8,23 @@ pillars.
 
 ![preview](preview.png)
 
+## V8: the simple lantern
+
+`RGBW_pucklight_lantern3V8_simple.scad`. The first version
+(`RGBW_pucklight_lantern3.scad`) without logos: smooth, with plain flat
+windows instead of star windows, and the roof with its light slits. There
+is no decoration envelope, keepout or hammered texture. There is no V7.
+
+![the V8 assembly](preview_v8.png)
+
+- the windows are plain plates, `window_thickness` (3 mm) thick, printed
+  (`part = "window"`) or cut from acrylic, as in the first version.
+- no logo in the frame, the roof, the windows, the screwin or the click
+  base. The `[Logo]` parameters are gone.
+- the loops in `slit_pattern()` and `half_cut()` are in `union()`, as in V2,
+  so the roof keeps its slits with lazy-union in the browser playground.
+  The first version still lacks this.
+
 ## V6: hammered like copper
 
 `RGBW_pucklight_lantern3V6_hammered.scad`. V5 with the outside of the
@@ -509,6 +526,8 @@ they are too weak, raise `roof_wall`.
   V4's star windows and a decoration keepout to subtract, without logos.
 - `RGBW_pucklight_lantern3V6_hammered.scad`: V5 with the frame's and the
   roof's outside hammered.
+- `RGBW_pucklight_lantern3V8_simple.scad`: the first version without logos,
+  with plain windows.
 - `preview.png`: the assembly. `section.png`: the assembly cut in half.
 - `preview_v2.png`: the V2 assembly. `window_v2.png`: a V2 window's
   thickness map. `random_windows.png`: the 25 random windows' thickness map.
@@ -522,6 +541,7 @@ they are too weak, raise `roof_wall`.
   `decoration_example_v5.png`: the test decoration on the frame and the roof.
 - `preview_v6.png`: the V6 frame and roof. `hammered_v6.png`: the hammered
   texture close up.
+- `preview_v8.png`: the V8 assembly.
 - `kupfertreiben_voronoi_texture/`: pictures of hammered copper and a
   Voronoi texture, as models for V6.
 - `problem_star_recognizability/`: a printed V2 window whose star stood out
