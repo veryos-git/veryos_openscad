@@ -8,45 +8,55 @@ pillars.
 
 ![preview](preview.png)
 
-## V2: decorative windows
+## V2: star windows
 
 `RGBW_pucklight_lantern3V2_decorative_window.scad`. The lantern of V1 with
-the windows decorated as in `../published_christmas_star`: random lines
-across the window, mirrored about its middle, each cut from the outside
-down to a different number of layers. Printed in a translucent filament, the
-light shines through each line in a different shade. Everything else is as
-below.
+thin windows, each with a star on its outside as in
+`../published_christmas_star`. Printed in a translucent filament, the light
+shines through the plate brightly and through the star in shades. The frame
+and the slits are as below, only thinner.
 
 ![preview V2](preview_v2.png)
 
-![decorative window](window_v2.png)
-
-- the window is still `window_thickness` (3 mm) thick in its 3.6 mm slits,
-  `slot_clearance` (0.3 mm) thinner on each side, so it slides in. The lines
-  only take material away, so they do not change that.
-- `lines_per_half` (12) lines go through random points of the window's
-  right half, at random angles and widths between `line_width_min` (0.42
-  mm) and `line_width_max` (3 mm), and are mirrored onto the left half.
-- line i is cut down to i + 1 layers of `layer_step` (0.2 mm): from 0.2 mm
-  to 2.4 mm. Where lines cross, the deeper one wins. Set `layer_step` to
-  the layer height you print with.
-- the lines stay `decoration_border` (2 mm) inside the part of the window
-  you see between the pillars and above the rail, so the edges in the slits
-  keep their full thickness, and 2 mm away from the logo.
-- `decoration_seed` picks the pattern. `part = "window"` makes one window
+- the plate is `window_thickness` (0.4 mm) thick, with the logo engraved
+  half through it. The slits follow it: 1.0 mm wide, `slot_clearance` (0.3
+  mm) on each side. The star stays `decoration_border` (2 mm) inside the
+  part of the window you see between the pillars, so it never goes into a
+  slit; slide the window in with the star outside.
+- the star is the Christmas star's: `star_points` (5) points, each a sector
+  moved `star_sector_shift` (0.375) of its length past the middle, so the
+  sectors overlap in a smaller star there, with a hole near each point.
+  `star_inner_factor` and `star_angle_bias` shape the valleys and the
+  points as in `star.scad`; `random_points` picks 3 to 8 points at random.
+- it is as large as fits above the logo, 63 mm across, and stands a random
+  number of layers on the plate, between `star_height_min` (0.2 mm) and
+  `star_height_max` (1.4 mm). So the window is 0.6 to 1.8 mm thick at the
+  star. Set `layer_step` (0.2 mm) to the layer height you print with.
+- `lines_per_sector` (6) random lines go through each half sector, at
+  random angles and widths between `line_width_min` (0.42 mm) and
+  `line_width_max` (3 mm). Line j is cut down to 1 + j × (layers - 1) / 6
+  layers, rounded down: 1 to 6 layers in a 7 layer star, as in `star.scad`.
+  A star one layer high has no lines. Every half sector has the same lines,
+  so the star is symmetric.
+- `decoration_seed` picks the star. `part = "window"` makes one window
   with it; change the seed between exports for four different windows. The
-  assembly and the print layout show four windows with the same pattern.
+  assembly and the print layout show four windows with the same star.
 - `part = "random_windows"` makes 25 windows, lying flat in a 5 x 5 grid,
-  each with its own pattern: the bottom left one with `decoration_seed`,
-  the others with seeds 1000 apart. Export them as one file and split it
-  into objects in the slicer to pick the ones you print. The grid is 467 x
-  488 mm.
+  each with its own star: the bottom left one with `decoration_seed`, the
+  others with seeds 1000 apart. Export them as one file and split it into
+  objects in the slicer to pick the ones you print. The grid is 467 x 488
+  mm.
+
+The pictures below are thickness maps seen from above: the darker, the
+thicker, from the logo (0.2 mm) and the plate (0.4 mm) to 1.8 mm.
+
+![a star window](window_v2.png)
 
 ![random window patterns](random_windows.png)
 
-Print the window flat, its outside (the lines and the logo) up. Each line's
-floor is flat, so it needs no support. Not printed yet: the thinnest line
-is one layer (0.2 mm) thick, which may be weak if it is wide.
+Print the window flat, the star and the logo up. Each level is flat, so it
+needs no support. Not printed yet: the 0.4 mm plate is thin and bends
+easily, so the window may sit loosely in its 1.0 mm slits.
 
 ## parts
 
@@ -215,10 +225,10 @@ they are too weak, raise `roof_wall`.
 
 - `RGBW_pucklight_lantern3.scad`: the generator.
 - `RGBW_pucklight_lantern3V2_decorative_window.scad`: the generator with
-  decorative windows.
+  star windows.
 - `preview.png`: the assembly. `section.png`: the assembly cut in half.
-- `preview_v2.png`: the V2 assembly. `window_v2.png`: a V2 window.
-- `random_windows.png`: the 25 random window patterns.
+- `preview_v2.png`: the V2 assembly. `window_v2.png`: a V2 window's
+  thickness map. `random_windows.png`: the 25 random windows' thickness map.
 - `readme_hgc.md`: the original description.
 - `inspiration/`: pictures and the Onshape export.
 
