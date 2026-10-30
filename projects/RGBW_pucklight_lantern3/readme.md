@@ -8,6 +8,80 @@ pillars.
 
 ![preview](preview.png)
 
+## V5: a keepout to subtract instead of an envelope
+
+`RGBW_pucklight_lantern3V5_decoration_keepout.scad`. V4 with the decoration
+cut by a boolean difference instead of an intersection: `part = "keepout"`
+is the space in and around the assembled lantern that a decoration must
+leave free. A decoration of the whole lantern is sculpted once, as large as
+you like, and what is in the way is subtracted:
+
+1. export `part = "lantern"`, the frame, the roof and the windows as they
+   are assembled, and `part = "keepout"`, to see what to leave free. Both
+   are in the same place, as in V4: the frame's bottom on z = 0, the roof
+   lined up `roof_seat_gap` (0.4 mm) above the frame.
+2. sculpt the decoration around the lantern, inside and out. Let it reach
+   into the parts, so it fuses with them; how far does not matter.
+3. subtract the keepout and union the rest with the parts, in OpenSCAD:
+
+```
+include <RGBW_pucklight_lantern3V5_decoration_keepout.scad>
+part = "none";
+decorated_frame() import("decoration.stl");
+```
+
+and `decorated_roof() import("decoration.stl");` for the roof. Each
+subtracts the keepout from the decoration, keeps what is below the gap (the
+frame) or above it (the roof), unions it with the part and puts it where the
+part is printed.
+
+![the lantern in the keepout, whole and cut in half, and the keepout cut in half](keepout_v5.png)
+
+The keepout:
+
+- the light's way, as in V4: every straight line from the holder's round
+  window to the window openings between the pillars and to the neck's bore;
+  in front of the openings, straight out; in the roof, the columns straight
+  up from the slits, inside and out.
+- the windows' slits, from the rail's floor up through the frame's top. The
+  windows lie in them, their stars in the openings, and they slide in
+  through both.
+- the holder's cavity for the puck and the screwin, with its thread, and
+  the click base's pin holes.
+- the bed: everything below the frame's bottom.
+- the gap between the frame and the roof, in which the roof turns, and the
+  roof's thread: a cylinder around the neck, 45.1 mm in radius, up to the
+  top of the thread.
+
+It reaches 500 mm out (`far`), so a decoration may be as large as you like;
+`part = "keepout"` shows it 10 mm out (`view_margin`). The parts' material
+is not in it: where a decoration reaches into a part, it fuses with it.
+That is why V5 needs neither `envelope_thickness` nor `envelope_overlap`.
+Apart from V4's limit of 10 mm outside the parts, the same space is free as
+in V4. V4's envelope was a box minus the keepout and minus the parts.
+
+![the frame and the roof filled wherever a decoration may go, whole and cut in half](fill_v5.png)
+
+Checked with a decoration that fills a block around the whole lantern
+(above), so the frame and the roof take all the space the keepout leaves:
+
+- the windows, in place and slid halfway in, touch the filled frame only
+  where they touch the frame itself.
+- the screwin, the puck and the click base, pressed down, do not reach into
+  the filled frame.
+- the filled roof, lined up or turned on to its stop, does not touch the
+  filled frame.
+- in the light's way the filled frame has only what the frame has there,
+  the holder's ribs. The roof's slit columns are empty.
+- each filled part is one solid.
+
+![the test decoration on the frame and the roof, whole and cut in half](decoration_example_v5.png)
+
+With V4's test decoration, the frame and the roof each came out as one
+solid again. In OpenSCAD 2021.01 the keepout renders in 10 s, the filled
+parts in a minute each, and the decorated frame and roof in about 5 and 8
+minutes, with other renders running alongside.
+
 ## V4: one envelope for the whole lantern
 
 `RGBW_pucklight_lantern3V4_lantern_envelope.scad`. V3 with one decoration
@@ -385,6 +459,8 @@ they are too weak, raise `roof_wall`.
 - `RGBW_pucklight_lantern3V4_lantern_envelope.scad`: the generator with
   star windows and one decoration envelope for the whole lantern, without
   logos.
+- `RGBW_pucklight_lantern3V5_decoration_keepout.scad`: the generator with
+  V4's star windows and a decoration keepout to subtract, without logos.
 - `preview.png`: the assembly. `section.png`: the assembly cut in half.
 - `preview_v2.png`: the V2 assembly. `window_v2.png`: a V2 window's
   thickness map. `random_windows.png`: the 25 random windows' thickness map.
@@ -393,6 +469,9 @@ they are too weak, raise `roof_wall`.
 - `envelope_v4.png`: the lantern in the V4 envelope.
   `decoration_example_v4.png`: a test decoration on the frame and the roof.
   `window_v4.png`, `random_windows_v4.png`: thickness maps of the V4 windows.
+- `keepout_v5.png`: the lantern in the V5 keepout. `fill_v5.png`: the frame
+  and the roof filled wherever a decoration may go.
+  `decoration_example_v5.png`: the test decoration on the frame and the roof.
 - `problem_star_recognizability/`: a printed V2 window whose star stood out
   too little.
 - `readme_hgc.md`: the original description.
