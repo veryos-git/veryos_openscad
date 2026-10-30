@@ -37,7 +37,7 @@
 // Units: mm. No external files or libraries needed.
 
 /* [View] */
-part = "assembly"; // [assembly:Assembly on the click base,section:Assembly cut in half,print_layout:All parts,frame:Frame,roof:Roof,screwin:Screwin,clickbase:Click base,window:Window]
+part = "assembly"; // [assembly:Assembly on the click base,section:Assembly cut in half,print_layout:All parts,frame:Frame,roof:Roof,screwin:Screwin,clickbase:Click base,window:Window,random_windows:Random window patterns]
 
 /* [Frame] */
 // The frame's bottom is the holder's 76 mm top part. Its sides lean out to
@@ -396,6 +396,7 @@ else if (part == "roof") roof();
 else if (part == "screwin") bottom_screw();
 else if (part == "clickbase") clickbase();
 else if (part == "window") decorative_window();
+else if (part == "random_windows") random_windows();
 
 // The lantern on the click base, released: as in the holder it floats on
 // the puck's dome, and pressing it down clicks the light. The roof is lined
@@ -429,6 +430,13 @@ module half_cut()
         children();
         translate([-200, -400, -200]) cube(400);
     }
+
+// 25 windows lying flat in a 5 x 5 grid, each with its own pattern: the first
+// (bottom left) with decoration_seed, the others 1000 apart from it.
+module random_windows()
+    for (x = [0:4], y = [0:4])
+        translate([(x - 2) * (2 * win_top_half + layout_gap), (y - 2) * (win_len + layout_gap), 0])
+            decorative_window(decoration_seed + 1000 * (5 * y + x));
 
 // Every part as it is printed, side by side.
 module print_layout() {
@@ -584,9 +592,9 @@ module window()
 // window's right half at a random angle and width, clipped to that half and
 // mirrored onto the left. Line i is cut down to i + 1 layers; where lines
 // cross, the deeper one wins. Each level is a flat floor, so it prints
-// without support.
-module decorative_window() {
-    r = rands(0, 1, 4 * lines_per_half, decoration_seed);
+// without support. seed picks the pattern.
+module decorative_window(seed = decoration_seed) {
+    r = rands(0, 1, 4 * lines_per_half, seed);
     difference() {
         window();
         difference() {

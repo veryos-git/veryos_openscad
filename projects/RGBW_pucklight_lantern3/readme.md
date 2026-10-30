@@ -36,6 +36,13 @@ below.
 - `decoration_seed` picks the pattern. `part = "window"` makes one window
   with it; change the seed between exports for four different windows. The
   assembly and the print layout show four windows with the same pattern.
+- `part = "random_windows"` makes 25 windows, lying flat in a 5 x 5 grid,
+  each with its own pattern: the bottom left one with `decoration_seed`,
+  the others with seeds 1000 apart. Export them as one file and split it
+  into objects in the slicer to pick the ones you print. The grid is 467 x
+  488 mm.
+
+![random window patterns](random_windows.png)
 
 Print the window flat, its outside (the lines and the logo) up. Each line's
 floor is flat, so it needs no support. Not printed yet: the thinnest line
@@ -211,6 +218,7 @@ they are too weak, raise `roof_wall`.
   decorative windows.
 - `preview.png`: the assembly. `section.png`: the assembly cut in half.
 - `preview_v2.png`: the V2 assembly. `window_v2.png`: a V2 window.
+- `random_windows.png`: the 25 random window patterns.
 - `readme_hgc.md`: the original description.
 - `inspiration/`: pictures and the Onshape export.
 
