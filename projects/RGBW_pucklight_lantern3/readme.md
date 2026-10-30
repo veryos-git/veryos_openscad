@@ -12,8 +12,9 @@ pillars.
 
 `RGBW_pucklight_lantern3V4_lantern_envelope.scad`. V3 with one decoration
 envelope for the assembled lantern, inside and out, instead of one outside
-each part: `part = "envelope"`. A decoration of the whole lantern is
-sculpted once and cut to what fits:
+each part: `part = "envelope"`, and with windows whose star stands out more
+(see below). A decoration of the whole lantern is sculpted once and cut to
+what fits:
 
 1. export `part = "lantern"`, the frame, the roof and the windows as they
    are assembled, and `part = "envelope"`. Both are in the same place: the
@@ -76,6 +77,33 @@ roof with it each came out as one solid.
 
 In OpenSCAD 2021.01 the envelope renders in 45 s, the decorated frame and
 roof with this decoration in 5 and 6 minutes.
+
+### V4: stars with more contrast
+
+A printed V2 window's star stood out too little
+(`problem_star_recognizability`): it stood a random 1 to 7 layers on a 0.4
+mm plate, and its lines were cut one layer apart, so neighbouring areas
+differed by 0.2 mm. In V4:
+
+- the plate is 0.2 mm (`window_thickness`), one layer. The slits follow at
+  0.8 mm.
+- the window has only a few thicknesses, `level_step` (0.6 mm) apart: the
+  plate (0.2 mm), the level half the lines are cut down to (0.8 mm), and the
+  star's top, `star_levels` (2) levels above the plate (1.4 mm). The other
+  half of the lines and the holes near the points go through to the plate.
+  The star is always as high as that.
+- the lines are thinner: 0.42 to 1.2 mm (`line_width_max`) instead of 0.42
+  to 3 mm.
+- a seed still gives the same points and lines as before.
+
+![a V4 star window](window_v4.png)
+
+![random V4 window patterns](random_windows_v4.png)
+
+Thickness maps as for V2: the plate (0.2 mm) light, the lines' level (0.8
+mm) grey, the star's top (1.4 mm) dark. Not printed yet: a one-layer plate
+is fragile, bends more than the 0.4 mm one and may sit loosely in its
+slits. If it does, raise `window_thickness`, and the slits follow.
 
 ## V3: decoration envelopes
 
@@ -364,6 +392,9 @@ they are too weak, raise `roof_wall`.
   `decoration_example_v3.png`: a test decoration on the frame.
 - `envelope_v4.png`: the lantern in the V4 envelope.
   `decoration_example_v4.png`: a test decoration on the frame and the roof.
+  `window_v4.png`, `random_windows_v4.png`: thickness maps of the V4 windows.
+- `problem_star_recognizability/`: a printed V2 window whose star stood out
+  too little.
 - `readme_hgc.md`: the original description.
 - `inspiration/`: pictures and the Onshape export.
 

@@ -17,9 +17,9 @@
 // shows as an arch behind each window.
 //
 // V2: each window is a thin plate with a star on its outside, as in
-// ../published_christmas_star: the star stands a random number of layers on
-// the plate, and random lines are cut into it to different levels, so the
-// light shines through in shades. The plate is window_thickness thick,
+// ../published_christmas_star: the star stands on the plate, and random
+// lines are cut into it to different levels, so the light shines through in
+// shades. The plate is window_thickness thick,
 // slot_clearance thinner on each side than its slits, so it slides in; the
 // star stays between the pillars, clear of the slits.
 //
@@ -34,6 +34,9 @@
 // slits, the holder, and the thread the roof turns on. Sculpt a decoration of
 // the whole lantern; decorated_frame() and decorated_roof() cut it to the
 // envelope and union it with the parts.
+// For more contrast the window's plate is 0.2 mm, and the window has few
+// thicknesses, level_step apart: the plate, the levels the star's lines are
+// cut down to, the lowest to the plate, and the star's top.
 //
 // The roof continues the frame's sides in a band, then curves in to a ball
 // on top. Vertical slits through it let the light out at the top. It is a
@@ -67,7 +70,7 @@ rail_height = 6;
 /* [Windows] */
 // A window is a flat plate: printed (part = "window") or cut from acrylic,
 // film or paper of this thickness. The printed window's star stands on it.
-window_thickness = 0.4;
+window_thickness = 0.2;
 // Gap on each side of a window in its slit, and at its edges.
 slot_clearance = 0.3;
 // Wall in front of the slits.
@@ -80,12 +83,15 @@ slot_floor = 1;
 /* [Window star] */
 // Change this for a different star.
 decoration_seed = 41.1; // [0:0.1:100]
-// The layer height you print the windows with. The star's height and the
-// levels of its lines are whole layers.
+// The layer height you print the windows with. The levels are whole layers.
 layer_step = 0.2; // [0.08:0.04:0.4]
-// The star stands on the plate a random height between these.
-star_height_min = 0.2;
-star_height_max = 1.4;
+// Between the window's levels: the plate, the levels the lines are cut down
+// to and the star's top. The larger, the more the star and its lines stand
+// out when the light shines through.
+level_step = 0.6;
+// Levels the star stands above the plate. Its lines are cut down to the
+// lower levels and to the plate, the same number of lines to each.
+star_levels = 2; // [1:5]
 // Points of the star; with random_points, 3 to 8 at random.
 star_points = 5; // [3:12]
 random_points = false;
@@ -97,10 +103,10 @@ star_angle_bias = 0.35; // [0:0.01:1]
 // length; there the sectors overlap in a smaller star.
 star_sector_shift = 0.375; // [0:0.01:1]
 // Random lines in each half of a sector, cut into the star to different
-// levels, at least one layer above the plate.
+// levels.
 lines_per_sector = 6; // [1:20]
 line_width_min = 0.42; // [0.3:0.01:5]
-line_width_max = 3; // [0.3:0.1:20]
+line_width_max = 1.2; // [0.3:0.1:20]
 // Between the star and the window's visible edges.
 decoration_border = 2;
 
@@ -312,9 +318,8 @@ deco_slope = (win_top_half - win_bot_half) / win_len;
 star_fit_r = min((deco_y1 - deco_y0) / 2,
                  deco_half(deco_y1) / (sqrt(1 + deco_slope * deco_slope) + deco_slope));
 star_y = deco_y1 - star_fit_r;
-// The star's height in whole layers.
-star_layers_min = max(1, round(star_height_min / layer_step));
-star_layers_max = max(star_layers_min, round(star_height_max / layer_step));
+// A level in whole layers.
+level_h = max(1, round(level_step / layer_step)) * layer_step;
 // Roof. Its band leans like the frame's sides up to the eaves, a0 from the
 // middle.
 a0 = w1 + lean * roof_band_height;
@@ -376,7 +381,6 @@ assert(roof_curve_r > chord / 2 && cy >= roof_rise, "roof_curve_r is too small f
 assert(roof_thread_top + 2 <= roof_band_height, "roof_band_height must be 2 mm more than the thread.");
 assert(roof_in(roof_thread_top) >= roof_thread_d / 2, "The roof's inside is narrower than its thread; lower roof_wall.");
 assert(roof_in(roof_in_top) >= 0.5, "roof_wall is too thick for the roof's top; lower roof_wall.");
-assert(star_height_min <= star_height_max, "star_height_min must not exceed star_height_max.");
 assert(line_width_min <= line_width_max, "line_width_min must not exceed line_width_max.");
 assert(star_fit_r >= 5, "There is no room for the star; lower decoration_border.");
 
@@ -755,15 +759,15 @@ module window()
                                               [win_top_half, win_len], [-win_top_half, win_len]]);
 
 // The window with a star on its outside, as in the Christmas star: the
-// largest that fits above the rail, a random number of layers between
-// star_height_min and star_height_max high. seed picks the star.
+// largest that fits above the rail, star_levels levels high. seed picks the
+// star. r[1] picked the star's height before V4; it stays, so a seed gives
+// the same points and lines as before.
 module decorative_window(seed = decoration_seed) {
     r = rands(0, 1, 2 + 4 * lines_per_sector, seed);
     n = random_points ? 3 + floor(r[0] * 6) : star_points;
-    layers = min(star_layers_max, star_layers_min + floor(r[1] * (star_layers_max - star_layers_min + 1)));
     window();
     translate([0, star_y, window_thickness])
-        star(n, star_fit_r / star_extent(n), layers, [for (i = [2:len(r) - 1]) r[i]]);
+        star(n, star_fit_r / star_extent(n), [for (i = [2:len(r) - 1]) r[i]]);
 }
 
 // Half of a star's sector for a radius of 1, as in the Christmas star: the
@@ -777,18 +781,18 @@ function star_sector(n) =
 // How far a star of radius 1 reaches from its middle, its sectors moved.
 function star_extent(n) = max([for (p = star_sector(n)) norm(p - [0, star_sector_shift])]);
 
-// The Christmas star's mandala, layers high on z = 0 and eps into the plate
-// below: n sectors of the given radius, each moved star_sector_shift of it
-// past the middle, so they overlap there. Each half sector has a hole near
-// its point and lines_per_sector lines from the randoms r, 4 per line:
-// through a random point of the half sector, at a random angle and width.
-// Line j is cut down to 1 + floor(j * (layers - 1) / lines_per_sector)
-// layers: 1 to lines_per_sector layers in the highest star, as in the
-// Christmas star. A star one layer high has no lines. Every half sector has
+// The Christmas star's mandala, star_levels levels high on z = 0 and eps into
+// the plate below: n sectors of the given radius, each moved
+// star_sector_shift of it past the middle, so they overlap there. Each half
+// sector has a hole near its point and lines_per_sector lines from the
+// randoms r, 4 per line: through a random point of the half sector, at a
+// random angle and width. Line j is cut down to level
+// floor(j * star_levels / lines_per_sector), level 0 being the plate, so
+// each level below the star's top has as many lines. Every half sector has
 // the same lines, so the star is symmetric.
-module star(n, radius, layers, r) {
+module star(n, radius, r) {
     t = radius * star_sector(n);
-    h = layers * layer_step;
+    h = star_levels * level_h;
     line_len = max(norm(t[1] - t[0]), norm(t[2] - t[1]), norm(t[0] - t[2]));
     for (i = [0:n - 1]) rotate(i * 360 / n) translate([0, -star_sector_shift * radius])
         for (m = [0, 1]) mirror([m, 0, 0]) difference() {
@@ -796,9 +800,9 @@ module star(n, radius, layers, r) {
             for (j = [0:lines_per_sector - 1])
                 let (u = r[4 * j], v = r[4 * j + 1], fold = u + v > 1,
                      p = t[0] + (fold ? 1 - u : u) * (t[1] - t[0]) + (fold ? 1 - v : v) * (t[2] - t[0]),
-                     level = 1 + floor(j * (layers - 1) / lines_per_sector),
+                     level = floor(j * star_levels / lines_per_sector),
                      width = line_width_min + r[4 * j + 3] * (line_width_max - line_width_min))
-                if (level < layers) translate([p[0], p[1], level * layer_step])
+                translate([p[0], p[1], level * level_h])
                     rotate(r[4 * j + 2] * 360) translate([-line_len / 2, -width / 2, 0])
                         cube([line_len, width, h]);
             translate([0, 0.6 * radius, -1]) linear_extrude(h + 2) scale(0.2) polygon(t);
