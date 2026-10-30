@@ -8,6 +8,63 @@ pillars.
 
 ![preview](preview.png)
 
+## V3: decoration envelopes
+
+`RGBW_pucklight_lantern3V3_decoration_envelope.scad`. V2 with two more
+views for decorating the lantern: `frame_envelope` and `roof_envelope`, the
+space outside the frame and the roof that a decoration may fill. With them,
+a decoration is sculpted freely, then cut to what fits:
+
+1. export a part (`part = "frame"` or `"roof"`) and its envelope
+   (`"frame_envelope"` or `"roof_envelope"`). Both are in the position the
+   part is printed in, so they line up.
+2. sculpt the decoration around the part.
+3. intersect the decoration with the envelope.
+4. union the result with the part.
+
+![the frame and the roof in their envelopes](envelope_v3.png)
+
+- each envelope reaches `envelope_thickness` (10 mm) out from the part's
+  sides, measured square to each side, with sharp corners, and
+  `envelope_overlap` (0.2 mm) into them, so the decoration fuses with the
+  part instead of only touching it.
+- the frame's envelope runs from the frame's bottom, which stands on the
+  bed and the click base, to its top, above which the roof turns as it is
+  screwed on. The window openings between the pillars above the rail are
+  free, so the windows and their stars stay clear.
+- the roof's envelope runs from the roof's bottom up, round around the ball.
+  The columns above the slits and the squares at the eaves are free, so the
+  light still comes out.
+- checked: neither envelope touches the windows, the window slits, the
+  threads or the other part; with the roof screwed down to its stop, the
+  two envelopes only meet in the plane between them.
+
+In OpenSCAD, steps 3 and 4 for the frame are:
+
+```
+include <RGBW_pucklight_lantern3V3_decoration_envelope.scad>
+part = "none";
+union() {
+    frame();
+    intersection() { import("frame_decoration.stl"); frame_envelope(); }
+}
+```
+
+`part = "none"` keeps the included file from drawing its own view.
+`include` instead of `use` keeps the file's `$fn`, which the threads need.
+
+![a test decoration on the frame](decoration_example_v3.png)
+
+A test decoration, rings and diagonal bars, cut by the frame's envelope and
+unioned with the frame. A piece of a decoration that lies in the envelope
+without touching the part comes out loose, like the short bars in front of
+the rail here: the rest of each bar is in front of a window opening. Leave
+such pieces out of the sculpt, or delete them in the slicer.
+
+V3 has no logos: none in the frame, the roof, the windows, the screwin or
+the click base. Without the window's logo the star fills the window above
+the rail and is 66 mm across instead of 63.
+
 ## V2: star windows
 
 `RGBW_pucklight_lantern3V2_decorative_window.scad`. The lantern of V1 with
@@ -226,9 +283,13 @@ they are too weak, raise `roof_wall`.
 - `RGBW_pucklight_lantern3.scad`: the generator.
 - `RGBW_pucklight_lantern3V2_decorative_window.scad`: the generator with
   star windows.
+- `RGBW_pucklight_lantern3V3_decoration_envelope.scad`: the generator with
+  star windows and decoration envelopes, without logos.
 - `preview.png`: the assembly. `section.png`: the assembly cut in half.
 - `preview_v2.png`: the V2 assembly. `window_v2.png`: a V2 window's
   thickness map. `random_windows.png`: the 25 random windows' thickness map.
+- `envelope_v3.png`: the frame and the roof in their envelopes.
+  `decoration_example_v3.png`: a test decoration on the frame.
 - `readme_hgc.md`: the original description.
 - `inspiration/`: pictures and the Onshape export.
 
