@@ -8,6 +8,39 @@ pillars.
 
 ![preview](preview.png)
 
+## V2: decorative windows
+
+`RGBW_pucklight_lantern3V2_decorative_window.scad`. The lantern of V1 with
+the windows decorated as in `../published_christmas_star`: random lines
+across the window, mirrored about its middle, each cut from the outside
+down to a different number of layers. Printed in a translucent filament, the
+light shines through each line in a different shade. Everything else is as
+below.
+
+![preview V2](preview_v2.png)
+
+![decorative window](window_v2.png)
+
+- the window is still `window_thickness` (3 mm) thick in its 3.6 mm slits,
+  `slot_clearance` (0.3 mm) thinner on each side, so it slides in. The lines
+  only take material away, so they do not change that.
+- `lines_per_half` (12) lines go through random points of the window's
+  right half, at random angles and widths between `line_width_min` (0.42
+  mm) and `line_width_max` (3 mm), and are mirrored onto the left half.
+- line i is cut down to i + 1 layers of `layer_step` (0.2 mm): from 0.2 mm
+  to 2.4 mm. Where lines cross, the deeper one wins. Set `layer_step` to
+  the layer height you print with.
+- the lines stay `decoration_border` (2 mm) inside the part of the window
+  you see between the pillars and above the rail, so the edges in the slits
+  keep their full thickness, and 2 mm away from the logo.
+- `decoration_seed` picks the pattern. `part = "window"` makes one window
+  with it; change the seed between exports for four different windows. The
+  assembly and the print layout show four windows with the same pattern.
+
+Print the window flat, its outside (the lines and the logo) up. Each line's
+floor is flat, so it needs no support. Not printed yet: the thinnest line
+is one layer (0.2 mm) thick, which may be weak if it is wide.
+
 ## parts
 
 - `frame`: the holder's top part at the bottom, then four corner pillars
@@ -174,7 +207,10 @@ they are too weak, raise `roof_wall`.
 ## files
 
 - `RGBW_pucklight_lantern3.scad`: the generator.
+- `RGBW_pucklight_lantern3V2_decorative_window.scad`: the generator with
+  decorative windows.
 - `preview.png`: the assembly. `section.png`: the assembly cut in half.
+- `preview_v2.png`: the V2 assembly. `window_v2.png`: a V2 window.
 - `readme_hgc.md`: the original description.
 - `inspiration/`: pictures and the Onshape export.
 
