@@ -8,6 +8,75 @@ pillars.
 
 ![preview](preview.png)
 
+## V4: one envelope for the whole lantern
+
+`RGBW_pucklight_lantern3V4_lantern_envelope.scad`. V3 with one decoration
+envelope for the assembled lantern, inside and out, instead of one outside
+each part: `part = "envelope"`. A decoration of the whole lantern is
+sculpted once and cut to what fits:
+
+1. export `part = "lantern"`, the frame, the roof and the windows as they
+   are assembled, and `part = "envelope"`. Both are in the same place: the
+   frame's bottom on z = 0, the roof lined up `roof_seat_gap` (0.4 mm) above
+   the frame, without the click base.
+2. sculpt the decoration around the lantern, inside and out.
+3. cut it to the envelope and union it with the parts, in OpenSCAD:
+
+```
+include <RGBW_pucklight_lantern3V4_lantern_envelope.scad>
+part = "none";
+decorated_frame() import("decoration.stl");
+```
+
+and `decorated_roof() import("decoration.stl");` for the roof. Each takes
+the decoration's piece in its part of the envelope, unions it with the part
+and puts it where the part is printed.
+
+![the lantern in its envelope, whole and cut in half, and the envelope cut in half](envelope_v4.png)
+
+- outside it is as in V3: `envelope_thickness` (10 mm) out from the frame's
+  and the roof's sides, from the frame's bottom up.
+- inside it also takes the pillars' inner faces and the corners behind
+  them, the holder's top in its corners, the band's underside in the
+  corners and the roof's inside between the slits.
+- it reaches `envelope_overlap` (0.2 mm) into the parts' faces, inside and
+  out, so a decoration fuses with them. It is for adding a decoration, not
+  for cutting one in: the parts' material is not in it.
+- free, so the lantern still works:
+  - the light's way: every straight line from the holder's round window
+    (50 mm) to the window openings between the pillars above the rail, and
+    to the neck's 82.4 mm bore, which lets the light into the roof; in front
+    of the openings, straight out, as in V3; in the roof, the columns
+    straight up from the slits, inside and out.
+  - the windows and their slits. A window and its star slide in through the
+    slits and the opening.
+  - the holder, with the puck, the screwin and the click base's pins; the
+    envelope starts at the frame's bottom.
+  - the roof's thread: a cylinder around the neck, 45.1 mm in radius, up to
+    the top of the thread.
+  - the gap between the frame and the roof: below it the envelope is the
+    frame's, above it the roof's, so a decoration falls apart into a piece
+    for each there, and the roof still turns. At the roof's stop the two only
+    meet in the plane between them.
+- checked: the envelope does not touch the windows, the slits, the light's
+  way, the roof's thread or the frame's neck, and with the roof at its stop
+  the roof's part does not touch the frame, nor the frame's part the roof.
+- it is in five pieces: outside the frame, inside it low in the corners,
+  inside it under the band's corners, outside the roof and inside it.
+- the holder's ribs, where they stand out of the light's way, are in the
+  envelope; a union does not change them.
+
+![a test decoration on the frame and the roof, whole and cut in half](decoration_example_v4.png)
+
+A test decoration: beads along the pillars' outer and inner corners, rings
+around the holder, the roof's band and its curve. Inside, the beads stop
+where the light's way begins. The rings on the curve are round, the roof is
+square, so they pass through the roof's inside at the hips. The frame and the
+roof with it each came out as one solid.
+
+In OpenSCAD 2021.01 the envelope renders in 45 s, the decorated frame and
+roof with this decoration in 5 and 6 minutes.
+
 ## V3: decoration envelopes
 
 `RGBW_pucklight_lantern3V3_decoration_envelope.scad`. V2 with two more
@@ -285,11 +354,16 @@ they are too weak, raise `roof_wall`.
   star windows.
 - `RGBW_pucklight_lantern3V3_decoration_envelope.scad`: the generator with
   star windows and decoration envelopes, without logos.
+- `RGBW_pucklight_lantern3V4_lantern_envelope.scad`: the generator with
+  star windows and one decoration envelope for the whole lantern, without
+  logos.
 - `preview.png`: the assembly. `section.png`: the assembly cut in half.
 - `preview_v2.png`: the V2 assembly. `window_v2.png`: a V2 window's
   thickness map. `random_windows.png`: the 25 random windows' thickness map.
 - `envelope_v3.png`: the frame and the roof in their envelopes.
   `decoration_example_v3.png`: a test decoration on the frame.
+- `envelope_v4.png`: the lantern in the V4 envelope.
+  `decoration_example_v4.png`: a test decoration on the frame and the roof.
 - `readme_hgc.md`: the original description.
 - `inspiration/`: pictures and the Onshape export.
 
