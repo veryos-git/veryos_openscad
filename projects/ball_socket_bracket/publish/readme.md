@@ -5,6 +5,9 @@ in print orientation. All three are shown at the same scale.
 
 ![the three variants](variants.png)
 
+Cover, images and text for MakerWorld and Printables:
+[listing.md](listing.md).
+
 | | small | medium | large |
 | --- | --- | --- | --- |
 | ball | 14 mm | 20 mm | 30 mm |

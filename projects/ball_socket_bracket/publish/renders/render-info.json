@@ -1,0 +1,93 @@
+[
+  {
+    "id": "small",
+    "camera_direction": [
+      0.75,
+      -1,
+      0.8
+    ],
+    "orthographic_width_mm": 131.75,
+    "resolution": [
+      1800,
+      1500
+    ]
+  },
+  {
+    "id": "medium",
+    "camera_direction": [
+      0.75,
+      -1,
+      0.8
+    ],
+    "orthographic_width_mm": 131.75,
+    "resolution": [
+      1800,
+      1500
+    ]
+  },
+  {
+    "id": "large",
+    "camera_direction": [
+      0.75,
+      -1,
+      0.8
+    ],
+    "orthographic_width_mm": 131.75,
+    "resolution": [
+      1800,
+      1500
+    ]
+  },
+  {
+    "id": "tilt",
+    "camera_direction": [
+      0.75,
+      -1,
+      0.8
+    ],
+    "orthographic_width_mm": 97.15,
+    "resolution": [
+      1800,
+      1500
+    ]
+  },
+  {
+    "id": "section",
+    "camera_direction": [
+      0.2,
+      -1,
+      0.25
+    ],
+    "orthographic_width_mm": 84.89,
+    "resolution": [
+      1800,
+      1500
+    ]
+  },
+  {
+    "id": "screwcut",
+    "camera_direction": [
+      1,
+      -0.55,
+      0.35
+    ],
+    "orthographic_width_mm": 72.09,
+    "resolution": [
+      1800,
+      1500
+    ]
+  },
+  {
+    "id": "plate",
+    "camera_direction": [
+      0.3,
+      -1,
+      2.2
+    ],
+    "orthographic_width_mm": 121.49,
+    "resolution": [
+      1800,
+      1500
+    ]
+  }
+]
