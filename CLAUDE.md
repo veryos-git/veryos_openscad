@@ -79,3 +79,6 @@ projects:projects are stored and worked on in the 'projects' folder. each projec
  if this is not possible because of missing space, it can be omitted.
 
 ---
+lessons learned: lessons_learned.md in the workspace root collects findings from real prints (clearances, fits). check it before choosing clearances. add new findings there as compact table rows or one-line rules, no floating text.
+
+---
