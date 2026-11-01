@@ -74,7 +74,7 @@ lip_width = 16; // [12:1:30]
 magnet_diameter = 6; // [3:0.5:12]
 magnet_thickness = 2; // [1:0.5:5]
 // Clearance added to the DIAMETER, not to each side.
-magnet_diameter_clearance = 0.2; // [0:0.05:0.8]
+magnet_diameter_clearance = 0.3; // [0:0.05:0.8]
 magnet_depth_clearance = 0.1; // [0:0.05:0.5]
 // Additional usable depth below the box's chamfered corner-post tops.
 box_magnet_extra_depth = 0.5; // [0:0.1:3]
