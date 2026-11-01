@@ -5,7 +5,8 @@
 // V3 is a sharp-edged cuboid with smooth, flat outer faces, ready for added
 // rectangular relief decorations, and a rectangular opening and lid. It keeps
 // the V2 45-degree grip lip, tapered lid seat, rim seat, magnets and hinge.
-// The VeryOS logo is engraved in the box underside, the cover and the lid.
+// Optionally, the VeryOS logo is engraved in the box underside, the cover
+// and the lid.
 
 /* [View] */
 // Export this separated layout to keep all three parts splittable in a slicer.
@@ -57,6 +58,8 @@ lip_width = 16; // [12:1:30]
 // The front undercut is always 45 degrees; the latch magnet pad is retained.
 
 /* [Logo] */
+// Engrave the VeryOS logo in the box underside, the cover and the lid.
+engrave_logo = false;
 // The same logo size on all three parts; left out where it does not fit.
 logo_width = 20; // [8:1:40]
 logo_depth = 0.6; // [0.2:0.1:1.2]
@@ -135,8 +138,8 @@ logo_h = logo_width * 2 * logo_r / logo_w;
 // Cover logo: centred in the flat band behind the hinge. Lid logo: centred
 // between the grip lip and the back edge. Each keeps a 2 mm margin.
 cover_logo_y = (hinge_y + hinge_r + box_depth / 2) / 2;
-cover_logo = logo_h + 4 <= box_depth / 2 - hinge_y - hinge_r;
-lid_logo = logo_h + 4 <= lid_d / 2 - lip_back_y && logo_width + 4 <= lid_w;
+cover_logo = engrave_logo && logo_h + 4 <= box_depth / 2 - hinge_y - hinge_r;
+lid_logo = engrave_logo && logo_h + 4 <= lid_d / 2 - lip_back_y && logo_width + 4 <= lid_w;
 
 assert(part == "assembly" || part == "exploded" || part == "print_layout"
        || part == "box" || part == "boxcover" || part == "boxcover_lid",
@@ -198,7 +201,7 @@ assert(lip_projection > 1 + tab_half && lip_projection > lip_height,
        "Lip must project beyond the latch pad and leave a base under its 45-degree face.");
 assert(-lip_front_y + wall_thickness < box_depth / 2,
        "Lip extends too close to the cover edge; reduce lip_projection or opening_depth.");
-assert(logo_depth > 0 && logo_depth <= bottom_thickness - 1.2,
+assert(!engrave_logo || (logo_depth > 0 && logo_depth <= bottom_thickness - 1.2),
        "Logo depth must be positive and leave at least 1.2 mm of floor.");
 assert(lid_angle >= 0 && lid_angle <= 180 && exploded_distance >= 0,
        "Use a lid angle from 0 to 180 degrees and a nonnegative explode distance.");
@@ -222,9 +225,11 @@ echo(str("Rectangular opening: ", opening_w, " x ", opening_d, " mm; lid ",
          lid_w, " x ", lid_d, " mm."));
 echo(str("Lid seat: 45 degrees, ", seat_depth, " mm deep, ", seat_clearance,
          " mm clearance per side; throat ", seat_throat_w, " x ", seat_throat_d, " mm."));
-echo(str("Logo: ", logo_width, " x ", logo_h, " mm, ", logo_depth,
-         " mm deep; box underside, cover ", cover_logo ? "yes" : "left out",
-         ", lid ", lid_logo ? "yes" : "left out", "."));
+echo(engrave_logo
+    ? str("Logo: ", logo_width, " x ", logo_h, " mm, ", logo_depth,
+          " mm deep; box underside, cover ", cover_logo ? "yes" : "left out",
+          ", lid ", lid_logo ? "yes" : "left out", ".")
+    : "Logo: off.");
 
 // A centred rectangle lofted through sections [Z, growth per side]. Equal
 // growth and rise give 45-degree faces on all four sides. One mesh avoids
@@ -330,7 +335,7 @@ module box() {
             pocket_from_top(box_height, inner_edge_chamfer + box_magnet_pocket_h);
         if (inner_edge_chamfer > 0) top_rim_chamfer();
         // Turned over so it reads from below, with its top toward the hinge side.
-        rotate([0, 180, 0]) logo_cut(logo_width);
+        if (engrave_logo) rotate([0, 180, 0]) logo_cut(logo_width);
     }
 }
 

@@ -11,9 +11,9 @@
   The finger lip and the pad around the latch magnet are square-cornered too.
 - **Square corner posts** inside the box hold the corner magnets, matching the
   square cavity corners.
-- **The VeryOS logo** is engraved in all three parts: the box underside (it
-  reads correctly when the box is turned over), the cover behind the hinge, and
-  the middle of the lid.
+- **Optional VeryOS logo**, off by default. With `engrave_logo = true` it is
+  engraved in all three parts: the box underside (it reads correctly when the
+  box is turned over), the cover behind the hinge, and the middle of the lid.
 
 Everything else is carried over from V2: the 45° tapered lid seat, the 45° rim
 seat between box and cover, the lowered corner posts with 2.6 mm magnet bores,
@@ -23,7 +23,7 @@ the 45° finger lip and the filament hinge. V3 parts do not fit V2 parts.
 
 ![Closed box](closed_preview.png)
 
-![Lid with the engraved logo and the square grip lip](lid_detail.png)
+![Lid with the optional logo enabled and the square grip lip](lid_detail.png)
 
 ## Dimensions
 
@@ -40,6 +40,7 @@ Parameters that changed from V2:
 | --- | --- | --- |
 | `magnet_inset` | 8 | Distance from each outer side to the corner magnet axes; replaces `corner_radius` |
 | `opening_width` / `opening_depth` | 0 / 0 | Rectangular opening at the top of the seat; zero uses 53% / 40% of the box |
+| `engrave_logo` | false | Engrave the VeryOS logo in the box underside, cover and lid |
 | `logo_width` | 20 | Logo width on all three parts; a logo is left out where it does not fit |
 | `logo_depth` | 0.6 | Engraving depth |
 
@@ -53,7 +54,7 @@ The outer faces are the planes x = ±`box_width`/2 and y = ±`box_depth`/2
 the cover top is the plane z = `cover_thickness`. A relief can be added with
 `union()` as a `cube()` placed against one of these faces. Keep reliefs on the
 cover top clear of the lid (`lid_w` × `lid_d` plus the 9 mm finger lip), the
-hinge and the logo behind it, and keep the box's top edge flat where the cover
+hinge and, if enabled, the logo behind it, and keep the box's top edge flat where the cover
 sits on it.
 
 ## Export and assembly
@@ -91,11 +92,13 @@ Printing notes:
   2.25 mm above the bed. The cover's outer ledge sits 1.35 mm above the bed.
   Inspect these overhangs in the slicer and add local supports where needed,
   keeping support out of the sloped seat faces and the filament bore.
-- The box logo is engraved in the bed-facing side; the slicer bridges over it.
+- With the logo enabled, the box logo is engraved in the bed-facing side; the
+  slicer bridges over it.
 
 ## Validation
 
-Rendered with OpenSCAD 2026.09.16 (Manifold). The box, cover and lid each
+Rendered with OpenSCAD 2026.09.16 (Manifold), with the logo off and on. The
+box, cover and lid each
 export as one closed mesh with consistent face orientation and the lowest
 point at Z=0; the print layout contains exactly three separate bodies. The
 assembled box and cover meet only at their flat contact plane at the rim
