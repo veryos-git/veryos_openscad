@@ -33,11 +33,11 @@ bottom_thickness = 2.4; // [1.2:0.2:6]
 /* [Exterior pattern] */
 // Material is added OUTSIDE the box; the cavity, seat and hinge stay unchanged.
 // The maximum footprint is box_width/depth + 2*pattern_depth. "none" is smooth.
-exterior_pattern = "none"; // [none:Smooth,ribs:Fine round ribs,flutes:Broad rounded flutes,spiral:Spiral/twist ribs,diamond:Diamond knurl,waves:Wavy ribs,chevron:Chevron ribs]
+exterior_pattern = "diamond"; // [none:Smooth,ribs:Fine round ribs,flutes:Broad rounded flutes,spiral:Spiral/twist ribs,diamond:Diamond knurl,waves:Wavy ribs,chevron:Chevron ribs]
 pattern_on_box = true;
 pattern_on_cover = true;
 // Added outward height; 0 also disables the pattern.
-pattern_depth = 1.5; // [0:0.1:4]
+pattern_depth = 3; // [0:0.1:4]
 // Rib/flute repeats around the whole perimeter. Must be a whole number.
 pattern_count = 52; // [8:1:160]
 // Smooth band at the top and bottom edge of each part.

@@ -78,7 +78,7 @@ rail_height = 6;
 /* [Windows] */
 // A window is a flat plate: printed (part = "window") or cut from acrylic,
 // film or paper of this thickness. The printed window's star stands on it.
-window_thickness = 0.2;
+window_thickness = 3.0;
 // Gap on each side of a window in its slit, and at its edges.
 slot_clearance = 0.3;
 // Wall in front of the slits.
