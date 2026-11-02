@@ -1,0 +1,41 @@
+{
+    "parameterSets": {
+        "Everyday": {
+            "box_width": "200",
+            "box_depth": "120",
+            "box_height": "65",
+            "corner_style": "rectangular",
+            "exterior_pattern": "diamond",
+            "opening_width": "0",
+            "hinge_middle_length": "24"
+        },
+        "Cube": {
+            "box_width": "120",
+            "box_depth": "120",
+            "box_height": "120",
+            "corner_style": "rounded",
+            "exterior_pattern": "flutes",
+            "opening_width": "68",
+            "hinge_middle_length": "12"
+        },
+        "Long": {
+            "box_width": "260",
+            "box_depth": "100",
+            "box_height": "65",
+            "corner_style": "rectangular",
+            "exterior_pattern": "ribs",
+            "opening_width": "0",
+            "hinge_middle_length": "24"
+        },
+        "Tall": {
+            "box_width": "160",
+            "box_depth": "120",
+            "box_height": "145",
+            "corner_style": "rounded",
+            "exterior_pattern": "spiral",
+            "opening_width": "0",
+            "hinge_middle_length": "24"
+        }
+    },
+    "fileFormatVersion": "1"
+}

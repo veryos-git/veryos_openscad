@@ -1,0 +1,270 @@
+[
+  {
+    "id": "everyday",
+    "meshes": {
+      "box": "everyday_box",
+      "cover": "everyday_cover",
+      "lid": "everyday_lid_0"
+    },
+    "camera_direction": [
+      0.95,
+      -1.6,
+      1.05
+    ],
+    "orthographic_width_mm": 305.47,
+    "resolution": [
+      1800,
+      1500
+    ]
+  },
+  {
+    "id": "cube",
+    "meshes": {
+      "box": "cube_box",
+      "cover": "cube_cover",
+      "lid": "cube_lid_0"
+    },
+    "camera_direction": [
+      0.95,
+      -1.6,
+      1.05
+    ],
+    "orthographic_width_mm": 305.47,
+    "resolution": [
+      1800,
+      1500
+    ]
+  },
+  {
+    "id": "long",
+    "meshes": {
+      "box": "long_box",
+      "cover": "long_cover",
+      "lid": "long_lid_0"
+    },
+    "camera_direction": [
+      0.95,
+      -1.6,
+      1.05
+    ],
+    "orthographic_width_mm": 305.47,
+    "resolution": [
+      1800,
+      1500
+    ]
+  },
+  {
+    "id": "tall",
+    "meshes": {
+      "box": "tall_box",
+      "cover": "tall_cover",
+      "lid": "tall_lid_0"
+    },
+    "camera_direction": [
+      0.95,
+      -1.6,
+      1.05
+    ],
+    "orthographic_width_mm": 305.47,
+    "resolution": [
+      1800,
+      1500
+    ]
+  },
+  {
+    "id": "pattern_none",
+    "meshes": {
+      "box": "everyday_none_box",
+      "cover": "everyday_none_cover",
+      "lid": "everyday_none_lid_0"
+    },
+    "camera_direction": [
+      0.95,
+      -1.6,
+      1.05
+    ],
+    "orthographic_width_mm": 260.77,
+    "resolution": [
+      1800,
+      1500
+    ]
+  },
+  {
+    "id": "pattern_ribs",
+    "meshes": {
+      "box": "everyday_ribs_box",
+      "cover": "everyday_ribs_cover",
+      "lid": "everyday_ribs_lid_0"
+    },
+    "camera_direction": [
+      0.95,
+      -1.6,
+      1.05
+    ],
+    "orthographic_width_mm": 260.77,
+    "resolution": [
+      1800,
+      1500
+    ]
+  },
+  {
+    "id": "pattern_flutes",
+    "meshes": {
+      "box": "everyday_flutes_box",
+      "cover": "everyday_flutes_cover",
+      "lid": "everyday_flutes_lid_0"
+    },
+    "camera_direction": [
+      0.95,
+      -1.6,
+      1.05
+    ],
+    "orthographic_width_mm": 260.77,
+    "resolution": [
+      1800,
+      1500
+    ]
+  },
+  {
+    "id": "pattern_spiral",
+    "meshes": {
+      "box": "everyday_spiral_box",
+      "cover": "everyday_spiral_cover",
+      "lid": "everyday_spiral_lid_0"
+    },
+    "camera_direction": [
+      0.95,
+      -1.6,
+      1.05
+    ],
+    "orthographic_width_mm": 260.77,
+    "resolution": [
+      1800,
+      1500
+    ]
+  },
+  {
+    "id": "pattern_diamond",
+    "meshes": {
+      "box": "everyday_box",
+      "cover": "everyday_cover",
+      "lid": "everyday_lid_0"
+    },
+    "camera_direction": [
+      0.95,
+      -1.6,
+      1.05
+    ],
+    "orthographic_width_mm": 260.77,
+    "resolution": [
+      1800,
+      1500
+    ]
+  },
+  {
+    "id": "pattern_waves",
+    "meshes": {
+      "box": "everyday_waves_box",
+      "cover": "everyday_waves_cover",
+      "lid": "everyday_waves_lid_0"
+    },
+    "camera_direction": [
+      0.95,
+      -1.6,
+      1.05
+    ],
+    "orthographic_width_mm": 260.77,
+    "resolution": [
+      1800,
+      1500
+    ]
+  },
+  {
+    "id": "pattern_chevron",
+    "meshes": {
+      "box": "everyday_chevron_box",
+      "cover": "everyday_chevron_cover",
+      "lid": "everyday_chevron_lid_0"
+    },
+    "camera_direction": [
+      0.95,
+      -1.6,
+      1.05
+    ],
+    "orthographic_width_mm": 260.77,
+    "resolution": [
+      1800,
+      1500
+    ]
+  },
+  {
+    "id": "rectangular",
+    "meshes": {
+      "box": "everyday_box",
+      "cover": "everyday_cover",
+      "lid": "everyday_lid_110"
+    },
+    "camera_direction": [
+      0.95,
+      -1.6,
+      1.05
+    ],
+    "orthographic_width_mm": 272.16,
+    "resolution": [
+      1800,
+      1500
+    ]
+  },
+  {
+    "id": "rounded",
+    "meshes": {
+      "box": "everyday_rounded_box",
+      "cover": "everyday_rounded_cover",
+      "lid": "everyday_rounded_lid_110"
+    },
+    "camera_direction": [
+      0.95,
+      -1.6,
+      1.05
+    ],
+    "orthographic_width_mm": 272.16,
+    "resolution": [
+      1800,
+      1500
+    ]
+  },
+  {
+    "id": "logo",
+    "meshes": {
+      "box": "everyday_box"
+    },
+    "camera_direction": [
+      0,
+      -0.2,
+      1
+    ],
+    "orthographic_width_mm": 222.46,
+    "resolution": [
+      1800,
+      1500
+    ]
+  },
+  {
+    "id": "print",
+    "meshes": {
+      "box": "everyday_box",
+      "print_cover": "everyday_print_cover",
+      "print_lid": "everyday_print_lid"
+    },
+    "camera_direction": [
+      0.35,
+      -1,
+      2.2
+    ],
+    "orthographic_width_mm": 401.03,
+    "resolution": [
+      1800,
+      1500
+    ]
+  }
+]

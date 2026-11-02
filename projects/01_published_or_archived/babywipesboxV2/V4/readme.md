@@ -90,4 +90,8 @@ not been tested.
 On rectangular corners, the pattern's lowest points stand 0.01 mm proud of the
 flat faces, so no faces of the pattern and the box coincide.
 
+Publishing material (images, listing text, print STLs) is in
+[publish/listing.md](publish/listing.md); the Customizer presets Everyday,
+Cube, Long and Tall are in [babywipesboxV4.json](babywipesboxV4.json).
+
 Licensed under the repository's [GPL license](../../../../LICENSE).
