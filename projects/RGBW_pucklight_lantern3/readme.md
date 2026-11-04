@@ -403,6 +403,24 @@ Between the pillars, at the top, there is no lip: the window lies in front
 of the band. For thinner windows, such as film or paper, set
 `window_thickness` to their thickness and the slits follow.
 
+### window outline for other CAD programs
+
+`window_outline.svg` and `window_outline.dxf`, from `window_outline.scad`
+(the projection of `window()` with the default parameters, in V1 and V8).
+
+| | |
+|---|---|
+| units / origin | mm / middle of the bottom (narrow) edge |
+| bottom edge | 61.67 mm |
+| top edge | 85.32 mm |
+| length | 89.485 mm |
+| thickness | 3 mm (slit 3.6 mm) |
+| clearance | already in the outline: 0.3 mm at the sides and the top |
+
+- hidden in the slits: 2.7 mm at each side, about 5 mm at the bottom (behind the rail's lip).
+- anything thicker than 3 mm only on the outside, inside the visible area, or the window does not slide in.
+- other parameters: re-export with `openscad -o window_outline.svg window_outline.scad`.
+
 ## the frame's top
 
 The band is the frame's top behind the slits. Its underside is a 45
