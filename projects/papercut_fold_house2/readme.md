@@ -47,6 +47,23 @@
 - Folds are cut as dashed slits (perforations), not separate score lines; the net stays one piece.
 - The VeryOS logo is a dashed engraving, high in the gable of wall 2, clear of the roof tabs glued inside.
 
+## Version 3 with windows
+
+[papercut_fold_house2_windows_V3.scad](papercut_fold_house2_windows_V3.scad): the same net and parameters, plus four-pane windows in every wall.
+
+![V3 template on an A4 sheet](preview-windows_V3-template.png)
+
+![V3 folded house](preview-windows_V3-folded.png)
+
+| Parameter | Default | Meaning |
+|---|---|---|
+| `floors`, `windows_per_floor` | 2, 2 | Window rows; windows per row on the long walls (gable walls: 1) |
+| `window_width`, `window_height`, `window_bar` | 18, 26, 1.6 | Four-pane window |
+| `door_width`, `door_height` | 18, 34 | The door replaces the ground-floor window of wall 0 and must fit below the first-floor window |
+
+- Windows keep `glue_tab + 3` mm from the ends of the long walls (the corner tab glues there).
+- The logo is left out (console message) if it has no room above the top windows.
+
 ## Export
 
 ```sh
