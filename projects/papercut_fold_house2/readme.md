@@ -34,9 +34,7 @@
 | `house_depth` | 55 | Gable walls |
 | `wall_height` | 100 | Bottom edge to eaves |
 | `roof_height` | 40 | Ridge above the eaves |
-| `floors`, `windows_per_floor` | 2, 2 | Window rows; windows per row on the long walls (gable walls: 1) |
-| `window_width`, `window_height`, `window_bar` | 18, 26, 1.6 | Four-pane window |
-| `door_width`, `door_height` | 18, 34 | Arched door, replaces the ground-floor window of wall 0 |
+| `door_width`, `door_height` | 18, 34 | Arched door in wall 0 |
 | `glue_tab` | 7 | Tab width; roof side tabs get narrower on steep, short roofs |
 | `fold_slit_width`, `fold_dash_length`, `fold_dash_gap` | 0.45, 2.6, 2 | Perforation slits along the folds |
 | `sheet_width`, `sheet_height`, `sheet_margin` | 297, 210, 5 | A4 landscape; fit check in the console, outline in the flat preview |
@@ -47,8 +45,7 @@
 - At the defaults, about 45 mm of A4 height is still free: raise `wall_height` up to ~145 for a taller house.
 - The top face of the template becomes the outside of the house. Cut it face up.
 - Folds are cut as dashed slits (perforations), not separate score lines; the net stays one piece.
-- The VeryOS logo is a dashed engraving, high in the gable of wall 2. It is left out (console message) if it has no room above the top windows.
-- Windows keep `glue_tab + 3` mm from the ends of the long walls (the corner tab glues there).
+- The VeryOS logo is a dashed engraving, high in the gable of wall 2, clear of the roof tabs glued inside.
 
 ## Export
 

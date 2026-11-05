@@ -15,7 +15,7 @@
 //         /      \#|             |#/      \#|             |
 //   +---+----------+-------------+----------+-------------+
 //   |tab|  wall 0  |   wall 1    |  wall 2  |   wall 3    |
-//   |   |   door   |   windows   |   logo   |   windows   |
+//   |   |   door   |             |   logo   |             |
 //   +---+----------+-------------+----------+-------------+
 //
 // Walls 0 and 2 are the gable walls, walls 1 and 3 the long walls. The left
@@ -37,14 +37,8 @@ wall_height = 100; // [40:1:160]
 // Height of the ridge above the eaves.
 roof_height = 40; // [15:1:70]
 
-/* [Windows and door] */
-// Window rows. The long walls get windows_per_floor windows per row, the
-// gable walls one. The door replaces the ground-floor window of wall 0.
-floors = 2; // [1:1:4]
-windows_per_floor = 2; // [1:1:4]
-window_width = 18; // [8:1:40]
-window_height = 26; // [8:1:60]
-window_bar = 1.6; // [1:0.1:4]
+/* [Door] */
+// Arched door in wall 0.
 door_width = 18; // [8:1:40]
 door_height = 34; // [10:1:80]
 
@@ -94,19 +88,13 @@ net_width = glue_tab + 2 * (house_depth + house_length);
 net_height = wall_height + roof_slant + glue_tab;
 fits_sheet = net_width <= sheet_width - 2 * sheet_margin
              && net_height <= sheet_height - 2 * sheet_margin;
-top_window_top = wall_height * (floors - 0.5) / floors + window_height / 2;
-door_limit = floors > 1
-    ? wall_height * 1.5 / floors - window_height / 2 - border
-    : wall_height - border;
 // The logo sits as high in the gable of wall 2 as the roof tabs glued inside
-// it allow. Without room above the top windows it is left out.
+// it allow.
 logo_top = roof_height * (1 - (logo_width / 2 + 1) / half_depth)
            - roof_tab * roof_slant / half_depth;
 logo_y = wall_height + logo_top - logo_height / 2;
-logo_fits = logo_y - logo_height / 2 >= top_window_top + border;
 
 function wall_width(index) = index % 2 == 0 ? house_depth : house_length;
-function window_columns(index) = index % 2 == 0 ? 1 : windows_per_floor;
 
 assert(output == "flat" || output == "cut" || output == "folded",
        "Choose flat, cut or folded output.");
@@ -114,31 +102,16 @@ assert(2 * roof_tab < house_depth - 2 * border,
        "Both roof tabs inside a gable need room; use a smaller glue_tab.");
 assert(roof_tab >= 4,
        "The roof is too short and steep for 4 mm side glue tabs; make the house deeper or the roof lower.");
-assert(house_length / (2 * windows_per_floor) - window_width / 2 >= glue_tab + border
-       && half_depth - window_width / 2 >= border
-       && wall_height / (2 * floors) - window_height / 2 >= border,
-       "The windows do not fit; use fewer or smaller windows. Wall 3's ends keep glue_tab + 3 mm free.");
-assert(window_bar < min(window_width, window_height) - 4,
-       "Window bars must leave panes wider than 2 mm.");
 assert(door_width <= house_depth - 2 * border && door_height > door_width / 2
-       && door_height <= door_limit,
-       "The door must fit below the first-floor window, with 3 mm of paper around it.");
+       && door_height <= wall_height - border,
+       "The door must fit in wall 0 with 3 mm of paper around it.");
 echo(str("Flat net: ", net_width, " x ", net_height, " mm; sheet ", sheet_width,
          " x ", sheet_height, " mm with ", sheet_margin, " mm margin: ",
          fits_sheet ? "fits" : "DOES NOT FIT", ". Folded house: ", house_length,
-         " x ", house_depth, " x ", wall_height + roof_height, " mm.",
-         logo_fits ? "" : " Logo left out: no room in the gable of wall 2."));
+         " x ", house_depth, " x ", wall_height + roof_height, " mm."));
 
 // ---------------------------------------------------------------------------
 // Two-dimensional artwork
-
-module window_2d() {
-    difference() {
-        square([window_width, window_height], center = true);
-        square([window_bar, window_height + 2], center = true);
-        square([window_width + 2, window_bar], center = true);
-    }
-}
 
 // Arched door, open at the bottom edge of the wall.
 module door_2d() {
@@ -182,15 +155,9 @@ module wall_outline_2d(index) {
 }
 
 module wall_openings_2d(index) {
-    n_columns = window_columns(index);
-    for (n_floor = [0 : floors - 1], n_column = [0 : n_columns - 1])
-        if (!(index == 0 && n_floor == 0))
-            translate([wall_width(index) * (n_column + 0.5) / n_columns,
-                       wall_height * (n_floor + 0.5) / floors])
-                window_2d();
     if (index == 0)
         translate([half_depth, 0]) door_2d();
-    if (index == 2 && logo_fits)
+    if (index == 2)
         translate([half_depth, logo_y]) logo_engraving_2d();
 }
 
