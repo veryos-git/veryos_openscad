@@ -1,12 +1,18 @@
 # Mathematical spheres
 
-Webapp: a shader, as in Shadertoy, draws a heightmap, and its brightness moves the outside of V2's sphere. Downloads `.stl` and `.obj`. Open `index.html` in a browser; no install, no server. Original description: `readme_hgc.md`.
+Webapp: a shader, as in Shadertoy, draws a heightmap, and its brightness moves the outside of V2's sphere. Downloads `.stl` and `.obj`. Original description: `readme_hgc.md`.
+
+| Start | |
+|---|---|
+| `deno task start` in this folder | serves it on http://localhost:8765, only to this computer |
+| Open `index.html` in a browser | works just as well, no Deno needed |
 
 ![the app](preview.png)
 
 | File | What |
 |---|---|
 | `index.html` | layout |
+| `deno.json` | the `start` task |
 | `app.js` | editor, heightmap, 3D views, colours, downloads |
 | `sphere_mesh.js` | `sphere_mesh()` of `../pucklight_sphereV2.scad` in JavaScript; copy changes over by hand |
 | `test_sphere_mesh.js` | `node test_sphere_mesh.js` compares it with OpenSCAD's export; needs `openscad` |

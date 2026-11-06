@@ -1,0 +1,6 @@
+{
+  "lock": false,
+  "tasks": {
+    "start": "deno run --allow-net=localhost:8765 --allow-read=. jsr:@std/http@1/file-server --host localhost --port 8765 ."
+  }
+}
