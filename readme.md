@@ -41,6 +41,7 @@ Example: [V4 baby wipes box](projects/01_published_or_archived/babywipesboxV2/V4
 | rule | value |
 | --- | --- |
 | main image | real photo of the printed model, not a render |
+| no print yet | not published: print first, then photograph |
 | photo edits | crop, white balance and background only; the print is not retouched or regenerated |
 | in the photo | no third-party brands |
 | logos | VeryOS logo always, OpenSCAD logo if the project has a `.scad` file |
