@@ -1,5 +1,7 @@
 # V5 softbox publishing pack
 
+**Not ready to publish.** This pack is for V5 and its thumbnail is a render; the photos in `realimages/` show a V4 build with a hand-cut cover. Next: print and photograph V6, then rebuild the pack for V6. `source/compose.py` still loads the OpenSCAD logo from the old `projects/biclightercase2` path, so fix that first.
+
 Open [contact-sheet.png](contact-sheet.png) to review all eight publication images. Use [listing.md](listing.md) for the title, description, tags, social caption, assembly notes and image alt text.
 
 ## Upload order
