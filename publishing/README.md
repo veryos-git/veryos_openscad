@@ -1,5 +1,7 @@
 # Customization publishing packs
 
+Rules for all publishing material: [readme.md](../readme.md#publishing). This file only documents this pipeline.
+
 The current collection covers four projects:
 
 - `biclightercase2` — four exterior patterns on the same lighter fit.
@@ -46,11 +48,11 @@ The cubic wipes-box example uses a 12 mm center hinge and 68 mm opening width so
 
 `mesh-audit.json` records the twelve meshes' bounds, topology and positive volume. `preset-audit.json` checks that the supplied Customizer presets reproduce the command-line geometry. These are digital checks; the new examples have not been physically printed or fit-tested.
 
-Consolas was requested but is unavailable on this machine. The covers use DejaVu Sans Mono. To recompose with local Consolas font files:
+The existing covers use DejaVu Sans Mono for all text. To recompose with the brand fonts:
 
 ```sh
-PUBLISH_FONT=/path/to/consola.ttf \
-PUBLISH_FONT_BOLD=/path/to/consolab.ttf \
+PUBLISH_FONT=/usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf \
+PUBLISH_FONT_BOLD=/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf \
 node publishing/build.mjs --stage=compose
 ```
 

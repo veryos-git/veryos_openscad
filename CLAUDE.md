@@ -82,3 +82,8 @@ projects:projects are stored and worked on in the 'projects' folder. each projec
 lessons learned: lessons_learned.md in the workspace root collects findings from real prints (clearances, fits). check it before choosing clearances. add new findings there as compact table rows or one-line rules, no floating text.
 
 ---
+publishing: the publishing section of readme.md in the workspace root is the single source of truth for publishing material (thumbnails, images, listings, print files). read it before creating publishing material. add new rules there, not in other files.
+
+---
+
+
