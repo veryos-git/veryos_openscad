@@ -30,6 +30,9 @@ The defaults are those of V3 with a 15 mm thick phone (`phone_thickness`), an
 80 mm wide phone (`phone_width`) and 3 mm walls (`wall`). The parts, use,
 printing and sizes are otherwise the same as V3 and V2 below.
 
+`V4/phone_camera_thread_holderV4.json` has four Customizer presets. Publishing
+material is in `V4/publishing`; start with `listing.md`.
+
 # V3
 
 ![preview](V3/preview.png)

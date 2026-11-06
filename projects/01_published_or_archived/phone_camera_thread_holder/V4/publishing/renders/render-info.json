@@ -1,0 +1,367 @@
+[
+  {
+    "id": "everyday",
+    "meshes": {
+      "body": "everyday_body",
+      "slider": "everyday_slider",
+      "screw": "everyday_screw"
+    },
+    "camera_direction": [
+      1,
+      -0.38,
+      0.62
+    ],
+    "orthographic_width_mm": 162.78,
+    "resolution": [
+      1800,
+      1500
+    ]
+  },
+  {
+    "id": "compact_phone",
+    "meshes": {
+      "body": "compact_phone_body",
+      "slider": "compact_phone_slider",
+      "screw": "compact_phone_screw"
+    },
+    "camera_direction": [
+      1,
+      -0.38,
+      0.62
+    ],
+    "orthographic_width_mm": 162.78,
+    "resolution": [
+      1800,
+      1500
+    ]
+  },
+  {
+    "id": "thick_case",
+    "meshes": {
+      "body": "thick_case_body",
+      "slider": "thick_case_slider",
+      "screw": "thick_case_screw"
+    },
+    "camera_direction": [
+      1,
+      -0.38,
+      0.62
+    ],
+    "orthographic_width_mm": 162.78,
+    "resolution": [
+      1800,
+      1500
+    ]
+  },
+  {
+    "id": "small_tablet",
+    "meshes": {
+      "body": "small_tablet_body",
+      "slider": "small_tablet_slider",
+      "screw": "small_tablet_screw"
+    },
+    "camera_direction": [
+      1,
+      -0.38,
+      0.62
+    ],
+    "orthographic_width_mm": 162.78,
+    "resolution": [
+      1800,
+      1500
+    ]
+  },
+  {
+    "id": "held_everyday",
+    "meshes": {
+      "body": "everyday_body",
+      "slider": "everyday_slider",
+      "screw": "everyday_screw",
+      "phone": "everyday_phone"
+    },
+    "camera_direction": [
+      1,
+      -0.38,
+      0.62
+    ],
+    "orthographic_width_mm": 262.71,
+    "resolution": [
+      1800,
+      1500
+    ]
+  },
+  {
+    "id": "held_compact_phone",
+    "meshes": {
+      "body": "compact_phone_body",
+      "slider": "compact_phone_slider",
+      "screw": "compact_phone_screw",
+      "phone": "compact_phone_phone"
+    },
+    "camera_direction": [
+      1,
+      -0.38,
+      0.62
+    ],
+    "orthographic_width_mm": 262.71,
+    "resolution": [
+      1800,
+      1500
+    ]
+  },
+  {
+    "id": "held_thick_case",
+    "meshes": {
+      "body": "thick_case_body",
+      "slider": "thick_case_slider",
+      "screw": "thick_case_screw",
+      "phone": "thick_case_phone"
+    },
+    "camera_direction": [
+      1,
+      -0.38,
+      0.62
+    ],
+    "orthographic_width_mm": 262.71,
+    "resolution": [
+      1800,
+      1500
+    ]
+  },
+  {
+    "id": "held_small_tablet",
+    "meshes": {
+      "body": "small_tablet_body",
+      "slider": "small_tablet_slider",
+      "screw": "small_tablet_screw",
+      "phone": "small_tablet_phone"
+    },
+    "camera_direction": [
+      1,
+      -0.38,
+      0.62
+    ],
+    "orthographic_width_mm": 262.71,
+    "resolution": [
+      1800,
+      1500
+    ]
+  },
+  {
+    "id": "exploded",
+    "meshes": {
+      "body": "everyday_spread_40_body",
+      "slider": "everyday_spread_40_slider",
+      "screw": "everyday_spread_40_screw"
+    },
+    "camera_direction": [
+      1,
+      -0.38,
+      0.62
+    ],
+    "orthographic_width_mm": 189.17,
+    "resolution": [
+      1800,
+      1500
+    ]
+  },
+  {
+    "id": "section",
+    "meshes": {
+      "body": "everyday_section_body",
+      "slider": "everyday_section_slider",
+      "screw": "everyday_section_screw",
+      "phone": "everyday_section_phone"
+    },
+    "camera_direction": [
+      1,
+      0,
+      0.1
+    ],
+    "orthographic_width_mm": 101.52,
+    "resolution": [
+      1800,
+      1500
+    ]
+  },
+  {
+    "id": "print",
+    "meshes": {
+      "print_body": "everyday_print_body",
+      "print_slider": "everyday_print_slider",
+      "print_screw": "everyday_print_screw"
+    },
+    "camera_direction": [
+      0.7,
+      -1,
+      1.9
+    ],
+    "orthographic_width_mm": 121.6,
+    "resolution": [
+      1800,
+      1500
+    ]
+  },
+  {
+    "id": "phone_thickness_10",
+    "meshes": {
+      "body": "everyday_phone_thickness_10_body",
+      "slider": "everyday_phone_thickness_10_slider",
+      "screw": "everyday_phone_thickness_10_screw"
+    },
+    "camera_direction": [
+      1,
+      -0.55,
+      0.85
+    ],
+    "orthographic_width_mm": 105.09,
+    "resolution": [
+      1800,
+      1500
+    ]
+  },
+  {
+    "id": "phone_thickness_15",
+    "meshes": {
+      "body": "everyday_body",
+      "slider": "everyday_slider",
+      "screw": "everyday_screw"
+    },
+    "camera_direction": [
+      1,
+      -0.55,
+      0.85
+    ],
+    "orthographic_width_mm": 105.09,
+    "resolution": [
+      1800,
+      1500
+    ]
+  },
+  {
+    "id": "phone_thickness_22",
+    "meshes": {
+      "body": "everyday_phone_thickness_22_body",
+      "slider": "everyday_phone_thickness_22_slider",
+      "screw": "everyday_phone_thickness_22_screw"
+    },
+    "camera_direction": [
+      1,
+      -0.55,
+      0.85
+    ],
+    "orthographic_width_mm": 105.09,
+    "resolution": [
+      1800,
+      1500
+    ]
+  },
+  {
+    "id": "holder_width_26",
+    "meshes": {
+      "body": "everyday_holder_width_26_body",
+      "slider": "everyday_holder_width_26_slider",
+      "screw": "everyday_holder_width_26_screw"
+    },
+    "camera_direction": [
+      1,
+      -0.55,
+      0.85
+    ],
+    "orthographic_width_mm": 105.09,
+    "resolution": [
+      1800,
+      1500
+    ]
+  },
+  {
+    "id": "holder_width_30",
+    "meshes": {
+      "body": "everyday_body",
+      "slider": "everyday_slider",
+      "screw": "everyday_screw"
+    },
+    "camera_direction": [
+      1,
+      -0.55,
+      0.85
+    ],
+    "orthographic_width_mm": 105.09,
+    "resolution": [
+      1800,
+      1500
+    ]
+  },
+  {
+    "id": "holder_width_44",
+    "meshes": {
+      "body": "everyday_holder_width_44_body",
+      "slider": "everyday_holder_width_44_slider",
+      "screw": "everyday_holder_width_44_screw"
+    },
+    "camera_direction": [
+      1,
+      -0.55,
+      0.85
+    ],
+    "orthographic_width_mm": 105.09,
+    "resolution": [
+      1800,
+      1500
+    ]
+  },
+  {
+    "id": "lip_length_3",
+    "meshes": {
+      "body": "everyday_lip_length_3_body",
+      "slider": "everyday_lip_length_3_slider",
+      "screw": "everyday_lip_length_3_screw"
+    },
+    "camera_direction": [
+      1,
+      -0.55,
+      0.85
+    ],
+    "orthographic_width_mm": 105.09,
+    "resolution": [
+      1800,
+      1500
+    ]
+  },
+  {
+    "id": "lip_length_5",
+    "meshes": {
+      "body": "everyday_body",
+      "slider": "everyday_slider",
+      "screw": "everyday_screw"
+    },
+    "camera_direction": [
+      1,
+      -0.55,
+      0.85
+    ],
+    "orthographic_width_mm": 105.09,
+    "resolution": [
+      1800,
+      1500
+    ]
+  },
+  {
+    "id": "lip_length_9",
+    "meshes": {
+      "body": "everyday_lip_length_9_body",
+      "slider": "everyday_lip_length_9_slider",
+      "screw": "everyday_lip_length_9_screw"
+    },
+    "camera_direction": [
+      1,
+      -0.55,
+      0.85
+    ],
+    "orthographic_width_mm": 105.09,
+    "resolution": [
+      1800,
+      1500
+    ]
+  }
+]
