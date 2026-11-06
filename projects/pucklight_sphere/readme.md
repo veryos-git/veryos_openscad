@@ -149,7 +149,8 @@ Meshes: all parts closed. `shell` 0.8 and 2, `sphere_d` 94 to 200 and `surface_d
 
 - Nothing has been printed: the thread's fit, the sphere's top and the click are open.
 - The lamp's 112 g rests on the puck's dome (sockel, screwin, sphere), less than the lantern's. If that clicks the light by itself, stand it on something else.
-- Not run in the browser playground, and the OpenSCAD window's preview was not opened: the checks above ran on the command line. The pictures are from Blender.
+- The checks above ran on the command line (OpenSCAD 2021.01); its window's preview was not opened. The pictures are from Blender.
+- Another OpenSCAD build, apparently the browser playground: `export (81).stl` has the same four parts, sizes and volumes.
 
 ## Not included
 
