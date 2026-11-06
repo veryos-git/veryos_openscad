@@ -1,5 +1,5 @@
 // Copyright (C) Jonas Immanuel Frey - Licensed under GPL
-// The sphere of ../pucklight_sphereV2.scad, part = "sphere", with a heightmap as its
+// The sphere of ../pucklight_sphereV3.scad, part = "sphere", with a heightmap as its
 // surface formula: the points and faces of its sphere_mesh(), at its defaults and
 // with its names. Copy changes over by hand; test_sphere_mesh.js compares the two.
 //
@@ -16,7 +16,7 @@ const cos_d = (a) => Math.cos(a / deg_per_rad);
 // The generator's parameters.
 const sphere_d = 100;
 const shell = 0.8;
-const neck_d = 77;
+const neck_d = 67;
 const neck_height = 4;
 const neck_wall = 1.2;
 const thread_pitch = 2;

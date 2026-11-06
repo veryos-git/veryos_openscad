@@ -15,6 +15,9 @@ Diameter clearance = added to the hole diameter, not per side.
 
 ## Rules
 
+- A click base needs no alignment pins: the disc in the screw's opening and the bar in its slot are enough (pucklight_sphere V2, 2026-11-06). Without pins the sockel can turn on the base, so hold it when turning a sphere.
+- A screw turned by hand needs height: 8.4 mm high with a 2.6 mm bar gives too little grip and feedback, 10.4 mm with a 4.6 mm bar is better (pucklight_sphere V2 against V1, 2026-11-06).
+- A sphere on a neck 77% of its diameter looks cut off (pucklight_sphere V2, starts at latitude -37.8, 2026-11-06).
 - Flat faces that set a fit belong on multiples of the layer height, 0.2 mm by default. The slicer rounds the others: a 0.1 mm axial gap sliced as 0.04 mm at 0.28 mm layers, measured in the G-code (pucklight_sphere V1, 2026-11-06).
 - A clearance that fits on a small test print may not fit on a large part. Test in the real part, or print the real section (e.g. one corner post) as the test piece. *Hypothesis (babywipesbox, 2026-11-01), not yet confirmed side by side.*
 - Glued magnets: check the polarity of each pair before the glue sets.

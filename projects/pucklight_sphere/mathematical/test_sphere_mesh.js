@@ -1,6 +1,6 @@
 // Copyright (C) Jonas Immanuel Frey - Licensed under GPL
 // Compares sphere_mesh.js with the sphere OpenSCAD exports from
-// ../pucklight_sphereV2.scad: same points, same faces, also with a surface formula.
+// ../pucklight_sphereV3.scad: same points, same faces, also with a surface formula.
 // Run: node test_sphere_mesh.js
 
 const assert = require("assert");
@@ -11,7 +11,7 @@ const path = require("path");
 const vm = require("vm");
 
 vm.runInThisContext(fs.readFileSync(path.join(__dirname, "sphere_mesh.js"), "utf8"));
-const scad = path.join(__dirname, "..", "pucklight_sphereV2.scad");
+const scad = path.join(__dirname, "..", "pucklight_sphereV3.scad");
 const temp = fs.mkdtempSync(path.join(os.tmpdir(), "sphere_mesh_"));
 
 function openscad_mesh(columns, surface) {

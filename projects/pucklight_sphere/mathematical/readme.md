@@ -1,6 +1,6 @@
 # Mathematical spheres
 
-Webapp: a shader, as in Shadertoy, draws a heightmap, from a formula or a loaded texture, and its brightness moves the outside of V2's sphere. Keeps its work in named projects. Downloads `.stl` and `.obj`. Original description: `readme_hgc.md`.
+Webapp: a shader, as in Shadertoy, draws a heightmap, from a formula or a loaded texture, and its brightness moves the outside of V3's sphere. Keeps its work in named projects. Downloads `.stl` and `.obj`. Original description: `readme_hgc.md`.
 
 ![the app](preview.png)
 
@@ -13,7 +13,7 @@ Webapp: a shader, as in Shadertoy, draws a heightmap, from a formula or a loaded
 |---|---|
 | `index.html` | layout |
 | `app.js` | editor, heightmap, texture, 3D views, colours, projects, downloads |
-| `sphere_mesh.js` | `sphere_mesh()` of `../pucklight_sphereV2.scad` in JavaScript; copy changes over by hand |
+| `sphere_mesh.js` | `sphere_mesh()` of `../pucklight_sphereV3.scad` in JavaScript; copy changes over by hand |
 | `server.js` | serves the app and keeps the projects |
 | `deno.json` | the `start` task |
 | `projects/` | the projects, tracked by git; the planets come from `../planets/` |
@@ -75,7 +75,7 @@ As `outer_radius()` in the generator, with the map as `surface_height()`: radius
 | Part | Latitude | Moves |
 |---|---|---|
 | Thread, neck, inside | | no |
-| Outside, lower part | -37.8 to From lat | no |
+| Outside, lower part | -45 to From lat | no |
 | Outside, fading in | From lat, 15 degrees | partly |
 | Outside | to 65 | fully |
 | Outside, fading out | 65 to 80 | partly |
@@ -83,18 +83,19 @@ As `outer_radius()` in the generator, with the map as `surface_height()`: radius
 
 | From lat | For |
 |---|---|
-| -12.5 | the default, the generator's `fade_bottom` (-12.497): as its formulas |
-| -36 | the planets: a map should reach the neck, or Earth loses most of its south |
+| -19.7 | the default, the generator's `fade_bottom` (-19.688): as its formulas |
+| -36 | the planets, saved for V2's neck: a map should reach the neck, or Earth loses most of its south |
+| -43 | the slider's lowest; V3's sphere starts at -45 |
 
 Colour follows the movement: a point that stays gets the colour of 0.0, also the neck and the inside.
 
 ## Columns
 
-| Columns | Step at the equator | Vertices | Offset at -12.5 | Triangles | `.stl` | Voronoi walls |
+| Columns | Step at the equator | Vertices | Offset at -19.7 | Triangles | `.stl` | Voronoi walls |
 |---|---|---|---|---|---|---|
-| 180 | 1.75 mm | 32222 | 8280 | 64440 | 3.2 MB | coarse stair-steps |
-| 360 | 0.87 mm | 110522 | 33120 | 221040 | 11.1 MB | visible stair-steps |
-| **720** | **0.44 mm** | **405362** | **133200** | **810720** | **40.5 MB** | **clean; the default and the generator's maximum** |
+| 180 | 1.75 mm | 33662 | 9000 | 67320 | 3.4 MB | coarse stair-steps |
+| 360 | 0.87 mm | 115562 | 35640 | 231120 | 11.6 MB | visible stair-steps |
+| **720** | **0.44 mm** | **425522** | **143280** | **851040** | **42.6 MB** | **clean; the default and the generator's maximum** |
 
 ## Checks
 
@@ -112,14 +113,16 @@ Colour follows the movement: a point that stays gets the colour of 0.0, also the
 | Create, read, update, rename, delete, and every other control, in headless Chrome: mouse and typing on the cube, orbit, zoom, stops, picker, buttons and editor; sliders and lists set by script | works, console clean apart from the refused names |
 | Without the internet | a plain text box replaces the editor; the rest works |
 
+Only `test_sphere_mesh.js` ran again on V3's sphere, which differs here in `neck_d` only. The other rows are from V2's.
+
 ## Not tested yet
 
-- Not sliced, not printed. Most open: overhang on the lower flank of a wall, and more so below -12.5 (hypothesis: a planet's gentle slopes are fine).
+- Not sliced, not printed. Most open: overhang on the lower flank of a wall, and more so below -19.7 (hypothesis: a planet's gentle slopes are fine).
 - Only on software WebGL in Chrome: no real GPU, no Firefox. One update took 0.2 to 1.6 s there.
 
 ## Not included
 
-- `vase_sphere`: this is V2's normal sphere, whose inside stays smooth, so thickness makes the pattern when lit.
-- Logo: none on the sphere, as in V2 by default; the sockel and the click base carry it.
+- `vase_sphere`: this is V3's normal sphere, whose inside stays smooth, so thickness makes the pattern when lit.
+- Logo: none on the sphere, as in V3 by default; the screwin and the click base carry it.
 
 Licensed under GPL. The textures in `projects/` are NASA and USGS data, see `../planets/readme.md`.
