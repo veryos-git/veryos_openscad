@@ -15,7 +15,7 @@ PHOTO_PARTS = PHOTOS/'WhatsApp Image 2026-10-31 at 16.25.43.jpeg'
 PHOTO_SIDE = PHOTOS/'WhatsApp Image 2026-10-31 at 16.25.43 (1).jpeg'
 PHOTO_TILT = PHOTOS/'WhatsApp Image 2026-10-31 at 16.25.43 (2).jpeg'
 BG, INK, MUTE, LINE, AMBER = '#F4EFE4', '#243C3A', '#64726B', '#D5CFC2', '#A15B23'
-FONT = os.environ.get('PUBLISH_FONT') or subprocess.check_output(['fc-match','-f','%{file}','Consolas'],text=True)
+FONT = os.environ.get('PUBLISH_FONT') or subprocess.check_output(['fc-match','-f','%{file}','DejaVu Sans Mono'],text=True)
 FAMILY = ImageFont.truetype(FONT,20).getname()[0]
 BOLD = os.environ.get('PUBLISH_FONT_BOLD') or subprocess.check_output(['fc-match','-f','%{file}',FAMILY+':style=Bold'],text=True)
 ICC = ImageCms.ImageCmsProfile(ImageCms.createProfile('sRGB')).tobytes()

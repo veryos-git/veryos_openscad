@@ -162,7 +162,7 @@ if stage in ('all', 'mesh'):
         openscad=(version.stdout + version.stderr).strip(), backend='Manifold',
         geometry='Original V5 modules and source assembly/print-layout transforms. No mesh scaling between variants.',
         presentation='Graphite frame, ivory covers and amber screws. Assembly previews have two covers removed, as in the source.',
-        font_requested='Consolas', validation='Digital geometry checks only; pictured variants are not fit-tested.')
+        font_requested='DejaVu Sans Mono', validation='Digital geometry checks only; pictured variants are not fit-tested.')
     (OUT / 'provenance.json').write_text(json.dumps(provenance, indent=2) + '\n')
     check_presets(records)
 if stage == 'presets':

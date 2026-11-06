@@ -20,7 +20,7 @@ PHOTO_TOP = photo_path('00.03.57 (3)')
 PHOTO_HINGE = photo_path('00.03.57 (4)')
 PHOTO_MAGNET = photo_path('00.03.57 (6)')
 BG, INK, MUTE, LINE, AMBER = '#F4EFE4', '#243C3A', '#64726B', '#D5CFC2', '#A15B23'
-FONT = os.environ.get('PUBLISH_FONT') or subprocess.check_output(['fc-match','-f','%{file}','Consolas'],text=True)
+FONT = os.environ.get('PUBLISH_FONT') or subprocess.check_output(['fc-match','-f','%{file}','DejaVu Sans Mono'],text=True)
 FAMILY = ImageFont.truetype(FONT,20).getname()[0]
 BOLD = os.environ.get('PUBLISH_FONT_BOLD') or subprocess.check_output(['fc-match','-f','%{file}',FAMILY+':style=Bold'],text=True)
 ICC = ImageCms.ImageCmsProfile(ImageCms.createProfile('sRGB')).tobytes()

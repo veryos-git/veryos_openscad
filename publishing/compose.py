@@ -10,7 +10,7 @@ cfg=json.loads(Path(sys.argv[1]).read_text()); root=Path(cfg['root']); only=sys.
 BG='#F4EFE4'; INK='#273532'; MUTE='#63706A'; LINE='#D1CABD'; ACCENT='#A95D24'
 FONT=os.environ.get('PUBLISH_FONT')
 if not FONT:
-    match=subprocess.check_output(['fc-match','-f','%{family}|%{file}','Consolas'],text=True).split('|')
+    match=subprocess.check_output(['fc-match','-f','%{family}|%{file}','DejaVu Sans Mono'],text=True).split('|')
     FONT=match[1]; FONT_FAMILY=match[0]
 else: FONT_FAMILY=ImageFont.truetype(FONT,20).getname()[0]
 BOLD=os.environ.get('PUBLISH_FONT_BOLD') or subprocess.check_output(['fc-match','-f','%{file}',FONT_FAMILY+':style=Bold'],text=True)
@@ -102,7 +102,7 @@ def listing(p,output):
     export_records=[json.loads((Path(cfg['cache'])/p['id']/f'{i+1}.source.json').read_text()) for i in range(4)]
     current_sha=hashlib.sha256(source.read_bytes()).hexdigest()
     if any(r['source_sha256']!=current_sha for r in export_records):raise ValueError('Source changed after export: '+p['id'])
-    provenance={'source':str(source.relative_to(root)),'source_sha256':current_sha,'tools':export_records[0]['tools'],'exports':export_records,'font':FONT_FAMILY,'requested_font':'Consolas','font_substitution':FONT_FAMILY.lower()!='consolas','geometry':'OpenSCAD-exported meshes; no AI-generated or scaled surrogate geometry','scale':'same orthographic scale for all four variants within a project','preset_notes':'Dimensions describe the named source parameters; see listing for external relief and allowances.'}
+    provenance={'source':str(source.relative_to(root)),'source_sha256':current_sha,'tools':export_records[0]['tools'],'exports':export_records,'font':FONT_FAMILY,'requested_font':'DejaVu Sans Mono','font_substitution':FONT_FAMILY.lower()!='dejavu sans mono','geometry':'OpenSCAD-exported meshes; no AI-generated or scaled surrogate geometry','scale':'same orthographic scale for all four variants within a project','preset_notes':'Dimensions describe the named source parameters; see listing for external relief and allowances.'}
     (output/'provenance.json').write_text(json.dumps(provenance,indent=2)+'\n')
     (output/'UPLOAD.txt').write_text('Suggested order: thumbnail_4x3.png, then thumbnail_3x4.png if useful.\nUse listing.md for title, description and tags.\nOffer the linked original SCAD source with its dependencies and license, plus presets.json/variants.json.\nRenders are digital previews. Assembly STL files are not included in this publication pack.\n')
 
@@ -123,7 +123,7 @@ for p in ready:
     base='../projects/'+p['folder']+'/publish/customization/'
     lines.append(f"| {p['title']} | [4:3]({base}thumbnail_4x3.png) | [3:4]({base}thumbnail_3x4.png) | [Copy + presets]({base}listing.md) |")
 lines+=['','Only the latest lighter case, wipes box, screw-top container and phone mount are included, as requested.','']
-lines+=['','## Typography and source fidelity','',f'The requested typeface is Consolas. This machine resolves it to **{FONT_FAMILY}**, which is used consistently here. Set `PUBLISH_FONT` and `PUBLISH_FONT_BOLD` to local Consolas font files and rerun the composition stage to replace it. The VeryOS mark is rendered from the root `veryos_logo.svg`; the OpenSCAD logo comes from the existing publishing assets.', '',
+lines+=['','## Typography and source fidelity','',f'The typeface is **{FONT_FAMILY}**. The VeryOS mark is rendered from the root `veryos_logo.svg`; the OpenSCAD logo comes from the existing publishing assets.', '',
        'Every pictured variant was exported from the named source. The source hash, parameter overrides and camera scale accompany each pack. New dimensional combinations are digital examples, not claims of print testing or fit. Older publishing material is preserved.', '',
        'Rebuild instructions are in [README.md](README.md).']
 if missing:lines+=['','## Pending renders','',', '.join(missing)]

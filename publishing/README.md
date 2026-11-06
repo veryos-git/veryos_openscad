@@ -48,12 +48,6 @@ The cubic wipes-box example uses a 12 mm center hinge and 68 mm opening width so
 
 `mesh-audit.json` records the twelve meshes' bounds, topology and positive volume. `preset-audit.json` checks that the supplied Customizer presets reproduce the command-line geometry. These are digital checks; the new examples have not been physically printed or fit-tested.
 
-The covers use the brand font, DejaVu Sans Mono. The scripts ask for Consolas and only get DejaVu as a fallback, so set it explicitly:
-
-```sh
-PUBLISH_FONT=/usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf \
-PUBLISH_FONT_BOLD=/usr/share/fonts/truetype/dejavu/DejaVuSansMono-Bold.ttf \
-node publishing/build.mjs --stage=compose
-```
+The covers use the brand font, DejaVu Sans Mono.
 
 Font files are not redistributed. The VeryOS mark comes from `veryos_logo.svg`, and the OpenSCAD icon comes from the repository's existing publishing assets. Existing model licenses remain unchanged.

@@ -10,7 +10,7 @@ from gi.repository import Rsvg
 cfg = json.loads(Path(sys.argv[1]).read_text())
 ROOT, OUT = Path(cfg['root']), Path(cfg['output'])
 BG, INK, MUTE, LINE, AMBER = '#F4EFE4', '#243C3A', '#64726B', '#D5CFC2', '#A15B23'
-FONT = os.environ.get('PUBLISH_FONT') or subprocess.check_output(['fc-match','-f','%{file}','Consolas'],text=True)
+FONT = os.environ.get('PUBLISH_FONT') or subprocess.check_output(['fc-match','-f','%{file}','DejaVu Sans Mono'],text=True)
 FAMILY = ImageFont.truetype(FONT,20).getname()[0]
 BOLD = os.environ.get('PUBLISH_FONT_BOLD') or subprocess.check_output(['fc-match','-f','%{file}',FAMILY+':style=Bold'],text=True)
 ICC = ImageCms.ImageCmsProfile(ImageCms.createProfile('sRGB')).tobytes()
@@ -205,7 +205,7 @@ for i,path in enumerate(files):
     sd.text((x+12,y+552),path.stem,font=font(16),fill=INK)
 sheet.save(OUT/'contact-sheet.png',optimize=True,compress_level=9,icc_profile=ICC)
 provenance=json.loads((OUT/'provenance.json').read_text())
-provenance.update(font_used=FAMILY,font_substitution=FAMILY.lower()!='consolas',
+provenance.update(font_used=FAMILY,font_substitution=FAMILY.lower()!='dejavu sans mono',
     veryos_logo='../../../veryos_logo.svg',
     openscad_logo='../../biclightercase2/publish/source/assets/openscad.png',
     blender=subprocess.check_output(['blender','--version'],text=True).splitlines()[0])

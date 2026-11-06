@@ -23,7 +23,7 @@ PHOTO_BACK = photo_path('40 (3)')
 UPLOADS = [(PHOTO_ARM,'photo ball head'), (photo_path('41 (1)'),'photo thread'), (photo_path('40 (1)'),'photo hook grip'),
            (photo_path('43 (1)'),'photo back'), (photo_path('41 (2)'),'photo screw logo'), (photo_path('41 (4)'),'photo bed side')]
 BG, INK, MUTE, LINE, AMBER = '#F4EFE4', '#243C3A', '#64726B', '#D5CFC2', '#A15B23'
-FONT = os.environ.get('PUBLISH_FONT') or subprocess.check_output(['fc-match','-f','%{file}','Consolas'],text=True)
+FONT = os.environ.get('PUBLISH_FONT') or subprocess.check_output(['fc-match','-f','%{file}','DejaVu Sans Mono'],text=True)
 FAMILY = ImageFont.truetype(FONT,20).getname()[0]
 BOLD = os.environ.get('PUBLISH_FONT_BOLD') or subprocess.check_output(['fc-match','-f','%{file}',FAMILY+':style=Bold'],text=True)
 ICC = ImageCms.ImageCmsProfile(ImageCms.createProfile('sRGB')).tobytes()

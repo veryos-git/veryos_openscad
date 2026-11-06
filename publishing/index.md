@@ -18,7 +18,7 @@ Only the latest lighter case, wipes box, screw-top container and phone mount are
 
 ## Typography and source fidelity
 
-The requested typeface is Consolas. This machine resolves it to **DejaVu Sans Mono**, which is used consistently here. Set `PUBLISH_FONT` and `PUBLISH_FONT_BOLD` to local Consolas font files and rerun the composition stage to replace it. The VeryOS mark is rendered from the root `veryos_logo.svg`; the OpenSCAD logo comes from the existing publishing assets.
+The typeface is **DejaVu Sans Mono**. The VeryOS mark is rendered from the root `veryos_logo.svg`; the OpenSCAD logo comes from the existing publishing assets.
 
 Every pictured variant was exported from the named source. The source hash, parameter overrides and camera scale accompany each pack. New dimensional combinations are digital examples, not claims of print testing or fit. Older publishing material is preserved.
 
