@@ -50,11 +50,12 @@ Example: [V4 baby wipes box](projects/01_published_or_archived/babywipesboxV2/V4
 
 ## brand
 
-Source: [brand identity sheet](branding/identity/veryos-brand-identity.pdf), except its typography, which still shows DejaVu Sans Bold headings. VeryOS stands for very open source: share everything, including the source.
+Source: [brand identity sheet](branding/identity/veryos-brand-identity.pdf). VeryOS stands for very open source: share everything, including the source.
 
 | element | rule |
 | --- | --- |
-| headings, wordmark | DejaVu Sans Mono Bold |
+| headings, wordmark on images | DejaVu Sans Mono Bold |
+| logo artwork in `branding/` | wordmark stays as drawn, in DejaVu Sans Bold |
 | supporting text, labels, values | DejaVu Sans Mono |
 | font license | Bitstream Vera: free to use, not CC0; keep its notice if font files are shared |
 | slogan | `Very Open Source.` |
