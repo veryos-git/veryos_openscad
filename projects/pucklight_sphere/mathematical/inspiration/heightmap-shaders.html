@@ -1,0 +1,648 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Greyscale Heightmap Shaders for 3D Reliefs</title>
+<style>
+  :root{
+    --bg:#121212; --panel:#1b1b1b; --line:#2c2c2c; --ink:#e8e6e1; --dim:#9a978f; --accent:#d9c7a3;
+    --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 "Iowan Old Style","Palatino Linotype",Palatino,Georgia,serif}
+  a{color:var(--accent)}
+  header{padding:40px 32px 20px;max-width:1400px;margin:0 auto}
+  h1{font-weight:400;font-size:clamp(28px,4vw,46px);letter-spacing:-.01em;margin:0 0 8px}
+  h1 em{font-style:italic;color:var(--accent)}
+  .lede{color:var(--dim);max-width:780px;margin:0}
+  .mono{font-family:var(--mono);font-size:12px;letter-spacing:.02em}
+  main{max-width:1400px;margin:0 auto;padding:0 32px 60px}
+
+  /* viewer */
+  .viewer{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(0,1fr);gap:16px;margin:20px 0 40px;
+    background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:16px}
+  .stage{position:relative;height:min(72vh,700px);align-self:start;background:#0b0b0b;border-radius:4px;overflow:hidden}
+  #gl3d{width:100%;height:100%;display:block;cursor:grab}
+  #gl3d:active{cursor:grabbing}
+  .stage .hint{position:absolute;left:10px;bottom:8px;color:var(--dim)}
+  .side{display:flex;flex-direction:column;gap:12px;min-width:0}
+  .side h2{font-weight:400;font-size:22px;margin:0}
+  .side .sub{color:var(--dim);margin:-6px 0 0}
+  #map2d{width:100%;aspect-ratio:1;image-rendering:auto;background:#000;border-radius:4px;display:block}
+  .ctl{display:grid;grid-template-columns:96px 1fr 44px;align-items:center;gap:8px}
+  .ctl label{color:var(--dim)}
+  .ctl output{text-align:right;color:var(--dim)}
+  input[type=range]{width:100%;accent-color:var(--accent)}
+  .row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+  button,select{font:inherit;font-family:var(--mono);font-size:12px;background:#262626;color:var(--ink);
+    border:1px solid #3a3a3a;border-radius:4px;padding:7px 10px;cursor:pointer}
+  button:hover{border-color:var(--accent)}
+  button.primary{background:var(--accent);color:#1a1a1a;border-color:var(--accent)}
+  .check{display:flex;gap:6px;align-items:center;color:var(--dim)}
+
+  /* gallery */
+  .section-h{display:flex;justify-content:space-between;align-items:baseline;border-bottom:1px solid var(--line);padding-bottom:8px;margin-bottom:18px}
+  .section-h h2{font-weight:400;font-size:24px;margin:0}
+  .filters{display:flex;gap:6px;flex-wrap:wrap}
+  .filters button.on{border-color:var(--accent);color:var(--accent)}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(330px,1fr));gap:16px}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:6px;overflow:hidden;display:flex;flex-direction:column;transition:border-color .15s}
+  .card.active{border-color:var(--accent)}
+  .card .thumb{display:grid;grid-template-columns:1fr;position:relative;cursor:pointer}
+  .card canvas{width:100%;aspect-ratio:2/1;display:block;background:#000}
+  .card .use{position:absolute;right:8px;bottom:8px;opacity:0;transition:opacity .15s}
+  .card .thumb:hover .use{opacity:1}
+  .card .body{padding:14px 16px 16px;display:flex;flex-direction:column;gap:8px;flex:1}
+  .card h3{font-weight:400;font-size:19px;margin:0}
+  .card p{margin:0;color:#cfccc4}
+  .tags{display:flex;gap:6px;flex-wrap:wrap}
+  .tag{font-family:var(--mono);font-size:11px;border:1px solid #3a3a3a;border-radius:999px;padding:2px 8px;color:var(--dim)}
+  .tag.good{border-color:#5d6b4a;color:#b7c79a}
+  .tag.warn{border-color:#6b5a3e;color:#d9b77a}
+  .shaders{list-style:none;margin:4px 0 0;padding:0;border-top:1px solid var(--line)}
+  .shaders li{padding:8px 0;border-bottom:1px dashed #2a2a2a}
+  .shaders li:last-child{border-bottom:none}
+  .shaders .t{display:flex;justify-content:space-between;gap:8px}
+  .shaders .t a{text-decoration:none}
+  .shaders .t a:hover{text-decoration:underline}
+  .shaders .meta{color:var(--dim);white-space:nowrap}
+  .shaders .tip{color:var(--dim);font-size:13.5px}
+  .shaders code{font-family:var(--mono);font-size:12px;color:var(--ink);background:#262626;padding:1px 4px;border-radius:3px}
+  footer{max-width:1400px;margin:0 auto;padding:24px 32px 48px;color:var(--dim);border-top:1px solid var(--line)}
+  footer p{max-width:900px}
+  @media (max-width:900px){.viewer{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<header>
+  <div class="mono" style="color:var(--dim)">SHADERTOY SURVEY · HEIGHTFIELD EDITION</div>
+  <h1>Greyscale shaders for <em>3D reliefs</em></h1>
+  <p class="lede">21 Shadertoy shaders whose output is (or easily becomes) a single height value per pixel, grouped into 15 technique families. Every family has a live, re-implemented greyscale preview: click one to load it into the relief viewer, tweak it, and export a 8- or 16-bit PNG to use as Z-displacement in Blender, a CNC/CAM tool or a lithophane generator.</p>
+</header>
+
+<main>
+  <section class="viewer" aria-label="Relief viewer">
+    <div class="stage">
+      <canvas id="gl3d"></canvas>
+      <div class="hint mono">drag to orbit · scroll to zoom</div>
+    </div>
+    <div class="side">
+      <h2 id="vTitle">—</h2>
+      <p class="sub mono" id="vSub"></p>
+      <canvas id="map2d" width="512" height="512"></canvas>
+      <div class="ctl"><label class="mono" for="cScale">Scale</label><input id="cScale" type="range" min="0.5" max="24" step="0.1"><output class="mono" id="oScale"></output></div>
+      <div class="ctl"><label class="mono" for="cSeed">Seed</label><input id="cSeed" type="range" min="0" max="100" step="1"><output class="mono" id="oSeed"></output></div>
+      <div class="ctl"><label class="mono" for="cGamma">Gamma</label><input id="cGamma" type="range" min="0.3" max="3" step="0.05"><output class="mono" id="oGamma"></output></div>
+      <div class="ctl"><label class="mono" for="cZ">Relief depth</label><input id="cZ" type="range" min="0" max="1" step="0.01"><output class="mono" id="oZ"></output></div>
+      <div class="row">
+        <label class="check mono"><input type="checkbox" id="cInv"> invert</label>
+        <button id="bRand">random seed</button>
+      </div>
+      <div class="row">
+        <select id="cRes" aria-label="Export resolution">
+          <option>512</option><option>1024</option><option selected>2048</option><option>4096</option>
+        </select>
+        <button class="primary" id="b16">PNG 16-bit</button>
+        <button id="b8">PNG 8-bit</button>
+      </div>
+      <p class="mono" style="color:var(--dim);margin:0">16-bit avoids visible terracing on deep reliefs.</p>
+    </div>
+  </section>
+
+  <div class="section-h">
+    <h2>The shaders</h2>
+    <div class="filters" id="filters"></div>
+  </div>
+  <div class="grid" id="grid"></div>
+</main>
+
+<footer>
+  <p><strong style="color:var(--ink);font-weight:400">About the previews.</strong> The greyscale thumbnails and the viewer are fresh, simplified re-implementations of each family's general technique (Voronoi borders, erosion noise, domain warping, Truchet tiles…), written for this page — not copies of the linked shaders. For the real thing, open the original and output its height function as <code class="mono">fragColor = vec4(vec3(h),1.)</code>.</p>
+  <p><strong style="color:var(--ink);font-weight:400">Licensing.</strong> Unless the author states otherwise, Shadertoy shaders fall under CC BY-NC-SA 3.0 — fine for personal reliefs with credit, but check with the author before selling objects made from their code. Stats (likes) were taken from Shadertoy in November 2026.</p>
+</footer>
+
+<script>
+/* ------------------------------------------------------------------ */
+/*  Catalogue                                                          */
+/* ------------------------------------------------------------------ */
+const ST = id => `https://www.shadertoy.com/view/${id}`;
+const FAMILIES = [
+  { preset:0, scale:6, title:"Voronoi plates", cat:"cells",
+    blurb:"Exact distance to Voronoi cell borders. Gives flat-topped plates separated by clean grooves — cracked mud, paving, leather.",
+    tags:[["single pass","good"],["crisp edges","good"]],
+    shaders:[
+      {id:"ldl3W8", name:"Voronoi - distances", by:"iq", y:2013, likes:448,
+       tip:"The border distance is already the output. Run <code>smoothstep</code> on it for groove width; add a per-cell random for stepped plates."}
+    ]},
+  { preset:1, scale:10, title:"Voronoise", cat:"noise",
+    blurb:"One function that blends between cell noise, Voronoi and smooth value noise. Two parameters give you a huge range of pebbly to soft surfaces.",
+    tags:[["single pass","good"],["tunable","good"]],
+    shaders:[
+      {id:"Xd23Dh", name:"Voronoise", by:"iq", y:2014, likes:347,
+       tip:"<code>voronoise(p,u,v)</code> returns 0–1 directly. Low <code>v</code> = faceted, high <code>v</code> = blurry."}
+    ]},
+  { preset:2, scale:5, title:"Stone / cobble heightmap", cat:"cells",
+    blurb:"Layered Voronoi (F2−F1) with noise detail, built specifically as a heightmap for raymarching. Great for rock walls and riverbed reliefs.",
+    tags:[["made as heightmap","good"],["buffer pass","warn"]],
+    shaders:[
+      {id:"ldtGWj", name:"Precalculated Voronoi Heightmap", by:"Shane", y:2016, likes:237,
+       tip:"Has a <code>SHOW_HEIGHMAP</code> define (spelled that way) and a <code>heightMap()</code> function baked into Buffer A — read Buffer A."}
+    ]},
+  { preset:3, scale:3, title:"Erosion noise", cat:"terrain",
+    blurb:"fBm terrain plus slope-aligned 'gullies' that fake water erosion — branching ridges without a simulation. The best-looking landscapes in this list.",
+    tags:[["landscapes","good"],["greyscale toggle","good"],["some multi-pass","warn"]],
+    shaders:[
+      {id:"MtGcWh", name:"Eroded Terrain Noise", by:"clayjohn", y:2018, likes:125,
+       tip:"The original. Toggle the <code>HEIGHTMAP</code> / <code>SHADED</code> defines to switch between 3D view and the flat greyscale map."},
+      {id:"7ljcRW", name:"Terrain Erosion Noise", by:"Fewes", y:2023, likes:196,
+       tip:"Fixes directional artefacts of the original; tune with the <code>EROSION_*</code> defines (tiles, octaves, gain, slope strength)."},
+      {id:"33cXW8", name:"Clean Terrain Erosion Filter", by:"runevision", y:2026, likes:72,
+       tip:"Rewrite with more correct derivatives — cleaner gullies. <code>EROSION_SCALE</code> / <code>EROSION_STRENGTH</code>."},
+      {id:"wXcfWn", name:"Advanced Terrain Erosion Filter", by:"runevision", y:2026, likes:172,
+       tip:"Has a <code>GREYSCALE</code> define and <code>mapHeight()</code>; also outputs a ridge map (<code>SHOW_RIDGEMAP</code>)."},
+      {id:"sf23W1", name:"Mouse-Paint Eroded Mountains", by:"runevision", y:2026, likes:258,
+       tip:"Paint mountains with the mouse, then press Enter to erode. Has a <code>GREYSCALE</code> define — ideal for designing a custom relief."}
+    ]},
+  { preset:14, scale:3, title:"Simulated erosion", cat:"terrain",
+    blurb:"Physically-inspired hydraulic erosion that evolves over time in buffers. Most realistic river networks, but you must let it run before capturing.",
+    tags:[["realistic","good"],["multi-pass sim","warn"]],
+    shaders:[
+      {id:"XsVBRm", name:"Hydraulic Erosion", by:"davidar", y:2018, likes:83,
+       tip:"Stream-power landscape evolution; the height lives in a buffer. Wait for it to settle, then output that channel."},
+      {id:"4sG3DG", name:"Water Erosion", by:"Dave_Hoskins", y:2016, likes:32,
+       tip:"Simple slope-based carving with ~600 raindrops; <code>terrain()</code> + <code>fbm()</code> give the base height."}
+    ]},
+  { preset:4, scale:3, title:"Domain-warped fBm", cat:"noise",
+    blurb:"Noise fed into noise fed into noise. Produces marbled, flowing, wood-grain and lava-like swirls — beautiful as a shallow bas-relief.",
+    tags:[["single pass","good"],["organic","good"]],
+    shaders:[
+      {id:"tdG3Rd", name:"Base warp fBM", by:"trinketMage", y:2019, likes:422,
+       tip:"<code>pattern()</code> returns a scalar before the colour-map is applied — output that instead of the colour."},
+      {id:"llySRV", name:"fBm Domain Warping", by:"capnslipp", y:2017, likes:25,
+       tip:"Minimal reference version of the same idea; easy to strip down to grey."}
+    ]},
+  { preset:5, scale:6, title:"Hexagonal Truchet", cat:"tiles",
+    blurb:"Random hex tiles of arcs that join into endless winding tubes. Reads beautifully as a raised relief — think carved Celtic-ish knotwork.",
+    tags:[["single pass","good"],["ornamental","good"]],
+    shaders:[
+      {id:"4td3zj", name:"Raymarched Hexagonal Truchet", by:"Shane", y:2016, likes:336,
+       tip:"A dedicated <code>heightMap()</code> function drives the raymarch — output it directly."},
+      {id:"llSyDh", name:"Hexagonal Maze Flow", by:"Shane", y:2017, likes:267,
+       tip:"2D faux-3D; the distance field <code>df()</code> becomes a height with a smoothstep profile."}
+    ]},
+  { preset:13, scale:10, title:"Maze lattice", cat:"tiles",
+    blurb:"Square Truchet / '10 PRINT' style random walls. Simple, graphic and very legible in shallow CNC reliefs.",
+    tags:[["graphic","good"],["3D source","warn"]],
+    shaders:[
+      {id:"llGGzh", name:"Maze Lattice", by:"Shane", y:2016, likes:167,
+       tip:"Built as a 3D distance field (<code>map()</code>); take a 2D slice, or use the 2D maze logic as height."}
+    ]},
+  { preset:6, scale:3, title:"Reaction–diffusion", cat:"organic",
+    blurb:"Turing-pattern labyrinths, spots and coral. Superb tactile texture; the real shaders simulate in buffers, the preview fakes it with banded noise.",
+    tags:[["coral / brain","good"],["multi-pass sim","warn"]],
+    shaders:[
+      {id:"XsG3z1", name:"Reaction Diffusion - 2 Pass", by:"Shane", y:2016, likes:189,
+       tip:"Concentration is stored in the buffer; output one channel after it stabilises."},
+      {id:"4d3GWS", name:"Gray Scott Reaction Diffusion", by:"Eybor", y:2016, likes:27,
+       tip:"Classic Gray–Scott; change feed/kill rates for spots vs. stripes."}
+    ]},
+  { preset:7, scale:5, title:"Rounded Voronoi blocks", cat:"cells",
+    blurb:"Voronoi cells with pillowed, bevelled tops — like cushions, stone setts or a reptile-scale texture.",
+    tags:[["single pass","good"],["soft bevels","good"]],
+    shaders:[
+      {id:"lt3SzH", name:"Rounded Voronoi Blocks", by:"Shane", y:2016, likes:84,
+       tip:"<code>Voronoi()</code> + <code>bumpFunc()</code>; the bump function is the height."}
+    ]},
+  { preset:12, scale:4, title:"Terraced contours", cat:"cells",
+    blurb:"Smooth Voronoi blobs quantised into stepped layers — topographic-model look, works great for laser-cut layer stacks too.",
+    tags:[["stepped","good"],["laser-friendly","good"]],
+    shaders:[
+      {id:"XdfyWM", name:"Alloy Plated Voronoi", by:"Shane", y:2017, likes:69,
+       tip:"<code>smoothVoronoi()</code> / <code>func2D()</code> produce the contours before the metal shading."}
+    ]},
+  { preset:8, scale:4, title:"Sierpinski carpet", cat:"tiles",
+    blurb:"Recursive square fractal turned into stepped pits — crisp geometric relief with clear depth levels.",
+    tags:[["fractal","good"],["hard steps","good"]],
+    shaders:[
+      {id:"MsySWK", name:"Raymarched 2D Sierpinski", by:"Shane", y:2016, likes:72,
+       tip:"Uses <code>heightMap()</code> for the raymarch — output it as grey."}
+    ]},
+  { preset:9, scale:4, title:"Sand ripples", cat:"organic",
+    blurb:"Asymmetric wind ripples over gentle dunes. Subtle, very natural — a nice base layer for tabletop terrain.",
+    tags:[["subtle","good"],["single pass","good"]],
+    shaders:[
+      {id:"ld3BzM", name:"Desert Sand", by:"Shane", y:2018, likes:172,
+       tip:"<code>sandL()</code> is the ripple layer, <code>fBm()</code> the dunes; combine and output."}
+    ]},
+  { preset:10, scale:4, title:"Water ripples", cat:"organic",
+    blurb:"Interfering concentric waves from random drop points — puddle surfaces, decorative tiles, lithophanes.",
+    tags:[["single pass","good"],["wavy","good"]],
+    shaders:[
+      {id:"lltXD4", name:"Ripple noise", by:"Mr_F", y:2016, likes:46,
+       tip:"Has a <code>heightmap()</code> function plus <code>drops()</code>/<code>drip()</code> helpers."}
+    ]},
+  { preset:11, scale:5, title:"Sinusoidal warp", cat:"noise",
+    blurb:"Iteratively warped sine waves: smooth, flowing, almost fabric-like folds with no noise grain.",
+    tags:[["silky","good"],["single pass","good"]],
+    shaders:[
+      {id:"4l2XWK", name:"Bumped Sinusoidal Warp", by:"Shane", y:2015, likes:269,
+       tip:"Everything comes from <code>bumpFunc()</code> — return that as the pixel value."}
+    ]},
+];
+const CATS = {all:"All", cells:"Cells", noise:"Noise", terrain:"Terrain", tiles:"Tiles", organic:"Organic"};
+
+/* ------------------------------------------------------------------ */
+/*  GLSL: one fragment shader, many height functions                  */
+/* ------------------------------------------------------------------ */
+const FS_HEIGHT = `#version 300 es
+precision highp float;
+uniform vec2 uRes; uniform float uScale, uSeed, uLo, uHi, uGamma; uniform int uPreset, uMode, uInvert;
+out vec4 o;
+const float PI = 3.14159265;
+
+vec2 hash2(vec2 p){ p += uSeed*vec2(17.13, 9.71);
+  vec3 q = fract(vec3(p.xyx)*vec3(.1031,.1030,.0973)); q += dot(q, q.yzx+33.33);
+  return fract((q.xx+q.yz)*q.zy); }
+float hash1(vec2 p){ return hash2(p).x; }
+
+vec3 gnoised(vec2 p){ vec2 i=floor(p), f=fract(p);
+  vec2 u=f*f*f*(f*(f*6.-15.)+10.), du=30.*f*f*(f*(f-2.)+1.);
+  vec2 ga=hash2(i)*2.-1., gb=hash2(i+vec2(1,0))*2.-1., gc=hash2(i+vec2(0,1))*2.-1., gd=hash2(i+1.)*2.-1.;
+  float va=dot(ga,f), vb=dot(gb,f-vec2(1,0)), vc=dot(gc,f-vec2(0,1)), vd=dot(gd,f-1.);
+  return vec3(va+u.x*(vb-va)+u.y*(vc-va)+u.x*u.y*(va-vb-vc+vd),
+              ga+u.x*(gb-ga)+u.y*(gc-ga)+u.x*u.y*(ga-gb-gc+gd)+du*(u.yx*(va-vb-vc+vd)+vec2(vb,vc)-va)); }
+float gnoise(vec2 p){ return gnoised(p).x; }
+float fbm(vec2 p, int oct){ float a=.5, s=0.; mat2 m=mat2(1.6,1.2,-1.2,1.6);
+  for(int i=0;i<8;i++){ if(i>=oct) break; s+=a*gnoise(p); p=m*p+vec2(3.1,1.7); a*=.5; } return s; }
+
+/* exact border distance voronoi: x=dist to border, y=cell random */
+vec2 voroBorder(vec2 x){ vec2 n=floor(x), f=fract(x), mg=vec2(0), mr=vec2(0); float md=8.;
+  for(int j=-1;j<=1;j++) for(int i=-1;i<=1;i++){ vec2 g=vec2(i,j), r=g+hash2(n+g)-f; float d=dot(r,r);
+    if(d<md){ md=d; mr=r; mg=g; } }
+  md=8.;
+  for(int j=-2;j<=2;j++) for(int i=-2;i<=2;i++){ vec2 g=mg+vec2(i,j), r=g+hash2(n+g)-f;
+    if(dot(mr-r,mr-r)>1e-5) md=min(md, dot(.5*(mr+r), normalize(r-mr))); }
+  return vec2(md, hash1(n+mg+3.7)); }
+/* F1, F2, cell random */
+vec3 voroF(vec2 x){ vec2 n=floor(x), f=fract(x); float f1=8., f2=8., id=0.;
+  for(int j=-1;j<=1;j++) for(int i=-1;i<=1;i++){ vec2 g=vec2(i,j), r=g+hash2(n+g)-f; float d=dot(r,r);
+    if(d<f1){ f2=f1; f1=d; id=hash1(n+g+3.1); } else if(d<f2) f2=d; }
+  return vec3(sqrt(f1), sqrt(f2), id); }
+float smoothVoro(vec2 x, float k){ vec2 n=floor(x), f=fract(x); float res=0.;
+  for(int j=-1;j<=1;j++) for(int i=-1;i<=1;i++){ vec2 g=vec2(i,j), r=g+hash2(n+g)-f; res+=exp(-k*length(r)); }
+  return -log(res)/k; }
+float voronoise(vec2 x, float u, float v){ vec2 p=floor(x), f=fract(x); float k=1.+63.*pow(1.-v,6.), va=0., wt=0.;
+  for(int j=-2;j<=2;j++) for(int i=-2;i<=2;i++){ vec2 g=vec2(i,j); vec2 o=hash2(p+g)*u; float z=hash1(p+g+7.3);
+    vec2 r=g-f+o; float w=pow(1.-smoothstep(0.,1.414,length(r)),k); va+=w*z; wt+=w; }
+  return va/wt; }
+
+/* ---- erosion noise (slope-aligned gullies) ---- */
+vec3 gullies(vec2 p, vec2 dir){ vec2 ip=floor(p), fp=fract(p); vec3 va=vec3(0); float wt=0.;
+  for(int i=-2;i<=1;i++) for(int j=-2;j<=1;j++){ vec2 o=vec2(i,j); vec2 pp=fp+o-hash2(ip-o)*.5;
+    float w=exp(-dot(pp,pp)*2.); wt+=w; float m=dot(pp,dir)*2.*PI;
+    va+=vec3(cos(m), -sin(m)*dir*2.*PI)*w; }
+  return va/wt; }
+float eroded(vec2 p){
+  float h=0., a=.5, fr=1.; vec2 d=vec2(0);
+  for(int i=0;i<5;i++){ vec3 g=gnoised(p*fr+vec2(float(i)*7.1,float(i)*3.3)); h+=a*g.x; d+=a*fr*g.yz; a*=.5; fr*=2.; }
+  float e=0.; a=.5; fr=2.5; vec2 dd=d*.6;
+  for(int i=0;i<5;i++){ float sl=length(dd); vec2 dir=vec2(dd.y,-dd.x)/(sl+1e-4);
+    vec3 g=gullies(p*fr, dir); float s=smoothstep(.05,.6,sl);
+    e+=a*g.x*s; dd+=g.yz*.03*a*s; a*=.45; fr*=1.9; }
+  return h + e*.07*smoothstep(-.4,.3,h);
+}
+float ridged(vec2 p){ float s=0., a=.5, w=1.;
+  for(int i=0;i<7;i++){ float n=1.-abs(gnoise(p)*1.4); n*=n; n*=w; w=clamp(n*2.,0.,1.); s+=n*a; p=p*2.03+vec2(1.7,9.2); a*=.5; }
+  return s; }
+
+float warp(vec2 p){ vec2 q=vec2(fbm(p,5), fbm(p+vec2(5.2,1.3),5));
+  vec2 r=vec2(fbm(p+3.5*q+vec2(1.7,9.2),5), fbm(p+3.5*q+vec2(8.3,2.8),5));
+  return fbm(p+3.5*r,5); }
+
+float hexTruchet(vec2 p){ vec2 s=vec2(1.,1.7320508);
+  vec2 a=mod(p,s)-s*.5, b=mod(p-s*.5,s)-s*.5; vec2 gv=dot(a,a)<dot(b,b)?a:b; vec2 id=p-gv;
+  float rot=hash1(floor(id*2.+.5))<.5?0.:1.; float R=.57735, d=1e9;
+  for(int k=0;k<3;k++){ float ang=PI/6.+(float(k)*2.+rot)*PI/3.; vec2 v=R*vec2(cos(ang),sin(ang));
+    d=min(d, abs(length(gv-v)-R*.5)); }
+  float w=.14, t=clamp(1.-(d/w)*(d/w),0.,1.);
+  return sqrt(t) + .08*sqrt(clamp(1.-(d/.03)*(d/.03),0.,1.)); }
+
+float maze(vec2 p){ vec2 id=floor(p), gv=fract(p)-.5; if(hash1(id)<.5) gv.x=-gv.x;
+  float d=abs(gv.x+gv.y)*.70710678; return 1.-smoothstep(.07,.13,d); }
+
+float laby(vec2 p){ vec2 q=p+vec2(fbm(p*.6,3),fbm(p*.6+7.,3))*.35; float v=0.;
+  for(int k=0;k<14;k++){ vec2 r=hash2(vec2(float(k),2.7)); float a=(float(k)+r.x)*PI/14.;
+    v+=cos(dot(vec2(cos(a),sin(a)),q)*20.+r.y*6.283); }
+  return smoothstep(-.6,.6,v); }
+
+float pillow(vec2 p){ vec2 v=voroBorder(p); return sqrt(clamp(v.x/.3,0.,1.))*(.6+.4*v.y) + .015*fbm(p*8.,3); }
+
+float terraces(vec2 p){ float v=1.-smoothVoro(p,8.)*1.3+.35*fbm(p*.5,4);
+  float n=7., t=clamp(v,0.,1.)*n; return (floor(t)+smoothstep(0.,.18,fract(t)))/n; }
+
+float carpet(vec2 p){ vec2 q=fract(p*.25); float h=1.;
+  for(int k=0;k<5;k++){ vec2 c=floor(q*3.), l=fract(q*3.)-.5;
+    if(c.x==1. && c.y==1.){ float m=max(abs(l.x),abs(l.y)); h=mix(1., float(k)/5., 1.-smoothstep(.44,.5,m)); break; }
+    q=fract(q*3.); }
+  return h; }
+
+float sand(vec2 p){ float dune=fbm(p*.35,4); vec2 dir=normalize(vec2(1.,.35));
+  float t=dot(p,dir)*9.+fbm(p*.9+4.,3)*6., f=fract(t);
+  float rip=smoothstep(0.,.75,f)*(1.-smoothstep(.75,1.,f)); float m=.5+.5*gnoise(p*.7+9.);
+  return dune*.8+rip*.07*(.4+.6*m); }
+
+float ripples(vec2 p){ vec2 n=floor(p), f=fract(p); float s=0.;
+  for(int j=-1;j<=1;j++) for(int i=-1;i<=1;i++){ vec2 g=vec2(i,j), r=g+hash2(n+g)-f; float d=length(r);
+    float ph=hash1(n+g+5.)*6.283; s+=sin(d*28.-ph)*exp(-d*2.5)*(1.-smoothstep(0.,1.5,d)); }
+  return s; }
+
+float sinewarp(vec2 p){ vec2 q=p;
+  for(int i=1;i<6;i++){ float fi=float(i);
+    q+=vec2(sin(q.y*fi*.9+fi*1.7+uSeed), cos(q.x*fi*.8+fi*2.3+uSeed*1.3))*.45/fi; }
+  return sin(q.x*3.)*sin(q.y*3.)+.3*sin((q.x+q.y)*6.); }
+
+float heightAt(vec2 p){
+  switch(uPreset){
+    case 0: { vec2 v=voroBorder(p); return smoothstep(0.,.08,v.x)*(.55+.45*v.y)+.02*fbm(p*4.,3); }
+    case 1: return .65*voronoise(p,1.,.6)+.35*voronoise(p*2.7+3.1,1.,.2);
+    case 2: { vec3 a=voroF(p), b=voroF(p*2.3+11.);
+              float s=pow(smoothstep(0.,.35,a.y-a.x),.6)*(.75+.25*a.z);
+              float s2=pow(smoothstep(0.,.3,b.y-b.x),.6)*(.6+.25*b.z)*.7;
+              return max(s,s2*.85)+.06*fbm(p*6.,4); }
+    case 3: return eroded(p);
+    case 4: return warp(p);
+    case 5: return hexTruchet(p);
+    case 6: return laby(p);
+    case 7: return pillow(p);
+    case 8: return carpet(p);
+    case 9: return sand(p);
+    case 10: return ripples(p);
+    case 11: return sinewarp(p);
+    case 12: return terraces(p);
+    case 13: return maze(p);
+    case 14: return ridged(p);
+  }
+  return 0.;
+}
+vec4 pack16(float v){ v=clamp(v,0.,1.)*65535.; return vec4(floor(v/256.)/255., mod(floor(v),256.)/255., 0., 1.); }
+void main(){
+  vec2 uv=gl_FragCoord.xy/uRes.y;
+  float raw=heightAt(uv*uScale);
+  if(uMode==2){ o=pack16((raw+2.)/4.); return; }
+  float h=clamp((raw-uLo)/max(uHi-uLo,1e-5),0.,1.);
+  if(uInvert==1) h=1.-h;
+  h=pow(h,uGamma);
+  o = uMode==1 ? pack16(h) : vec4(h,h,h,1.);
+}`;
+
+const VS_QUAD = `#version 300 es
+in vec2 aPos; void main(){ gl_Position=vec4(aPos,0.,1.); }`;
+
+const VS_MESH = `#version 300 es
+in vec2 aUV; uniform sampler2D uH; uniform mat4 uMVP; uniform float uZ;
+out vec2 vUV; out float vH;
+void main(){ vUV=aUV; float h=texture(uH,aUV).r; vH=h;
+  gl_Position=uMVP*vec4((aUV.x-.5)*2., h*uZ, (.5-aUV.y)*2., 1.); }`;
+const FS_MESH = `#version 300 es
+precision highp float;
+in vec2 vUV; in float vH; uniform sampler2D uH; uniform float uZ, uTexel; out vec4 o;
+void main(){
+  float e=uTexel;
+  float hl=texture(uH,vUV-vec2(e,0)).r, hr=texture(uH,vUV+vec2(e,0)).r;
+  float hd=texture(uH,vUV-vec2(0,e)).r, hu=texture(uH,vUV+vec2(0,e)).r;
+  float dx=2.*e*2.;
+  vec3 n=normalize(vec3(-(hr-hl)*uZ/dx, 1., (hu-hd)*uZ/dx));
+  vec3 L=normalize(vec3(-.55,.7,.45));
+  float dif=max(dot(n,L),0.), hemi=.5+.5*n.y;
+  vec3 base=vec3(.86,.83,.78);
+  vec3 c=base*(dif*.85+hemi*.28)+pow(max(dot(reflect(-L,n),vec3(0,1,0)),0.),24.)*.06;
+  float edge=step(.002,vUV.x)*step(vUV.x,.998)*step(.002,vUV.y)*step(vUV.y,.998);
+  o=vec4(pow(c,vec3(1./1.6))*mix(.6,1.,edge),1.);
+}`;
+
+/* ------------------------------------------------------------------ */
+/*  WebGL setup                                                        */
+/* ------------------------------------------------------------------ */
+const cv3 = document.getElementById('gl3d');
+const gl = cv3.getContext('webgl2', {antialias:true});
+if(!gl){ document.querySelector('.stage').innerHTML='<p style="padding:20px">WebGL2 is required.</p>'; throw new Error('no webgl2'); }
+const floatOK = !!gl.getExtension('EXT_color_buffer_float');
+
+function prog(vs, fs){
+  const p=gl.createProgram();
+  for(const [t,src] of [[gl.VERTEX_SHADER,vs],[gl.FRAGMENT_SHADER,fs]]){
+    const s=gl.createShader(t); gl.shaderSource(s,src); gl.compileShader(s);
+    if(!gl.getShaderParameter(s,gl.COMPILE_STATUS)) throw new Error(gl.getShaderInfoLog(s));
+    gl.attachShader(p,s);
+  }
+  gl.linkProgram(p); if(!gl.getProgramParameter(p,gl.LINK_STATUS)) throw new Error(gl.getProgramInfoLog(p));
+  const u={}; const n=gl.getProgramParameter(p,gl.ACTIVE_UNIFORMS);
+  for(let i=0;i<n;i++){ const a=gl.getActiveUniform(p,i); u[a.name]=gl.getUniformLocation(p,a.name); }
+  return {p,u};
+}
+const P_H = prog(VS_QUAD, FS_HEIGHT);
+const P_M = prog(VS_MESH, FS_MESH);
+
+// fullscreen quad
+const quadVAO = gl.createVertexArray(); gl.bindVertexArray(quadVAO);
+const qb=gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER,qb);
+gl.bufferData(gl.ARRAY_BUFFER,new Float32Array([-1,-1,1,-1,-1,1,1,1]),gl.STATIC_DRAW);
+const aPos=gl.getAttribLocation(P_H.p,'aPos'); gl.enableVertexAttribArray(aPos); gl.vertexAttribPointer(aPos,2,gl.FLOAT,false,0,0);
+
+// mesh grid
+const GRID=320;
+const meshVAO=gl.createVertexArray(); gl.bindVertexArray(meshVAO);
+{ const uv=new Float32Array((GRID+1)*(GRID+1)*2); let k=0;
+  for(let y=0;y<=GRID;y++) for(let x=0;x<=GRID;x++){ uv[k++]=x/GRID; uv[k++]=y/GRID; }
+  const ib=new Uint32Array(GRID*GRID*6); k=0;
+  for(let y=0;y<GRID;y++) for(let x=0;x<GRID;x++){ const i=y*(GRID+1)+x;
+    ib.set([i,i+1,i+GRID+1, i+1,i+GRID+2,i+GRID+1],k); k+=6; }
+  const vb=gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER,vb); gl.bufferData(gl.ARRAY_BUFFER,uv,gl.STATIC_DRAW);
+  const a=gl.getAttribLocation(P_M.p,'aUV'); gl.enableVertexAttribArray(a); gl.vertexAttribPointer(a,2,gl.FLOAT,false,0,0);
+  const eb=gl.createBuffer(); gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,eb); gl.bufferData(gl.ELEMENT_ARRAY_BUFFER,ib,gl.STATIC_DRAW);
+}
+gl.bindVertexArray(null);
+
+function makeTarget(w,h,float){
+  const tex=gl.createTexture(); gl.bindTexture(gl.TEXTURE_2D,tex);
+  if(float) gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA16F,w,h,0,gl.RGBA,gl.HALF_FLOAT,null);
+  else gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA8,w,h,0,gl.RGBA,gl.UNSIGNED_BYTE,null);
+  gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,gl.LINEAR); gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MAG_FILTER,gl.LINEAR);
+  gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_S,gl.CLAMP_TO_EDGE); gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_T,gl.CLAMP_TO_EDGE);
+  const fb=gl.createFramebuffer(); gl.bindFramebuffer(gl.FRAMEBUFFER,fb);
+  gl.framebufferTexture2D(gl.FRAMEBUFFER,gl.COLOR_ATTACHMENT0,gl.TEXTURE_2D,tex,0);
+  gl.bindFramebuffer(gl.FRAMEBUFFER,null);
+  return {tex,fb,w,h};
+}
+const targets={};
+function target(key,w,h,float){ const k=key+w+'x'+h; return targets[k] ||= makeTarget(w,h,float); }
+
+function renderHeight(t, params, mode){
+  gl.bindFramebuffer(gl.FRAMEBUFFER,t.fb); gl.viewport(0,0,t.w,t.h);
+  gl.disable(gl.DEPTH_TEST);
+  gl.useProgram(P_H.p); gl.bindVertexArray(quadVAO);
+  const u=P_H.u;
+  gl.uniform2f(u.uRes,t.w,t.h); gl.uniform1f(u.uScale,params.scale); gl.uniform1f(u.uSeed,params.seed);
+  gl.uniform1f(u.uLo,params.lo??0); gl.uniform1f(u.uHi,params.hi??1); gl.uniform1f(u.uGamma,params.gamma??1);
+  gl.uniform1i(u.uPreset,params.preset); gl.uniform1i(u.uMode,mode); gl.uniform1i(u.uInvert,params.invert?1:0);
+  gl.drawArrays(gl.TRIANGLE_STRIP,0,4);
+}
+function readRGBA(t){ const px=new Uint8Array(t.w*t.h*4); gl.bindFramebuffer(gl.FRAMEBUFFER,t.fb);
+  gl.readPixels(0,0,t.w,t.h,gl.RGBA,gl.UNSIGNED_BYTE,px); return px; }
+
+/* auto-levels: sample raw values, use 0.5% / 99.5% percentiles */
+function autoLevels(params){
+  const t=target('lv',128,128,false); renderHeight(t,params,2); const px=readRGBA(t);
+  const n=t.w*t.h, v=new Float32Array(n);
+  for(let i=0;i<n;i++) v[i]=((px[i*4]*256+px[i*4+1])/65535)*4-2;
+  v.sort(); return {lo:v[Math.floor(n*.005)], hi:v[Math.floor(n*.995)]};
+}
+
+/* ------------------------------------------------------------------ */
+/*  Gallery                                                            */
+/* ------------------------------------------------------------------ */
+const grid=document.getElementById('grid');
+const cards=[];
+FAMILIES.forEach((f,i)=>{
+  const el=document.createElement('article'); el.className='card'; el.dataset.cat=f.cat;
+  el.innerHTML=`
+    <div class="thumb" title="Load into relief viewer"><canvas width="384" height="192"></canvas><button class="use">load in viewer</button></div>
+    <div class="body">
+      <h3>${f.title}</h3>
+      <div class="tags"><span class="tag">${CATS[f.cat]}</span>${f.tags.map(([t,c])=>`<span class="tag ${c}">${t}</span>`).join('')}</div>
+      <p>${f.blurb}</p>
+      <ul class="shaders">${f.shaders.map(s=>`
+        <li><div class="t"><a href="${ST(s.id)}" target="_blank" rel="noopener">${s.name}</a>
+          <span class="meta mono">${s.by} · ${s.y} · ♥ ${s.likes}</span></div>
+          <div class="tip">${s.tip}</div></li>`).join('')}</ul>
+    </div>`;
+  el.querySelector('.thumb').addEventListener('click',()=>select(i,true));
+  grid.appendChild(el); cards.push(el);
+});
+// filters
+const fbar=document.getElementById('filters');
+Object.entries(CATS).forEach(([k,v])=>{
+  const b=document.createElement('button'); b.textContent=v; if(k==='all') b.classList.add('on');
+  b.onclick=()=>{ fbar.querySelectorAll('button').forEach(x=>x.classList.remove('on')); b.classList.add('on');
+    cards.forEach(c=>c.style.display=(k==='all'||c.dataset.cat===k)?'':'none'); };
+  fbar.appendChild(b);
+});
+
+function paintThumbs(){
+  const t=target('th',384,192,false);
+  FAMILIES.forEach((f,i)=>{
+    const p={preset:f.preset, scale:f.scale, seed:3};
+    Object.assign(p, autoLevels(p));
+    renderHeight(t,p,0);
+    const px=readRGBA(t);
+    const c=cards[i].querySelector('canvas'), ctx=c.getContext('2d'), img=ctx.createImageData(t.w,t.h);
+    flipInto(px,img.data,t.w,t.h); ctx.putImageData(img,0,0);
+  });
+}
+function flipInto(src,dst,w,h){ const row=w*4; for(let y=0;y<h;y++) dst.set(src.subarray((h-1-y)*row,(h-y)*row),y*row); }
+
+/* ------------------------------------------------------------------ */
+/*  Viewer                                                             */
+/* ------------------------------------------------------------------ */
+const S={ idx:0, preset:0, scale:6, seed:3, gamma:1, invert:false, z:.35, lo:0, hi:1 };
+const $=id=>document.getElementById(id);
+const ctl={scale:$('cScale'), seed:$('cSeed'), gamma:$('cGamma'), z:$('cZ'), inv:$('cInv')};
+
+function syncUI(){
+  ctl.scale.value=S.scale; ctl.seed.value=S.seed; ctl.gamma.value=S.gamma; ctl.z.value=S.z; ctl.inv.checked=S.invert;
+  $('oScale').textContent=(+S.scale).toFixed(1); $('oSeed').textContent=S.seed;
+  $('oGamma').textContent=(+S.gamma).toFixed(2); $('oZ').textContent=(+S.z).toFixed(2);
+}
+function select(i, scroll){
+  const f=FAMILIES[i]; S.idx=i; S.preset=f.preset; S.scale=f.scale;
+  cards.forEach((c,j)=>c.classList.toggle('active',j===i));
+  $('vTitle').textContent=f.title;
+  $('vSub').textContent=f.shaders.map(s=>`${s.name} — ${s.by}`).join(' · ');
+  syncUI(); update();
+  if(scroll) document.querySelector('.viewer').scrollIntoView({behavior:'smooth',block:'start'});
+}
+const hTarget = () => target('h3d',512,512,floatOK);
+function update(){
+  Object.assign(S, autoLevels(S));
+  const t=hTarget(); renderHeight(t,S,0);
+  // 2D preview
+  const t8=target('p2d',512,512,false); renderHeight(t8,S,0); const px=readRGBA(t8);
+  const ctx=$('map2d').getContext('2d'), img=ctx.createImageData(512,512); flipInto(px,img.data,512,512); ctx.putImageData(img,0,0);
+  draw();
+}
+for(const [k,el] of Object.entries(ctl)){
+  el.addEventListener('input',()=>{
+    if(k==='inv') S.invert=el.checked; else S[k]=+el.value;
+    syncUI(); k==='z' ? draw() : update();
+  });
+}
+$('bRand').onclick=()=>{ S.seed=Math.floor(Math.random()*101); syncUI(); update(); };
+
+/* camera */
+const cam={yaw:.7, pitch:.8, dist:3.9};
+function persp(fov,a,n,f){ const t=1/Math.tan(fov/2); return [t/a,0,0,0, 0,t,0,0, 0,0,(f+n)/(n-f),-1, 0,0,2*f*n/(n-f),0]; }
+function lookAt(e,c,u){ const z=norm(sub(e,c)), x=norm(cross(u,z)), y=cross(z,x);
+  return [x[0],y[0],z[0],0, x[1],y[1],z[1],0, x[2],y[2],z[2],0, -dot(x,e),-dot(y,e),-dot(z,e),1]; }
+const sub=(a,b)=>[a[0]-b[0],a[1]-b[1],a[2]-b[2]], dot=(a,b)=>a[0]*b[0]+a[1]*b[1]+a[2]*b[2];
+const cross=(a,b)=>[a[1]*b[2]-a[2]*b[1],a[2]*b[0]-a[0]*b[2],a[0]*b[1]-a[1]*b[0]];
+const norm=a=>{const l=Math.hypot(...a);return a.map(v=>v/l)};
+function mul(a,b){ const r=new Array(16).fill(0); for(let i=0;i<4;i++)for(let j=0;j<4;j++)for(let k=0;k<4;k++) r[j*4+i]+=a[k*4+i]*b[j*4+k]; return r; }
+
+function draw(){
+  const dpr=Math.min(devicePixelRatio||1,2), W=Math.round(cv3.clientWidth*dpr), H=Math.round(cv3.clientHeight*dpr);
+  if(cv3.width!==W||cv3.height!==H){ cv3.width=W; cv3.height=H; }
+  gl.bindFramebuffer(gl.FRAMEBUFFER,null); gl.viewport(0,0,W,H);
+  gl.clearColor(.043,.043,.043,1); gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT); gl.enable(gl.DEPTH_TEST);
+  const eye=[Math.cos(cam.yaw)*Math.cos(cam.pitch)*cam.dist, Math.sin(cam.pitch)*cam.dist, Math.sin(cam.yaw)*Math.cos(cam.pitch)*cam.dist];
+  const asp=W/H, fov=asp<1.25?2*Math.atan(Math.tan(.375)*1.25/asp):.75;
+  const mvp=mul(persp(fov,asp,.05,50), lookAt(eye,[0,S.z*.25,0],[0,1,0]));
+  gl.useProgram(P_M.p); gl.bindVertexArray(meshVAO);
+  gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D,hTarget().tex);
+  gl.uniform1i(P_M.u.uH,0); gl.uniformMatrix4fv(P_M.u.uMVP,false,mvp);
+  gl.uniform1f(P_M.u.uZ,S.z); gl.uniform1f(P_M.u.uTexel,1/512);
+  gl.drawElements(gl.TRIANGLES,GRID*GRID*6,gl.UNSIGNED_INT,0);
+  gl.bindVertexArray(null);
+}
+let drag=null;
+cv3.addEventListener('pointerdown',e=>{drag=[e.clientX,e.clientY]; cv3.setPointerCapture(e.pointerId);});
+cv3.addEventListener('pointermove',e=>{ if(!drag) return;
+  cam.yaw+= (e.clientX-drag[0])*.008; cam.pitch=Math.max(.08,Math.min(1.5,cam.pitch+(e.clientY-drag[1])*.006));
+  drag=[e.clientX,e.clientY]; draw(); });
+cv3.addEventListener('pointerup',()=>drag=null);
+cv3.addEventListener('wheel',e=>{ e.preventDefault(); cam.dist=Math.max(1.2,Math.min(8,cam.dist*Math.exp(e.deltaY*.001))); draw(); },{passive:false});
+addEventListener('resize',draw);
+
+/* ------------------------------------------------------------------ */
+/*  Export                                                             */
+/* ------------------------------------------------------------------ */
+const CRC=(()=>{const t=new Uint32Array(256);for(let n=0;n<256;n++){let c=n;for(let k=0;k<8;k++)c=c&1?0xEDB88320^(c>>>1):c>>>1;t[n]=c>>>0;}return t;})();
+function crc32(b){let c=0xFFFFFFFF;for(let i=0;i<b.length;i++)c=CRC[(c^b[i])&255]^(c>>>8);return (c^0xFFFFFFFF)>>>0;}
+function chunk(type,data){ const out=new Uint8Array(12+data.length), dv=new DataView(out.buffer);
+  dv.setUint32(0,data.length); for(let i=0;i<4;i++) out[4+i]=type.charCodeAt(i); out.set(data,8);
+  dv.setUint32(8+data.length, crc32(out.subarray(4,8+data.length))); return out; }
+async function png16(w,h,px){ // px: RGBA8 packed (R=hi, G=lo), bottom-up
+  const raw=new Uint8Array(h*(1+w*2)); let o=0;
+  for(let y=0;y<h;y++){ raw[o++]=0; const src=(h-1-y)*w*4;
+    for(let x=0;x<w;x++){ raw[o++]=px[src+x*4]; raw[o++]=px[src+x*4+1]; } }
+  const z=new Uint8Array(await new Response(new Blob([raw]).stream().pipeThrough(new CompressionStream('deflate'))).arrayBuffer());
+  const ih=new Uint8Array(13), dv=new DataView(ih.buffer); dv.setUint32(0,w); dv.setUint32(4,h); ih.set([16,0,0,0,0],8);
+  return new Blob([new Uint8Array([137,80,78,71,13,10,26,10]), chunk('IHDR',ih), chunk('IDAT',z), chunk('IEND',new Uint8Array())],{type:'image/png'});
+}
+function save(blob,name){ const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=name; a.click(); setTimeout(()=>URL.revokeObjectURL(a.href),4000); }
+const fname=b=>`heightmap_${FAMILIES[S.idx].title.toLowerCase().replace(/[^a-z0-9]+/g,'-')}_s${S.seed}_${$('cRes').value}px_${b}bit.png`;
+
+$('b16').onclick=async()=>{ const n=+$('cRes').value, t=makeTarget(n,n,false);
+  renderHeight(t,S,1); const px=readRGBA(t); gl.deleteFramebuffer(t.fb); gl.deleteTexture(t.tex);
+  save(await png16(n,n,px), fname(16)); draw(); };
+$('b8').onclick=()=>{ const n=+$('cRes').value, t=makeTarget(n,n,false);
+  renderHeight(t,S,0); const px=readRGBA(t); gl.deleteFramebuffer(t.fb); gl.deleteTexture(t.tex);
+  const c=document.createElement('canvas'); c.width=c.height=n; const ctx=c.getContext('2d'), img=ctx.createImageData(n,n);
+  flipInto(px,img.data,n,n); ctx.putImageData(img,0,0); c.toBlob(b=>save(b,fname(8)),'image/png'); draw(); };
+
+/* go */
+paintThumbs();
+select(3,false);
+</script>
+</body>
+</html>

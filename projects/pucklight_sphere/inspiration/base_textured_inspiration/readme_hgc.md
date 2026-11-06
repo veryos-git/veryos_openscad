@@ -1,0 +1,1 @@
+the base could be decorated with for example rocks or a different fitting 'texture' / relief
