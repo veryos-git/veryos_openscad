@@ -1,0 +1,1 @@
+1. when i fully screw in the screwin part, the led pucklight has no space to move anymore. please increase that space only slightly 

@@ -10,6 +10,23 @@ Sphere lamp for the 62 mm RGBW puck light. Prints in less than half the time of 
 
 Generators: `pucklight_sphereV2.scad` (newest), `pucklight_sphere.scad` (V1). Standalone, no libraries. Original description: `readme_hgc.md`.
 
+## Fixes after the first print
+
+In V1 and V2. Problems as reported in `v1_problems/readme_hgc.md`. The fix is not printed yet.
+
+| Problem | Cause | Fix | Reprint |
+|---|---|---|---|
+| Screwin turned in all the way: the puck cannot move | 0.1 mm free play at the screw's stop (`puck_play` 0.7 less `seat_gap` 0.6), less than one layer | `puck_extra_play` 0.3: the screw's floor and bar lie 0.3 mm lower | screwin only: V1 18 min, V2 15 min (PETG, 0.28 mm) |
+
+| Free play, measured on the geometry | Before | Now |
+|---|---|---|
+| Screwin flush | 0.7 mm | 1.0 mm |
+| Screwin at its stop | 0.1 mm | 0.4 mm |
+
+- Sockel and click base: geometry unchanged, no triangle differs. So is the click: on the click base the puck rests on the disc, not the floor.
+- No contact: the puck on the floor, the bar in the slot, the screw flush.
+- Still no room? Measure the puck. The generators use the CAD model's 26.8 mm, the spec sheet says 27.6 mm. At 27.6 mm the play would be 0.2 mm flush, and the puck would clamp before the stop. Then set `puck_height`.
+
 ## V2: smaller, thinner, faster
 
 `pucklight_sphereV2.scad`. V1's parts do not fit: thread and pins differ. The click works as before.

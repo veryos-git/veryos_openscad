@@ -68,8 +68,8 @@ puck_edge_radius = 7;
 puck_dome_d = 40;
 // Radial gap around the puck in the bottom screw.
 puck_clearance = 0.5;
-// Gap between the dome and the ribs while the puck lies on the bottom
-// screw's floor: how far the puck can move inside the holder.
+// Gap between the dome and the ribs with the puck lifted to lip_height. Together
+// with puck_extra_play, how far the puck can move inside the holder.
 puck_play = 0.7;
 
 /* [Holder top part] */
@@ -88,7 +88,8 @@ screw_height = 10.4;
 // Thread at the top that fully engages the top part's; below it a wider
 // flange.
 screw_thread_length = 3.5;
-// Floor under the puck. Also the height of the bar you turn the screw with.
+// Floor under the puck, and the height of the bar you turn the screw with, both
+// less puck_extra_play. The disc reaches up from here.
 lip_height = 5;
 bar_width = 2;
 // Wall between the puck and the thread's root.
@@ -98,9 +99,13 @@ thread_pitch = 2;
 // Radial gap between the threads.
 thread_clearance = 0.25;
 // The screw turns this much deeper than flush, so its bar can be lined up
-// with the click base's slot. Keep it below puck_play, or the screw clamps
-// the puck when turned in all the way.
+// with the click base's slot. Keep it below puck_play + puck_extra_play, or the
+// screw clamps the puck when turned in all the way.
 seat_gap = 0.6;
+// The screw's floor and bar lie this much below lip_height, so the puck can still
+// move with the screw turned in all the way: 0.4 mm there, 1 mm when flush. On the
+// click base the puck rests on the disc, so the click does not change.
+puck_extra_play = 0.3;
 
 /* [Click base] */
 base_thickness = 2;
@@ -191,6 +196,7 @@ rib_r = recess_r;
 foot_w = rib_width + 2 * (touch_z - top_z);
 // Height of the disc above the base's plate, and the slot in it for the bar.
 disc_h = lip_height + press_height;
+floor_z = lip_height - puck_extra_play;
 slot_w = bar_width + 2 * slide_clearance;
 // The logo at the size of veryos_logo.svg, as in veryos_logo_cube: a ring and
 // the two arms of a V, all logo_stroke wide. The arms stand logo_angle off
@@ -261,7 +267,7 @@ fade_width = 15;
 fade_top = 80;
 
 // The holder's checks.
-assert(seat_gap < puck_play, "seat_gap must stay below puck_play, or the bottom screw clamps the puck.");
+assert(seat_gap < puck_play + puck_extra_play, "seat_gap must stay below puck_play + puck_extra_play, or the bottom screw clamps the puck.");
 assert(press_height > puck_play, "press_height must exceed puck_play, or the base never pushes the button.");
 assert(window_d > puck_dome_d, "The window must be wider than the dome.");
 assert(top_z >= lift_z + puck_edge_height + cavity_gap, "window_d is too wide for the cavity's shoulder.");
@@ -485,12 +491,12 @@ module bottom_screw() {
                          r2 = screw_d / 2 - thread_depth);
             }
         }
-        translate([0, 0, lip_height]) cylinder(r = bore_r, h = screw_height);
+        translate([0, 0, floor_z]) cylinder(r = bore_r, h = screw_height);
         translate([0, 0, -1]) cylinder(r = opening_r, h = lip_height + 2);
         // Reads from below, its top pointing outwards.
         translate([screw_logo_x, 0, 0]) rotate(-90) rotate([0, 180, 0]) logo_cut(screw_logo_width);
     }
-    translate([-bar_width / 2, -opening_r - 1, 0]) cube([bar_width, 2 * opening_r + 2, lip_height]);
+    translate([-bar_width / 2, -opening_r - 1, 0]) cube([bar_width, 2 * opening_r + 2, floor_z]);
 }
 
 // Round plate with the guide pins and the disc that lifts the puck, slotted for
