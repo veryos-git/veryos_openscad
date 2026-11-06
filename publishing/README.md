@@ -48,11 +48,11 @@ The cubic wipes-box example uses a 12 mm center hinge and 68 mm opening width so
 
 `mesh-audit.json` records the twelve meshes' bounds, topology and positive volume. `preset-audit.json` checks that the supplied Customizer presets reproduce the command-line geometry. These are digital checks; the new examples have not been physically printed or fit-tested.
 
-The existing covers use DejaVu Sans Mono for all text. To recompose with the brand fonts:
+The covers use the brand font, DejaVu Sans Mono. The scripts ask for Consolas and only get DejaVu as a fallback, so set it explicitly:
 
 ```sh
 PUBLISH_FONT=/usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf \
-PUBLISH_FONT_BOLD=/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf \
+PUBLISH_FONT_BOLD=/usr/share/fonts/truetype/dejavu/DejaVuSansMono-Bold.ttf \
 node publishing/build.mjs --stage=compose
 ```
 
