@@ -121,17 +121,20 @@ pin_height = 5;
 pin_clearance = 0.3;
 
 /* [Logo] */
-// In the lower front of the sphere, half through the shell, so it glows
-// brighter. false: the sphere is one mesh, which renders in seconds.
-sphere_logo = true;
-sphere_logo_width = 20;
-// In the front of the sockel.
-sockel_logo_width = 20;
+// The logos are in the bottoms, hidden when the lamp stands on a desk. The
+// sphere's neck has no room for one.
+// In the bottom of the click base.
+base_logo_width = 40;
+// In the bottom of the sockel, between the recess and the outside.
+sockel_logo_width = 10;
 // In the bottom of the screw's flange, beside the bar.
 screw_logo_width = 8;
-// In the top of the click base's disc.
-base_logo_width = 18;
 logo_depth = 1;
+// Also one you can see: in the lower front of the sphere, half through the
+// shell, so it glows brighter, and in the front of the sockel. The sphere then
+// is no longer one mesh and renders in 20 s instead of 1 s.
+front_logos = false;
+front_logo_width = 20;
 
 /* [Quality] */
 $fn = 128;
@@ -209,10 +212,8 @@ s_small = (2 * ring_in - logo_stroke) / 4;
 s_big = s_small + logo_stroke;
 // Height of a logo of the given width.
 function logo_h(width) = width * 2 * logo_r / logo_w;
-// The screw's logo sits in the middle of the flange's bottom ring, the
-// base's between the slot's chamfer and the disc's top edge.
+// The screw's logo sits in the middle of the flange's bottom ring.
 screw_logo_x = (opening_r + flange_r) / 2;
-base_logo_x = (slot_w / 2 + 1 + press_r - 1) / 2;
 
 // The sockel: the holder's top part, round, with the cup on top. A round body
 // has no corners for the pins, so they lie halfway between the recess and the
@@ -250,12 +251,12 @@ columns = sphere_columns;
 thread_rows = ceil((neck_height + thread_depth) / (thread_pitch / 20));
 sphere_step = (90 - sphere_start) / ceil((90 - sphere_start) * columns / 360);
 sphere_rows = [for (i = [0:round((90 - sphere_start) / sphere_step) - 1]) sphere_start + i * sphere_step];
-// The sphere's logo sits just above the sockel's rim, on the smooth part.
-logo_half_lat = deg_per_rad * logo_h(sphere_logo_width) / 2 / sphere_r;
-sphere_logo_lat = sphere_start + 7 + logo_half_lat;
-// A formula fades in above the logo and out towards the pole, where its
-// columns meet.
-fade_bottom = sphere_logo_lat + logo_half_lat + 2;
+// The sphere's front logo sits just above the sockel's rim, on the smooth part.
+logo_half_lat = deg_per_rad * logo_h(front_logo_width) / 2 / sphere_r;
+front_logo_lat = sphere_start + 7 + logo_half_lat;
+// A formula fades in above the front logo's place, with or without the logo,
+// and out towards the pole, where its columns meet.
+fade_bottom = front_logo_lat + logo_half_lat + 2;
 fade_width = 15;
 fade_top = 80;
 
@@ -271,16 +272,17 @@ assert(shoulder_z >= screw_height + seat_gap, "The cavity's shoulder starts belo
 assert(bore_r - opening_r >= 2, "press_d is too large: the bottom screw's floor must be at least 2 mm wide.");
 assert(logo_h(screw_logo_width) + 2 <= flange_r - opening_r,
        "The screw's logo is wider than its flange; lower screw_logo_width.");
-assert(norm([base_logo_x + logo_h(base_logo_width) / 2, base_logo_width / 2]) <= press_r - 1.5
-       && base_logo_x - logo_h(base_logo_width) / 2 >= slot_w / 2 + 1.5,
-       "The base's logo does not fit on the disc; lower base_logo_width.");
+assert(norm([base_logo_width / 2, logo_h(base_logo_width) / 2]) <= sockel_r - 2,
+       "The base's logo does not fit on its bottom; lower base_logo_width.");
+assert(logo_depth + 0.5 <= base_thickness, "logo_depth is too deep for the click base's plate, under the bar's slot.");
 // The sphere's and the sockel's.
 assert(pin_r - pin_hole_r - recess_r >= 1, "sockel_d is too small for the pin holes.");
 assert(sockel_r - cup_lead_r >= 1, "neck_d is too large for sockel_d: the cup's rim must stay 1 mm wide.");
 assert(neck_bore_r >= rib_r + 1, "neck_d is too small: the neck must clear the ribs.");
 assert(sphere_d >= neck_d + 10, "sphere_d is too small for the neck; lower neck_d.");
 assert(bore_top >= 0, "shell is too thick for the neck; lower shell or raise neck_wall.");
-assert(logo_h(sockel_logo_width) + 2 <= sockel_h - recess_top, "The sockel's logo is too large; lower sockel_logo_width.");
+assert(logo_h(sockel_logo_width) + 2 <= sockel_r - recess_r, "The sockel's logo is wider than its bottom ring; lower sockel_logo_width.");
+assert(!front_logos || logo_h(front_logo_width) + 2 <= sockel_h - recess_top, "The front logo is too large for the sockel; lower front_logo_width.");
 
 if (part == "assembly") assembly();
 else if (part == "section") section();
@@ -360,9 +362,9 @@ module sphere_mesh() {
     polyhedron(points = points, faces = faces, convexity = 8);
 }
 
-// The sphere with its logo.
+// The sphere, with its front logo if there is one.
 module sphere_part() {
-    if (sphere_logo)
+    if (front_logos)
         difference() {
             sphere_mesh();
             sphere_logo_cut();
@@ -374,8 +376,8 @@ module sphere_part() {
 // The logo in the sphere's front, half through the shell, as deep everywhere.
 module sphere_logo_cut()
     translate([0, 0, centre_z]) difference() {
-        rotate([-sphere_logo_lat, 0, 0]) rotate([90, 0, 0]) translate([0, 0, 0.8 * sphere_r])
-            linear_extrude(0.2 * sphere_r + 2) scale(sphere_logo_width / logo_w) translate([0, -logo_r]) logo();
+        rotate([-front_logo_lat, 0, 0]) rotate([90, 0, 0]) translate([0, 0, 0.8 * sphere_r])
+            linear_extrude(0.2 * sphere_r + 2) scale(front_logo_width / logo_w) translate([0, -logo_r]) logo();
         sphere(r = sphere_r - shell / 2);
     }
 
@@ -439,16 +441,18 @@ module sockel() union() {
         // 45 degree lead-in at the rim.
         translate([0, 0, sockel_h - 2 * thread_depth]) cylinder(h = 2 * thread_depth + eps,
             r1 = cup_d / 2 - thread_depth, r2 = cup_lead_r + eps);
-        sockel_logo_cut();
+        // Reads from below, its top pointing outwards.
+        translate([0, -pin_r, 0]) rotate(180) rotate([0, 180, 0]) logo_cut(sockel_logo_width);
+        if (front_logos) sockel_front_logo_cut();
     }
     for (a = [0, 90]) rotate(a) rib();
 }
 
 // The logo in the sockel's front, logo_depth deep everywhere on the round wall.
-module sockel_logo_cut()
+module sockel_front_logo_cut()
     difference() {
         translate([0, 0, (recess_top + sockel_h) / 2]) rotate([90, 0, 0]) translate([0, 0, sockel_r - 3])
-            linear_extrude(4) scale(sockel_logo_width / logo_w) translate([0, -logo_r]) logo();
+            linear_extrude(4) scale(front_logo_width / logo_w) translate([0, -logo_r]) logo();
         translate([0, 0, -1]) cylinder(r = sockel_r - logo_depth, h = sockel_h + 2);
     }
 
@@ -505,8 +509,8 @@ module clickbase() {
         translate([0, 0, base_thickness]) rotate([90, 0, 0]) linear_extrude(press_d + 2, center = true)
             polygon([[-slot_w / 2, 0], [slot_w / 2, 0], [slot_w / 2, disc_h - 1], [slot_w / 2 + 2, disc_h + 1],
                      [-slot_w / 2 - 2, disc_h + 1], [-slot_w / 2, disc_h - 1]]);
-        // Its top pointing outwards.
-        translate([base_logo_x, 0, base_thickness + disc_h]) rotate(-90) logo_cut(base_logo_width);
+        // In the bottom, on the desk. Reads from below.
+        rotate([0, 180, 0]) logo_cut(base_logo_width);
     }
 }
 

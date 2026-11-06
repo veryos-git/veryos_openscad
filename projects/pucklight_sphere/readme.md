@@ -17,8 +17,8 @@ Generator: `pucklight_sphere.scad`. Standalone, no libraries. Original descripti
 | Sphere, plain | `sphere` | neck on the bed | 1 h 30 min | 59 g |
 | Sockel | `sockel` | bottom on the bed | 1 h 17 min | 45 g |
 | Screwin | `screwin` | bottom on the bed | 16 min | 9 g |
-| Click base | `clickbase` | bottom on the bed | 29 min | 18 g |
-| **Whole lamp** | | | **3 h 32 min** | **130 g** |
+| Click base | `clickbase` | bottom on the bed | 30 min | 18 g |
+| **Whole lamp** | | | **3 h 33 min** | **130 g** |
 
 Slicer estimates, not printed yet: SnapmakerOrca, Snapmaker U1, the settings of `RGBW_pucklight_lantern3/printed.3mf` with 0.2 mm layers, no support.
 
@@ -26,7 +26,7 @@ Lamp on the click base: Ø120 mm, 143 mm high. Also: `assembly`, `section`, `pri
 
 | Same settings | Lantern 3 V8 | Sphere lamp |
 |---|---|---|
-| Body | frame + roof: 5 h 59 min, 127 g | sphere + sockel: 2 h 46 min, 103 g |
+| Body | frame + roof: 5 h 59 min, 127 g | sphere + sockel: 2 h 47 min, 103 g |
 | To try a new look | roof: 3 h 9 min | sphere: 1 h 30 min |
 
 ## Parameters
@@ -41,7 +41,7 @@ Lamp on the click base: Ø120 mm, 143 mm high. Also: `assembly`, `section`, `pri
 | `surface_twist` | 120 | `twist`: degrees a rib turns from pole to pole |
 | `sphere_columns` | 180 | mesh resolution; about 12 columns per rib |
 | `neck_clearance` | 0.3 | radial gap of the sphere's thread |
-| `sphere_logo` | true | false: mesh only, renders in 1 s instead of 20 s |
+| `front_logos` | false | true: also a logo you can see, see Logo |
 
 ## Surface formulas
 
@@ -56,13 +56,13 @@ Left to right, `lon` and `lat` in degrees, height from 0 to 1:
 | `surface` | Formula | Print time | Weight |
 |---|---|---|---|
 | `smooth` | 0 | 1 h 30 min | 59 g |
-| `ribs` | 0.5 + 0.5 cos(n lon) | 2 h 32 min | 73 g |
-| `twist` | 0.5 + 0.5 cos(n (lon + twist lat / 180)) | 2 h 34 min | 73 g |
-| `waves` | 0.5 + 0.5 cos(n lon) cos(n lat) | 2 h 1 min | 73 g |
-| `lattice` | crossed loxodromes: max(0.5 + 0.5 cos(n lon ± m))³, m = n ln(tan(45° + lat / 2)) in degrees | 2 h 40 min | 73 g |
+| `ribs` | 0.5 + 0.5 cos(n lon) | 2 h 33 min | 73 g |
+| `twist` | 0.5 + 0.5 cos(n (lon + twist lat / 180)) | 2 h 33 min | 73 g |
+| `waves` | 0.5 + 0.5 cos(n lon) cos(n lat) | 2 h 4 min | 73 g |
+| `lattice` | crossed loxodromes: max(0.5 + 0.5 cos(n lon ± m))³, m = n ln(tan(45° + lat / 2)) in degrees | 2 h 39 min | 73 g |
 
 - Your own formula: add a line to `surface_height()` and its name to the `surface` list. Return 0 to 1.
-- A formula fades out above the logo and towards the pole, so the neck, the logo and the closed top stay smooth.
+- A formula fades in above the front logo's place, with or without the logo, and out towards the pole, so the neck and the closed top stay smooth.
 - The lit picture assumes light falling off with distance and exp(-1.2 × thickness in mm). The real contrast depends on the filament.
 
 ## Slicer settings for the sphere
@@ -81,7 +81,7 @@ Left to right, `lon` and `lat` in degrees, height from 0 to 1:
 |---|---|---|
 | Thread | 45° | flanks as in the holder |
 | Neck to the sphere | 45° | cone |
-| Lower half, outside | 43° at most | a larger sphere gets a longer cone, never more; the logo's 0.6 mm deep edges reach 60° |
+| Lower half, outside | 43° at most | a larger sphere gets a longer cone, never more; with `front_logos`, the sphere logo's 0.6 mm deep edges reach 60° |
 | Top, inside | up to 89° | closed walls lean in from 63° latitude; the slicer bridges the last Ø20 mm hole from 80° |
 
 The top's outside stands on the layer below, so sagging stays inside. If the top sags too much: organic support inside, removed through the neck, or thinner layers.
@@ -129,20 +129,27 @@ Meshes: all parts closed. `shell` 0.8 and 2, `sphere_d` 94 to 200 and `surface_d
 
 ## Logo
 
-| Part | Where |
-|---|---|
-| Sphere | lower front, 20 mm wide, half through the shell, so it glows brighter |
-| Sockel | front, 20 mm wide, 1 mm deep |
-| Screwin | bottom of the flange, 8 mm wide |
-| Click base | top of the disc, 18 mm wide |
+In the bottoms only, hidden when the lamp stands on a desk. All 1 mm deep, reading from below.
+
+![the bottoms of the click base, the sockel and the screwin](bottom.png)
+
+| Part | Where | Width |
+|---|---|---|
+| Click base | bottom of the plate, on the desk | 40 mm |
+| Sockel | bottom ring, between two pin holes | 10 mm |
+| Screwin | bottom of the flange | 8 mm |
+| Sphere | none: the neck's bottom is a 2 mm ring | |
+
+- These print on the bed: the slicer bridges over each recess at z = 1.2, out of sight.
+- `front_logos = true` adds a 20 mm logo (`front_logo_width`) in the sockel's front, 1 mm deep, and in the sphere's lower front, half through the shell, so it glows brighter.
 
 ## Render times (OpenSCAD 2021.01)
 
 | Part | Time |
 |---|---|
-| Sphere without logo | 1 s (3 s at 360 columns) |
-| Sphere with logo | 20 s |
-| Sockel | 24 s |
+| Sphere | 1 s (3 s at 360 columns) |
+| Sphere with `front_logos` | 20 s |
+| Sockel | 30 s |
 | `section` / `assembly` export | 2 / 3 min |
 
 ## Not tested yet
@@ -150,7 +157,7 @@ Meshes: all parts closed. `shell` 0.8 and 2, `sphere_d` 94 to 200 and `surface_d
 - Nothing has been printed: the thread's fit, the sphere's top and the click are open.
 - The lamp's 112 g rests on the puck's dome (sockel, screwin, sphere), less than the lantern's. If that clicks the light by itself, stand it on something else.
 - The checks above ran on the command line (OpenSCAD 2021.01); its window's preview was not opened. The pictures are from Blender.
-- Another OpenSCAD build, apparently the browser playground: `export (81).stl` has the same four parts, sizes and volumes.
+- Another OpenSCAD build, apparently the browser playground: `export (81).stl` had the same four parts, sizes and volumes, before the logos moved to the bottoms.
 
 ## Not included
 
