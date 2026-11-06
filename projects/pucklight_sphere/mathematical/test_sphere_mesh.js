@@ -120,9 +120,11 @@ displace(twisted, twist, 0.8);
 assert_same_mesh(twisted, openscad_mesh(180, "twist"), tolerance, "twist, 180 columns");
 assert_closed(twisted, "twist, 180 columns");
 
-// Only the rings in moving have moved, and they have moved along their line from the centre.
+// Only the rings the fade lets through have moved, along their line from the centre.
 const moved = new Set();
-for (const {ring} of twisted.moving) for (let c = 0; c < twisted.columns; c++) moved.add(ring * twisted.columns + c);
+for (const {ring, lat} of twisted.rows) {
+    if (surface_fade(lat) > 0) for (let c = 0; c < twisted.columns; c++) moved.add(ring * twisted.columns + c);
+}
 let changed = 0;
 for (let i = 0; i < rest.length / 3; i++) {
     const same = rest[i * 3] === twisted.positions[i * 3] && rest[i * 3 + 1] === twisted.positions[i * 3 + 1]
@@ -138,6 +140,16 @@ for (let i = 0; i < rest.length / 3; i++) {
     }
 }
 console.log(`ok  moved ${changed} of ${rest.length / 3} points, all away from the centre`);
+
+// A lower start, as for the planets, moves more of the outside and stays closed. Going
+// back puts every ring that stops moving exactly where it was.
+const lower = sphere_mesh(180);
+assert(displace(lower, twist, 0.8, -36) > displace(sphere_mesh(180), twist, 0.8));
+assert_closed(lower, "twist from -36 degrees, 180 columns");
+displace(lower, () => 0, 0.8);
+displace(lower, twist, 0.8);
+assert.deepEqual(lower.positions, twisted.positions, "going back to the generator's fade restores its mesh");
+console.log("ok  the fade's bottom can move and back");
 
 // The exports hold the mesh.
 const stl = new DataView(mesh_to_stl(twisted));

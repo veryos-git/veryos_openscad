@@ -1,0 +1,53 @@
+{
+  "template": "texture",
+  "code": "// The loaded texture as the heightmap. White stands out by the full depth.\n//\n// iChannel0 is the texture; its left and right edges wrap around. This turns the\n// middle of the map to the sphere's front: change 0.25 to turn it.\n\nvoid mainImage(out vec4 fragColor, in vec2 fragCoord) {\n    vec2 uv = fragCoord / iResolution.xy;\n    fragColor = texture(iChannel0, uv - vec2(0.25, 0.0));\n}\n",
+  "scale": 12,
+  "seed": 3,
+  "gamma": 0.45,
+  "depth": 0.8,
+  "relief_from": -36,
+  "columns": 720,
+  "stops": [
+    {
+      "t": 0,
+      "color": [
+        28,
+        78,
+        138
+      ]
+    },
+    {
+      "t": 0.03,
+      "color": [
+        28,
+        78,
+        138
+      ]
+    },
+    {
+      "t": 0.06,
+      "color": [
+        63,
+        143,
+        70
+      ]
+    },
+    {
+      "t": 0.5,
+      "color": [
+        201,
+        169,
+        92
+      ]
+    },
+    {
+      "t": 0.9,
+      "color": [
+        255,
+        255,
+        255
+      ]
+    }
+  ],
+  "texture": true
+}

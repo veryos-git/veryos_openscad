@@ -3,8 +3,9 @@
 // surface formula: the points and faces of its sphere_mesh(), at its defaults and
 // with its names. Copy changes over by hand; test_sphere_mesh.js compares the two.
 //
-// As in its outer_radius(), only the outside between fade_bottom and fade_top moves,
-// away from the sphere's centre. The thread, the neck, the inside and the poles stay.
+// As in its outer_radius(), only the outside above the fade's bottom and below fade_top
+// moves, away from the sphere's centre. The thread, the neck, the inside and the poles
+// stay. The generator's fade_bottom is the default; a planet can reach lower.
 //
 // Units: mm and degrees.
 
@@ -52,8 +53,8 @@ function smoothstep(t) {
     return s * s * (3 - 2 * s);
 }
 
-function surface_fade(lat) {
-    return smoothstep((lat - fade_bottom) / fade_width) * smoothstep((fade_top - lat) / fade_width);
+function surface_fade(lat, bottom = fade_bottom) {
+    return smoothstep((lat - bottom) / fade_width) * smoothstep((fade_top - lat) / fade_width);
 }
 
 function neck_radius(z, a) {
@@ -65,8 +66,9 @@ function neck_radius(z, a) {
 }
 
 // The smooth sphere, neck on the bed. positions has x, y, z per point; indices has
-// three per triangle, counter-clockwise from outside; heights has each point's
-// height from 0 to 1, as last set by displace(); moving lists the rings that can move.
+// three per triangle, counter-clockwise from outside; rest has the positions before
+// any displace(); heights has each point's height from 0 to 1, as last set by
+// displace(); rows lists the outside's rings, which can move.
 function sphere_mesh(columns) {
     const thread_rows = Math.ceil((neck_height + thread_depth) / (thread_pitch / 20));
     const row_count = Math.ceil((90 - sphere_start) * columns / 360);
@@ -119,16 +121,24 @@ function sphere_mesh(columns) {
     for (let k = n_outer; k < n_rings - 1; k++) ring_strip(k, k + 1);
     ring_strip(n_rings - 1, 0);
 
-    const moving = sphere_rows.map((lat, i) => ({ring: thread_rows + 1 + i, lat, fade: surface_fade(lat)}))
-        .filter((row) => row.fade > 0);
-    return {columns, positions, indices, heights: new Float32Array(pole_in + 1), moving};
+    const rows = sphere_rows.map((lat, i) => ({ring: thread_rows + 1 + i, lat}));
+    return {columns, positions, rest: positions.slice(), indices, heights: new Float32Array(pole_in + 1), rows};
 }
 
 // Moves the outside to height(lat, lon), from 0 to 1, times depth above the smooth
-// sphere, as outer_radius() does with surface_height(lat, lon).
-function displace(mesh, height, depth) {
-    const {columns, positions, heights} = mesh;
-    for (const {ring, lat, fade} of mesh.moving) {
+// sphere, as outer_radius() does with surface_height(lat, lon). Returns how many
+// points were offset; the others are back on the smooth sphere.
+function displace(mesh, height, depth, bottom = fade_bottom) {
+    const {columns, positions, rest, heights} = mesh;
+    let offset = 0;
+    for (const {ring, lat} of mesh.rows) {
+        const fade = surface_fade(lat, bottom);
+        if (fade === 0) {
+            positions.set(rest.subarray(ring * columns * 3, (ring + 1) * columns * 3), ring * columns * 3);
+            heights.fill(0, ring * columns, (ring + 1) * columns);
+            continue;
+        }
+        offset += columns;
         const ring_r = cos_d(lat);
         const ring_z = sin_d(lat);
         for (let c = 0; c < columns; c++) {
@@ -142,6 +152,7 @@ function displace(mesh, height, depth) {
             positions[3 * i + 2] = centre_z + r * ring_z;
         }
     }
+    return offset;
 }
 
 // Binary STL, as an ArrayBuffer.

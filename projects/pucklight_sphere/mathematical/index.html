@@ -27,9 +27,13 @@
     position: relative; display: flex; flex-direction: column; gap: 10px; min-height: 0; height: 100vh;
     padding: 14px 16px; background: var(--panel); border-right: 1px solid var(--line);
   }
-  #title { display: flex; justify-content: space-between; align-items: center; }
-  #logo { width: 34px; color: var(--ink); }
-  #template { width: 100%; padding: 6px 8px; }
+  .row { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+  .row > label, .row > .label { flex: none; width: 58px; }
+  .row select { flex: 1; min-width: 110px; padding: 5px 8px; }
+  .row button { padding: 4px 8px; }
+  button:disabled, select:disabled { opacity: .4; cursor: default; border-color: var(--line); }
+  #project_save.dirty { border-color: var(--accent); color: var(--accent); }
+  #logo { width: 34px; margin-left: auto; color: var(--ink); }
   #editor { flex: 1 1 0; min-height: 120px; border: 1px solid var(--line); overflow: hidden; }
   #editor textarea {
     width: 100%; height: 100%; padding: 8px; border: 0; resize: none; outline: 0;
@@ -38,6 +42,7 @@
   #map { display: block; width: 100%; aspect-ratio: 2 / 1; max-height: 22vh; background: #000; }
   .slider { display: grid; grid-template-columns: 76px 1fr 40px; align-items: center; gap: 8px; }
   .slider output { text-align: right; color: var(--dim); }
+  .slider input:disabled { opacity: .35; }
   .slider select { grid-column: 2 / 4; padding: 2px 4px; }
   #sliders { display: flex; flex-direction: column; gap: 4px; }
 
@@ -110,11 +115,25 @@
 </head>
 <body>
 <section id="left">
-  <div id="title">
+  <div class="row">
+    <label for="project">project</label>
+    <select id="project"></select>
+    <button id="project_new" title="New project, as a copy of this one">new</button>
+    <button id="project_save">save</button>
+    <button id="project_rename">rename</button>
+    <button id="project_delete">delete</button>
+  </div>
+  <div class="row">
     <label for="template">template</label>
+    <select id="template"></select>
+  </div>
+  <div class="row">
+    <span class="label">texture</span>
+    <button id="texture_load" title="An image the browser can read; the shader gets it as iChannel0">load</button>
+    <button id="texture_remove">remove</button>
+    <input id="texture_file" type="file" accept="image/*" hidden>
     <svg id="logo" viewBox="0 0 43.9095293518 31.2528266758" role="img" aria-label="VeryOS logo"><path fill="currentColor" fill-rule="evenodd" d="M 7.7528133542 9.1080260785 L 4.6193976626 1.5432914191 L 0 3.4567085809 L 11.5135290962 31.2528266758 L 32.3960002556 31.2528266758 L 43.9095293518 3.4567085809 L 39.2901316892 1.5432914191 L 36.1567159975 9.1080260785 A 15.6264133379 15.6264133379 0 0 0 7.7528133542 9.1080260785 Z M 30.9694268093 21.2528266758 A 10.6264133379 10.6264133379 0 0 0 21.9547646759 5 A 4.0632066689 4.0632066689 0 0 0 21.9547646759 13.1264133379 A 9.0632066689 9.0632066689 0 0 1 30.9694268093 21.2528266758 Z M 12.9401025425 10 A 9.0632066689 9.0632066689 0 0 0 21.9547646759 18.1264133379 A 4.0632066689 4.0632066689 0 0 1 21.9547646759 26.2528266758 A 10.6264133379 10.6264133379 0 0 1 12.9401025425 10 Z"/></svg>
   </div>
-  <select id="template"></select>
   <div id="editor"></div>
   <canvas id="map" width="1024" height="512" title="The heightmap: longitude from left to right, the top of the sphere at the top"></canvas>
   <div id="sliders">
@@ -122,6 +141,7 @@
     <div class="slider"><label for="seed">Seed</label><input id="seed" type="range" min="0" max="100" step="1" value="3"><output id="seed_value"></output></div>
     <div class="slider"><label for="gamma">gamma</label><input id="gamma" type="range" min="0.3" max="3" step="0.05" value="1"><output id="gamma_value"></output></div>
     <div class="slider" title="surface_depth in the generator: how far 1.0 stands out, in mm"><label for="depth">Depth mm</label><input id="depth" type="range" min="0.2" max="5" step="0.1" value="0.8"><output id="depth_value"></output></div>
+    <div class="slider" title="The latitude where the relief starts; below it the sphere stays smooth. The generator's fade_bottom is -12.5; a planet can reach down to the neck"><label for="relief_from">From lat</label><input id="relief_from" type="range" min="-36" max="10" step="0.5" value="-12.5"><output id="relief_from_value"></output></div>
     <div class="slider" title="sphere_columns in the generator: the mesh's resolution"><label for="columns">Columns</label>
       <select id="columns"><option>180</option><option>360</option><option selected>720</option></select>
     </div>

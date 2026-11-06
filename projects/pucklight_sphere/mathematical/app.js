@@ -1,7 +1,8 @@
 // Copyright (C) Jonas Immanuel Frey - Licensed under GPL
 // The app around sphere_mesh.js: a Shadertoy-style shader draws a heightmap, longitude
 // from left to right and latitude from bottom to top, and its brightness moves the
-// sphere's outside. The colours map the height of each point. See readme.md.
+// sphere's outside. The colours map the height of each point. A project keeps it all
+// under a name, through server.js. See readme.md.
 
 const $ = (id) => document.getElementById(id);
 
@@ -56,6 +57,16 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord) {
     fragColor = vec4(vec3(h), 1.0);
 }
 `,
+    texture: `// The loaded texture as the heightmap. White stands out by the full depth.
+//
+// iChannel0 is the texture; its left and right edges wrap around. This turns the
+// middle of the map to the sphere's front: change 0.25 to turn it.
+
+void mainImage(out vec4 fragColor, in vec2 fragCoord) {
+    vec2 uv = fragCoord / iResolution.xy;
+    fragColor = texture(iChannel0, uv - vec2(0.25, 0.0));
+}
+`,
 };
 
 /* ---- Heightmap ---- */
@@ -85,6 +96,7 @@ const height_prefix = `#version 300 es
 precision highp float;
 uniform vec3 iResolution;
 uniform float iScale, iSeed, iGamma;
+uniform sampler2D iChannel0;
 const float iTime = 0.0;
 const int iFrame = 0;
 const vec4 iMouse = vec4(0.0);
@@ -121,6 +133,47 @@ function compile_height_shader(code) {
         .map(([, line, message]) => ({line: Math.min(+line, last_line), message}));
 }
 
+/* ---- Texture: iChannel0 in the shader ---- */
+
+// The map has 1024 pixels across, so a wider texture would only cost memory.
+const texture_max_width = 4096;
+const black_pixel = new Uint8Array([0, 0, 0, 255]);
+const channel_texture = gl.createTexture();
+gl.bindTexture(gl.TEXTURE_2D, channel_texture);
+gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA8, 1, 1, 0, gl.RGBA, gl.UNSIGNED_BYTE, black_pixel);
+gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_LINEAR);
+gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.REPEAT);
+gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+
+let texture_blob = null;
+// Since the project was last saved or opened.
+let texture_changed = false;
+
+async function set_texture(blob) {
+    texture_blob = blob;
+    gl.bindTexture(gl.TEXTURE_2D, channel_texture);
+    if (blob) {
+        // The image's top is the sphere's top: y = 1 in the shader.
+        const image = await createImageBitmap(blob, {imageOrientation: "flipY", colorSpaceConversion: "none", premultiplyAlpha: "none"});
+        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA8, gl.RGBA, gl.UNSIGNED_BYTE, image);
+        gl.generateMipmap(gl.TEXTURE_2D);
+        image.close();
+    } else {
+        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA8, 1, 1, 0, gl.RGBA, gl.UNSIGNED_BYTE, black_pixel);
+    }
+    $("texture_remove").disabled = !blob;
+}
+
+// Any image the browser can read, as a PNG of a sensible size.
+async function texture_png(file) {
+    const image = await createImageBitmap(file);
+    const scale = Math.min(1, texture_max_width / image.width);
+    const canvas = new OffscreenCanvas(Math.round(image.width * scale), Math.round(image.height * scale));
+    canvas.getContext("2d").drawImage(image, 0, 0, canvas.width, canvas.height);
+    image.close();
+    return canvas.convertToBlob({type: "image/png"});
+}
+
 const map_framebuffer = gl.createFramebuffer();
 const map_texture = gl.createTexture();
 gl.bindTexture(gl.TEXTURE_2D, map_texture);
@@ -138,7 +191,11 @@ function render_map() {
     gl.disable(gl.DEPTH_TEST);
     gl.useProgram(height_program);
     gl.bindVertexArray(null);
+    gl.bindTexture(gl.TEXTURE_2D, channel_texture);
     const uniform = (name) => gl.getUniformLocation(height_program, name);
+    // A slider the shader does not read would do nothing.
+    $("scale").disabled = uniform("iScale") === null;
+    $("seed").disabled = uniform("iSeed") === null;
     gl.uniform3f(uniform("iResolution"), map_width, map_height, 1);
     gl.uniform1f(uniform("iScale"), +$("scale").value);
     gl.uniform1f(uniform("iSeed"), +$("seed").value);
@@ -387,6 +444,7 @@ function colors_changed() {
     paint_gradient();
     apply_colors();
     request_draw();
+    paint_project();
 }
 
 function add_handle(stop) {
@@ -530,6 +588,18 @@ function show_status(text, kind = "") {
     $("status").className = kind;
 }
 
+let offset_count = 0;
+
+// What the status says when nothing is going on.
+function show_result() {
+    if (shader_errors.length) {
+        show_status(`line ${shader_errors[0].line}: ${shader_errors[0].message}`, "error");
+    } else {
+        const unused = texture_blob && gl.getUniformLocation(height_program, "iChannel0") === null;
+        show_status(`ready: ${mesh.positions.length / 3} vertices, ${offset_count} offset${unused ? "; this shader does not use the texture: iChannel0" : ""}`);
+    }
+}
+
 function update() {
     if (code !== compiled_code) {
         compiled_code = code;
@@ -538,16 +608,13 @@ function update() {
     }
     if (+$("columns").value !== mesh.columns) set_columns(+$("columns").value);
     render_map();
-    displace(mesh, map_height_at, +$("depth").value);
+    offset_count = displace(mesh, map_height_at, +$("depth").value, +$("relief_from").value);
     gl.bindBuffer(gl.ARRAY_BUFFER, position_buffer);
     gl.bufferSubData(gl.ARRAY_BUFFER, 0, mesh.positions);
     apply_colors();
     draw();
-    if (shader_errors.length) {
-        show_status(`line ${shader_errors[0].line}: ${shader_errors[0].message}`, "error");
-    } else {
-        show_status(`ready: ${mesh.positions.length / 3} vertices, ${mesh.moving.length * mesh.columns} offset`);
-    }
+    show_result();
+    paint_project();
 }
 
 // Waits a moment, so the status shows before the work starts.
@@ -561,11 +628,12 @@ function schedule_update() {
     }));
 }
 
-for (const name of ["scale", "seed", "gamma", "depth"]) {
-    const show_value = () => { $(`${name}_value`).textContent = $(name).value; };
-    show_value();
+const sliders = ["scale", "seed", "gamma", "depth", "relief_from"];
+const show_slider_value = (name) => { $(`${name}_value`).textContent = $(name).value; };
+for (const name of sliders) {
+    show_slider_value(name);
     $(name).addEventListener("input", () => {
-        show_value();
+        show_slider_value(name);
         schedule_update();
     });
 }
@@ -574,13 +642,28 @@ $("columns").addEventListener("change", schedule_update);
 /* ---- Editor ---- */
 
 let typing_timer = null;
+let latest_code = code;
+
 function code_changed(text) {
-    show_status("updating, please wait...", "busy");
+    latest_code = text;
     clearTimeout(typing_timer);
-    typing_timer = setTimeout(() => {
-        code = text;
-        schedule_update();
-    }, typing_pause);
+    if (text === code) return;
+    show_status("updating, please wait...", "busy");
+    typing_timer = setTimeout(flush_code, typing_pause);
+}
+
+function flush_code() {
+    clearTimeout(typing_timer);
+    if (latest_code === code) return;
+    code = latest_code;
+    schedule_update();
+}
+
+// Puts other code into the editor, in effect at the next update.
+function load_code(text) {
+    clearTimeout(typing_timer);
+    code = latest_code = text;
+    set_code(text);
 }
 
 let set_code = (text) => {};
@@ -613,31 +696,224 @@ function start_textarea() {
     area.value = code;
     area.addEventListener("input", () => code_changed(area.value));
     $("editor").append(area);
-    set_code = (text) => {
-        area.value = text;
-        code_changed(text);
-    };
+    set_code = (text) => { area.value = text; };
 }
 
 for (const name of Object.keys(templates)) $("template").add(new Option(name));
-$("template").addEventListener("change", () => set_code(templates[$("template").value]));
+$("template").addEventListener("change", () => {
+    load_code(templates[$("template").value]);
+    schedule_update();
+});
+
+$("texture_load").addEventListener("click", () => $("texture_file").click());
+$("texture_file").addEventListener("change", async () => {
+    const [file] = $("texture_file").files;
+    $("texture_file").value = "";
+    if (!file) return;
+    show_status("updating, please wait...", "busy");
+    try {
+        await set_texture(await texture_png(file));
+    } catch {
+        show_status(`cannot read ${file.name}: browsers read PNG, JPEG and WebP, but not TIFF`, "error");
+        return;
+    }
+    texture_changed = true;
+    // A template left as it is cannot show the texture, but this one can.
+    if (Object.values(templates).includes(code)) {
+        $("template").value = "texture";
+        load_code(templates.texture);
+    }
+    schedule_update();
+});
+$("texture_remove").addEventListener("click", async () => {
+    await set_texture(null);
+    texture_changed = true;
+    schedule_update();
+});
+
+/* ---- Projects: a name, and everything above, kept by server.js ---- */
+
+// The name of the open project.
+let project = null;
+let project_names = [];
+let saved_state = null;
+
+function get_state() {
+    const state = {template: $("template").value, code};
+    for (const name of sliders) state[name] = +$(name).value;
+    state.columns = +$("columns").value;
+    state.stops = stops.map(({t, color}) => ({t, color}));
+    state.texture = texture_blob !== null;
+    return state;
+}
+
+function apply_state(state) {
+    $("template").value = state.template;
+    load_code(state.code);
+    for (const name of sliders) {
+        $(name).value = state[name];
+        show_slider_value(name);
+    }
+    $("columns").value = state.columns;
+    close_picker();
+    stops.splice(0, stops.length, ...state.stops);
+    $("gradient").replaceChildren();
+    stops.forEach(add_handle);
+    paint_gradient();
+}
+
+function is_dirty() {
+    return project !== null && (texture_changed || JSON.stringify(get_state()) !== saved_state);
+}
+
+function paint_project() {
+    const dirty = is_dirty();
+    const selected = $("project").selectedOptions[0];
+    if (selected) selected.text = dirty ? `${project} *` : project;
+    $("project_save").classList.toggle("dirty", dirty);
+    $("project_rename").disabled = project === null;
+    $("project_delete").disabled = project === null;
+}
+
+async function api(method, path, body) {
+    const response = await fetch(`api/projects${path}`, {method, body, cache: "no-store"});
+    const result = await response.json();
+    if (!response.ok) throw new Error(result.error);
+    return result;
+}
+
+const project_path = (name) => `/${encodeURIComponent(name)}`;
+
+async function refresh_projects() {
+    project_names = await api("GET", "");
+    $("project").replaceChildren(...project_names.map((name) => new Option(name, name)));
+    $("project").value = project;
+}
+
+// What is open now is what is on disk.
+function mark_saved() {
+    saved_state = JSON.stringify(get_state());
+    texture_changed = false;
+    history.replaceState(null, "", project === null ? location.pathname : `#${encodeURIComponent(project)}`);
+    paint_project();
+}
+
+async function open_project(name) {
+    const state = await api("GET", project_path(name));
+    const texture = state.texture
+        ? await (await fetch(`projects/${encodeURIComponent(name)}/texture.png`, {cache: "no-store"})).blob()
+        : null;
+    await set_texture(texture);
+    project = name;
+    apply_state(state);
+    $("project").value = name;
+    mark_saved();
+    schedule_update();
+}
+
+async function store(name, method) {
+    flush_code();
+    await api(method, project_path(name), JSON.stringify(get_state()));
+    if (texture_blob) await api("PUT", `${project_path(name)}/texture`, texture_blob);
+    else if (method === "PUT") await api("DELETE", `${project_path(name)}/texture`);
+}
+
+async function new_project() {
+    const name = prompt("Name of the new project? It starts as a copy of this one.");
+    if (!name) return;
+    await store(name, "POST");
+    project = name;
+    await refresh_projects();
+    mark_saved();
+    show_status(`created ${name}`);
+}
+
+async function save_project() {
+    if (project === null) return new_project();
+    await store(project, "PUT");
+    mark_saved();
+    show_status(`saved ${project}`);
+}
+
+async function rename_project() {
+    const wanted = prompt("New name?", project);
+    if (!wanted || wanted === project) return;
+    const {name} = await api("PATCH", project_path(project), JSON.stringify({name: wanted}));
+    project = name;
+    await refresh_projects();
+    history.replaceState(null, "", `#${encodeURIComponent(name)}`);
+    paint_project();
+}
+
+async function delete_project() {
+    if (!confirm(`Delete the project ${project} and its texture?`)) return;
+    await api("DELETE", project_path(project));
+    const deleted = project;
+    project = null;
+    await refresh_projects();
+    if (project_names.length) await open_project(project_names[0]);
+    else mark_saved();
+    show_status(`deleted ${deleted}`);
+}
+
+async function switch_project() {
+    const name = $("project").value;
+    if (is_dirty() && !confirm(`Discard the changes in ${project}?`)) {
+        $("project").value = project;
+        return;
+    }
+    await open_project(name);
+}
+
+// Without a server, as when opening index.html as a file, there are no projects.
+async function start_projects() {
+    if (location.protocol === "file:") {
+        for (const id of ["project", "project_new", "project_save", "project_rename", "project_delete"]) {
+            $(id).disabled = true;
+            $(id).title = "Projects need the server: deno task start";
+        }
+        return;
+    }
+    await refresh_projects();
+    const wanted = decodeURIComponent(location.hash.slice(1));
+    const first = project_names.includes(wanted) ? wanted : project_names[0];
+    if (first) await open_project(first);
+    else mark_saved();
+}
+
+// Shows what went wrong, as the server said it.
+const project_action = (action) => async () => {
+    try {
+        await action();
+    } catch (error) {
+        show_status(error.message, "error");
+    }
+};
+
+$("project").addEventListener("change", project_action(switch_project));
+$("project_new").addEventListener("click", project_action(new_project));
+$("project_save").addEventListener("click", project_action(save_project));
+$("project_rename").addEventListener("click", project_action(rename_project));
+$("project_delete").addEventListener("click", project_action(delete_project));
+addEventListener("beforeunload", (e) => {
+    if (is_dirty()) e.preventDefault();
+});
 
 /* ---- Download ---- */
 
 function save(data, extension) {
     const link_element = document.createElement("a");
     link_element.href = URL.createObjectURL(new Blob([data]));
-    link_element.download = `pucklight_sphere_mathematical_${$("template").value}_scale${$("scale").value}_seed${$("seed").value}.${extension}`;
+    link_element.download = `pucklight_sphere_${(project ?? $("template").value).replace(/\s+/g, "_")}.${extension}`;
     link_element.click();
     setTimeout(() => URL.revokeObjectURL(link_element.href), 4000);
 }
 
 function download(extension, make) {
-    const before = [$("status").textContent, $("status").className];
     show_status(`writing .${extension}, please wait...`, "busy");
     requestAnimationFrame(() => setTimeout(() => {
         save(make(), extension);
-        show_status(...before);
+        show_result();
     }));
 }
 
@@ -648,6 +924,7 @@ $("download_stl").addEventListener("click", () => download("stl", () => mesh_to_
 
 stops.forEach(add_handle);
 paint_gradient();
+$("texture_remove").disabled = true;
 if (window.require) start_monaco();
 else start_textarea();
-schedule_update();
+project_action(start_projects)().finally(schedule_update);
