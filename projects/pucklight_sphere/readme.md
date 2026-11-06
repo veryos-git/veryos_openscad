@@ -10,6 +10,8 @@ Sphere lamp for the 62 mm RGBW puck light. Prints in less than half the time of 
 
 Generators: `pucklight_sphereV2.scad` (newest), `pucklight_sphere.scad` (V1). Standalone, no libraries. Original description: `readme_hgc.md`.
 
+Patterns from a shader: the webapp in `mathematical/`, see its `readme.md`.
+
 ## Fixes after the first print
 
 In V1 and V2. Problems as reported in `v1_problems/readme_hgc.md`. The fix is not printed yet.
