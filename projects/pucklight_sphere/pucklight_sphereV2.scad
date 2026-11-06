@@ -81,7 +81,7 @@ puck_dome_d = 40;
 puck_clearance = 0.5;
 // Gap between the dome and the ribs with the puck lifted to lip_height. Together
 // with puck_extra_play, how far the puck can move inside the holder.
-puck_play = 0.7;
+puck_play = 0.6;
 
 /* [Holder top part] */
 // Round window over the dome. The cavity's 45 degree shoulder runs up to its
@@ -115,8 +115,8 @@ thread_clearance = 0.25;
 seat_gap = 0.6;
 // The screw's floor and bar lie this much below lip_height, so the puck can still
 // move with the screw turned in all the way: 0.4 mm there, 1 mm when flush. On the
-// click base the puck rests on the disc, so the click does not change.
-puck_extra_play = 0.3;
+// click base the puck rests on the disc, so the click does not depend on it.
+puck_extra_play = 0.4;
 // How far the flange below the thread stands out.
 flange_overhang = 0.5;
 
@@ -127,8 +127,8 @@ press_d = 50;
 // How far the disc reaches above the bottom screw's floor when the holder is
 // pressed down onto the base. Must exceed puck_play; the rest is how far it
 // pushes the button. The puck's bottom is 0.2 mm hollow inside its foot
-// ring, where the disc pushes, so 1.6 pushes the button 0.7 mm, as in the
-// Onshape model.
+// ring, where the disc pushes, so 1.6 pushes the button 0.8 mm. The Onshape model
+// pushes it 0.7 mm.
 press_height = 1.6;
 // Radial gap between the disc and the bottom screw's opening, and on each
 // side of the bar in the disc's slot.
@@ -156,6 +156,11 @@ front_logo_width = 20;
 
 /* [Quality] */
 $fn = 128;
+// The layer height the fits are made for. The flat faces that set them lie on its
+// multiples, so a slicer does not have to round them: the screw's floor and the
+// ribs' underside below, and at these defaults the disc, the plate and the rest.
+// At 0.28 mm, for quick prototypes, they round by up to 0.14 mm, and still fit.
+layer_height = 0.2;
 
 /* [Hidden] */
 eps = 0.01;
@@ -165,6 +170,7 @@ deg_per_rad = 180 / PI;
 // The holder, as in RGBW_pucklight_holderV3.scad.
 puck_r = puck_d / 2;
 thread_depth = 0.4 * thread_pitch;
+function on_layer(z) = round(z / layer_height) * layer_height;
 // Half the flat top of a thread's ridge.
 thread_tip = 0.05 * thread_pitch;
 // Inner wall of the bottom screw around the puck, and its opening for the
@@ -201,7 +207,7 @@ window_r = window_d / 2;
 top_z = shoulder_c - window_r;
 // The ribs' underside in the middle, puck_play above the puck lying on the
 // floor.
-touch_z = lip_height + puck_height + puck_play;
+touch_z = on_layer(lip_height + puck_height + puck_play);
 rib_top = touch_z + rib_height;
 // The ribs end over the recess wall. Beside the window they stand on 45
 // degree feet.
@@ -209,7 +215,7 @@ rib_r = recess_r;
 foot_w = rib_width + 2 * (touch_z - top_z);
 // Height of the disc above the base's plate, and the slot in it for the bar.
 disc_h = lip_height + press_height;
-floor_z = lip_height - puck_extra_play;
+floor_z = on_layer(lip_height - puck_extra_play);
 slot_w = bar_width + 2 * slide_clearance;
 // The logo at the size of veryos_logo.svg, as in veryos_logo_cube: a ring and
 // the two arms of a V, all logo_stroke wide. The arms stand logo_angle off
@@ -483,7 +489,7 @@ module sockel() union() {
         // the screw is flush.
         threaded_rod(hole_d, shoulder_z);
         for (x = [-1, 1], y = [-1, 1]) translate([x * pin_pos, y * pin_pos, -1])
-            cylinder(d = pin_d + 2 * pin_clearance, h = pin_height + 1.5);
+            cylinder(d = pin_d + 2 * pin_clearance, h = pin_height + 1.6);
         translate([0, 0, top_z]) threaded_rod(cup_d, cup_h + 1);
         // 45 degree lead-in at the rim.
         translate([0, 0, sockel_h - 2 * thread_depth]) cylinder(h = 2 * thread_depth + eps,

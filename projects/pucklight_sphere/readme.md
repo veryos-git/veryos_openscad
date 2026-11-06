@@ -16,16 +16,40 @@ In V1 and V2. Problems as reported in `v1_problems/readme_hgc.md`. The fix is no
 
 | Problem | Cause | Fix | Reprint |
 |---|---|---|---|
-| Screwin turned in all the way: the puck cannot move | 0.1 mm free play at the screw's stop (`puck_play` 0.7 less `seat_gap` 0.6), less than one layer | `puck_extra_play` 0.3: the screw's floor and bar lie 0.3 mm lower | screwin only: V1 18 min, V2 15 min (PETG, 0.28 mm) |
+| Screwin turned in all the way: the puck cannot move | 0.1 mm free play at the screw's stop on paper (`puck_play` 0.7 less `seat_gap` 0.6), 0.04 mm as sliced at 0.28 mm | the screw's floor and bar lie lower (`puck_extra_play` 0.4), `puck_play` 0.6, all on 0.2 mm layers | screwin only: V1 20 min, V2 17 min at 0.2 mm |
 
-| Free play, measured on the geometry | Before | Now |
-|---|---|---|
-| Screwin flush | 0.7 mm | 1.0 mm |
-| Screwin at its stop | 0.1 mm | 0.4 mm |
+V1 as the slicer prints it, read from the G-code, with the 26.8 mm puck:
 
-- Sockel and click base: geometry unchanged, no triangle differs. So is the click: on the click base the puck rests on the disc, not the floor.
+| | Layers | Floor | Ribs | Play, flush | Play, at the stop | Button push |
+|---|---|---|---|---|---|---|
+| Before | 0.28 mm (the print) | 4.96 | 32.40 | 0.64 | **0.04** | 0.80 |
+| Before | 0.2 mm | 5.00 | 32.60 | 0.80 | 0.20 | 0.60 |
+| **Now** | **0.2 mm** | **4.60** | **32.40** | **1.00** | **0.40** | **0.80** |
+| Now | 0.28 mm | 4.68 | 32.40 | 0.92 | 0.32 | 0.80 |
+
+V2: the same, 2 mm lower; button push 0.76 at 0.28 mm.
+
+- Printed parts stay usable: the click base is unchanged, the sockel only has its ribs 0.1 mm lower and its pin holes 0.1 mm deeper, and an old sockel fits the new screwin.
+- A screwin printed at 0.28 mm with `puck_extra_play` 0.3 has the same 4.68 floor: no need to print it again.
 - No contact: the puck on the floor, the bar in the slot, the screw flush.
 - Still no room? Measure the puck. The generators use the CAD model's 26.8 mm, the spec sheet says 27.6 mm. At 27.6 mm the play would be 0.2 mm flush, and the puck would clamp before the stop. Then set `puck_height`.
+
+## Made for 0.2 mm layers
+
+The default, as in most slicers; 0.28 mm is for quick prototypes. A flat face on a layer's midpoint can round either way, so the ones that set a fit lie on multiples of 0.2 mm.
+
+| Flat face | V1 | V2 |
+|---|---|---|
+| Screw's floor and bar top | 4.6 | 2.6 |
+| Ribs' underside, top | 32.4, 34.4 | 30.4, 32.4 |
+| Click base's plate, disc top | 2, 8.6 | 1.2, 5.8 |
+| Pin top, pin hole top | 7, 5.6 | 5.2, 4.6 |
+| Cup's height | 6.8 | 4.8 |
+| Logo depth | 1 | 0.6 |
+
+- Thread: 2 mm pitch is 10 layers: ridge tip 1, each flank 4, root 1.
+- `layer_height` (0.2): the screw's floor and the ribs stay on its multiples, also after changing `puck_height`.
+- Cup's floor: 0.007 mm above a layer, which changes nothing.
 
 ## V2: smaller, thinner, faster
 
@@ -52,29 +76,29 @@ In V1 and V2. Problems as reported in `v1_problems/readme_hgc.md`. The fix is no
 
 ### Print time
 
-Slicer estimates, not printed yet: SnapmakerOrca, Snapmaker U1, no support, each part alone. Settings of `v1_snapmaker.3mf`: 0.28 mm layers, the sphere in SnapSpeed PLA (min layer time 4 s, max flow 20 mm³/s), the rest apparently in Generic PETG (12 s, 12 mm³/s).
+Slicer estimates: SnapmakerOrca, Snapmaker U1, no support, each part alone. As in `v1_snapmaker.3mf`: the sphere in SnapSpeed PLA (min layer time 4 s, max flow 20 mm³/s), the rest apparently in Generic PETG (12 s, 12 mm³/s).
 
-| Part | V1 | V2 |
-|---|---|---|
-| Sphere, Arachne | 1 h 2 min, 58 g | 33 min, 25 g |
-| Sockel | 1 h 12 min, 44 g | 54 min, 31 g |
-| Click base | 30 min, 19 g | 21 min, 12 g |
-| Screwin | 18 min, 9 g | 15 min, 7 g |
-| **Whole lamp** | **3 h 1 min, 130 g** | **2 h 2 min, 75 g** |
-| All in SnapSpeed PLA | 2 h 37 min | 1 h 46 min |
+| Part | V1, 0.2 mm | V2, 0.2 mm | V2, 0.28 mm prototype |
+|---|---|---|---|
+| Sphere, Arachne | 1 h 13 min, 58 g | 41 min, 26 g | 33 min, 25 g |
+| Sockel | 1 h 16 min, 44 g | 58 min, 31 g | 54 min, 31 g |
+| Click base | 32 min, 18 g | 22 min, 11 g | 21 min, 12 g |
+| Screwin | 20 min, 9 g | 17 min, 7 g | 15 min, 7 g |
+| **Whole lamp** | **3 h 21 min, 129 g** | **2 h 17 min, 74 g** | **2 h 2 min, 75 g** |
+| All in SnapSpeed PLA | 3 h 6 min | 2 h 5 min | 1 h 46 min |
 
-| Sphere, V2, SnapSpeed PLA | Normal, 0.28 mm | Vase mode, 0.2 mm |
-|---|---|---|
-| Plain | 33 min, 25 g | 31 min, 16 g (24 min at 3 s) |
-| `waves` | 59 min, 33 g | 31 min, 16 g |
-| `ribs`, `twist` | 1 h 11 min, 33 g | 31 min, 16 g |
-| `lattice` | 1 h 20 min, 34 g | 32 min, 16 g |
+| Sphere, V2, SnapSpeed PLA | Normal, 0.2 mm | Normal, 0.28 mm | Vase mode, 0.2 mm |
+|---|---|---|---|
+| Plain | 41 min, 26 g | 33 min, 25 g | 31 min, 16 g (24 min at 3 s) |
+| `waves` | 1 h 11 min, 34 g | 59 min, 33 g | 31 min, 16 g |
+| `ribs`, `twist` | 1 h 32 min, 34 g | 1 h 11 min, 33 g | 31 min, 16 g |
+| `lattice` | 1 h 45 min, 34 g | 1 h 20 min, 34 g | 32 min, 16 g |
 
 What sets the time:
 
-- Min layer time: a thin sphere hits it. PETG's 12 s makes V2's plain sphere 1 h 8 min against 33 min in SnapSpeed PLA. The same sphere at 0.2 mm has 430 layers × 8 s = 57 min, however thin the shell.
+- Min layer time: a thin sphere hits it. V2's plain sphere has 430 layers at 0.2 mm: PETG's 12 s makes it 1 h 33 min, against 41 min in SnapSpeed PLA.
 - Max flow: otherwise time follows the plastic.
-- Sockel's infill: 8% instead of 15% saves 6 min.
+- Sockel's infill: 8% instead of 15% saves 5 min.
 - Formula spheres in normal mode are slow: walls that change width move slowly. More walls do not help.
 
 Tried and left out, because they saved nothing:
@@ -89,7 +113,8 @@ Tried and left out, because they saved nothing:
 
 | Setting | Value | Why |
 |---|---|---|
-| Wall generator, walls | Arachne, 2 | 0.8 mm is two lines; classic takes 3 min longer |
+| Layer height | 0.2 mm | 0.28 mm for quick prototypes |
+| Wall generator, walls | Arachne, 2 | 0.8 mm is two lines; classic takes 2 min longer |
 | Filament | SnapSpeed PLA in white or a light colour | 4 s against PETG's 12 s |
 | Brim | outer, 5 mm | the neck stands on a 1.2 mm ring; auto adds none |
 
@@ -298,7 +323,7 @@ In the bottoms only, hidden when the lamp stands on a desk. All 1 mm deep, readi
 
 ## Not tested yet
 
-- Nothing has been printed: the thread's fit, the sphere's top and the click are open.
+- Printed once: the puck's room was too tight, see Fixes after the first print. No report yet on the thread's fit, the sphere's top and the click.
 - The lamp's 112 g rests on the puck's dome (sockel, screwin, sphere), less than the lantern's. If that clicks the light by itself, stand it on something else.
 - The checks above ran on the command line (OpenSCAD 2021.01); its window's preview was not opened. The pictures are from Blender.
 - Another OpenSCAD build, apparently the browser playground: `export (81).stl` had the same four parts, sizes and volumes, before the logos moved to the bottoms.
