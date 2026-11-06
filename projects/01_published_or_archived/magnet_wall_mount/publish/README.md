@@ -58,4 +58,4 @@ Open the `.scad` source in OpenSCAD and use the customizer panel:
 
 ## License
 
-MIT — see the repository root.
+GPL-2.0 — see `LICENSE` in the repository root.
