@@ -84,10 +84,28 @@ As `outer_radius()` in the generator, with the map as `surface_height()`: radius
 | From lat | For |
 |---|---|
 | -19.7 | the default, the generator's `fade_bottom` (-19.688): as its formulas |
-| -36 | the planets, saved for V2's neck: a map should reach the neck, or Earth loses most of its south |
-| -43 | the slider's lowest; V3's sphere starts at -45 |
+| -36 | the planets: Earth keeps most of its south, little overhang, see below |
+| -43 | the slider's lowest; V3's sphere starts at -45. More of the south, more overhang |
 
 Colour follows the movement: a point that stays gets the colour of 0.0, also the neck and the inside.
+
+## Overhang
+
+The lower half of the mesh, 720 columns, depth 0.8 mm: its steepest face in degrees, and its area steeper than 45, of about 11400 mm2. The smooth sphere's steepest is 44.8.
+
+| Project | From -36 | From -43 |
+|---|---|---|
+| Mercury | 56.7, 6 mm2 | 61.7, 73 mm2 |
+| Venus | 55.9, 2 mm2 | 55.9, 4 mm2 |
+| Earth | 56.7, 5 mm2 | 59.2, 16 mm2 |
+| Moon | 45.9, 1 mm2 | 51.3, 19 mm2 |
+| Pluto | 50.5, 1 mm2 | 63.4, 38 mm2 |
+| Ceres | none | 49.3, 8 mm2 |
+| Mars, Charon, Vesta, Titan | none | none |
+| Voronoi | 62.4, 186 mm2 | 70.2, 398 mm2 |
+
+- Saved: the planets at -36, Voronoi at -19.7, where it has none.
+- More depth makes it worse; what a print tolerates is not tested.
 
 ## Columns
 
@@ -102,9 +120,9 @@ Colour follows the movement: a point that stays gets the colour of 0.0, also the
 | Check | Result |
 |---|---|
 | `test_sphere_mesh.js`: smooth at 64 and 180 columns, `twist` at 180, also from -36 | same points within 0.0001 mm, same faces in the same direction, closed |
-| The generator's `twist` typed as a shader, downloaded, against OpenSCAD's `surface = "twist"` | worst point 0.0013 mm off |
+| The generator's `twist` typed as a shader, downloaded, against OpenSCAD's `surface = "twist"` | worst point 0.0015 mm off |
 | Voronoi, 720 columns, against OpenSCAD's smooth sphere | not one point of the thread, neck or inside moved |
-| Same, read back by Blender | `.stl` and `.obj`: 0 non-manifold edges, 26.0 cm3 (smooth: 22.0), 32 g of PLA by volume |
+| Same, read back by Blender | `.stl` and `.obj`: 0 non-manifold edges, 27.6 cm3 (smooth: 23.1), 34 g of PLA by volume |
 | `.obj` in Blender | vertex colours arrive |
 | A test image with a patch at a known place | where it belongs: not mirrored, not upside down, not on the back |
 | Every project opened in the app | loads as saved, nothing marked unsaved; saving writes the same bytes, so git stays clean |
@@ -113,11 +131,11 @@ Colour follows the movement: a point that stays gets the colour of 0.0, also the
 | Create, read, update, rename, delete, and every other control, in headless Chrome: mouse and typing on the cube, orbit, zoom, stops, picker, buttons and editor; sliders and lists set by script | works, console clean apart from the refused names |
 | Without the internet | a plain text box replaces the editor; the rest works |
 
-Only `test_sphere_mesh.js` ran again on V3's sphere, which differs here in `neck_d` only. The other rows are from V2's.
+All on V3's sphere, which differs here in `neck_d` only, except the API and internet rows: those are from V2's and do not depend on the sphere.
 
 ## Not tested yet
 
-- Not sliced, not printed. Most open: overhang on the lower flank of a wall, and more so below -19.7 (hypothesis: a planet's gentle slopes are fine).
+- Not sliced, not printed. Most open: what the overhang above does to a print (hypothesis: a few mm2 on a planet's slopes are fine).
 - Only on software WebGL in Chrome: no real GPU, no Firefox. One update took 0.2 to 1.6 s there.
 
 ## Not included

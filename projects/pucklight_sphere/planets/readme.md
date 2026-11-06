@@ -48,7 +48,7 @@ Run `python3 make_planet_projects.py [names]`; needs numpy, Pillow and curl. Dow
 - Titan: the lines follow Cassini's radar tracks. Between them is interpolation, so most of what you see is not landscape.
 - Pluto, Charon: the smooth part was never measured.
 - Venus: the gaps are level at the median.
-- The relief starts at -36 and V3's sphere at -45, so the far south is not on any sphere. `From lat` reaches -43; not tried.
+- The relief starts at -36 and V3's sphere at -45, so the far south is not on any sphere. `From lat` reaches -43, with more overhang: `../mathematical/readme.md`, Overhang.
 - Not sliced, not printed.
 
 Sources: NASA and USGS, with GEBCO for Earth's data, Cassini RADAR team and Lorenz et al. 2013 for Titan. Credit them; the data is not under this project's GPL.

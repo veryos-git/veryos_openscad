@@ -5,7 +5,7 @@
   "seed": 3,
   "gamma": 1,
   "depth": 0.8,
-  "relief_from": -12.5,
+  "relief_from": -19.7,
   "columns": 720,
   "stops": [
     {
