@@ -23,7 +23,7 @@ raw_dir = here / ".gitignored" / "raw"
 projects_dir = here.parent / "mathematical" / "projects"
 app_js = here.parent / "mathematical" / "app.js"
 
-# The app's map has 1024 x 512 pixels, so this is enough, and git stays small.
+# The app's map has this many pixels, so this is enough, and git stays small.
 width, height = 2048, 1024
 # A few extreme points, like Olympus Mons, must not flatten all the rest.
 percentiles = (0.1, 99.9)

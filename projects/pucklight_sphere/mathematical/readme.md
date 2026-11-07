@@ -62,7 +62,7 @@ Webapp: a shader, as in Shadertoy, draws a heightmap, from a formula or a loaded
 | `sphereDir(uv)` | the point on the unit sphere: no seam, no squeezed cells at the top |
 | `iScale`, `iSeed` | the sliders |
 | `iTime`, `iFrame`, `iMouse` | always 0 |
-| Map | 1024 x 512, 8 bit, brightness = 0.299 r + 0.587 g + 0.114 b |
+| Map | 2048 x 1024, 8 bit, brightness = 0.299 r + 0.587 g + 0.114 b |
 
 - Without `sphereDir()`, a pattern must repeat from left to right, or it shows a seam on the +x side.
 - A new template: add a line to `templates` in `app.js`.
@@ -95,17 +95,19 @@ The lower half of the mesh, 720 columns, depth 0.8 mm: its steepest face in degr
 
 | Project | From -36 | From -43 |
 |---|---|---|
-| Mercury | 56.7, 6 mm2 | 61.7, 73 mm2 |
-| Venus | 55.9, 2 mm2 | 55.9, 4 mm2 |
-| Earth | 56.7, 5 mm2 | 59.2, 16 mm2 |
-| Moon | 45.9, 1 mm2 | 51.3, 19 mm2 |
-| Pluto | 50.5, 1 mm2 | 63.4, 38 mm2 |
-| Ceres | none | 49.3, 8 mm2 |
-| Mars, Charon, Vesta, Titan | none | none |
-| Voronoi | 62.4, 186 mm2 | 70.2, 398 mm2 |
+| Mercury | 61.3, 20 mm2 | 69.7, 125 mm2 |
+| Venus | 63.5, 6 mm2 | 63.5, 11 mm2 |
+| Earth | 64.4, 10 mm2 | 65.1, 29 mm2 |
+| Moon | 51.0, 4 mm2 | 55.4, 45 mm2 |
+| Pluto | 56.0, 10 mm2 | 68.3, 71 mm2 |
+| Ceres | none | 50.5, 14 mm2 |
+| Mars | 48.0, 1 mm2 | 48.0, 2 mm2 |
+| Charon, Vesta, Titan | none | none |
+| Voronoi | 63.3, 199 mm2 | 71.2, 410 mm2 |
 
-- Saved: the planets at -36, Voronoi at -19.7, where it has none.
+- Saved: the planets at -36, Voronoi at -19.7, where it has 45.4, 1 mm2.
 - More depth makes it worse; what a print tolerates is not tested.
+- More map pixels make it worse too: this is the map of 2048 x 1024. On the first map of 1024 x 512, Mercury had 6 mm2 from -36.
 
 ## Columns
 
@@ -114,6 +116,13 @@ The lower half of the mesh, 720 columns, depth 0.8 mm: its steepest face in degr
 | 180 | 1.75 mm | 33662 | 9000 | 67320 | 3.4 MB | coarse stair-steps |
 | 360 | 0.87 mm | 115562 | 35640 | 231120 | 11.6 MB | visible stair-steps |
 | **720** | **0.44 mm** | **425522** | **143280** | **851040** | **42.6 MB** | **clean; the default and the generator's maximum** |
+| 1024 | 0.31 mm | 838658 | 290816 | 1677312 | 83.9 MB | clean |
+| 1440 | 0.22 mm | 1628642 | 573120 | 3257280 | 162.9 MB | clean; a step is about one 0.2 mm layer |
+| 2048 | 0.15 mm | 3250178 | 1163264 | 6500352 | 325 MB | clean; one map pixel per column and row |
+
+- Above 720 is this app only: the generator's `sphere_columns` stops at 720.
+- A 0.42 mm line cannot draw a 0.15 mm step, so above about 720 expect smoother slopes, not more detail. Hypothesis, not printed.
+- A slicer has to hold all those triangles. Not sliced above 720: `v3_earth_litho.3mf`, at 720, already keeps a 70 MB model.
 
 ## Checks
 
@@ -127,6 +136,8 @@ The lower half of the mesh, 720 columns, depth 0.8 mm: its steepest face in degr
 | A test image with a patch at a known place | where it belongs: not mirrored, not upside down, not on the back |
 | Every project opened in the app | loads as saved, nothing marked unsaved; saving writes the same bytes, so git stays clean |
 | Mars, 720 columns | not one point of the thread, neck or inside moved |
+| `moon_light` at 1024, 1440, 2048 columns, in headless Chrome | closed: every edge once in each direction; not one point of the thread, neck or inside moved |
+| The downloads' `.stl` and `.obj` at 2048 columns, in headless Chrome | made in memory: 325 MB in 0.7 s, 307 MB in 5 s; not saved to disk, not read back |
 | API with `../..`, `a/b`, `.git`, another site's `Origin` and `Host` | refused, nothing touched |
 | Create, read, update, rename, delete, and every other control, in headless Chrome: mouse and typing on the cube, orbit, zoom, stops, picker, buttons and editor; sliders and lists set by script | works, console clean apart from the refused names |
 | Without the internet | a plain text box replaces the editor; the rest works |
@@ -136,7 +147,7 @@ All on V3's sphere, which differs here in `neck_d` only, except the API and inte
 ## Not tested yet
 
 - Not sliced, not printed. Most open: what the overhang above does to a print (hypothesis: a few mm2 on a planet's slopes are fine).
-- Only on software WebGL in Chrome: no real GPU, no Firefox. One update took 0.2 to 1.6 s there.
+- Only on software WebGL in Chrome: no real GPU, no Firefox. One update took 0.3 to 6.5 s there, from 720 to 2048 columns.
 
 ## Not included
 

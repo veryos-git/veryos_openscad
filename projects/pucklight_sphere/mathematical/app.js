@@ -7,8 +7,9 @@
 const $ = (id) => document.getElementById(id);
 
 const monaco_url = "https://cdn.jsdelivr.net/npm/monaco-editor@0.52.2/min";
-const map_width = 1024;
-const map_height = 512;
+// One pixel per column and per row at the largest Columns, 2048.
+const map_width = 2048;
+const map_height = 1024;
 const background = [0.082, 0.106, 0.114];
 const view_background = [0.098, 0.133, 0.133];
 const view_target = [0, 0, (centre_z + sphere_r) / 2];
@@ -135,7 +136,7 @@ function compile_height_shader(code) {
 
 /* ---- Texture: iChannel0 in the shader ---- */
 
-// The map has 1024 pixels across, so a wider texture would only cost memory.
+// The map has 2048 pixels across, so a much wider texture would only cost memory.
 const texture_max_width = 4096;
 const black_pixel = new Uint8Array([0, 0, 0, 255]);
 const channel_texture = gl.createTexture();

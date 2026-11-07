@@ -27,7 +27,7 @@ Run `python3 make_planet_projects.py [names]`; needs numpy, Pillow and curl. Dow
 
 | Step | Why |
 |---|---|
-| Area average to 2048 x 1024, 8 bit, about 0.5 MB | the app's map has 1024 x 512; at 5 mm depth a step is 0.02 mm, far below a 0.2 mm layer |
+| Area average to 2048 x 1024, 8 bit, about 0.5 MB | the app's map has 2048 x 1024; at 5 mm depth a step is 0.02 mm, far below a 0.2 mm layer |
 | Stretch from the 0.1 to the 99.9 percentile | a few extreme points, like the Himalaya, must not flatten the rest |
 | No data: level at the median height | the edge of what was measured is no cliff |
 | flatten: less each latitude's median | Ceres and Vesta are flattened bodies measured from a sphere: a broad belt around the equator drowned the craters |
