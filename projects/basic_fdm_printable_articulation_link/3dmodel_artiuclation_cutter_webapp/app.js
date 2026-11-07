@@ -455,7 +455,7 @@ async function update_layers() {
         const preparing = !(step === 3 && result_pieces.length) && placed_key !== model_key();
         if (preparing) { show_status("preparing the model for slicing...", "busy"); await next_frame(); }
         for (const [body, color] of layer_bodies()) {
-            const slab = body.slice(z).extrude(layer_height, 1, 0, 1, false).translate([0, 0, z - layer_height]);
+            const slab = body.slice(z).extrude(layer_height, 1, 0, [1, 1], false).translate([0, 0, z - layer_height]);
             layer_group.add(new THREE.Mesh(geometry_of(slab),
                 new THREE.MeshStandardMaterial({color: color.clone().offsetHSL(0, 0, 0.15), roughness: 0.7})));
             slab.delete();

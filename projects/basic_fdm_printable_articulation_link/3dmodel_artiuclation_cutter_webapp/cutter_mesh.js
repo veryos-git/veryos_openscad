@@ -48,8 +48,9 @@ export function cutter_lib(wasm, P = defaults) {
     const {r_pin, R_out, pitch, tilt, u, v, M, bed_z, d_back, d_front} = D;
     wasm.setCircularSegments(P.fn);
     const polygon = (points) => new CrossSection([points], "EvenOdd");
-    // OpenSCAD's rotate([90, 0, 0]) linear_extrude(h, center = true) of an XZ outline
-    const extrude_xz = (section, h) => section.extrude(h, 1, 0, 1, true).rotate([90, 0, 0]);
+    // OpenSCAD's rotate([90, 0, 0]) linear_extrude(h, center = true) of an XZ outline.
+    // scaleTop must be a pair: a number is read as [n, 0] and tapers the extrusion.
+    const extrude_xz = (section, h) => section.extrude(h, 1, 0, [1, 1], true).rotate([90, 0, 0]);
     const torus = (R, r) => Manifold.revolve(CrossSection.circle(r).translate([R, 0]), 96);
 
     // Ring: annulus R_in..R_out, thickness w, all edges rounded r_ring_fillet.
@@ -69,7 +70,7 @@ export function cutter_lib(wasm, P = defaults) {
         const core = CrossSection.square([d_front - d_back - 2 * rs, P.w - 2 * rs], true)
             .offset(rs - rb, "Round")
             .translate([(d_back + d_front) / 2, 0])
-            .extrude(40, 1, 0, 1, true)
+            .extrude(40, 1, 0, [1, 1], true)
             .rotate([0, -tilt, 0])
             .trimByPlane([0, 0, 1], bed_z + rb)   // above the bed
             .trimByPlane([0, 0, -1], -1);        // top well inside the ring
@@ -156,7 +157,7 @@ export function cutter_lib(wasm, P = defaults) {
             CrossSection.circle(bar_r).translate([-(bar_w / 2 - bar_r), bar_h - bar_r]),
             CrossSection.circle(bar_r).translate([bar_w / 2 - bar_r, bar_h - bar_r]),
         ]);
-        const bar = profile.extrude(len, 1, 0, 1, true).rotate([90, 0, 90]);
+        const bar = profile.extrude(len, 1, 0, [1, 1], true).rotate([90, 0, 90]);
         const cutters = [];
         for (let i = 0; i < joints; i++)
             cutters.push(joint_cutter(60, 40).translate([(i - (joints - 1) / 2) * spacing, 0, 0]));
