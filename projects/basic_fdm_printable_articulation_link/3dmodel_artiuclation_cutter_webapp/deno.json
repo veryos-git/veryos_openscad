@@ -1,0 +1,7 @@
+{
+  "lock": false,
+  "tasks": {
+    "start": "deno run --allow-net=localhost:8766 --allow-read=. --allow-write=projects server.js",
+    "test": "node test_cutter_mesh.js"
+  }
+}

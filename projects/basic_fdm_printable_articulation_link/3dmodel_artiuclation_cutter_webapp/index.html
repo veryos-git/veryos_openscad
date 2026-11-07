@@ -1,0 +1,157 @@
+<!-- Copyright (C) Jonas Immanuel Frey - Licensed under GPL -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>VeryOS articulation model creator</title>
+<link rel="icon" href="data:,">
+<style>
+  :root {
+    --bg: #151b1d; --panel: #192222; --line: #344040; --ink: #f7f2e6; --dim: #c7c8bc; --accent: #f0b750;
+  }
+  * { box-sizing: border-box; }
+  html, body { height: 100%; margin: 0; }
+  body {
+    display: grid; grid-template-columns: minmax(320px, 30%) 1fr;
+    background: var(--bg); color: var(--ink);
+    font: 13px/1.4 ui-monospace, "DejaVu Sans Mono", Menlo, Consolas, monospace;
+  }
+  button, select, input { font: inherit; color: inherit; }
+  button, select { background: var(--panel); border: 1px solid var(--line); border-radius: 4px; cursor: pointer; }
+  button:hover, select:hover { border-color: var(--accent); }
+  button:disabled, select:disabled { opacity: .4; cursor: default; border-color: var(--line); }
+  input[type=range] { width: 100%; margin: 0; accent-color: var(--accent); }
+  input[type=number] { width: 64px; padding: 2px 4px; background: var(--bg); border: 1px solid var(--line); border-radius: 4px; }
+  input[type=checkbox] { accent-color: var(--accent); }
+
+  /* left: the steps */
+  #left {
+    display: flex; flex-direction: column; gap: 10px; height: 100vh; overflow: auto;
+    padding: 14px 16px; background: var(--panel); border-right: 1px solid var(--line);
+  }
+  .row { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+  .row > label, .row > .label { flex: none; width: 58px; }
+  .row select { flex: 1; min-width: 110px; padding: 5px 8px; }
+  .row button { padding: 4px 8px; }
+  #project_save.dirty { border-color: var(--accent); color: var(--accent); }
+  #logo { width: 34px; margin-left: auto; color: var(--ink); }
+  #steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; }
+  #steps button { padding: 8px 4px; }
+  #steps button.current { border-color: var(--accent); color: var(--accent); }
+  .step { display: flex; flex-direction: column; gap: 8px; }
+  .step[hidden] { display: none; }
+  .step h2 { margin: 6px 0 0; font: inherit; color: var(--accent); }
+  .step p { margin: 0; color: var(--dim); }
+  .slider { display: grid; grid-template-columns: 76px 1fr 48px; align-items: center; gap: 8px; }
+  .slider output { text-align: right; color: var(--dim); }
+  .field { display: grid; grid-template-columns: 76px auto 1fr; align-items: center; gap: 8px; }
+  .field .hint { color: var(--dim); }
+  .turns { display: grid; grid-template-columns: 76px repeat(3, 1fr); gap: 4px; align-items: center; }
+  .turns button { padding: 4px 0; }
+  details summary { cursor: pointer; color: var(--dim); }
+  details .field { margin-top: 6px; }
+  #joints { display: flex; flex-direction: column; gap: 2px; max-height: 30vh; overflow: auto; color: var(--dim); }
+  #joints .warn { color: #ffb4a8; }
+  #model_info { color: var(--dim); }
+  .big { padding: 8px 14px; }
+  #build { border-color: var(--accent); }
+
+  /* right: the view */
+  #right { position: relative; min-width: 0; height: 100vh; overflow: hidden; }
+  #view { position: absolute; inset: 0; width: 100%; height: 100%; display: block; touch-action: none; }
+  #view.draw { cursor: crosshair; }
+  #status {
+    position: absolute; left: 14px; top: 14px; max-width: calc(100% - 200px); padding: 8px 14px;
+    background: var(--panel); border: 1px solid var(--line); border-radius: 14px; pointer-events: none;
+  }
+  #status.busy { border-color: var(--accent); color: var(--accent); }
+  #status.error { border-color: #e06c5a; color: #ffb4a8; }
+  #cameras { position: absolute; right: 14px; top: 14px; display: flex; gap: 4px; }
+  #cameras button { padding: 6px 10px; }
+  #download { position: absolute; left: 14px; bottom: 14px; display: flex; gap: 4px; align-items: center; }
+  #download span { margin-right: 6px; }
+  #download button { padding: 8px 14px; }
+  #download[hidden] { display: none; }
+</style>
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js",
+    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"
+  }
+}
+</script>
+</head>
+<body>
+<section id="left">
+  <div class="row">
+    <label for="project">project</label>
+    <select id="project"></select>
+    <button id="project_new" title="New project, as a copy of this one">new</button>
+    <button id="project_save">save</button>
+    <button id="project_rename">rename</button>
+    <button id="project_delete">delete</button>
+  </div>
+  <div class="row">
+    <span class="label">model</span>
+    <button id="model_load" title="A closed STL mesh">load .stl</button>
+    <span id="model_info">none</span>
+    <input id="model_file" type="file" accept=".stl" hidden>
+    <svg id="logo" viewBox="0 0 43.9095293518 31.2528266758" role="img" aria-label="VeryOS logo"><path fill="currentColor" fill-rule="evenodd" d="M 7.7528133542 9.1080260785 L 4.6193976626 1.5432914191 L 0 3.4567085809 L 11.5135290962 31.2528266758 L 32.3960002556 31.2528266758 L 43.9095293518 3.4567085809 L 39.2901316892 1.5432914191 L 36.1567159975 9.1080260785 A 15.6264133379 15.6264133379 0 0 0 7.7528133542 9.1080260785 Z M 30.9694268093 21.2528266758 A 10.6264133379 10.6264133379 0 0 0 21.9547646759 5 A 4.0632066689 4.0632066689 0 0 0 21.9547646759 13.1264133379 A 9.0632066689 9.0632066689 0 0 1 30.9694268093 21.2528266758 Z M 12.9401025425 10 A 9.0632066689 9.0632066689 0 0 0 21.9547646759 18.1264133379 A 4.0632066689 4.0632066689 0 0 1 21.9547646759 26.2528266758 A 10.6264133379 10.6264133379 0 0 1 12.9401025425 10 Z"/></svg>
+  </div>
+  <div id="steps">
+    <button data-step="1" class="current">1 lay flat</button>
+    <button data-step="2">2 curve</button>
+    <button data-step="3">3 result</button>
+  </div>
+
+  <div class="step" id="step1">
+    <h2>Lay the model flat on the bed</h2>
+    <p>Turn the model so its spine runs along the bed, then cut off the bottom to give it a flat face to print on. The model is centred and placed on the bed on its own.</p>
+    <div class="turns"><span>turn X</span><button data-axis="0" data-by="-90">−90°</button><input id="rot0" type="number" step="1" value="0"><button data-axis="0" data-by="90">+90°</button></div>
+    <div class="turns"><span>turn Y</span><button data-axis="1" data-by="-90">−90°</button><input id="rot1" type="number" step="1" value="0"><button data-axis="1" data-by="90">+90°</button></div>
+    <div class="turns"><span>turn Z</span><button data-axis="2" data-by="-90">−90°</button><input id="rot2" type="number" step="1" value="0"><button data-axis="2" data-by="90">+90°</button></div>
+    <div class="slider" title="How much of the model's bottom is cut off"><label for="cut">cut mm</label><input id="cut" type="range" min="0" max="10" step="0.1" value="0"><output id="cut_value"></output></div>
+    <div id="size_info" class="hint"></div>
+  </div>
+
+  <div class="step" id="step2" hidden>
+    <h2>Draw the spine, head to tail</h2>
+    <p>Click on the model to add points; drag a point to move it; Delete removes the last one. The joints are spread evenly along the curve. At each joint the segment towards the tail keeps the ring link, the segment towards the head the loop.</p>
+    <div class="row"><button id="curve_clear">clear curve</button></div>
+    <div class="field"><label for="parts">parts</label><input id="parts" type="number" min="2" max="60" step="1" value="8"><span class="hint">segments; joints = parts − 1</span></div>
+    <div class="field"><label for="flip">flip</label><input id="flip" type="checkbox"><span class="hint">ring link towards the head instead</span></div>
+    <div class="field" title="Scales the whole joint, clearances included. Below 1 the clearances shrink, so print a test first"><label for="scale">joint scale</label><input id="scale" type="number" min="0.5" max="4" step="0.05" value="1"><span class="hint">1 = ring Ø8.2, pivot 5.2 above the bed</span></div>
+    <details>
+      <summary>joint clearances, as in articulation_cutter.scad</summary>
+      <div class="field"><label for="gap">gap</label><input id="gap" type="number" min="0.1" max="2" step="0.05" value="0.4"><span class="hint">between the segments at the pivot</span></div>
+      <div class="field"><label for="bend_angle">bend angle</label><input id="bend_angle" type="number" min="0" max="60" step="1" value="15"><span class="hint">how far a joint bends before the segments touch</span></div>
+      <div class="field"><label for="link_clearance">link</label><input id="link_clearance" type="number" min="0.1" max="2" step="0.05" value="0.4"><span class="hint">around the ring link</span></div>
+      <div class="field"><label for="side_clearance">side</label><input id="side_clearance" type="number" min="0.1" max="4" step="0.1" value="1"><span class="hint">beside the ring link</span></div>
+      <div class="field"><label for="loop_clearance">loop</label><input id="loop_clearance" type="number" min="0.1" max="4" step="0.1" value="1"><span class="hint">around the loop</span></div>
+    </details>
+    <div id="joints"></div>
+  </div>
+
+  <div class="step" id="step3" hidden>
+    <h2>Cut the joints</h2>
+    <p>Each cutter is sized to the model's width and height at its joint, then all are subtracted from the model. The pieces are coloured; there should be as many as parts.</p>
+    <div class="row"><button id="build" class="big">build</button></div>
+    <div id="result_info" class="hint"></div>
+  </div>
+</section>
+<section id="right">
+  <canvas id="view"></canvas>
+  <div id="status"></div>
+  <div id="cameras">
+    <button data-view="iso">iso</button>
+    <button data-view="top">top</button>
+    <button data-view="front">front</button>
+    <button data-view="side">side</button>
+  </div>
+  <div id="download" hidden><span>Download</span><button id="download_result">model .stl</button><button id="download_cutters">cutters .stl</button></div>
+</section>
+<script type="module" src="app.js"></script>
+</body>
+</html>
