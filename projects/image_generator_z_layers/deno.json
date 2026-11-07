@@ -1,0 +1,6 @@
+{
+  "lock": false,
+  "tasks": {
+    "start": "deno run --allow-run --allow-read=. --allow-write=runs,venv --allow-net=127.0.0.1:8767,jsr.io server.js"
+  }
+}

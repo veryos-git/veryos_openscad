@@ -1,0 +1,1 @@
+this webapp should use loop evolve to create cool animations using ai image generator. the command 'deno task start' isntalls and starts everhthing. 
