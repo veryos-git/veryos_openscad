@@ -14,7 +14,7 @@ Sphere lamp for the 62 mm RGBW puck light. Prints in less than half the time of 
 | `readme_hgc.md` | original description |
 | `archive/` | V1 and V2 with their readme; V3's threads do not fit them |
 | `mathematical/` | webapp: patterns from a shader or a map, on V3's sphere |
-| `planets/` | ten planets, as projects of the webapp |
+| `planets/` | fifteen bodies of the solar system, as projects of the webapp, and their spheres |
 
 ## V3 against V2
 

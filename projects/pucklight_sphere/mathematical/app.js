@@ -68,6 +68,17 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord) {
     fragColor = texture(iChannel0, uv - vec2(0.25, 0.0));
 }
 `,
+    lithophane: `// The loaded texture as a lithophane. Black stands out by the full depth, so the
+// dark parts are thick and dark when lit, and the light parts glow: as in the photo.
+//
+// iChannel0 is the texture; its left and right edges wrap around. This turns the
+// middle of the map to the sphere's front: change 0.25 to turn it.
+
+void mainImage(out vec4 fragColor, in vec2 fragCoord) {
+    vec2 uv = fragCoord / iResolution.xy;
+    fragColor = vec4(1.0 - texture(iChannel0, uv - vec2(0.25, 0.0)).rgb, 1.0);
+}
+`,
 };
 
 /* ---- Heightmap ---- */
@@ -719,8 +730,8 @@ $("texture_file").addEventListener("change", async () => {
         return;
     }
     texture_changed = true;
-    // A template left as it is cannot show the texture, but this one can.
-    if (Object.values(templates).includes(code)) {
+    // A template left as it is, without iChannel0, cannot show the texture, but this one can.
+    if (Object.values(templates).includes(code) && !code.includes("iChannel0")) {
         $("template").value = "texture";
         load_code(templates.texture);
     }

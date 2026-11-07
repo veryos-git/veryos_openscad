@@ -4,8 +4,8 @@
   "scale": 12,
   "seed": 3,
   "gamma": 0.45,
-  "depth": 0.8,
-  "relief_from": -36,
+  "depth": 3,
+  "relief_from": -43,
   "columns": 720,
   "stops": [
     {

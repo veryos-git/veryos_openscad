@@ -50,7 +50,7 @@ Webapp: a shader, as in Shadertoy, draws a heightmap, from a formula or a loaded
 
 3D view: drag to orbit, wheel to zoom, cube to jump to a side, arrow to hide the small views.
 
-- A texture on an unedited template switches to the `texture` template. An edited shader stays; the status says if it does not use the texture.
+- A texture on an unedited template that does not read `iChannel0` switches to the `texture` template. An edited shader stays; the status says if it does not use the texture.
 
 ## Shader
 
@@ -65,6 +65,7 @@ Webapp: a shader, as in Shadertoy, draws a heightmap, from a formula or a loaded
 | Map | 2048 x 1024, 8 bit, brightness = 0.299 r + 0.587 g + 0.114 b |
 
 - Without `sphereDir()`, a pattern must repeat from left to right, or it shows a seam on the +x side.
+- `lithophane`: the `texture` template turned over: dark stands out, so it is thick and dark when lit, and the lit sphere looks like the photo.
 - A new template: add a line to `templates` in `app.js`.
 - With a shader error, the status and the editor show the line, and the last good sphere stays.
 
@@ -84,8 +85,8 @@ As `outer_radius()` in the generator, with the map as `surface_height()`: radius
 | From lat | For |
 |---|---|
 | -19.7 | the default, the generator's `fade_bottom` (-19.688): as its formulas |
-| -36 | the planets: Earth keeps most of its south, little overhang, see below |
-| -43 | the slider's lowest; V3's sphere starts at -45. More of the south, more overhang |
+| -36 | Earth keeps most of its south, little overhang at 0.8 mm, see below |
+| -43 | the slider's lowest; V3's sphere starts at -45. More of the south, more overhang. The planets, at 3 mm |
 
 Colour follows the movement: a point that stays gets the colour of 0.0, also the neck and the inside.
 
@@ -105,7 +106,7 @@ The lower half of the mesh, 720 columns, depth 0.8 mm: its steepest face in degr
 | Charon, Vesta, Titan | none | none |
 | Voronoi | 63.3, 199 mm2 | 71.2, 410 mm2 |
 
-- Saved: the planets at -36, Voronoi at -19.7, where it has 45.4, 1 mm2.
+- Saved: the planets at -43 and 3 mm, see `../planets/readme.md`, Spheres; Voronoi at -19.7, where it has 45.4, 1 mm2.
 - More depth makes it worse; what a print tolerates is not tested.
 - More map pixels make it worse too: this is the map of 2048 x 1024. On the first map of 1024 x 512, Mercury had 6 mm2 from -36.
 
@@ -154,4 +155,4 @@ All on V3's sphere, which differs here in `neck_d` only, except the API and inte
 - `vase_sphere`: this is V3's normal sphere, whose inside stays smooth, so thickness makes the pattern when lit.
 - Logo: none on the sphere, as in V3 by default; the screwin and the click base carry it.
 
-Licensed under GPL. The textures in `projects/` are NASA and USGS data, see `../planets/readme.md`.
+Licensed under GPL. The textures in `projects/` are NASA, USGS and Hubble OPAL data, see `../planets/readme.md`.

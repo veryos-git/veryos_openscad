@@ -1,7 +1,8 @@
 # Copyright (C) Jonas Immanuel Frey - Licensed under GPL
-# Downloads the elevation maps of the bodies in planetary_heightmaps.md and makes a
-# project of each for the webapp: ../mathematical/projects/<name>/. A project that
-# already exists stays as it is; delete it to make it again.
+# Downloads the elevation maps of the bodies in planetary_heightmaps.md, and maps of how
+# the giant planets look, and makes a project of each for the webapp:
+# ../mathematical/projects/<name>/. A project that already exists stays as it is;
+# delete it to make it again.
 #
 # Run: python3 make_planet_projects.py [names]
 # Needs numpy, Pillow and curl. The downloads, 5 GB, stay in .gitignored/raw/.
@@ -32,6 +33,7 @@ usgs = "https://planetarymaps.usgs.gov/mosaic/"
 nasa_earth = "https://assets.science.nasa.gov/content/dam/science/esd/eo/images/bmng/topography/"
 nasa_moon = "https://svs.gsfc.nasa.gov/vis/a000000/a004700/a004720/"
 titan_zip = "https://asc-astropedia.s3.us-west-2.amazonaws.com/Titan/Cassini/GTDR/gtdr-data.zip"
+opal = "https://archive.stsci.edu/hlsps/opal/"
 
 
 def stops(*pairs):
@@ -42,6 +44,8 @@ def stops(*pairs):
 # gamma brings out what would stay dark: a body with a few high places gets less than 1.
 # flatten takes out the shape of a flattened body, measured from a sphere: a broad belt
 # around the equator that drowns the craters.
+# light: a colour map of how the body looks, not its height; its project is a lithophane,
+# so dark stands out. trim: degrees cut along the edge of what was seen, see read_light().
 bodies = {
     "Mercury": dict(url=usgs + "Mercury_Messenger_USGS_DEM_Global_665m_v2.tif", gamma=1,
                     stops=stops(("#3d3a36", 0), ("#7a7065", 0.35), ("#b3a595", 0.7), ("#f2ebe0", 1))),
@@ -63,6 +67,18 @@ bodies = {
                   stops=stops(("#33302c", 0), ("#6e675e", 0.35), ("#a89f92", 0.7), ("#f1ece2", 1))),
     "Titan": dict(url=titan_zip, gamma=1,
                   stops=stops(("#3f2508", 0), ("#8a5a14", 0.35), ("#d09a3c", 0.7), ("#f8e3a8", 1))),
+    "Jupiter": dict(url=opal + "cycle32/jupiter/hlsp_opal_hst_wfc3-uvis_jupiter-2025a_f395n-f502n-f631n_v1_globalmap.tif",
+                    gamma=1, light=True, trim=1,
+                    stops=stops(("#f4ecdc", 0), ("#dcc29c", 0.35), ("#ad6c46", 0.7), ("#6e3a28", 1))),
+    "Saturn": dict(url=opal + "cycle32/saturn/hlsp_opal_hst_wfc3-uvis_saturn-2025a_f395n-f502n-f631n_v1_globalmap.tif",
+                   gamma=1, light=True, trim=1,
+                   stops=stops(("#f7eed4", 0), ("#e3d0a2", 0.35), ("#b89c68", 0.7), ("#7a6646", 1))),
+    "Uranus": dict(url=opal + "cycle32/uranus/hlsp_opal_hst_wfc3-uvis_uranus-2024a_f657n-f547m-f467m_v1_globalmap.tif",
+                   gamma=1, light=True, trim=20,
+                   stops=stops(("#eaf6f4", 0), ("#c4e6e4", 0.35), ("#9ed2d4", 0.7), ("#78b8be", 1))),
+    "Neptune": dict(url=opal + "cycle27/neptune/hlsp_opal_hst_wfc3-uvis_neptune-2020a_f467m-f547m-f657n_v1_globalmap.tif",
+                    gamma=1, light=True, trim=20,
+                    stops=stops(("#d6e4f6", 0), ("#94b4e2", 0.35), ("#5078c0", 0.7), ("#2c4a8a", 1))),
 }
 
 
@@ -142,10 +158,35 @@ def average_down(rows, nodata):
     return out
 
 
-def make_texture(name, path, flatten):
+def read_light(path, trim):
+    """How a body looks, from an 8-bit colour map: the brightness, as the app reads it, at
+    the texture's size, not stretched, so a pale planet stays pale. Black was not seen,
+    nor Saturn's rings, edge on. trim degrees along its edge go too: there the limb left
+    coloured fringes. What was not seen gets the mean of what was seen at its latitude,
+    or the nearest: a giant planet's bands run along the latitudes."""
+    rgb = np.asarray(Image.open(path).convert("RGB"), dtype=np.float32)
+    # OPAL's 721 columns run from 0 to 360 degrees, both included.
+    rgb = rgb[:, :rgb.shape[1] // 2 * 2]
+    brightness = rgb @ np.float32([0.299, 0.587, 0.114])
+    seen = brightness > 20
+    for _ in range(round(trim * rgb.shape[1] / 360)):
+        seen &= np.roll(seen, 1, 0) & np.roll(seen, -1, 0) & np.roll(seen, 1, 1) & np.roll(seen, -1, 1)
+    count = seen.sum(axis=1)
+    mean = np.where(seen, brightness, 0).sum(axis=1) / np.maximum(count, 1)
+    rows = np.arange(len(seen))
+    zonal = np.interp(rows, rows[count > 0], mean[count > 0])
+    brightness = np.where(seen, brightness, zonal[:, None]).astype(np.float32)
+    print(f"{path.parent.name}: {rgb.shape[1]} x {rgb.shape[0]}, {100 * seen.mean():.1f}% seen", flush=True)
+    brightness = Image.fromarray(brightness).resize((width, height), Image.BILINEAR)
+    return Image.fromarray((np.asarray(brightness) + 0.5).astype(np.uint8))
+
+
+def make_texture(name, path, body):
+    if body.get("light", False):
+        return read_light(path, body.get("trim", 0))
     rows, nodata = read_titan(path) if path.suffix == ".zip" else read_tiff(path)
     elevation = average_down(rows, nodata)
-    if flatten:
+    if body.get("flatten", False):
         elevation -= np.nanmedian(elevation, axis=1, keepdims=True)
     known = ~np.isnan(elevation)
     low, high = np.percentile(elevation[known], percentiles)
@@ -160,19 +201,21 @@ def make_texture(name, path, flatten):
 
 
 def main(names):
-    code = re.search(r"texture: `(.*?)`", app_js.read_text(), re.S).group(1)
+    templates = {t: re.search(rf"\n    {t}: `(.*?)`", app_js.read_text(), re.S).group(1)
+                 for t in ("texture", "lithophane")}
     for name in names:
         folder = projects_dir / name
         if folder.exists():
             print(f"{name}: the project exists, skipped")
             continue
         body = bodies[name]
-        texture = make_texture(name, download(name, body["url"]), body.get("flatten", False))
+        texture = make_texture(name, download(name, body["url"]), body)
         folder.mkdir(parents=True)
         texture.save(folder / "texture.png", optimize=True)
         # As the app writes it.
-        project = {"template": "texture", "code": code, "scale": 12, "seed": 3, "gamma": body["gamma"], "depth": 0.8,
-                   "relief_from": -36, "columns": 720, "stops": body["stops"], "texture": True}
+        template = "lithophane" if body.get("light", False) else "texture"
+        project = {"template": template, "code": templates[template], "scale": 12, "seed": 3, "gamma": body["gamma"],
+                   "depth": 3, "relief_from": -43, "columns": 720, "stops": body["stops"], "texture": True}
         (folder / "project.json").write_text(json.dumps(project, indent=2) + "\n")
 
 

@@ -1,0 +1,45 @@
+{
+  "template": "lithophane",
+  "code": "// The loaded texture as a lithophane. Black stands out by the full depth, so the\n// dark parts are thick and dark when lit, and the light parts glow: as in the photo.\n//\n// iChannel0 is the texture; its left and right edges wrap around. This turns the\n// middle of the map to the sphere's front: change 0.25 to turn it.\n\nvoid mainImage(out vec4 fragColor, in vec2 fragCoord) {\n    vec2 uv = fragCoord / iResolution.xy;\n    fragColor = vec4(1.0 - texture(iChannel0, uv - vec2(0.25, 0.0)).rgb, 1.0);\n}\n",
+  "scale": 12,
+  "seed": 3,
+  "gamma": 1,
+  "depth": 3,
+  "relief_from": -43,
+  "columns": 720,
+  "stops": [
+    {
+      "t": 0,
+      "color": [
+        234,
+        246,
+        244
+      ]
+    },
+    {
+      "t": 0.35,
+      "color": [
+        196,
+        230,
+        228
+      ]
+    },
+    {
+      "t": 0.7,
+      "color": [
+        158,
+        210,
+        212
+      ]
+    },
+    {
+      "t": 1,
+      "color": [
+        120,
+        184,
+        190
+      ]
+    }
+  ],
+  "texture": true
+}
