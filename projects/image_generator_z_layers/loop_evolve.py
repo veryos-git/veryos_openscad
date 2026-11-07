@@ -20,7 +20,7 @@ import random
 import numpy as np
 from PIL import Image, ImageDraw
 
-SIZE = 512
+SIZE = 256
 
 
 # ---------- 1. initial sketch: a random smooth closed loop ----------
