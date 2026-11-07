@@ -24,8 +24,8 @@ A long claw that slides onto a fingertip, built from OpenSCAD primitives. It is 
 | slit | lets the sleeve open over the finger, on the pad side | `slit_w` wide, whole sleeve |
 | knuckle notch | frees the knuckle at the open end, nail side | gable, 45° roof, `knuckle_notch_h` high |
 | pad opening | the fingertip's pad is free `tip_free` from the tip down | slope at 55°, then the blade's sides taper at 78° |
-| blade | continues the nail `claw_length` past the tip, leans back `claw_lean` | `hull()` of the sleeve's top, half an ellipsoid and a sphere at the tip |
-| scoop | hollows the blade's underside; the blade is `wall` thick at its base, `blade_thickness` at the scoop's round end | the same hull, smaller, swept towards the pad |
+| blade | continues the nail `claw_length` past the tip, bends `claw_bend`° towards the nail side in an arc, leans back `claw_lean` on top | ellipses across a spine, narrowing as √(1 − t), hulled segment by segment |
+| scoop | hollows the blade's underside; the blade is `wall` thick at its base, `blade_thickness` at the scoop's round end ¾ up | smaller ellipses on the same spine, swept towards the pad |
 | facets | `facets` = 6…16 makes the outside a prism, flat on the nail side; 0 is smooth | `$fn` of the outside only; the cavity stays smooth |
 | logo | VeryOS logo, 0.4 deep on the nail side of the sleeve, above the notch | `linear_extrude()` minus an inset frustum |
 
@@ -38,9 +38,9 @@ Measured on `inspiration/other_version/…/obj_4_Top.obj(2).stl`, the set for an
 | sleeve | round, 1.2–1.6 thick, inside Ø13.4 at the open end, Ø12.8 at the top | elliptic 14 × 12 at the open end, × 0.92 at the top, wall 1.6 |
 | pad side | slit 2.5 wide, legs fall away at about 55° from z = 28 | slit 2, legs fall away at 55° from `tip_free` |
 | knuckle | notch 8 high on the nail side | notch 7 high, 45° roof |
-| blade | hollow, 3.5 thick at its back, back bulges 3.5 towards the nail | hollow, scoop ends 3/4 up, back leans 3 |
+| blade | hollow, 3.5 thick at its back, bends towards the nail | hollow, scoop ends ¾ up, bends 20°, leans 2 |
 | surface | hand-sculpted facets | smooth, or a prism with `facets` |
-| size, w × d × h | 18.5 × 23.9 × 73.4 | 17.2 × 17.7 × 65.6 |
+| size, w × d × h | 18.5 × 23.9 × 73.4 | 17.2 × 25.1 × 64.4 |
 
 ## Fit
 

@@ -12,11 +12,12 @@
             "wall": "1.6",
             "slit_w": "2",
             "knuckle_notch_h": "7",
-            "claw_lean": "3",
+            "claw_lean": "2",
             "claw_tip_d": "1.2",
             "facets": "0",
             "logo_width": "7",
-            "logo_depth": "0.4"
+            "logo_depth": "0.4",
+            "claw_bend": "20"
         },
         "index": {
             "finger_w": "14",
@@ -30,11 +31,12 @@
             "wall": "1.6",
             "slit_w": "2",
             "knuckle_notch_h": "7",
-            "claw_lean": "3",
+            "claw_lean": "2",
             "claw_tip_d": "1.2",
             "facets": "0",
             "logo_width": "7",
-            "logo_depth": "0.4"
+            "logo_depth": "0.4",
+            "claw_bend": "20"
         },
         "middle": {
             "finger_w": "14.5",
@@ -48,11 +50,12 @@
             "wall": "1.6",
             "slit_w": "2",
             "knuckle_notch_h": "7",
-            "claw_lean": "3",
+            "claw_lean": "2",
             "claw_tip_d": "1.2",
             "facets": "0",
             "logo_width": "7",
-            "logo_depth": "0.4"
+            "logo_depth": "0.4",
+            "claw_bend": "20"
         },
         "ring": {
             "finger_w": "14",
@@ -66,11 +69,12 @@
             "wall": "1.6",
             "slit_w": "2",
             "knuckle_notch_h": "7",
-            "claw_lean": "3",
+            "claw_lean": "2",
             "claw_tip_d": "1.2",
             "facets": "0",
             "logo_width": "7",
-            "logo_depth": "0.4"
+            "logo_depth": "0.4",
+            "claw_bend": "20"
         },
         "pinky": {
             "finger_w": "12",
@@ -84,11 +88,12 @@
             "wall": "1.6",
             "slit_w": "2",
             "knuckle_notch_h": "7",
-            "claw_lean": "3",
+            "claw_lean": "2",
             "claw_tip_d": "1.2",
             "facets": "0",
             "logo_width": "7",
-            "logo_depth": "0.4"
+            "logo_depth": "0.4",
+            "claw_bend": "20"
         }
     },
     "fileFormatVersion": "1"

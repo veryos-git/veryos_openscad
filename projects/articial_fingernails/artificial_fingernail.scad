@@ -6,9 +6,10 @@
 // - sleeve: a tube over the last phalanx, narrowing towards the tip as the
 //   finger does. A slit along the pad side lets it open over the finger, a
 //   notch on the nail side frees the knuckle.
-// - blade: continues the nail straight up past the fingertip. Its outline is
-//   the hull of half an ellipsoid and a small sphere at the tip, its
-//   underside a scoop: the same, smaller, swept towards the pad.
+// - blade: continues the nail past the fingertip, along a spine that bends
+//   towards the nail side. Its cross sections are ellipses that narrow as
+//   sqrt(1 - t) along the spine, hulled segment by segment; its underside a
+//   scoop: smaller sections on the same spine, swept towards the pad.
 // - opening: the fingertip's pad is free, tip_free from the tip down. The
 //   sleeve's sides fall away at leg_angle from there, the blade's sides
 //   taper on at leg_taper.
@@ -43,8 +44,11 @@ knuckle_notch_h = 7; // [0:0.5:15]
 /* [Blade] */
 // How far the blade reaches past the fingertip.
 claw_length = 40; // [10:1:80]
-// How far the tip leans back, towards the nail side. The blade's back bulges.
-claw_lean = 3; // [0:0.5:15]
+// How far the blade's direction turns towards the nail side from base to
+// tip, degrees: it bends in an arc. Above 45 the tip overhangs when printed.
+claw_bend = 20; // [0:1:60]
+// How far the tip leans back on top of that, towards the nail side, straight.
+claw_lean = 2; // [0:0.5:15]
 // Thickness of the blade at the top of its scoop; at the base it is wall.
 blade_thickness = 2.5; // [1:0.1:6]
 claw_tip_d = 1.2; // [0.4:0.1:4]
@@ -72,15 +76,21 @@ top_b = (finger_h * fingertip_scale + clearance) / 2;
 // The sleeve ends and the blade begins where the pad gets free.
 z_s = finger_length - tip_free;
 blade_len = finger_length + claw_length - z_s;
-// The tip continues the outside of the nail side. The scoop ends round,
-// scoop_end_d wide, a quarter of the blade below the tip, blade_thickness
-// under the blade's back there.
-tip = [0, top_b + wall - claw_tip_d / 2 + claw_lean, z_s + blade_len];
+// The spine is the blade's back, t from 0 at the sleeve's top to 1 at the
+// tip: an arc of blade_len turning claw_bend, plus the lean. spine_angle is
+// its direction off the finger's axis there.
+function spine_angle(t) = claw_bend * t;
+function spine(t) = let (
+        arc = claw_bend == 0 ? [0, blade_len * t]
+            : let (r = blade_len / (claw_bend * PI / 180))
+              [r * (1 - cos(spine_angle(t))), r * sin(spine_angle(t))])
+    [0, top_b + wall + arc[0] + claw_lean * t, z_s + arc[1]];
+// The scoop ends round, scoop_end_d wide, at scoop_top of the blade's length,
+// blade_thickness under the blade's back there.
+scoop_top = 0.75;
 scoop_end_d = 2;
-scoop_end = [0, top_b + wall + 0.75 * claw_lean - blade_thickness - scoop_end_d / 2,
-             z_s + 0.75 * blade_len];
-// Height of the half ellipsoids: higher gives a fuller blade.
-shoulder = 0.6 * blade_len;
+// Segments of the blade; the scoop ends on a segment's border.
+segments = 16;
 // The sleeve's sides fall away at this angle from the horizontal, the
 // blade's sides end along this one above them.
 leg_angle = 55;
@@ -127,22 +137,32 @@ module fingernail() {
     }
 }
 
-module blade() {
-    hull() {
-        translate([0, 0, z_s - eps]) outer_frustum(top_a + wall, top_b + wall, top_a + wall, top_b + wall, eps);
-        translate([0, 0, z_s]) half_ellipsoid((top_a + wall) * out_k, (top_b + wall) * out_k, shoulder, out_fn);
-        translate(tip) sphere(d = claw_tip_d, $fn = 24);
-    }
-}
+// Half axes of the blade's section at t, from the sleeve's outside down to
+// the tip's radius.
+function blade_a(t) = max((top_a + wall) * sqrt(1 - t), claw_tip_d / 2);
+function blade_b(t) = max((top_b + wall) * sqrt(1 - t), claw_tip_d / 2);
 
-// The cavity's top, hulled to the scoop's end, swept towards the pad so that
-// it leaves the blade's underside and cuts its sides off cleanly.
-module scoop() {
-    hull() for (dy = [0, -big]) translate([0, dy, 0]) {
-        translate([0, 0, z_s]) half_ellipsoid(top_a, top_b, shoulder - wall, $fn);
-        translate(scoop_end) sphere(d = scoop_end_d, $fn = 24);
-    }
-}
+module blade()
+    for (i = [0 : segments - 1]) hull() for (t = [i, i + 1] / segments)
+        slice(t, blade_a(t), blade_b(t), 0, out_fn, out_k);
+
+// The scoop's section at t: the cavity's top, narrowing to scoop_end_d at
+// scoop_top, its back thickness(t) under the blade's back.
+function scoop_a(t) = max(top_a * sqrt(1 - t / scoop_top), scoop_end_d / 2);
+function scoop_b(t) = max(top_b * sqrt(1 - t / scoop_top), scoop_end_d / 2);
+function thickness(t) = wall + (blade_thickness - wall) * t / scoop_top;
+
+// Each segment swept towards the pad, so that the scoop leaves the blade's
+// underside and cuts its sides off cleanly.
+module scoop()
+    for (i = [0 : round(scoop_top * segments) - 1]) hull() for (dy = [0, -big], t = [i, i + 1] / segments)
+        translate([0, dy, 0]) slice(t, scoop_a(t), scoop_b(t), thickness(t), $fn, 1);
+
+// An ellipse a by b across the spine at t, its back off under the spine,
+// facing along the spine. k and fn facet it like the sleeve's outside.
+module slice(t, a, b, off, fn, k)
+    translate(spine(t)) rotate([-spine_angle(t), 0, 0]) translate([0, -off - b, 0])
+        rotate(180 / fn) scale([a * k, b * k, 1]) cylinder(r = 1, h = eps, center = true, $fn = fn);
 
 // Everything above a slope that rises at leg_angle from the sleeve's top at
 // the pad to the finger's middle and at leg_taper from there.
@@ -182,13 +202,6 @@ module frustum(a0, b0, a1, b1, h, fn = $fn)
     hull() {
         scale([a0, b0, 1]) cylinder(r = 1, h = eps, $fn = fn);
         translate([0, 0, h - eps]) scale([a1, b1, 1]) cylinder(r = 1, h = eps, $fn = fn);
-    }
-
-// The upper half of an ellipsoid, flat face on z = 0.
-module half_ellipsoid(a, b, h, fn)
-    intersection() {
-        rotate(180 / fn) scale([a, b, h]) sphere(r = 1, $fn = fn);
-        translate([-a, -b, 0]) cube([2 * a, 2 * b, h]);
     }
 
 // The VeryOS logo at the size of veryos_logo.svg, bottom edge on y = 0,
