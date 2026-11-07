@@ -28,7 +28,12 @@
     #error { color: #ff8a65; font-size: 13px; min-height: 1.4em; }
     section h2 { margin: 0 0 10px; font-size: 15px; color: var(--amber); }
     #view { background: var(--panel); border: 1px solid var(--line); border-radius: 6px; padding: 16px; margin-bottom: 20px; }
-    #view img { display: block; max-width: 512px; width: 100%; image-rendering: auto; border-radius: 4px; background: #fff; }
+    #view .images { display: flex; flex-wrap: wrap; gap: 16px; }
+    #view figure { margin: 0; }
+    #view img { display: block; width: 256px; max-width: 100%; border-radius: 4px; background: #fff; }
+    #view figcaption { font-size: 12px; color: var(--dim); margin-top: 4px; }
+    #view h2 { color: var(--text); }
+    #download { font-size: 13px; color: var(--dim); margin-top: 6px; }
     #view .empty { color: var(--dim); }
     progress { width: 100%; max-width: 512px; height: 8px; accent-color: var(--gold); display: block; margin: 10px 0 6px; }
     #status { color: var(--dim); font-size: 13px; }
@@ -63,7 +68,20 @@
         <div id="error"></div>
     </form>
     <div>
-        <section id="view"><div class="empty">no run selected</div></section>
+        <section id="view">
+            <div class="empty">no run selected</div>
+            <div class="run" hidden>
+                <h2 id="view-prompt"></h2>
+                <div class="images">
+                    <figure><img id="view-frame" alt=""><figcaption>latest frame</figcaption></figure>
+                    <figure><img id="view-gif" alt=""><figcaption id="view-gif-caption">animation so far</figcaption></figure>
+                </div>
+                <progress id="view-progress"></progress>
+                <div id="status"></div>
+                <div id="download"><a id="view-download" download style="color:var(--gold)">download gif</a> · <span id="view-folder"></span></div>
+                <div id="log"></div>
+            </div>
+        </section>
         <section><h2>runs</h2><div id="gallery"></div></section>
     </div>
 </main>

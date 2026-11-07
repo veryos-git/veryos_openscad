@@ -16,10 +16,10 @@ const python = windows ? "venv\\Scripts\\python.exe" : "venv/bin/python";
 const params = {
     prompt: {default: "a closed loop line"},
     frames: {default: 60, min: 1, max: 2000},
-    strength: {default: 0.5, min: 0.1, max: 0.95},
+    strength: {default: 0.3, min: 0.1, max: 0.95},
     steps: {default: 4, min: 1, max: 20},
-    noise: {default: 500, min: 0, max: 20000},
-    spread: {default: 25, min: 1, max: 256},
+    noise: {default: 200, min: 0, max: 20000},
+    spread: {default: 15, min: 1, max: 256},
     seed: {default: 0, min: 0, max: 2 ** 31 - 1},
     fps: {default: 8, min: 1, max: 50},
     dry_run: {default: false},
@@ -140,6 +140,7 @@ async function start_run(body) {
         await Promise.all([read(process.stdout), read(process.stderr)]);
         const {code, signal} = await process.status;
         log_file.close();
+        await Deno.remove(`${dir}/animation.gif.tmp`).catch(() => {}); // a stop can interrupt a gif write
         job.done = true;
         if (signal) job.error = "stopped";
         else if (code !== 0) job.error = `loop_evolve.py failed with code ${code}, see the log`;

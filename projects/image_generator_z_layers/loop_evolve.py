@@ -10,7 +10,7 @@ Usage:
     python loop_evolve.py -n 120 -s 0.4 --noise 800 --seed 7
     python loop_evolve.py --dry-run            # test the pipeline without the AI model
 
-Output: frames/frame_0000.png ... and loop_animation.gif
+Output: frames/frame_0000.png ... and loop_animation.gif, which is rewritten after each frame
 """
 import argparse
 import math
@@ -105,11 +105,11 @@ def main():
     p = argparse.ArgumentParser()
     p.add_argument("-n", "--frames", type=int, default=60)
     p.add_argument("-p", "--prompt", default="a closed loop line")
-    p.add_argument("-s", "--strength", type=float, default=0.5,
+    p.add_argument("-s", "--strength", type=float, default=0.3,
                    help="how much each step changes the image (0.2-0.8)")
     p.add_argument("--steps", type=int, default=4)
-    p.add_argument("--noise", type=int, default=500, help="random pixels per frame")
-    p.add_argument("--spread", type=int, default=25, help="max px distance from line")
+    p.add_argument("--noise", type=int, default=200, help="random pixels per frame")
+    p.add_argument("--spread", type=int, default=15, help="max px distance from line")
     p.add_argument("--seed", type=int, default=0)
     p.add_argument("--fps", type=int, default=8)
     p.add_argument("--out-dir", default="frames")
@@ -138,10 +138,18 @@ def main():
         img.save(os.path.join(args.out_dir, f"frame_{i:04d}.png"))
         frames.append(img)
         print(f"frame {i}/{args.frames}")
-
-    frames[0].save(args.gif, save_all=True, append_images=frames[1:],
-                   duration=int(1000 / args.fps), loop=0)
+        # the gif is rewritten while the run goes, so the frames so far can be watched;
+        # less often for long runs, since every rewrite takes all frames
+        if i % max(1, i // 100) == 0 or i == args.frames:
+            save_gif(frames, args.gif, args.fps)
     print(f"Saved {args.gif} ({len(frames)} frames)")
+
+
+def save_gif(frames, path, fps):
+    tmp = path + ".tmp"
+    frames[0].save(tmp, format="GIF", save_all=True, append_images=frames[1:],
+                   duration=int(1000 / fps), loop=0)
+    os.replace(tmp, path)           # never a half-written gif for the viewer
 
 
 if __name__ == "__main__":

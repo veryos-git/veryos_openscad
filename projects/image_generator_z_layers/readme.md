@@ -1,6 +1,6 @@
 # Loop Evolve webapp
 
-Makes animations with a local AI image generator: a random closed loop is sketched, random pixels are sprinkled around the line, SDXL-Turbo redraws the image from a prompt, and the result is the next frame's input. `loop_evolve.py` does this, the webapp runs it and shows the frames while they come.
+Makes animations with a local AI image generator: a random closed loop is sketched, random pixels are sprinkled around the line, SDXL-Turbo redraws the image from a prompt, and the result is the next frame's input. `loop_evolve.py` does this, the webapp runs it and shows the frames while they come. The gif is rewritten after each frame, so it can be watched and downloaded during the run.
 
 ## run
 
@@ -26,10 +26,10 @@ Opens on http://localhost:8767. The first start creates `venv/` and installs the
 | --- | --- | --- |
 | prompt | a closed loop line | what the model draws each frame |
 | frames | 60 | frames after the sketch |
-| strength | 0.5 | how much each frame changes, 0.2 to 0.8 is useful |
+| strength | 0.3 | how much each frame changes, 0.2 for gentle drift, 0.5 and up for drastic changes |
 | steps | 4 | model steps, raised automatically so steps × strength ≥ 1 |
-| noise | 500 | random pixels per frame |
-| spread | 25 | max distance of the noise from the line, px |
+| noise | 200 | random pixels per frame |
+| spread | 15 | max distance of the noise from the line, px |
 | seed | 0 | same seed, same animation |
 | fps | 8 | gif speed |
 | dry run | off | skips the model, only noise, to test quickly |
