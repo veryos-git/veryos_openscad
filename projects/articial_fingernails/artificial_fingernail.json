@@ -1,0 +1,80 @@
+{
+    "parameterSets": {
+        "thumb": {
+            "finger_w": "17.5",
+            "finger_h": "15",
+            "finger_length": "30",
+            "pad_window_w": "11.5",
+            "claw_length": "47",
+            "clearance": "0.4",
+            "wall": "1.6",
+            "ring_length": "6",
+            "claw_angle": "17",
+            "claw_tip_d": "1.2",
+            "logo_width": "7",
+            "logo_depth": "0.4",
+            "fingertip_scale": "0.92"
+        },
+        "index": {
+            "finger_w": "14",
+            "finger_h": "12",
+            "finger_length": "24",
+            "pad_window_w": "9",
+            "claw_length": "38",
+            "clearance": "0.4",
+            "wall": "1.6",
+            "ring_length": "6",
+            "claw_angle": "17",
+            "claw_tip_d": "1.2",
+            "logo_width": "7",
+            "logo_depth": "0.4",
+            "fingertip_scale": "0.92"
+        },
+        "middle": {
+            "finger_w": "14",
+            "finger_h": "12",
+            "finger_length": "24",
+            "pad_window_w": "9",
+            "claw_length": "38.5",
+            "clearance": "0.4",
+            "wall": "1.6",
+            "ring_length": "6",
+            "claw_angle": "17",
+            "claw_tip_d": "1.2",
+            "logo_width": "7",
+            "logo_depth": "0.4",
+            "fingertip_scale": "0.92"
+        },
+        "ring": {
+            "finger_w": "13.5",
+            "finger_h": "11.5",
+            "finger_length": "23",
+            "pad_window_w": "9",
+            "claw_length": "36.5",
+            "clearance": "0.4",
+            "wall": "1.6",
+            "ring_length": "6",
+            "claw_angle": "17",
+            "claw_tip_d": "1.2",
+            "logo_width": "7",
+            "logo_depth": "0.4",
+            "fingertip_scale": "0.92"
+        },
+        "pinky": {
+            "finger_w": "12",
+            "finger_h": "10.5",
+            "finger_length": "21",
+            "pad_window_w": "8",
+            "claw_length": "33",
+            "clearance": "0.4",
+            "wall": "1.6",
+            "ring_length": "6",
+            "claw_angle": "17",
+            "claw_tip_d": "1.2",
+            "logo_width": "7",
+            "logo_depth": "0.4",
+            "fingertip_scale": "0.92"
+        }
+    },
+    "fileFormatVersion": "1"
+}
