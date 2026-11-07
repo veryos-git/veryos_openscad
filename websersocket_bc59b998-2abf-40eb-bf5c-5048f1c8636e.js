@@ -198,9 +198,10 @@ let f_handler = async function(o_request, o_conninfo) {
     // websocket upgrade
 
     if (o_request.headers.get('upgrade') === 'websocket') {
-        let { socket: o_socket, response: o_response } = Deno.upgradeWebSocket(o_request);
+        // read the headers before the upgrade: after it the request is closed
         let s_ip = o_request.headers.get('x-forwarded-for')?.split(',')[0]?.trim()
         || o_conninfo.remoteAddr.hostname;
+        let { socket: o_socket, response: o_response } = Deno.upgradeWebSocket(o_request);
         let o_wsclient = f_o_model_instance(
             o_model__o_wsclient,
             {
