@@ -9,7 +9,7 @@ Print-in-place joint for FDM, as a chain and as a cutter: `model − cutter` tur
 | File | What |
 |---|---|
 | `articulated_chain.scad` | the chain: one link = ring, foot, loop; `n_links` in a row |
-| `articulation_cutter.scad` | the cutter, `part = demo / cutter / keep`; includes the chain for its link |
+| `articulation_cutter.scad` | the cutter, `part = demo / cutter / keep`; standalone, the link is copied from the chain |
 | `most_simple_and_robust_spec.md` | the chain's geometry, from the Onshape original |
 | `readme_hgc.md` | original description |
 | `inspiration/` | Flexi-Cutter by 3Dcrabi, for the idea; its ball joint is not used |

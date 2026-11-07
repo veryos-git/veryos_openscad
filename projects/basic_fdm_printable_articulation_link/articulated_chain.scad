@@ -27,7 +27,6 @@ r_foot_bottom = 0.4;  // Fillet 3: foot bottom perimeter
 
 /* [Chain] */
 n_links = 2;          // Onshape had 2 (Point Pattern 1, one copy at -pitch)
-show_chain = true;    // false when another file includes this one for its modules
 $fn = 64;
 
 // ---------- derived ----------
@@ -115,4 +114,4 @@ module link() {
 }
 
 // Onshape Point Pattern placed the copy at -pitch; link i's loop threads link i+1's ring.
-if (show_chain) for (i = [0 : n_links - 1]) translate([-i * pitch, 0, 0]) link();
+for (i = [0 : n_links - 1]) translate([-i * pitch, 0, 0]) link();
