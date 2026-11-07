@@ -232,20 +232,37 @@ let dragging = null;
 
 const mm_per_px = () => (ortho.top - ortho.bottom) / ortho.zoom / canvas.clientHeight;
 
-// The model's extent across and up at a joint: the vertices within half a link
-// along the curve, measured across it and above the bed.
+// The model's extent across and up at a joint: the triangles within half a link
+// along the curve, in 1 mm bins across it, each triangle filling the bins it spans.
+// The body under the curve reaches as far as the bins are filled from the curve
+// out; a gap of 2 mm ends it, so another part of the model lying beside it, as
+// across a bend, is not measured.
 function local_size(x, y, tx, ty) {
     const half = D.pitch * state.scale / 2 + 2;
     const p = model.placed;
+    const bins = new Map();   // across, rounded to 1 mm -> the highest z there
+    for (let i = 0; i < p.length; i += 9) {
+        let lo = Infinity, hi = -Infinity, z = -Infinity, before = 0, behind = 0;
+        for (let k = 0; k < 9; k += 3) {
+            const dx = p[i + k] - x, dy = p[i + k + 1] - y, along = dx * tx + dy * ty, a = -dx * ty + dy * tx;
+            if (along < -half) before++;
+            if (along > half) behind++;
+            lo = Math.min(lo, a);
+            hi = Math.max(hi, a);
+            z = Math.max(z, p[i + k + 2]);
+        }
+        if (before === 3 || behind === 3 || z < 0) continue;
+        for (let bin = Math.round(lo); bin <= Math.round(hi); bin++) bins.set(bin, Math.max(bins.get(bin) ?? 0, z));
+    }
     let across = 0, up = 0, seen = false;
-    for (let i = 0; i < p.length; i += 3) {
-        const z = p[i + 2];
-        if (z < 0) continue;
-        const dx = p[i] - x, dy = p[i + 1] - y;
-        if (Math.abs(dx * tx + dy * ty) > half) continue;
-        seen = true;
-        across = Math.max(across, Math.abs(-dx * ty + dy * tx));
-        up = Math.max(up, z);
+    for (const dir of [-1, 1]) {
+        for (let bin = 0, gap = 0; gap < 2; bin += dir) {
+            if (!bins.has(bin)) { gap++; continue; }
+            seen = true;
+            gap = 0;
+            across = Math.max(across, Math.abs(bin) + 0.5);
+            up = Math.max(up, bins.get(bin));
+        }
     }
     return {seen, across, up};
 }

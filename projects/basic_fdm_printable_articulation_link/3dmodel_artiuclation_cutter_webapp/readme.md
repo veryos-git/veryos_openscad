@@ -29,7 +29,7 @@ Webapp: load a model, lay it flat on the bed, draw its spine from above, and the
 | | |
 |---|---|
 | geometry | `../articulation_cutter.scad`, see `../readme.md`; clearances under "joint clearances" |
-| cutter size | per joint: the model's width across the curve within half a link, + 2, in 2 mm steps; its height + 1 |
+| cutter size | per joint: the model's width across the curve within half a link, out to the first 2 mm gap so a part beside it, as across a bend, is left alone; + 2, in 2 mm steps; its height + 1 |
 | direction | the cutter's +X, the side that keeps the ring link, points towards the tail; flip turns it |
 | scale | scales the whole joint, clearances included; below 1 print a test first |
 | warnings | per joint: off the model, too low for the ring (9.3 × scale), too narrow for the loop (9.5 × scale), parts shorter than a link (8.6 × scale) |
