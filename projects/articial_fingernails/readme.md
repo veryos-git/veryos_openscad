@@ -1,6 +1,6 @@
 # Artificial fingernail
 
-A claw that slides onto a fingertip, built from OpenSCAD primitives. It is a base model: functional, deliberately plain, made to be decorated in a sculpting program.
+A long claw that slides onto a fingertip, built from OpenSCAD primitives. It is a base model: functional, deliberately plain, made to be decorated in a sculpting program.
 
 ![index preset](preview.png)
 
@@ -14,30 +14,33 @@ A claw that slides onto a fingertip, built from OpenSCAD primitives. It is a bas
 | `artificial_fingernail.json` | Customizer presets: thumb, index, middle, ring, pinky |
 | `stl/` | one STL per preset, the starting point for sculpting |
 | `readme_hgc.md` | original description |
-| `inspiration/` | the demon nails this is modelled after: their STLs and photos of a print |
+| `inspiration/` | photos of a printed demon nail; `other_version/` (not in git) holds the claws this is modelled after |
 
 ## Parts
 
 | Part | Does | Made of |
 |---|---|---|
-| ring | holds the nail on; closed, at the open end | elliptic frustum, `ring_length` long |
-| hood | sleeve over the last phalanx; open on the pad side, grips the fingertip like a C | elliptic frustum, narrows by `fingertip_scale` |
-| cavity top | the fingertip's room; 45° cone, prints without support | scaled `cylinder(r1, r2 = 0)` |
-| claw | `claw_length` past the fingertip, bent `claw_angle` towards the pad | `hull()` of the hood's top and a sphere |
-| logo | VeryOS logo, 0.4 deep on the nail side of the hood | `linear_extrude()` minus an inset frustum |
+| sleeve | tube over the last phalanx, narrows by `fingertip_scale` | elliptic frustum, `wall` thick |
+| slit | lets the sleeve open over the finger, on the pad side | `slit_w` wide, whole sleeve |
+| knuckle notch | frees the knuckle at the open end, nail side | gable, 45° roof, `knuckle_notch_h` high |
+| pad opening | the fingertip's pad is free `tip_free` from the tip down | slope at 55°, then the blade's sides taper at 78° |
+| blade | continues the nail `claw_length` past the tip, leans back `claw_lean` | `hull()` of the sleeve's top, half an ellipsoid and a sphere at the tip |
+| scoop | hollows the blade's underside; the blade is `wall` thick at its base, `blade_thickness` at the scoop's round end | the same hull, smaller, swept towards the pad |
+| facets | `facets` = 6…16 makes the outside a prism, flat on the nail side; 0 is smooth | `$fn` of the outside only; the cavity stays smooth |
+| logo | VeryOS logo, 0.4 deep on the nail side of the sleeve, above the notch | `linear_extrude()` minus an inset frustum |
 
 ## Against the original
 
-Measured on `inspiration/…/obj_3_demon nails INDEX.stl`. The original's five files are one mesh, scaled: thumb 1.24, index 1, middle 1.01, ring 0.965, pinky 0.875. The presets follow these factors.
+Measured on `inspiration/other_version/…/obj_4_Top.obj(2).stl`, the set for an 18 mm middle finger. The first version of this script followed `demon nails` instead, a ring and a hood with a solid cone: it looked like a cone on a tube, see git history.
 
-| | Original, index | This script, index preset |
+| | Original | This script, index preset |
 |---|---|---|
-| ring | tilted about 35°; inner width 13.6 | square to the finger; inner 14.4 × 12.4 |
-| hood | C, open on the pad side; inner width 12.5, wall 1.4 | C, open on the pad side; inner 13.3 × 11.4 at its top, wall 1.6 |
-| claw | hollow shell, open underneath; 38 past the fingertip, 17° down | solid; 38 past the fingertip, 17° down |
-| between ring and hood | a window on the nail side | closed, the logo is there |
-| size, w × d × h | 18.4 × 26.2 × 76.3 | 17.6 × 20.0 × 62.6 |
-| supports | tree supports everywhere | none |
+| sleeve | round, 1.2–1.6 thick, inside Ø13.4 at the open end, Ø12.8 at the top | elliptic 14 × 12 at the open end, × 0.92 at the top, wall 1.6 |
+| pad side | slit 2.5 wide, legs fall away at about 55° from z = 28 | slit 2, legs fall away at 55° from `tip_free` |
+| knuckle | notch 8 high on the nail side | notch 7 high, 45° roof |
+| blade | hollow, 3.5 thick at its back, back bulges 3.5 towards the nail | hollow, scoop ends 3/4 up, back leans 3 |
+| surface | hand-sculpted facets | smooth, or a prism with `facets` |
+| size, w × d × h | 18.5 × 23.9 × 73.4 | 17.2 × 17.7 × 65.6 |
 
 ## Fit
 
@@ -49,18 +52,18 @@ Not printed yet. All fits are untested.
 | `finger_w` | finger's width at that crease |
 | `finger_h` | finger's thickness, nail to pad, at that crease |
 | `fingertip_scale` | finger's width about 7 mm from the tip ÷ `finger_w` |
-| `clearance` | added to width and thickness; default 0.4 |
-| `pad_window_w` | narrower grips harder; must stay below the fingertip's width |
+| `clearance` | added to width and thickness; default 0, the slit lets the sleeve open |
+| `tip_free` | how much of the pad is free; longer frees more, grips less |
 
 ## Print
 
-- Standing as worn: ring on the bed, claw up. No supports: nothing overhangs more than 45°.
+- Standing as worn: open end on the bed, tip up. No supports: nothing overhangs more than 45°.
 - 0.2 mm layers.
-- The thin claw tip prints slowly at minimum layer time; a second part on the bed gives each layer time to cool.
+- The thin blade prints slowly at minimum layer time; a second part on the bed gives each layer time to cool.
 
 ## Sculpting
 
 - Import the STL, voxel remesh it first: OpenSCAD's long thin triangles do not sculpt.
-- Keep the cavity, the ring and the pad window as they are: they set the fit.
+- Keep the cavity, the slit and the pad opening as they are: they set the fit.
 - Keep the walls 1.2 mm or more.
 - Keep 45° or less on overhangs, or plan supports.
