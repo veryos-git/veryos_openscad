@@ -130,7 +130,7 @@ function set_model(bytes, name, fit = false) {
         max[i % 3] = Math.max(max[i % 3], positions[i]);
     }
     const extent = Math.max(max[0] - min[0], max[1] - min[1], max[2] - min[2]);
-    model = {name, bytes, positions, placed: new Float32Array(positions.length), size: [0, 0, 0]};
+    model = {name, bytes, positions, placed: new Float32Array(positions.length), size: [0, 0, 0], extent};
     state.model_scale = fit ? fit_scale(extent) : 1;
     paint_model_scale();
     model_mesh.geometry.dispose();
@@ -588,6 +588,8 @@ function get_state() {
 
 function apply_state(s) {
     for (const key of Object.keys(state)) if (key in s) state[key] = structuredClone(s[key]);
+    // a project saved before the scale existed was drawn on the fitted model
+    if (!("model_scale" in s) && model) state.model_scale = fit_scale(model.extent);
     place_model();   // sets the cut slider's range
     for (const axis of [0, 1, 2]) $(`rot${axis}`).value = state.rotate[axis];
     $("cut").value = state.cut;
