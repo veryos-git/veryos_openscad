@@ -1,0 +1,37 @@
+{
+  "template": "texture",
+  "code": "// The Moon as it looks in the night sky, as a lamp. iChannel0 is its picture, not its height.\n//\n// A thick wall lets less light through, so the picture is inverted: a dark sea stands\n// out, a bright ray stays thin. Light falls exponentially with thickness, so the height\n// is a logarithm, not 1 - brightness. gamma and Depth change the contrast.\n\nconst float brightest = 0.994; // height 0: the thinnest wall\nconst float darkest = 0.451;   // height 1: stands out by the full depth\n\n// Turns the Moon's face up, in degrees. Tycho, at -43, leaves the fade at the neck, and\n// the lamp stands below the eye, so it looks at you. 0 is the Moon's own north.\nconst float tilt = 18.0;\n\n// How soft the picture is. A pixel is 0.15 mm at the equator and each step doubles it, so 1\n// is about what a 0.42 mm line can draw. 0 is sharper, with twice the overhang: readme.md.\nconst float blur = 1.0;\n\nvoid mainImage(out vec4 fragColor, in vec2 fragCoord) {\n    vec3 p = sphereDir(fragCoord / iResolution.xy);\n    float c = cos(radians(tilt));\n    float s = sin(radians(tilt));\n    vec3 m = vec3(p.x, c * p.y - s * p.z, s * p.y + c * p.z);\n\n    // The picture's middle, longitude 0, is on the sphere's front. textureLod, because\n    // the jump in atan at the back would draw a line with texture.\n    vec2 uv = vec2(0.5 + atan(m.x, -m.y) / 6.28318530718, 0.5 + asin(clamp(m.z, -1.0, 1.0)) / 3.14159265359);\n    float v = textureLod(iChannel0, uv, blur).r;\n    fragColor = vec4(vec3(log(v / brightest) / log(darkest / brightest)), 1.0);\n}\n",
+  "scale": 12,
+  "seed": 3,
+  "gamma": 1,
+  "depth": 2,
+  "relief_from": -43,
+  "columns": 1440,
+  "stops": [
+    {
+      "t": 0,
+      "color": [
+        254,
+        254,
+        254
+      ]
+    },
+    {
+      "t": 0.5,
+      "color": [
+        171,
+        171,
+        171
+      ]
+    },
+    {
+      "t": 1,
+      "color": [
+        115,
+        115,
+        115
+      ]
+    }
+  ],
+  "texture": true
+}

@@ -19,6 +19,8 @@ Elevation maps of ten bodies, each a project of the webapp in `../mathematical/`
 
 Not here: Jupiter, Saturn, Uranus, Neptune have no solid surface, so no measured height exists.
 
+Not an elevation map: `moon_light`, the Moon's picture, inverted, as a lamp. See `../mathematical/projects/moon_light/readme.md`, made by `make_moon_light.py`.
+
 All projects: `texture` template, `From lat` -36, depth 0.8 mm, 720 columns. The middle of each map faces the sphere's front, so Pluto and Charon show the side that was measured.
 
 ## How a map is made
