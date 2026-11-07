@@ -236,6 +236,14 @@ async function handle(request) {
     return new Response(await Deno.readFile(file), {headers: {...no_cache, "content-type": `${type}; charset=utf-8`}});
 }
 
+// Ctrl-C must take the run down with the server, or it keeps going as an orphan.
+for (const signal of ["SIGINT", "SIGTERM"]) {
+    Deno.addSignalListener(signal, () => {
+        if (current && !current.done) current.process.kill("SIGTERM");
+        Deno.exit();
+    });
+}
+
 await ensure_venv();
 await Deno.mkdir(runs_dir, {recursive: true});
 Deno.serve({port, hostname: "127.0.0.1"}, handle);
