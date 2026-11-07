@@ -20,7 +20,7 @@ Webapp: load a model, lay it flat on the bed, draw its spine from above, and the
 
 | Step | Do | Happens |
 |---|---|---|
-| 1 lay flat | turn X, Y, Z; cut mm | the model is centred in x, y and stands on the bed; what is below the cut is gone, so the model has a flat face to print on |
+| 1 lay flat | scale; turn X, Y, Z; cut mm | the model is centred in x, y and stands on the bed; what is below the cut is gone, so the model has a flat face to print on. A model over 333 mm or under 10 mm is scaled to fit 333 mm when loaded: it was probably saved in other units. The curve scales along |
 | 2 curve | click points from head to tail; drag to move, Delete removes the last; parts; flip; joint scale | parts − 1 joints spread evenly along the curve; a tick across the model per joint, an arrow towards the segment that keeps the ring link |
 | 3 result | build | each cutter is sized to the model there, all are subtracted with Manifold; the pieces are coloured and counted |
 
@@ -45,7 +45,7 @@ Webapp: load a model, lay it flat on the bed, draw its spine from above, and the
 | Update | rename | the folder moves |
 | Delete | delete, asks first | the folder goes |
 
-- A project holds the turns, the cut, the curve and the joint settings, and the model as loaded.
+- A project holds the scale, the turns, the cut, the curve and the joint settings, and the model as loaded.
 - API: `GET /api/projects`, and `GET`, `POST`, `PUT`, `PATCH`, `DELETE /api/projects/<name>`; `PUT`, `DELETE /api/projects/<name>/model`.
 - The server writes to `projects/` only, listens on localhost only, and refuses requests from other web pages.
 

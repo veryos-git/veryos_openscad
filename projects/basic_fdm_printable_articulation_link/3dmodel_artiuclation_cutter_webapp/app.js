@@ -17,7 +17,7 @@ const next_frame = () => new Promise((resolve) => requestAnimationFrame(() => se
 // What a project saves. The curve is in the placed model's frame: the model centred
 // in x and y, the bed at z = 0.
 const state = {
-    rotate: [0, 0, 0], cut: 0,
+    rotate: [0, 0, 0], cut: 0, model_scale: 1,
     parts: 8, flip: false, scale: 1,
     gap: 0.4, bend_angle: 15, link_clearance: 0.4, side_clearance: 1, loop_clearance: 1,
     curve: [],
@@ -110,9 +110,28 @@ animate();
 
 /* ---- Model ---- */
 
-function set_model(bytes, name) {
+// A model larger than fit_mm or smaller than small_mm was probably saved in other
+// units: it is scaled to fit a cube of fit_mm when loaded.
+const fit_mm = 333, small_mm = 10;
+const fit_scale = (extent) => extent > fit_mm || extent < small_mm ? fit_mm / extent : 1;
+const format_scale = (k) => k >= 100 ? k.toFixed(0) : k.toPrecision(3);
+
+function paint_model_scale() {
+    $("model_scale").value = Math.log10(state.model_scale).toFixed(2);
+    $("model_scale_value").value = format_scale(state.model_scale);
+}
+
+function set_model(bytes, name, fit = false) {
     const positions = parse_stl(bytes);
+    const min = [Infinity, Infinity, Infinity], max = [-Infinity, -Infinity, -Infinity];
+    for (let i = 0; i < positions.length; i++) {
+        min[i % 3] = Math.min(min[i % 3], positions[i]);
+        max[i % 3] = Math.max(max[i % 3], positions[i]);
+    }
+    const extent = Math.max(max[0] - min[0], max[1] - min[1], max[2] - min[2]);
     model = {name, bytes, positions, placed: new Float32Array(positions.length), size: [0, 0, 0]};
+    state.model_scale = fit ? fit_scale(extent) : 1;
+    paint_model_scale();
     model_mesh.geometry.dispose();
     model_mesh.geometry = new THREE.BufferGeometry();
     model_mesh.geometry.setAttribute("position", new THREE.BufferAttribute(model.placed, 3));
@@ -123,11 +142,12 @@ function set_model(bytes, name) {
     clear_result();
 }
 
-// Turns the model, centres it in x and y and puts it on the bed, the cut below it.
+// Scales and turns the model, centres it in x and y and puts it on the bed, the
+// cut below it.
 function place_model() {
     if (!model) return;
     const euler = new THREE.Euler(...state.rotate.map((d) => THREE.MathUtils.degToRad(d)), "XYZ");
-    const e = new THREE.Matrix4().makeRotationFromEuler(euler).elements;
+    const e = new THREE.Matrix4().makeRotationFromEuler(euler).elements.map((v) => v * state.model_scale);
     const src = model.positions, out = model.placed;
     const min = [Infinity, Infinity, Infinity], max = [-Infinity, -Infinity, -Infinity];
     for (let i = 0; i < src.length; i += 3) {
@@ -160,9 +180,9 @@ $("model_file").addEventListener("change", async () => {
     const file = $("model_file").files[0];
     if (!file) return;
     try {
-        set_model(await file.arrayBuffer(), file.name);
+        set_model(await file.arrayBuffer(), file.name, true);
         model_changed = true;
-        show_status(`loaded ${file.name}`);
+        show_status(`loaded ${file.name}` + (state.model_scale === 1 ? "" : `, scaled × ${format_scale(state.model_scale)} to fit ${fit_mm} mm`));
     } catch (error) {
         show_status(error.message, "error");
     }
@@ -189,6 +209,15 @@ for (const axis of [0, 1, 2]) {
 $("cut").addEventListener("input", () => {
     state.cut = +$("cut").value;
     $("cut_value").value = state.cut.toFixed(1);
+    place_model();
+    paint_project();
+});
+// The curve scales along, so a drawn spine stays on the model.
+$("model_scale").addEventListener("input", () => {
+    const k = Math.pow(10, +$("model_scale").value);
+    state.curve = state.curve.map(([x, y]) => [x * k / state.model_scale, y * k / state.model_scale]);
+    state.model_scale = k;
+    $("model_scale_value").value = format_scale(k);
     place_model();
     paint_project();
 });
@@ -482,6 +511,7 @@ function apply_state(s) {
     for (const axis of [0, 1, 2]) $(`rot${axis}`).value = state.rotate[axis];
     $("cut").value = state.cut;
     $("cut_value").value = state.cut.toFixed(1);
+    paint_model_scale();
     for (const key of ["parts", "scale", ...joint_keys]) $(key).value = state[key];
     $("flip").checked = state.flip;
     clear_result();
