@@ -122,5 +122,5 @@ Deno.serve({
     const url = new URL(request.url);
     return url.pathname === "/api/projects" || url.pathname.startsWith("/api/projects/")
         ? handle_api(request, url)
-        : serveDir(request, {quiet: true});
+        : serveDir(request, {quiet: true, headers: ["cache-control: no-cache"]});   // edits show on a plain reload
 });
