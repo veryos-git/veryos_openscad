@@ -23,6 +23,7 @@ Webapp: load a model, lay it flat on the bed, draw its spine from above, and the
 | 1 lay flat | scale; turn X, Y, Z; cut mm | the model is centred in x, y and stands on the bed; what is below the cut is gone, so the model has a flat face to print on. A model over 333 mm or under 10 mm is scaled to fit 333 mm when loaded: it was probably saved in other units. The curve scales along |
 | 2 curve | click points from head to tail; drag to move, Delete removes the last; parts; flip; joint scale | parts − 1 joints spread evenly along the curve; a tick across the model per joint, an arrow towards the segment that keeps the ring link |
 | 3 result | build | each cutter is sized to the model there, all are subtracted with Manifold; the pieces are coloured and counted |
+| layer slider | right of the view, steps 1 and 3 | shows the model, or the pieces, up to that height, the 0.2 mm layer there sliced solid with Manifold, as a slicer does; at the top everything shows |
 
 ## Joint
 

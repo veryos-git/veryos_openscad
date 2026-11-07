@@ -69,6 +69,12 @@
   #status.error { border-color: #e06c5a; color: #ffb4a8; }
   #cameras { position: absolute; right: 14px; top: 14px; display: flex; gap: 4px; }
   #cameras button { padding: 6px 10px; }
+  #layers {
+    position: absolute; right: 14px; top: 64px; bottom: 64px; display: flex; flex-direction: column; align-items: center; gap: 6px;
+  }
+  #layers[hidden] { display: none; }
+  #layers span, #layers output { color: var(--dim); font-size: 12px; white-space: nowrap; }
+  #layer { flex: 1; min-height: 120px; width: auto; writing-mode: vertical-lr; direction: rtl; }
   #download { position: absolute; left: 14px; bottom: 14px; display: flex; gap: 4px; align-items: center; }
   #download span { margin-right: 6px; }
   #download button { padding: 8px 14px; }
@@ -151,6 +157,7 @@
     <button data-view="front">front</button>
     <button data-view="side">side</button>
   </div>
+  <div id="layers" hidden title="Shows the model up to this height, the layer there sliced solid"><span>layer</span><input id="layer" type="range" min="0" max="10" step="0.2" value="10"><output id="layer_value"></output></div>
   <div id="download" hidden><span>Download</span><button id="download_result">model .stl</button><button id="download_cutters">cutters .stl</button></div>
 </section>
 <script type="module" src="app.js"></script>

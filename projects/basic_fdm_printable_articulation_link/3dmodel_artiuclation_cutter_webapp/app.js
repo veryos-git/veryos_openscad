@@ -1,7 +1,8 @@
 // Copyright (C) Jonas Immanuel Frey - Licensed under GPL
 // The articulation model creator: load an STL, lay it flat on the bed, draw its
 // spine from the top, cut the joints of ../articulation_cutter.scad along it with
-// Manifold, download the pieces.
+// Manifold, download the pieces. A layer slider shows the model or the pieces
+// up to a height, with that layer sliced solid, as a slicer does.
 
 import * as THREE from "three";
 import {OrbitControls} from "three/addons/controls/OrbitControls.js";
@@ -167,6 +168,8 @@ function place_model() {
     model_mesh.geometry.computeBoundingSphere();
     $("cut").max = Math.max(0, max[2] - min[2] - 1).toFixed(1);
     $("size_info").textContent = `on the bed: ${model.size.map((s) => s.toFixed(1)).join(" × ")} mm`;
+    $("layer").max = $("layer").value = model.size[2].toFixed(1);
+    update_layers();
     if (bed) scene.remove(bed);
     const extent = Math.ceil((Math.max(model.size[0], model.size[1]) + 40) / 20) * 20;
     bed = new THREE.GridHelper(extent, extent / 10, 0x4a5a5a, 0x2a3434);
@@ -411,10 +414,61 @@ function set_step(n) {
     result_group.visible = n === 3;
     overlay.visible = n !== 3;
     $("download").hidden = !(n === 3 && built);
-    if (n === 2) { frame_top(); update_curve(); }
+    $("layers").hidden = n === 2 || !model;
+    layer_group.visible = n !== 2;
+    if (n === 2) { renderer.clippingPlanes = []; frame_top(); update_curve(); }
+    else update_layers();
 }
 for (const button of $("steps").children) button.addEventListener("click", () => set_step(+button.dataset.step));
 for (const button of $("cameras").children) button.addEventListener("click", () => look(button.dataset.view));
+
+/* ---- Layers ---- */
+
+// The layer slider, at the top: everything shows. Lower: what is above z is
+// clipped away and the layer ending at z is drawn solid, sliced with Manifold:
+// the model, or in step 3 the pieces in their colours.
+const layer_height = 0.2;
+const layer_plane = new THREE.Plane(new THREE.Vector3(0, 0, -1), 0);
+const layer_group = new THREE.Group();
+scene.add(layer_group);
+let result_pieces = [];   // the pieces as Manifolds, kept for the layers
+let layers_busy = false, layers_again = false;
+
+function layer_bodies() {
+    if (step === 3 && result_pieces.length) return result_pieces.map((piece, i) => [piece, piece_color(i)]);
+    return [[model_manifold(), model_material.color]];
+}
+
+async function update_layers() {
+    if (layers_busy) { layers_again = true; return; }
+    for (const mesh of layer_group.children) { mesh.geometry.dispose(); mesh.material.dispose(); }
+    layer_group.clear();
+    const z = +$("layer").value, top = +$("layer").max;
+    $("layer_value").value = `${z.toFixed(1)} mm`;
+    const slicing = model && z < top;
+    renderer.clippingPlanes = slicing ? [layer_plane] : [];
+    layer_plane.constant = z + 0.01;
+    if (!slicing) return;
+    layers_busy = true;
+    try {
+        if (!wasm) await ensure_manifold();
+        const preparing = !(step === 3 && result_pieces.length) && placed_key !== model_key();
+        if (preparing) { show_status("preparing the model for slicing...", "busy"); await next_frame(); }
+        for (const [body, color] of layer_bodies()) {
+            const slab = body.slice(z).extrude(layer_height, 1, 0, 1, false).translate([0, 0, z - layer_height]);
+            layer_group.add(new THREE.Mesh(geometry_of(slab),
+                new THREE.MeshStandardMaterial({color: color.clone().offsetHSL(0, 0, 0.15), roughness: 0.7})));
+            slab.delete();
+        }
+        if (preparing) show_status("ready to slice");
+    } catch (error) {
+        show_status(error.message, "error");
+    } finally {
+        layers_busy = false;
+        if (layers_again) { layers_again = false; update_layers(); }
+    }
+}
+$("layer").addEventListener("input", update_layers);
 
 /* ---- Cutting ---- */
 
@@ -442,8 +496,9 @@ function get_lib() {
 }
 
 // The placed model as a Manifold, the part above the bed. Kept until the placement changes.
+const model_key = () => JSON.stringify([model.name, model.positions.length, state.model_scale, state.rotate, state.cut]);
 function model_manifold() {
-    const key = JSON.stringify([model.name, model.positions.length, state.rotate, state.cut]);
+    const key = model_key();
     if (key !== placed_key) {
         placed_manifold?.delete();
         placed_manifold = manifold_of_soup(wasm, model.placed).trimByPlane([0, 0, 1], 0);
@@ -454,23 +509,29 @@ function model_manifold() {
 
 function clear_result() {
     result_group.clear();
+    for (const piece of result_pieces) piece.delete();
+    result_pieces = [];
     result_mesh = cutters_mesh = null;
     $("result_info").textContent = "";
     if (step === 3) set_step(3);
 }
 
+const piece_color = (i) => new THREE.Color().setHSL((i * 0.618) % 1, 0.5, 0.6);
+
+function geometry_of(manifold) {
+    const mesh = manifold.getMesh();
+    const geometry = new THREE.BufferGeometry();
+    geometry.setAttribute("position", new THREE.BufferAttribute(mesh.vertProperties, mesh.numProp));
+    geometry.setIndex(new THREE.BufferAttribute(mesh.triVerts, 1));
+    const flat = geometry.toNonIndexed();
+    flat.computeVertexNormals();
+    return flat;
+}
+
 function show_pieces(pieces) {
     result_group.clear();
-    pieces.forEach((piece, i) => {
-        const mesh = piece.getMesh();
-        const geometry = new THREE.BufferGeometry();
-        geometry.setAttribute("position", new THREE.BufferAttribute(mesh.vertProperties, mesh.numProp));
-        geometry.setIndex(new THREE.BufferAttribute(mesh.triVerts, 1));
-        const flat = geometry.toNonIndexed();
-        flat.computeVertexNormals();
-        const color = new THREE.Color().setHSL((i * 0.618) % 1, 0.5, 0.6);
-        result_group.add(new THREE.Mesh(flat, new THREE.MeshStandardMaterial({color, roughness: 0.7})));
-    });
+    pieces.forEach((piece, i) => result_group.add(new THREE.Mesh(geometry_of(piece),
+        new THREE.MeshStandardMaterial({color: piece_color(i), roughness: 0.7, side: THREE.DoubleSide}))));
 }
 
 async function build() {
@@ -489,6 +550,9 @@ async function build() {
         const result = Manifold.difference(model_manifold(), all);
         const pieces = result.decompose();
         show_pieces(pieces);
+        for (const piece of result_pieces) piece.delete();
+        result_pieces = pieces;
+        update_layers();
         result_mesh = result.getMesh();
         cutters_mesh = all.getMesh();
         const ok = pieces.length === state.parts;
