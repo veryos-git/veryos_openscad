@@ -54,6 +54,6 @@ The walls and the lid's edge carry the ribs of the XY table (`current_setup/xy_t
 | `rail_len`, `rail_w` | 84 × 10 | measure the rail: half size breadboard rails are about 84, full size about 165 |
 | `mod_h`, `usb_h` | 3.1, 3.3 | height of the module's can and of the USB-C shells above the board: the lid's pillars stop 0.2 above them, measure yours |
 | `esp_under` | 20 | room under the board for the dupont housings on the pins: 2.5 header, 14 housing, wire bend |
-| `screw_hole` | 2.6 | M3 thread forming, untested, see `lessons_learned.md` |
+| `screw_hole` | 2.8 | M3 thread forming, 0.6 chamfer at the entry, untested, see `lessons_learned.md` |
 
 Board outline, headers, module and USB-C ports come from the DXF (62.74 × 25.4; headers 6.44 to 62.82 under both edges; module 18 wide, 6.3 past the antenna end; ports centred 6.0 and 19.4 from the left edge).

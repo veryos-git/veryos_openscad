@@ -45,9 +45,10 @@ inner_h = 30;
 outer_corner_r = 3;
 // Corner post for the lid screws, square
 post = 7;
-// M3 thread forming, untested
-screw_hole = 2.6;
+// M3 thread forming, untested; 45 degree chamfer at the entry
+screw_hole = 2.8;
 screw_hole_depth = 12;
+screw_chamfer = 0.6;
 // Clearance hole and counterbore for M3 pan heads in the lid
 lid_hole = 3.4;
 counterbore_d = 6.5;
@@ -223,8 +224,7 @@ module base() {
                 rail_tray();
             }
         }
-        for (p = post_centers) translate([p[0], p[1], floor_t + inner_h - screw_hole_depth])
-            cylinder(d = screw_hole, h = screw_hole_depth + 1);
+        for (p = post_centers) translate([p[0], p[1], floor_t + inner_h]) screw_hole_cut(screw_hole_depth);
         // USB-C window
         translate([usb_cx - usb_window_w / 2, outer_y - wall - 1, usb_cz - usb_window_h / 2])
             cube([usb_window_w, wall + rib_out + 2, usb_window_h]);
@@ -281,8 +281,14 @@ module uln_standoffs() {
                    (uln_y0 + uln_y1) / 2 + dy * uln_hole_dy / 2, 0])
             difference() {
                 cylinder(d = uln_standoff_d, h = uln_standoff_h);
-                translate([0, 0, -2]) cylinder(d = screw_hole, h = uln_standoff_h + 3);
+                translate([0, 0, uln_standoff_h]) screw_hole_cut(uln_standoff_h + 2);
             }
+}
+
+// Thread forming hole, depth deep from z = 0 downwards, chamfered at the top.
+module screw_hole_cut(depth) {
+    translate([0, 0, -depth]) cylinder(d = screw_hole, h = depth + 1);
+    translate([0, 0, -screw_chamfer]) cylinder(d1 = screw_hole, d2 = screw_hole + 2 * screw_chamfer + 2, h = screw_chamfer + 1);
 }
 
 module rail_tray() {
