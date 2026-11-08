@@ -10,12 +10,20 @@ Box for the electronics of the open microscope motorization: an ESP32-S3-DevKitC
 
 | File | What |
 |---|---|
-| `omm_enclosureV1.scad` | the generator, standalone, no libraries. `version` at its top is engraved in every part with the project's name; bump it with the file name |
-| `omm_enclosureV1_base.stl`, `omm_enclosureV1_lid.stl` | exported from the generator with the brand font, for slicers and viewers without DejaVu |
+| `omm_enclosureV2.scad` | the generator, standalone, no libraries. `version` at its top is engraved in every part with the project's name; bump it with the file name |
+| `omm_enclosureV2_base.stl`, `omm_enclosureV2_lid.stl` | exported from the generator with the brand font, for slicers and viewers without DejaVu |
+| `archive/` | every earlier version, script and STLs. Each change to the generator makes a new version file; the old one stays |
 | `readme_hgc.md` | original goal |
 | `current_setup/` | photos of the setup it replaces |
 | `image*.png` | the boards, with the ULN2003 drawing |
 | `DXF_ESP32-S3-DevKitC-1_V1.1_20220429.dxf` | Espressif's board drawing, source of the ESP32 numbers in the generator |
+
+## V2 against V1
+
+| Asked for | V1 | V2 |
+|---|---|---|
+| Better fit for the power rail | plain tray 84 × 10, 3 high, 0.4 clearance | the pocket of the printed driver board holder, 82.1 × 9.7, 8 deep, with tab, notch and side jogs |
+| Screw holes | 2.8 | 2.7 |
 
 ## Layout
 
