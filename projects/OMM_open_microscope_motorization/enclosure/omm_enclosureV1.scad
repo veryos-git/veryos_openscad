@@ -33,7 +33,8 @@ part = "print_layout"; // [print_layout:Base and lid on the bed,assembly:Assembl
 version = "V1";
 engraving = str("VeryOS OMM enclosure ", version);
 text_size = 6;
-text_font = "Liberation Sans:style=Bold";
+// The brand's heading font, see the brand section of the workspace readme
+text_font = "DejaVu Sans Mono:style=Bold";
 
 /* [Box] */
 wall = 2.4;
