@@ -8,6 +8,9 @@ Diameter clearance = added to the hole diameter, not per side.
 
 | Date | Fit | Part | Hole | Result | Printer / material |
 |---|---|---|---|---|---|
+| 2026-11-08 | M3 thread forming, lid screws and driver standoffs | OMM enclosure V1 | 2.6 | untested | ? |
+| 2026-11-08 | ESP32-S3-DevKitC-1 in its cradle, per side | OMM enclosure V1 | 0.4 | untested | ? |
+| 2026-11-08 | Lid lip inside the walls, per side | OMM enclosure V1 | 0.3 | untested | ? |
 | 2026-11-06 | Puck's free play in the holder, axial gap, not a diameter | pucklight_sphere screwin, fixed | 0.4 at the screw's stop, 1.0 flush, at 0.2 mm layers | untested | ? |
 | 2026-11-06 | Puck's free play in the holder, axial gap, not a diameter | pucklight_sphere V1 screwin | 0.1 at the screw's stop, 0.7 flush; as sliced at 0.28 mm layers 0.04, 0.64 | too tight: the puck cannot move when screwed in all the way | Snapmaker U1, 0.28 mm, per v1_snapmaker.3mf |
 | 2026-11-01 | 6 × 2 mm disc magnet, blind bore | babywipesbox V2–V4 | 6.3 (+0.3) | untested; magnets are glued, gap holds glue | ? |
