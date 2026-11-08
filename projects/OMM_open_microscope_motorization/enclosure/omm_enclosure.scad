@@ -16,6 +16,9 @@
 // for the motor cable. The lid's tabs close the slots down to the cable and
 // only fit one way round, so the pillars always land where they should.
 // Front wall (y = 0): the power rail's tray.
+// The outside of the walls and the lid's edge carry the ribs of the OMM XY
+// table (measured in OMM_v2p2.3mf): stadiums 4 wide, 3 proud, 15 apart. They
+// match the table and give the first layer more edge to hold on to.
 //
 // Print the base as is, the lid top face down (the pillars and tabs point up).
 // Origin: outer front left bottom corner of the base. Units: mm.
@@ -43,6 +46,16 @@ counterbore_h = 1.5;
 lip_w = 1.2;
 lip_h = 2;
 lip_gap = 0.3;
+
+/* [Ribs] */
+// Vertical ribs on the outside of the walls, as on the XY table: stadiums of
+// rib_r radius with a rib_flat long flat, rib_out proud of the wall
+rib_r = 4;
+rib_flat = 5.4;
+rib_out = 3;
+rib_pitch = 15;
+// Least distance from a corner to a rib's end
+rib_margin = 5;
 
 /* [ESP32-S3-DevKitC-1] */
 // Board coordinates as in the DXF: x from the left edge, y from the USB-C end.
@@ -143,12 +156,13 @@ usb_cx = esp_x + esp_w / 2;
 usb_cz = floor_t + esp_top + 1.65;
 cable_slot_x = [for (k = [0 : uln_n - 1]) uln_x0 + k * uln_pitch + uln_jst_x];
 
-echo(str("outer ", outer_x, " x ", outer_y, " x ", outer_h, " mm"));
+echo(str("outer ", outer_x, " x ", outer_y, " x ", outer_h, " mm, over the ribs ",
+         outer_x + 2 * rib_out, " x ", outer_y + 2 * rib_out));
 
 // ---- parts ----
 if (part == "print_layout") {
     base();
-    translate([outer_x + 10, outer_y, lid_t]) rotate([180, 0, 0]) lid();
+    translate([outer_x + 2 * rib_out + 10, outer_y, lid_t]) rotate([180, 0, 0]) lid();
 } else if (part == "assembly") {
     base();
     translate([0, 0, floor_t + inner_h + 25]) lid();
@@ -166,11 +180,29 @@ module rounded_rect(x, y, r) {
     hull() for (px = [r, x - r], py = [r, y - r]) translate([px, py]) circle(r = r);
 }
 
+// The walls' outside with the ribs. Each side gets as many ribs as fit with
+// rib_margin to the corners, centred on the side.
+module outline() {
+    rounded_rect(outer_x, outer_y, outer_corner_r);
+    for (s = [[0, 0, 0, outer_x], [outer_x, 0, 90, outer_y],
+              [outer_x, outer_y, 180, outer_x], [0, outer_y, 270, outer_y]])
+        translate([s[0], s[1]]) rotate(s[2]) ribs(s[3]);
+}
+
+// Ribs along a side from the origin along +x, outside toward -y.
+module ribs(len) {
+    rib_len = rib_flat + 2 * rib_r;
+    n = floor((len - 2 * rib_margin - rib_len) / rib_pitch) + 1;
+    x0 = (len - (n - 1) * rib_pitch - rib_len) / 2 + rib_r;
+    for (i = [0 : n - 1]) hull() for (dx = [0, rib_flat])
+        translate([x0 + i * rib_pitch + dx, rib_r - rib_out]) circle(r = rib_r);
+}
+
 module base() {
     difference() {
         union() {
             difference() {
-                linear_extrude(outer_h - lid_t) rounded_rect(outer_x, outer_y, outer_corner_r);
+                linear_extrude(outer_h - lid_t) outline();
                 translate([wall, wall, floor_t]) cube([inner_x, inner_y, inner_h + 1]);
             }
             for (p = post_centers) translate([p[0] - post / 2, p[1] - post / 2, floor_t - eps])
@@ -185,11 +217,11 @@ module base() {
             cylinder(d = screw_hole, h = screw_hole_depth + 1);
         // USB-C window
         translate([usb_cx - usb_window_w / 2, outer_y - wall - 1, usb_cz - usb_window_h / 2])
-            cube([usb_window_w, wall + 2, usb_window_h]);
+            cube([usb_window_w, wall + rib_out + 2, usb_window_h]);
         // motor cable slots
         for (x = cable_slot_x)
             translate([x - cable_slot_w / 2, outer_y - wall - 1, floor_t + inner_h - cable_slot_h])
-                cube([cable_slot_w, wall + 2, cable_slot_h + 1]);
+                cube([cable_slot_w, wall + rib_out + 2, cable_slot_h + 1]);
         // feet
         for (x = [feet_inset, outer_x - feet_inset], y = [feet_inset, outer_y - feet_inset])
             translate([x, y, -1]) cylinder(d = feet_d, h = feet_depth + 1);
@@ -249,7 +281,7 @@ module rail_tray() {
 module lid() {
     difference() {
         union() {
-            linear_extrude(lid_t) rounded_rect(outer_x, outer_y, outer_corner_r);
+            linear_extrude(lid_t) outline();
             // lip
             translate([0, 0, -lip_h]) linear_extrude(lip_h + eps) difference() {
                 translate([wall + lip_gap, wall + lip_gap])

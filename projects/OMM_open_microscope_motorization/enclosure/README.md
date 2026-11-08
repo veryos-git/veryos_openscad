@@ -18,7 +18,9 @@ Box for the electronics of the open microscope motorization: an ESP32-S3-DevKitC
 
 ## Layout
 
-Outer 156.45 × 76.6 × 36 mm. Front wall y = 0, cables leave through the back wall.
+Outer 156.45 × 76.6 × 36 mm over the walls, 162.45 × 82.6 over the ribs. Front wall y = 0, cables leave through the back wall.
+
+The walls and the lid's edge carry the ribs of the XY table (`current_setup/xy_table_omm/`), measured in `OMM_v2p2.3mf`: stadiums of radius 4 with a 5.4 flat, 3 proud of the wall, 15 apart, centred on each side. They match the table and give the first layer more edge.
 
 | Part | Where | Held by |
 |---|---|---|
