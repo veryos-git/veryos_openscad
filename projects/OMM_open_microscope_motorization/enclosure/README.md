@@ -27,7 +27,7 @@ The walls and the lid's edge carry the ribs of the XY table (`current_setup/xy_t
 |---|---|---|
 | ESP32-S3-DevKitC-1 | left, along the depth, USB-C ports at the back wall | lies 20 mm above the floor on a bar between its headers at the antenna end and on two pads between the USB-C legs, so the jumper wires fit on the pins below; an end stop under the module's overhang, posts against the headers' ends and beside them; the lid's four pillars press on the module's can and the USB-C shells, the only flat spots on top |
 | 3 × ULN2003 | row at the right, JST plugs toward the back, IN pins toward the ESP32 | Ø6 × 5 standoffs on the 29.6 × 26.6 hole pattern, M3 × 6 thread forming |
-| power rail | along the front wall, under the drivers | tray, 3 mm walls around it, adhesive back |
+| power rail | along the front wall, under the drivers | the pocket of the driver board holder in `current_setup/`, measured in its STL: 82.1 × 9.7, 8 deep, with a tab for the rail's chaining slot, a notch for its tab and the side jogs for its dovetails, so it fits one way round only |
 | lid | 4 × M3 × 10 into the corner posts | lip inside the walls, tabs in the cable slots: fits one way round only |
 
 | Opening | Where | Size |
@@ -51,9 +51,9 @@ The walls and the lid's edge carry the ribs of the XY table (`current_setup/xy_t
 
 | What | Set to | Note |
 |---|---|---|
-| `rail_len`, `rail_w` | 84 × 10 | measure the rail: half size breadboard rails are about 84, full size about 165 |
+| `rail_len`, `rail_w` | 82.1 × 9.7 | the pocket of your printed holder, which fits the rail |
 | `mod_h`, `usb_h` | 3.1, 3.3 | height of the module's can and of the USB-C shells above the board: the lid's pillars stop 0.2 above them, measure yours |
 | `esp_under` | 20 | room under the board for the dupont housings on the pins: 2.5 header, 14 housing, wire bend |
-| `screw_hole` | 2.8 | M3 thread forming, 0.6 chamfer at the entry, untested, see `lessons_learned.md` |
+| `screw_hole` | 2.7 | M3 thread forming, 0.6 chamfer at the entry, untested, see `lessons_learned.md` |
 
 Board outline, headers, module and USB-C ports come from the DXF (62.74 × 25.4; headers 6.44 to 62.82 under both edges; module 18 wide, 6.3 past the antenna end; ports centred 6.0 and 19.4 from the left edge).

@@ -46,7 +46,7 @@ outer_corner_r = 3;
 // Corner post for the lid screws, square
 post = 7;
 // M3 thread forming, untested; 45 degree chamfer at the entry
-screw_hole = 2.8;
+screw_hole = 2.7;
 screw_hole_depth = 12;
 screw_chamfer = 0.6;
 // Clearance hole and counterbore for M3 pan heads in the lid
@@ -112,12 +112,24 @@ uln_standoff_h = 5;
 uln_gap = 4;
 
 /* [Breadboard power rail] */
-// Measure yours: a half size breadboard's rail is about 84 x 10 x 9
-rail_len = 84;
-rail_w = 10;
-rail_gap = 0.4;
-rail_tray_wall = 1.2;
-rail_tray_h = 3;
+// Pocket for the rail as in the driver board holder of current_setup
+// (ULN2003_Driver_Module_board_holder_veryos_stls, measured in its STL): the
+// rail's chaining tab at one end, its slot at the other and the dovetail
+// bumps on its sides have their places, so it fits one way round only.
+// Pocket length between its end walls and width
+rail_len = 82.1;
+rail_w = 9.7;
+rail_pocket_h = 8;
+rail_wall = 3;
+// Chaining tab and slot, centred on the ends: width, and length, which is
+// also the depth of the side jogs
+rail_tab_w = 3.6;
+rail_tab = 1.2;
+// Side jogs: centres from the pocket's ends, length of the bump on the
+// drivers' side, length of the notch on the wall side
+rail_jog_pos = 14.2;
+rail_jog_in = 3.6;
+rail_jog_out = 4.4;
 
 /* [Cable slots] */
 // U slot in the back wall, open to the top, fits a JST XH 5 pin plug
@@ -158,9 +170,11 @@ inner_x = uln_x0 - wall + uln_n * uln_x + (uln_n - 1) * uln_gap + 2;
 outer_x = inner_x + 2 * wall;
 outer_y = inner_y + 2 * wall;
 outer_h = floor_t + inner_h + lid_t;
-// Rail along the front wall, under the drivers
+// Rail along the front wall, under the drivers; its block reaches rail_depth
+// into the box
 rail_cx = uln_x0 + (uln_n * uln_x + (uln_n - 1) * uln_gap) / 2;
-rail_y0 = wall + 2 + rail_tray_wall;
+rail_x0 = rail_cx - (rail_len + rail_tab) / 2;
+rail_depth = rail_w + rail_tab + 2 * rail_wall;
 post_centers = [for (x = [wall + post / 2, outer_x - wall - post / 2])
                 for (y = [wall + post / 2, outer_y - wall - post / 2]) [x, y]];
 usb_cx = esp_x + esp_w / 2;
@@ -236,7 +250,7 @@ module base() {
         for (x = [feet_inset, outer_x - feet_inset], y = [feet_inset, outer_y - feet_inset])
             translate([x, y, -1]) cylinder(d = feet_d, h = feet_depth + 1);
         // logo in the floor, between the drivers and the rail
-        translate([rail_cx, (rail_y0 + rail_w + rail_gap + rail_tray_wall + uln_y0) / 2, floor_t])
+        translate([rail_cx, (wall + rail_depth + uln_y0) / 2, floor_t])
             logo_cut(floor_logo_w);
         // name and version in the bottom, reading from below
         translate([outer_x / 2, outer_y / 2, 0]) mirror([0, 0, 1]) mirror([1, 0, 0]) text_cut();
@@ -291,13 +305,30 @@ module screw_hole_cut(depth) {
     translate([0, 0, -screw_chamfer]) cylinder(d1 = screw_hole, d2 = screw_hole + 2 * screw_chamfer + 2, h = screw_chamfer + 1);
 }
 
+// Block against the front wall with the rail's pocket; the pocket's wall side
+// faces the front wall, its bump side the drivers.
 module rail_tray() {
-    ix = rail_len + 2 * rail_gap;
-    iy = rail_w + 2 * rail_gap;
-    translate([rail_cx - ix / 2, rail_y0 - rail_gap, 0]) difference() {
-        translate([-rail_tray_wall, -rail_tray_wall, 0])
-            cube([ix + 2 * rail_tray_wall, iy + 2 * rail_tray_wall, rail_tray_h]);
-        translate([0, 0, -1]) cube([ix, iy, rail_tray_h + 2]);
+    translate([rail_x0, wall, 0]) difference() {
+        translate([-rail_wall, 0, 0])
+            cube([rail_len + rail_tab + 2 * rail_wall, rail_depth, rail_pocket_h]);
+        translate([0, rail_depth - rail_wall, -1]) mirror([0, 1, 0])
+            linear_extrude(rail_pocket_h + 2) rail_pocket_2d();
+    }
+}
+
+// The pocket, x along the rail from the slot end, y across from the bump side.
+module rail_pocket_2d() {
+    jogs = [rail_jog_pos, rail_len - rail_jog_pos];
+    difference() {
+        union() {
+            square([rail_len, rail_w]);
+            // notch for the rail's chaining tab
+            translate([rail_len - eps, (rail_w - rail_tab_w) / 2]) square([rail_tab + eps, rail_tab_w]);
+            for (x = jogs) translate([x - rail_jog_out / 2, rail_w - eps]) square([rail_jog_out, rail_tab + eps]);
+        }
+        // tab into the rail's chaining slot
+        translate([-1, (rail_w - rail_tab_w) / 2]) square([rail_tab + 1, rail_tab_w]);
+        for (x = jogs) translate([x - rail_jog_in / 2, -1]) square([rail_jog_in, rail_tab + 1]);
     }
 }
 
@@ -367,7 +398,7 @@ module boards() {
             color("green") cube([uln_x, uln_y, pcb_t]);
             color("white") translate([uln_jst_x - 3, uln_y - 18, pcb_t]) cube([6, 14, 7]);
         }
-        color("white") translate([rail_cx - rail_len / 2, rail_y0, 0]) cube([rail_len, rail_w, 9]);
+        color("white") translate([rail_x0, wall + rail_wall + rail_tab, 0]) cube([rail_len, rail_w, 9]);
     }
 }
 

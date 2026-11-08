@@ -8,7 +8,7 @@ Diameter clearance = added to the hole diameter, not per side.
 
 | Date | Fit | Part | Hole | Result | Printer / material |
 |---|---|---|---|---|---|
-| 2026-11-08 | M3 thread forming, lid screws and driver standoffs | OMM enclosure V1 | 2.8, 0.6 chamfer | untested | ? |
+| 2026-11-08 | M3 thread forming, lid screws and driver standoffs | OMM enclosure V1 | 2.7, 0.6 chamfer | untested | ? |
 | 2026-11-08 | ESP32-S3-DevKitC-1 in its cradle, per side | OMM enclosure V1 | 0.4 | untested | ? |
 | 2026-11-08 | Lid lip inside the walls, per side | OMM enclosure V1 | 0.3 | untested | ? |
 | 2026-11-06 | Puck's free play in the holder, axial gap, not a diameter | pucklight_sphere screwin, fixed | 0.4 at the screw's stop, 1.0 flush, at 0.2 mm layers | untested | ? |
