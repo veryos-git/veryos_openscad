@@ -1,5 +1,6 @@
 // Copyright (C) Jonas Immanuel Frey - Licensed under GPL
-// OMM enclosure V1: box for the electronics of the open microscope
+// OMM enclosure V1 (the version is also engraved in the parts, see version
+// below): box for the electronics of the open microscope
 // motorization. Holds an ESP32-S3-DevKitC-1, three ULN2003 driver boards and
 // a breadboard power rail. Lid with four M3 screws into the corner posts.
 //
@@ -25,6 +26,14 @@
 
 /* [View] */
 part = "print_layout"; // [print_layout:Base and lid on the bed,assembly:Assembly with the boards,open:Base with the boards,base:Base,lid:Lid]
+
+/* [Version] */
+// Engraved in every part with the project's name. Bump it together with the
+// file name, omm_enclosureV1.scad.
+version = "V1";
+engraving = str("VeryOS OMM enclosure ", version);
+text_size = 6;
+text_font = "Liberation Sans:style=Bold";
 
 /* [Box] */
 wall = 2.4;
@@ -228,7 +237,15 @@ module base() {
         // logo in the floor, between the drivers and the rail
         translate([rail_cx, (rail_y0 + rail_w + rail_gap + rail_tray_wall + uln_y0) / 2, floor_t])
             logo_cut(floor_logo_w);
+        // name and version in the bottom, reading from below
+        translate([outer_x / 2, outer_y / 2, 0]) mirror([0, 0, 1]) mirror([1, 0, 0]) text_cut();
     }
+}
+
+// The engraving, centred on the origin, logo_depth into z < 0.
+module text_cut() {
+    translate([0, 0, -logo_depth]) linear_extrude(logo_depth + 1)
+        text(engraving, size = text_size, font = text_font, halign = "center", valign = "center");
 }
 
 // Board coordinates of the ESP32 (x from its left edge, y from its USB end,
@@ -302,6 +319,8 @@ module lid() {
             translate([0, 0, lid_t + 1 - counterbore_h]) cylinder(d = counterbore_d, h = counterbore_h + 1);
         }
         translate([outer_x / 2, outer_y / 2, lid_t]) logo_cut(lid_logo_w);
+        // name and version under the logo
+        translate([outer_x / 2, outer_y / 2 - lid_logo_w * logo_r / logo_w - text_size, lid_t]) text_cut();
     }
 }
 

@@ -10,7 +10,7 @@ Box for the electronics of the open microscope motorization: an ESP32-S3-DevKitC
 
 | File | What |
 |---|---|
-| `omm_enclosure.scad` | the generator, standalone, no libraries |
+| `omm_enclosureV1.scad` | the generator, standalone, no libraries. `version` at its top is engraved in every part with the project's name; bump it with the file name |
 | `readme_hgc.md` | original goal |
 | `current_setup/` | photos of the setup it replaces |
 | `image*.png` | the boards, with the ULN2003 drawing |
@@ -35,6 +35,7 @@ The walls and the lid's edge carry the ribs of the XY table (`current_setup/xy_t
 | motor cable slot | back wall, behind each JST plug | 16 wide, open to the top for the plug; the lid's tab closes it to 5 mm |
 | feet | bottom, four corners | Ø10 × 1 recess for stick-on feet |
 | logo | lid top 40 wide, floor 15 wide between the drivers and the rail | 0.6 deep |
+| name and version | lid top under the logo, base bottom reading from below | 6 mm text, 0.6 deep |
 
 ## Print
 
