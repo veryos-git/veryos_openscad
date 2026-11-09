@@ -1,6 +1,6 @@
 # OMM XY table
 
-Motorised XY stage of the open microscope motorization: moves a standard 76 × 25 × 1 mm glass slide in X and Y with two 28BYJ-48 steppers. `omm_xy_table_v2p4.scad` rebuilds the Onshape document OMM_v2 (engraved label v2.3) in OpenSCAD, with the same parts and the same Onshape variable names and values. v2.4 is not printed yet.
+Motorised XY stage of the open microscope motorization: moves a standard 76 × 25 × 1 mm glass slide in X and Y with two 28BYJ-48 steppers. `omm_xy_table_v2p5.scad` rebuilds the Onshape document OMM_v2 (engraved label v2.3) in OpenSCAD, with the same parts and the same Onshape variable names and values. v2.4 is printed, v2.5 not yet.
 
 ![assembly](preview.png)
 
@@ -8,11 +8,20 @@ Motorised XY stage of the open microscope motorization: moves a standard 76 × 2
 
 | File | What |
 |---|---|
-| `omm_xy_table_v2p4.scad` | the generator, standalone, no libraries. `part` picks the assembly, the print layout or one part. `version` is engraved in the table; bump it with the file name |
-| `omm_xy_table_v2p4_<part>.stl` | every printed part, exported from the generator in print orientation with the brand font |
+| `omm_xy_table_v2p5.scad` | the generator, standalone, no libraries. `part` picks the assembly, the print layout or one part. `version` is engraved in the table; bump it with the file name |
+| `omm_xy_table_v2p5_<part>.stl` | every printed part, exported from the generator in print orientation with the brand font |
+| `archive/` | v2.4, script and STLs. Each change to the generator makes a new version file; the old one stays |
 | `OMM_v2_rebuild_kit.zip` | Onshape export, source of every dimension: feature trees, sketches, variables, STEP, STL, DXF, renders and the kit's own README |
 | `omm_params.scad` | the Onshape Variable Studio, 1:1 from the kit |
 | `Onshape_online_CAD_version/` | Onshape print files OMM_v2p2.3mf and OMM_v2p3.3mf |
+
+## v2.5 against v2.4
+
+Only the slide holder and the table's label changed; the other parts print as in v2.4.
+
+| Asked for | v2.4 | v2.5 |
+|---|---|---|
+| The slide holder goes onto the X slider; the printed v2.4 one barely did | the grooves end square on the long edges: seated, each of their four inner corners overlaps the rounded inner corner of the ring by 0.85 × 1.15 | the grooves' mouths are rounded with `fillet_r` on all eight corners, as in Onshape: no overlap, 0.4 clear all round, the same as along the grooves |
 
 ## v2.4 against Onshape's v2.3
 
@@ -60,12 +69,12 @@ Not printed: 2 × 28BYJ-48 with their ULN2003 drivers (in the enclosure, `../enc
 
 ## Check before printing
 
-None of these fits is in `lessons_learned.md` yet; they are Onshape's values, untested in v2.4.
+Onshape's values. Printed in v2.4: the slide holder on the X slider, see `lessons_learned.md`. No results yet for the other fits.
 
 | What | Set to | Note |
 |---|---|---|
 | `tol_rail` | 0.2 | slot 2.2 on the 2.0 rail; for the first `rail_mouth_h` = 0.2 the mouth is only 2.02 wide (`workaround_no_space`), as in the Onshape sketch, and it prints on the bed |
-| `tol_slideh_x_slider` | 0.8 | slide holder's grooves 4.8 on the ring's 4 wall |
+| `tol_slideh_x_slider` | 0.8 | slide holder's grooves 4.8 on the ring's 4 wall. v2.4 barely went on, because of the grooves' square mouths, not this width; v2.5's rounded mouths are untested |
 | `tol_slide_holder` | 1 | recess 77 × 26 for the 76 × 25 slide, on a 1.2 ledge |
 | `mshaft_tol`, `rib_protrude` | 0.1, 0.4 | adapter's bore 5.2 on the Ø5 shaft, flats 4.0 apart with crush ribs 3.2 apart on its 3.0 flats |
 | `bracket_gap` | 0.45 | between the moving female rail and the uprights |

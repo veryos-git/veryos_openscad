@@ -8,6 +8,8 @@ Diameter clearance = added to the hole diameter, not per side.
 
 | Date | Fit | Part | Hole | Result | Printer / material |
 |---|---|---|---|---|---|
+| 2026-11-10 | Slide holder's rounded groove mouths on the X slider's ring, per side | OMM XY table v2.5 | 0.4 | untested | ? |
+| 2026-11-10 | Slide holder's grooves on the X slider ring's 4.0 wall | OMM XY table v2.4 | 4.8 (+0.8) | barely goes on. Not the width: the grooves' square mouths overlap the ring's rounded inner corners by 0.85 at four places | ? |
 | 2026-11-09 | ESP32-S3 WROOM-1 board in the pocket of its printed case | OMM enclosure V3 | 64.55 × 28.55, header slots 3.3 | untested; the case's own numbers | ? |
 | 2026-11-08 | M3 thread forming, lid screws and driver standoffs | OMM enclosure V1 | 2.7, 0.6 chamfer | untested | ? |
 | 2026-11-08 | ESP32-S3-DevKitC-1 in its cradle, per side | OMM enclosure V1 | 0.4 | the board did not fit: it is a 28 mm wide clone, not the 25.4 of Espressif's DXF | ? |
@@ -19,6 +21,7 @@ Diameter clearance = added to the hole diameter, not per side.
 
 ## Rules
 
+- Seat mating parts on each other in the model and check for overlap before printing; the clearance of the main faces does not show it. OMM XY table v2.4 had 0.4 per side in the grooves, yet their square mouths sat 0.85 inside the ring's rounded corners (2026-11-10).
 - A dev board bought as a clone does not follow the maker's drawing: the OMM enclosure V2 cradle from Espressif's ESP32-S3-DevKitC-1 DXF (25.4 wide) did not take the 28 wide board. Measure the board, or take the pocket of a printed case that fits it (OMM enclosure V3, 2026-11-09).
 
 - A click base needs no alignment pins: the disc in the screw's opening and the bar in its slot are enough (pucklight_sphere V2, 2026-11-06). Without pins the sockel can turn on the base, so hold it when turning a sphere.
