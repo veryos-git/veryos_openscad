@@ -1,0 +1,39 @@
+{
+  "rotate": [
+    0,
+    0,
+    0
+  ],
+  "cut": 4,
+  "parts": 8,
+  "flip": false,
+  "scale": 1,
+  "gap": 0.4,
+  "bend_angle": 15,
+  "link_clearance": 0.4,
+  "side_clearance": 1,
+  "loop_clearance": 1,
+  "curve": [
+    [
+      -50,
+      5
+    ],
+    [
+      -28,
+      14
+    ],
+    [
+      2,
+      0
+    ],
+    [
+      32,
+      -14
+    ],
+    [
+      58,
+      -3
+    ]
+  ],
+  "model": "7cf2391fe0c37a21c61a0741b5401517.stl"
+}
