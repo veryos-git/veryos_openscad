@@ -1,6 +1,6 @@
 # OMM enclosure
 
-Box for the electronics of the open microscope motorization: an ESP32-S3 WROOM-1 dev board, three ULN2003 driver boards and a breadboard power rail. Replaces the food box in `current_setup/`. V3, not printed yet.
+Box for the electronics of the open microscope motorization: an ESP32-S3 WROOM-1 dev board, three ULN2003 driver boards and a breadboard power rail. Replaces the food box in `current_setup/`. V4, not printed yet.
 
 ![assembly](preview.png)
 
@@ -10,14 +10,20 @@ Box for the electronics of the open microscope motorization: an ESP32-S3 WROOM-1
 
 | File | What |
 |---|---|
-| `omm_enclosureV3.scad` | the generator, standalone, no libraries. `version` at its top is engraved in every part with the project's name; bump it with the file name |
-| `omm_enclosureV3_base.stl`, `omm_enclosureV3_lid.stl` | exported from the generator with the brand font, for slicers and viewers without DejaVu |
+| `omm_enclosureV4.scad` | the generator, standalone, no libraries. `version` at its top is engraved in every part with the project's name; bump it with the file name |
+| `omm_enclosureV4_base.stl`, `omm_enclosureV4_lid.stl` | exported from the generator with the brand font, for slicers and viewers without DejaVu |
 | `archive/` | every earlier version, script and STLs. Each change to the generator makes a new version file; the old one stays |
 | `readme_hgc.md` | original goal |
 | `current_setup/` | photos of the setup it replaces |
 | `image*.png` | the boards, with the ULN2003 drawing |
 | `../ESP32_S3_WROOM_Case.stl` | printed case that fits the ESP32 board, source of the pocket in the generator |
 | `DXF_ESP32-S3-DevKitC-1_V1.1_20220429.dxf` | Espressif's drawing of the official board, source of V1 and V2's cradle, which the board did not fit |
+
+## V4 against V3
+
+| Asked for | V3 | V4 |
+|---|---|---|
+| A slit for the 5 V cables at each end of the power rail | closed end walls | 4 mm slit through each end wall, open to the top, down to the pocket's floor |
 
 ## V3 against V2
 
@@ -42,7 +48,7 @@ The walls and the lid's edge carry the ribs of the XY table (`current_setup/xy_t
 |---|---|---|
 | ESP32-S3 WROOM-1 board | left, along the depth, USB-C ports at the back wall | the pocket of `ESP32_S3_WROOM_Case.stl`, 64.55 × 28.55 between 2 mm walls, 20 mm above the floor: the board rests on a 0.95 wide rail beside each header, the headers hang in 3.3 wide slots along the walls, open to the floor so the jumper wires fit on the pins below; the slots end 7 mm before the end wall and stop the headers; the lid's four pillars press on the module's can and the USB-C shells, the only flat spots on top |
 | 3 × ULN2003 | row at the right, JST plugs toward the back, IN pins toward the ESP32 | Ø6 × 5 standoffs on the 29.6 × 26.6 hole pattern, M3 × 6 thread forming |
-| power rail | along the front wall, under the drivers | the pocket of the driver board holder in `current_setup/`, measured in its STL: 82.1 × 9.7, 8 deep, with a tab for the rail's chaining slot, a notch for its tab and the side jogs for its dovetails, so it fits one way round only |
+| power rail | along the front wall, under the drivers | the pocket of the driver board holder in `current_setup/`, measured in its STL: 82.1 × 9.7, 8 deep, with a notch for the rail's chaining tab and the side jogs for its dovetails, so it fits one way round only; a 4 mm slit through each end wall, open to the top, lets the 5 V cables out of the rail's end holes |
 | lid | 4 × M3 × 10 into the corner posts | lip inside the walls, tabs in the cable slots: fits one way round only |
 
 | Opening | Where | Size |
@@ -67,6 +73,7 @@ The walls and the lid's edge carry the ribs of the XY table (`current_setup/xy_t
 | What | Set to | Note |
 |---|---|---|
 | `rail_len`, `rail_w` | 82.1 × 9.7 | the pocket of your printed holder, which fits the rail |
+| `rail_slit_w` | 4 | the slit in the pocket's end walls: two jumper wires side by side, not a dupont housing |
 | `esp_pocket_len`, `esp_pocket_w`, `esp_slot_w`, `esp_slot_end` | 64.55 × 28.55, 3.3, 7 | the pocket of `ESP32_S3_WROOM_Case.stl`, which fits the board; the board itself is not measured |
 | `mod_pad_y`, `usb_dx` | 10–14 from the end wall, 12 | where the lid's pillars land: on the can, which the case vents 7.6–24.4 from its end wall, and on the two USB-C shells, whose windows in the case are 12 apart |
 | `mod_h`, `usb_h` | 3.1, 3.3 | height of the module's can and of the USB-C shells above the board: the lid's pillars stop 0.2 above them, measure yours |
