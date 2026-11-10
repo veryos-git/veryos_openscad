@@ -8,6 +8,8 @@ Diameter clearance = added to the hole diameter, not per side.
 
 | Date | Fit | Part | Hole | Result | Printer / material |
 |---|---|---|---|---|---|
+| 2026-11-10 | Y slider's two slots on the table's two rails, 15 apart, total | OMM XY table v2.6 | 2.2 on 2.0 (+0.2) each | untested | ? |
+| 2026-11-10 | Y slider's slot on the table's one rail, total, guided 69 long | OMM XY table, Onshape print with round windows (as OMM_v2p2.3mf) | 2.2 on 2.0 (+0.2) | slides; the Y slider wiggles sideways at the X motor when pushed by hand | ? |
 | 2026-11-10 | A script's shape above the ribs in the sockel's cup, axial gap, not a diameter | pucklight_vase, collar | 0.4: starts at z = 6.6, the ribs end at 6.19 | untested | ? |
 | 2026-11-10 | Printed 5 mm screw (2 mm pitch, 45 degree) in a blind thread in an upright boss, per side | esp32_unofficial enclosure V1 | 0.25, as the nuts of fdm_optimized_screws | untested in a boss; fits in the nuts (PETG) | ? |
 | 2026-11-10 | Snap lid: lip inside the walls, per side; 45 degree bead on the lip in a groove in a 2.0 wall | esp32_unofficial enclosure V1 | lip 0.2; bead 0.6 proud, 0.4 into the wall, 20 long | untested | ? |
@@ -26,6 +28,7 @@ Diameter clearance = added to the hole diameter, not per side.
 
 ## Rules
 
+- Yaw play of a slider on rails = clearance / guided length along the travel: 0.2 over 61 mm is ±0.19°, ±0.3 mm 90 mm away from the guide. A second rail beside the first does not change it; a longer guide, or a second rail at the far end of the slider, does. *From the geometry (OMM XY table v2.6, 2026-11-10), not yet confirmed by a print.*
 - Inside difference() or intersection(), wrap a for() in union(). The online renderer (openscad.ochafik.com) runs with lazy union: a bare for() counts as separate children, so the second screw boss of the esp32_unofficial enclosure was subtracted instead of added. OpenSCAD 2021.01 does not show it (2026-11-10).
 - A wall beside a pin header hides what wire sits on what pin. Leave the side open where the wiring has to be checked: the OMM enclosure's ESP32 pocket had full walls up to V6, V7 drops the one toward the drivers (2026-11-10).
 - Seat mating parts on each other in the model and check for overlap before printing; the clearance of the main faces does not show it. OMM XY table v2.4 had 0.4 per side in the grooves, yet their square mouths sat 0.85 inside the ring's rounded corners (2026-11-10).
