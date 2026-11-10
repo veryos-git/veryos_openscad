@@ -567,6 +567,13 @@ $("project_new").addEventListener("click", project_action(new_project));
 $("project_save").addEventListener("click", project_action(save_project));
 $("project_rename").addEventListener("click", project_action(rename_project));
 $("project_delete").addEventListener("click", project_action(delete_project));
+// Ctrl+S, or Cmd+S on a Mac, is the save button, in the editor too, and not the
+// browser's own save.
+addEventListener("keydown", (e) => {
+    if (!(e.ctrlKey || e.metaKey) || e.key.toLowerCase() !== "s") return;
+    e.preventDefault();
+    $("project_save").click();
+});
 
 /* ---- Download ---- */
 

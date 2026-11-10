@@ -41,7 +41,7 @@ A vase and V3's spheres fit the same sockel.
 |---|---|---|
 | Create | new: a copy of what is in the editor, under a new name | `projects/<name>/script.js` |
 | Read | the project list; the address `#<name>` opens it again after a reload | |
-| Update | save; a `*` in the list means unsaved | `script.js` |
+| Update | save, or Ctrl+S, in the editor too; a `*` in the list means unsaved | `script.js` |
 | Update | rename | the folder moves |
 | Delete | delete, asks first | the folder goes |
 
@@ -188,6 +188,7 @@ Vase mode, as V3's `vase_sphere`: see `../pucklight_sphere/readme.md`, Vase mode
 | Projects in headless Chrome: create from an example, save, new, switch with and without unsaved changes, rename, reload on `#<name>`, download, delete down to none | works, console clean; `script.js` holds the editor's text each time |
 | Names the server refuses, from the app: taken, `../x`, `a/b`, `.git`, a space | the status says why, nothing touched |
 | API with `../..`, `a/b`, `.git`, no script, another site's `Origin` and `Host` | refused, nothing touched |
+| Ctrl+S in headless Chrome 154: in the editor after typing, outside it, with caps lock, without a project, opened as a file | saves what the editor holds, also before the view has caught up; without a project asks for a name; as a file nothing; the browser's own save never comes |
 | Opened as a file | project controls off, the rest works |
 | Views in headless Chrome: each view, the section in each, the slider by mouse and by value | drawn as above; the slider's top is 1.0 |
 | `overhang` on a `wild_bend` half as high, from above, from below and through a section | overhangs orange and red from below and on the inside, walls that lean in blue from above, the legend only in this view |
