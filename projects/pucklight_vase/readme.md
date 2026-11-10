@@ -18,6 +18,7 @@ The editor comes from the internet; without it a plain text box replaces it.
 | `index.html` | layout |
 | `app.js` | editor, 3D view, projects, download |
 | `vase_mesh.js` | the thread, the collar and a script's layers as one mesh; `.stl` |
+| `noise.js` | `noise` for the scripts: stlsculpter's `perlin2.js`, Stefan Gustavson's simplex and Perlin noise, public domain by its header |
 | `examples.js` | the scripts the editor offers |
 | `server.js` | serves the app and keeps the projects |
 | `deno.json` | the `start` task |
@@ -54,7 +55,7 @@ A vase and V3's spheres fit the same sockel.
 
 ## Script
 
-The editor holds the body of a function: it gets `o_thread` and returns `{n_its_layer, n_its_corner, f_o_p}`, with `n_height_dome` for a dome on top.
+The editor holds the body of a function: it gets `o_thread`, sees `noise`, and returns `{n_its_layer, n_its_corner, f_o_p}`, with `n_height_dome` for a dome on top.
 
 | Name | Is |
 |---|---|
@@ -66,9 +67,24 @@ The editor holds the body of a function: it gets `o_thread` and returns `{n_its_
 | `o_thread.n_radius`, `o_thread.n_z` | 33.5 and 6.6: the top ring of what is fixed, as it were layer 0 |
 | `n_height_dome` | optional: the app closes the last layer with a dome this high, in mm; 0 or left out, with a flat face |
 | `n_overhang_dome` | optional, 60: how far the dome's wall may lean from vertical, in degrees, above 0 and below 90 |
+| `noise.simplex2(x, y)`, `noise.simplex3(x, y, z)` | simplex noise: a number from -1 to 1, which changes smoothly from place to place, about one bump per 1 |
+| `noise.perlin2(x, y)`, `noise.perlin3(x, y, z)` | Perlin noise: the same on a grid of squares; 0 where x, y and z are whole numbers |
+| `noise.seed(n)` | another pattern: a whole number from 1 to 65535, or, as in stlsculpter, between 0 and 1 |
 
+| Noise | Minimal example, in `f_o_p()` |
+|---|---|
+| The layers in and out, by up to 3 mm | `n_amp += noise.simplex2(0.5, n_it_layer_nor * 4) * 3;` |
+| Narrower, deeper | multiply what goes in, what comes out |
+| Each corner of a polygon on its own | `n_amp += noise.simplex2(n_it_corner_nor * n_its_corner, n_it_layer_nor * 3) * 4;` |
+| A twist that wobbles | `n_rad_offset += noise.simplex2(0.5, n_it_layer_nor * 2) * n_tau / 30;` |
+| Bumps around the ring without a seam: x and y on a circle | `n_amp += noise.simplex3(Math.sin(n_it_corner_nor * n_tau) * 2, Math.cos(n_it_corner_nor * n_tau) * 2, n_it_layer_nor * 4) * 3;` |
+| Another pattern | `noise.seed(7);` above `f_o_p()` |
+
+- The last four are in `template`'s comments, to try without their `//`.
+- `n_it_corner_nor` alone as x or y leaves a seam where the ring closes: the noise at 0 is not the noise at 1.
+- A script starts on seed 0, whatever the script before it seeded: the same script makes the same vase, in the view and in the `.stl`.
 - z = 0 is the print bed. Every `n_z` must be `o_thread.n_z` or more: below is the sockel.
-- The app joins the top ring to layer 1 with straight walls. Start on the ring, as `template`, or higher, which makes a cone, as `four_pillars`.
+- The app joins the top ring to layer 1 with straight walls. Start on the ring, as `egg`, or higher, which makes a cone, as `template` and `four_pillars`.
 - The two may differ in their number of points: 180 on the ring, 12 in `low_poly`.
 - Corners may run either way around the axis and start anywhere; all layers the same way.
 - At most 2 000 000 points.
@@ -91,7 +107,7 @@ Gold in the view. `f_o_p()` is not called for it.
 
 ## View
 
-![the views, on a template with fewer layers and corners; lower for the overhang](views.png)
+![the views, on a round vase with waves and a dome, of few layers and corners; lower for the overhang](views.png)
 
 | Control | Does |
 |---|---|
@@ -111,17 +127,23 @@ Gold in the view. `f_o_p()` is not called for it.
 
 ## Examples
 
-`template` explains the script. `egg` is a preset to put a pattern on. The others are stlsculpter's, with their formulas and names: the radius starts on the thread's 33.5 instead of `n_radius_base`, or on a cone, and z on `o_thread.n_z`.
+`template` explains the script, with examples of noise in its comments. `egg` is a preset to put a pattern on. The others are stlsculpter's, with their formulas and names: the radius starts on the thread's 33.5 instead of `n_radius_base`, or on a cone, and z on `o_thread.n_z`.
 
 | Example | stlsculpter's | Layers × corners | Triangles | High × wide | Overhang up to | Leans in up to |
 |---|---|---|---|---|---|---|
-| `template` | `template.js`, changed, with a dome | 120 × 180 | 66960 | 141.6 × 105.2 | 28° at z = 9 | 60° at z = 131: its dome |
+| `template` | `template.js`, changed: a triangle that turns a sixth of a turn and shrinks linearly, with a dome | 120 × 3 | 18858 | 153.6 × 89.6 | 41° at z = 11: its cone | 41° at z = 151: its dome |
 | `egg` | none | 160 × 180 | 75600 | 128.3 × 96.0 | 43° at z = 7 | 60° at z = 124: its cone |
 | `exponential_twist` | `vase_exponential_twist.js` | 100 × 400 | 98000 | 106.6 × 87.0 | 47° at z = 39 | 51° at z = 39 |
 | `wild_bend` | `vase_wild_bend.js` | 120 × 300 | 90000 | 126.6 × 97.5 | 49° at z = 7 | 49° at z = 81 |
 | `four_pillars` | `vase_four_pillars.js` | 120 × 500 | 138000 | 132.6 × 98.6 | 52° at z = 14 | 52° at z = 73 |
 | `starshape_pow` | `template_starshape_pow_function.js` | 240 × 600 | 306000 | 131.6 × 100.5 | 52° at z = 16 | 52° at z = 72 |
 | `low_poly` | `vase_long_low_poly_multi_layer.js` | 5 × 12 | 18120 | 156.6 × 86.2 | 24° at z = 57 | 26° at z = 137 |
+| `low_poly_noise` | `vase_low_poly_noise` in `client.module.js`, with the layers, 10 mm apart, and the 12 corners of its `low_poly_vase` | 15 × 12 | 18360 | 156.6 × 100.0 | 43° at z = 10 | 38° at z = 80 |
+
+- Of each example's triangles 17820 are the thread's and the collar's. Between its layers `low_poly` has 96, `low_poly_noise` 336.
+- `low_poly_noise`: noise moves each corner along its ring by up to half a corner. `noise.seed()` with another number makes another vase.
+- `template`: `n_its_corner` is the polygon, `n_radius_bottom` and `n_radius_top` its size, `n_twist` its turn. `n_height_dome = 0` leaves its top flat.
+- `template`: each side of a layer is two triangles, which the twist bends against each other by up to 0.2 mm: fine stripes in `shaded`. More layers make them finer.
 
 ## Printing
 
@@ -159,7 +181,7 @@ Vase mode, as V3's `vase_sphere`: see `../pucklight_sphere/readme.md`, Vase mode
 | Same: 3 to 500 corners, clockwise and counter-clockwise, starting anywhere | closed, the same volume |
 | Same: domes 20 to 300 high, at 45°, 60° and 89°, both ways around, and on a star with a wavy last layer | closed, no face without area, the tip at its height, as steep as asked; lower than its cone, that cone |
 | Same: scripts that return nothing, no numbers, a point below the thread, too many points, a dome below 0 or at 90° | refused with a message |
-| `template` and `low_poly` `.stl` in V3's sockel, intersections in OpenSCAD 2021.01; a wall as thick as V3's neck stands in for the single wall | seated: only the bottom on the cup's floor, the stop. 0.01 mm higher, half a turn out, 2.5 turns out: no contact |
+| `template`, `low_poly` and `low_poly_noise` `.stl` in V3's sockel, intersections in OpenSCAD 2021.01; a wall as thick as V3's neck stands in for the single wall | seated: only the bottom on the cup's floor, the stop. 0.01 mm higher, half a turn out, 2.5 turns out: no contact |
 | Same, pushed 0.5 mm down, and turned half a turn without rising | contact, so the check finds one |
 | App in headless Chrome 154: typing, mistakes, examples, the question before discarding a changed script, orbit, zoom, download | works, console clean; the `.stl` has the bytes Node makes |
 | Without the internet | the text box replaces the editor, the rest works |
@@ -171,6 +193,9 @@ Vase mode, as V3's `vase_sphere`: see `../pucklight_sphere/readme.md`, Vase mode
 | `overhang` on a `wild_bend` half as high, from above, from below and through a section | overhangs orange and red from below and on the inside, walls that lean in blue from above, the legend only in this view |
 | `test_vase_mesh.js`: a wall that goes out 6.5 in 3 mm, with and without a dome | an overhang of 65°, both ways around; the dome leans in only |
 | A mistake's line | found in Chrome 154 and Firefox 157 |
+| `test_vase_mesh.js`: `noise`'s four functions, and a script with and without `noise.seed()` | from -1 to 1, Perlin's 0 on whole numbers; a script makes the same vase each run, whatever the script before it seeded, and another with a seed |
+| Same: `template`'s three examples of noise without their `//`, each with and without `noise.seed(7)` above `f_o_p()` | closed, each another vase |
+| Noise in headless Chrome 154: the examples typed into the editor, `noise.` typed, `noise.simplex4()` typed, `low_poly_noise` downloaded | drawn; the editor offers the five functions; a mistake with its line; the `.stl` has the bytes Node makes; console clean |
 
 ## Not tested yet
 
@@ -179,7 +204,7 @@ Vase mode, as V3's `vase_sphere`: see `../pucklight_sphere/readme.md`, Vase mode
 
 ## Not included
 
-- stlsculpter's vases with noise: they need its Perlin noise library.
+- stlsculpter's other vases with noise, such as `vase_noise_elegant_lines.js`: `noise` is here, the vases are not put on the thread yet.
 - A normal mode vase with a thick neck, as V3's `sphere`: the inside would need its own surface.
 
 Licensed under GPL.

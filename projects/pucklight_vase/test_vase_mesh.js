@@ -1,7 +1,8 @@
 // Copyright (C) Jonas Immanuel Frey - Licensed under GPL
 // Checks vase_mesh.js against ../pucklight_sphere/pucklight_sphereV3.scad: its thread is
 // the vase mode sphere's, as OpenSCAD exports it, and its collar ends above the ribs in
-// the sockel's cup. Then every example: closed, on the same thread. Then the dome.
+// the sockel's cup. Then every example: closed, on the same thread. Then the noise, and
+// the dome.
 // Run: node test_vase_mesh.js
 
 const assert = require("assert");
@@ -11,7 +12,7 @@ const os = require("os");
 const path = require("path");
 const vm = require("vm");
 
-for (const file of ["vase_mesh.js", "examples.js"]) {
+for (const file of ["noise.js", "vase_mesh.js", "examples.js"]) {
     vm.runInThisContext(fs.readFileSync(path.join(__dirname, file), "utf8"), {filename: file});
 }
 const scad = path.join(__dirname, "..", "pucklight_sphere", "pucklight_sphereV3.scad");
@@ -144,6 +145,44 @@ for (const [name, code] of Object.entries(examples)) {
         + `${(signed_volume(mesh) / 1000).toFixed(0)} cm3, overhang up to ${out.angle.toFixed(1)} degrees at z = ${out.z.toFixed(1)}, `
         + `leans in up to ${inward.angle.toFixed(1)} at z = ${inward.z.toFixed(1)}`);
 }
+
+/* ---- Noise ---- */
+
+// What the comments say of it: from -1 to 1, and Perlin's is 0 on whole numbers.
+for (const name of ["simplex2", "simplex3", "perlin2", "perlin3"]) {
+    let [low, high] = [0, 0];
+    for (let i = 0; i < 100000; i++) {
+        const n = noise[name](i * 0.137, i * 0.071 - 50, i * 0.053 + 9);
+        low = Math.min(low, n);
+        high = Math.max(high, n);
+    }
+    assert(low >= -1 && low < -0.7 && high <= 1 && high > 0.7, `${name}: from ${low} to ${high}`);
+}
+assert.equal(noise.perlin2(3, -7), 0);
+assert.equal(noise.perlin3(3, -7, 12), 0);
+// A script that does not seed starts on seed 0, whatever the script before it seeded.
+const unseeded_code = examples.low_poly_noise.replace("noise.seed(1);", "");
+assert.notEqual(unseeded_code, examples.low_poly_noise);
+const unseeded = vase_mesh(run_script(unseeded_code));
+const seeded = vase_mesh(run_script(examples.low_poly_noise));
+assert.notDeepEqual(seeded.positions, unseeded.positions, "a seed makes the same vase");
+assert.deepEqual(vase_mesh(run_script(unseeded_code)), unseeded, "a script's seed reached the next script");
+assert.deepEqual(vase_mesh(run_script(unseeded_code.replace("function f_o_p", "noise.seed(0);\nfunction f_o_p"))), unseeded);
+// The template's examples of noise, without their //: each makes another vase, and
+// with the seed above f_o_p() yet another.
+const commented = examples.template.match(/^    \/\/ (?:n_\w+ \+= noise|noise\.seed)[^;]*;/gm);
+assert.equal(commented.length, 4, "the template's examples of noise");
+const uncommented = (example) => example.replace(/^    \/\/ /gm, "    ");
+for (const example of commented.slice(0, 3)) {
+    const code = examples.template.replace(example, uncommented(example));
+    const mesh = vase_mesh(run_script(code));
+    assert_closed(mesh, example);
+    assert.notDeepEqual(mesh.positions, template.positions, `${example}: changes nothing`);
+    const reseeded = vase_mesh(run_script(code.replace("function f_o_p", `${uncommented(commented[3])}\nfunction f_o_p`)));
+    assert_closed(reseeded, `${example}, seeded`);
+    assert.notDeepEqual(reseeded.positions, mesh.positions, `${example}: the seed changes nothing`);
+}
+console.log("ok  noise: from -1 to 1, the same for each run of a script, another with a seed; the template's examples work");
 
 /* ---- Any script ---- */
 

@@ -5,7 +5,7 @@
 // reaches past the ribs in the sockel's cup. Copy changes to the thread over by hand;
 // test_vase_mesh.js compares the two. Everything above the collar is a script's: its
 // f_o_p() is called for each corner of each layer. On top the last layer is closed
-// flat, or, if the script asks for one, with a dome.
+// flat, or, if the script asks for one, with a dome. Needs noise.js, for the scripts.
 //
 // Units: mm and degrees. z = 0 is the print bed, and the floor of the sockel's cup.
 
@@ -46,8 +46,11 @@ function neck_radius(z, a) {
 }
 
 // Runs a script: the body of a function that returns {n_its_layer, n_its_corner, f_o_p},
-// and n_height_dome and n_overhang_dome if it wants a dome.
+// and n_height_dome and n_overhang_dome if it wants a dome. It gets o_thread, and sees
+// the noise of noise.js, which starts on seed 0 for each script: whatever the script
+// before it seeded, a script makes the same vase.
 function run_script(code) {
+    noise.seed(0);
     return new Function("o_thread", code)({...o_thread});
 }
 

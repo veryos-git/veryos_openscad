@@ -363,9 +363,13 @@ function start_monaco() {
     window.MonacoEnvironment = {getWorkerUrl: () => `data:text/javascript;charset=utf-8,${encodeURIComponent(worker)}`};
     require.config({paths: {vs: `${monaco_url}/vs`}});
     require(["vs/editor/editor.main"], () => {
-        // A script is a function's body: its return is no mistake, and it gets o_thread.
+        // A script is a function's body: its return is no mistake, and it gets o_thread
+        // and sees noise.
         monaco.languages.typescript.javascriptDefaults.setDiagnosticsOptions({diagnosticCodesToIgnore: [1108]});
-        monaco.languages.typescript.javascriptDefaults.addExtraLib("declare const o_thread: {n_radius: number, n_z: number};");
+        monaco.languages.typescript.javascriptDefaults.addExtraLib("declare const o_thread: {n_radius: number, n_z: number};"
+            + " declare const noise: {seed(n_seed: number): void, simplex2(x: number, y: number): number,"
+            + " simplex3(x: number, y: number, z: number): number, perlin2(x: number, y: number): number,"
+            + " perlin3(x: number, y: number, z: number): number};");
         const editor = monaco.editor.create($("editor"), {
             value: code, language: "javascript", theme: "vs-dark", automaticLayout: true,
             minimap: {enabled: false}, scrollBeyondLastLine: false, fontSize: 13, tabSize: 4, lineNumbersMinChars: 3,

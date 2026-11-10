@@ -19,7 +19,17 @@ const examples = {
 const n_tau = Math.PI * 2;
 const n_height = 100;
 const n_its_layer = 120;
-const n_its_corner = 180;
+// A regular polygon: with 3 corners a triangle.
+const n_its_corner = 3;
+// How far its corners are from the axis, on the bottom and on the
+// top layer. Between them it shrinks linearly.
+const n_radius_bottom = 45;
+const n_radius_top = 22;
+// How far it turns one way on its way up, linearly: 1 is a turn.
+const n_twist = 1 / 6;
+// Layer 1 is this far above the thread's ring, so the straight
+// walls from the round ring to the triangle stand steep enough.
+const n_height_cone = 12;
 // The app closes the last layer with a dome this high. 0 leaves
 // the top flat. The dome is round up to where its wall leans
 // n_overhang_dome from vertical, in degrees. From there a straight
@@ -31,18 +41,40 @@ const n_overhang_dome = 60;
 // n_it_corner_nor: n_it_corner / n_its_corner, around the ring
 // n_it_layer and n_it_corner themselves come as a 3rd and 4th.
 function f_o_p(n_it_layer_nor, n_it_corner_nor) {
-    let n_amp = o_thread.n_radius;
-    // The belly.
-    n_amp += Math.sin(n_it_layer_nor * n_tau * 0.45) * 18;
-    // Twelve waves, which grow from the thread upwards.
-    n_amp += Math.sin(n_it_corner_nor * n_tau * 12) * 2 * n_it_layer_nor;
-    // Twists the waves by a sixth of a turn.
-    let n_rad_offset = n_it_layer_nor * n_tau / 6;
+    let n_amp = n_radius_bottom
+        + (n_radius_top - n_radius_bottom) * n_it_layer_nor;
+    let n_rad_offset = n_it_layer_nor * n_twist * n_tau;
+
+    // Noise: noise.simplex2(x, y) and noise.simplex3(x, y, z)
+    // return a number from -1 to 1, which changes smoothly from
+    // place to place, about one bump per 1. noise.perlin2() and
+    // noise.perlin3() do the same on a grid of squares, and return
+    // 0 where x, y and z are whole numbers.
+    // Examples, to try without their //:
+    //
+    // Each corner wanders in and out by up to 4 mm.
+    // n_amp += noise.simplex2(n_it_corner_nor * n_its_corner,
+    //     n_it_layer_nor * 3) * 4;
+    //
+    // The twist wobbles by up to a thirtieth of a turn.
+    // n_rad_offset += noise.simplex2(0.5, n_it_layer_nor * 2)
+    //     * n_tau / 30;
+    //
+    // Bumps all around, 3 mm deep, with n_its_corner = 180. Their
+    // x and y go around a circle, so the noise has no seam where
+    // the ring closes.
+    // n_amp += noise.simplex3(
+    //     Math.sin(n_it_corner_nor * n_tau) * 2,
+    //     Math.cos(n_it_corner_nor * n_tau) * 2,
+    //     n_it_layer_nor * 4) * 3;
+    //
+    // Another pattern, from 1 to 65535. Above f_o_p():
+    // noise.seed(7);
 
     return {
         n_x: Math.sin(n_it_corner_nor * n_tau + n_rad_offset) * n_amp,
         n_y: Math.cos(n_it_corner_nor * n_tau + n_rad_offset) * n_amp,
-        n_z: o_thread.n_z + n_it_layer_nor * n_height,
+        n_z: o_thread.n_z + n_height_cone + n_it_layer_nor * n_height,
     };
 }
 
@@ -339,6 +371,39 @@ function f_o_p(n_it_layer_nor, n_it_corner_nor, n_it_layer, n_it_corner) {
     return {
         n_x: Math.sin(n_it_nor_corner * n_tau + n_rad_offset + nof) * n_amp,
         n_y: Math.cos(n_it_nor_corner * n_tau + n_rad_offset + nof) * n_amp,
+        n_z: o_thread.n_z + n_it_layer_nor * n_height,
+    };
+}
+
+return {n_its_layer, n_its_corner, f_o_p};
+`,
+    low_poly_noise: `// stlsculpter's vase_low_poly_noise, with the many faces of its
+// low_poly_vase: layers of twelve corners, 10 mm apart. Noise
+// moves each corner along its ring by up to half a corner, so no
+// two facets are alike.
+
+const n_tau = Math.PI * 2;
+const n_height = 150;
+const n_its_layer = 15;
+const n_its_corner = 12;
+const n_radius_base = o_thread.n_radius;
+
+// Another number, another vase: from 1 to 65535.
+noise.seed(1);
+
+function f_o_p(n_it_layer_nor, n_it_corner_nor) {
+    let n_amp = n_radius_base;
+    n_amp += Math.sin(n_it_layer_nor * 0.95 * n_tau + 0.2) * n_radius_base * .5;
+    let n_noise_layer = (noise.simplex2(
+        (n_it_corner_nor + n_it_layer_nor * 2.),
+        (n_it_corner_nor + n_it_layer_nor * 20.)
+    ) + 1) * .5 * (1. / n_its_corner / 2);
+    n_it_corner_nor += n_noise_layer;
+    let n_rad_offset = 0;
+
+    return {
+        n_x: Math.sin(n_it_corner_nor * n_tau + n_rad_offset) * n_amp,
+        n_y: Math.cos(n_it_corner_nor * n_tau + n_rad_offset) * n_amp,
         n_z: o_thread.n_z + n_it_layer_nor * n_height,
     };
 }
