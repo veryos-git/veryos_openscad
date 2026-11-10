@@ -8,7 +8,8 @@
 // The board lies in the base with the pins down. It rests on a block in each
 // corner, clear of the headers, and the walls locate it. The mounting holes
 // are not used: their distance across the board is not in the drawing. Four
-// legs under the lid's corners hold the board down. A lip under the lid
+// legs under the lid's corners hold the board down. A slit in the floor under
+// each pin row lets the jumper wires' plugs onto the pins from below. A lip under the lid
 // locates it inside the walls. A notch in the wall opposite the USB port lets
 // a fingernail under the lid.
 // push: the lip carries a bead on each long side that snaps into a groove in
@@ -47,6 +48,11 @@ usb_out = 1;
 // Board underside to the pin tips: 13 overall less the board and about 3.2 of
 // parts on top leaves 8.2
 pins_h = 8.2;
+// Pin rows, measured in image.png: distance between the two rows, pins per
+// row, first pin's centre from the USB edge
+pin_row = 25.4;
+pin_n = 15;
+pin_x0 = 9.8;
 
 /* [Box] */
 wall = 2;
@@ -63,6 +69,10 @@ top_room = 5.4;
 // Block under each corner of the board, square, from the wall's inner face.
 // The headers start about 7 mm from the board's ends.
 support = 4.5;
+// Slit in the floor under each pin row, for the wires' plugs: width from the
+// wall's inner face, length beyond the first and last pin's centre
+slit_w = 4.2;
+slit_over = 2;
 
 /* [USB window] */
 // For the plug's overmould (about 12.4 x 6.5), which enters the wall. Open to
@@ -199,13 +209,13 @@ module snap(len, h) {
 module snaps(len, y_in, z) {
     for (m = [0, 1])
         translate([outer_x / 2, m ? outer_y - wall - y_in : wall + y_in, z])
-            mirror([0, m ? 0 : 1, 0]) snap(len, bead_h);
+            rotate(m ? 0 : 180) snap(len, bead_h);
 }
 
 // Outline of the screw bosses on both long walls, also the lid's ears.
 module bosses() {
     difference() {
-        for (m = [0, 1]) translate([outer_x / 2, m ? outer_y : 0]) mirror([0, m, 0]) hull() {
+        for (m = [0, 1]) translate([outer_x / 2, m ? outer_y : 0]) rotate(m * 180) hull() {
             translate([0, -boss_c]) circle(d = boss_d);
             translate([-boss_d / 2, 0]) square([boss_d, 0.1]);
         }
@@ -323,13 +333,17 @@ module base() {
             if (lid_fix == "m3") screw_hole_cut(screw_hole_depth);
             if (lid_fix == "printed") translate([0, 0, -ps_depth]) thread_hole(ps_depth);
         }
+        // slits under the pin rows
+        for (y = [wall, outer_y - wall - slit_w])
+            translate([wall + fit + pin_x0 - slit_over, y, -1])
+                cube([(pin_n - 1) * 2.54 + 2 * slit_over, slit_w, floor_t + 1 + eps]);
         // fingernail notch
         translate([outer_x - wall + 0.8, (outer_y - notch_w) / 2, wall_top - notch_h])
             cube([wall, notch_w, notch_h + 1]);
         // logo, name and version in the bottom, reading from below
         translate([outer_x / 2, outer_y / 2, 0]) mirror([0, 0, 1]) mirror([1, 0, 0]) {
-            translate([0, 4.5, 0]) logo_cut(floor_logo_w);
-            translate([0, -7, -logo_depth]) linear_extrude(logo_depth + 1)
+            translate([0, 3.9, 0]) logo_cut(floor_logo_w);
+            translate([0, -7.6, -logo_depth]) linear_extrude(logo_depth + 1)
                 text(engraving, size = text_size, font = text_font, halign = "center", valign = "center");
         }
     }
@@ -380,11 +394,11 @@ module board() {
         color("dimgray") translate([board_l - 6.2, (board_w - 18) / 2, pcb_t]) cube([6.2, 18, 0.8]);
         // USB-C
         color("silver") translate([-usb_out, (board_w - 9) / 2, pcb_t]) cube([7.4, 9, 3.2]);
-        // headers, 2 x 15
-        for (y = [0.2, board_w - 2.74]) {
-            color("black") translate([(board_l - 38.1) / 2, y, -2.5]) cube([38.1, 2.54, 2.5]);
-            for (k = [0 : 14]) color("gold")
-                translate([(board_l - 38.1) / 2 + 0.95 + 2.54 * k, y + 0.95, -pins_h]) cube([0.64, 0.64, pins_h]);
+        // headers
+        for (y = [(board_w - pin_row) / 2, (board_w + pin_row) / 2]) {
+            color("black") translate([pin_x0 - 1.27, y - 1.27, -2.5]) cube([pin_n * 2.54, 2.54, 2.5]);
+            for (k = [0 : pin_n - 1]) color("gold")
+                translate([pin_x0 + 2.54 * k - 0.32, y - 0.32, -pins_h]) cube([0.64, 0.64, pins_h]);
         }
     }
 }

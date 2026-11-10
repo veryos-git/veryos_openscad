@@ -11,8 +11,12 @@ hand, see `dimensions.png`.
 - The board lies in the base with the pins down, on a block in each corner.
   The walls locate it, four legs under the lid hold it down.
 - USB-C window in one short wall, sized for the plug's overmould.
+- A slit in the floor under each pin row: the jumper wires' plugs go onto the
+  pins from below. The plugs (14 mm) stand about 5.5 mm out of the bottom.
 - A notch in the wall opposite the USB port lets a fingernail under the lid.
 - Vent slots and the VeryOS logo in the lid, logo and version in the bottom.
+
+![bottom](preview_bottom.png)
 
 ## lid fixing
 
@@ -45,6 +49,7 @@ flats with a slot for a coin or screwdriver.
 | USB-C beyond the board's edge | 1 |
 | Height, pin tips to top of the parts | 13 |
 | Mounting holes | 2.8, 47 apart along the board; not used, the distance across is not measured |
+| Pin rows | 2 x 15, first pin 9.8 from the USB edge, measured in `image.png`; rows taken as 25.4 apart |
 
 ## printing
 
@@ -55,7 +60,6 @@ Base as is, lid top face down, printed screws lying on their cut. No support.
 
 ## not in V1
 
-- The pins are closed in, as in the inspiration: the case is for a board
-  running on USB alone.
+- No opening for the onboard LED; its position is not measured.
 - EN and BOOT cannot be pressed with the lid on; their positions are not
   measured.
