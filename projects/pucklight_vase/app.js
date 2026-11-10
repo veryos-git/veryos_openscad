@@ -357,6 +357,33 @@ function code_changed(text) {
 let get_code = () => code;
 let set_code = (text) => {};
 
+// What a script gets and sees, for the editor to offer and to explain: o_thread, noise,
+// and vase_mesh.js's script_functions. And console, to look at a number.
+const script_declarations = `
+declare const console: {log(...data: any[]): void};
+declare const o_thread: {n_radius: number, n_z: number};
+declare const noise: {seed(n_seed: number): void, simplex2(x: number, y: number): number,
+    simplex3(x: number, y: number, z: number): number, perlin2(x: number, y: number): number,
+    perlin3(x: number, y: number, z: number): number};
+${Object.getOwnPropertyNames(Math).map((name) => `declare const ${name}: typeof Math.${name};`).join("\n")}
+/** n - floor(n): fract(3.25) is 0.25 */
+declare function fract(n: number): number;
+/** From a at n = 0 to b at n = 1. */
+declare function mix(a: number, b: number, n: number): number;
+/** n, but not below low and not above high. */
+declare function clamp(n: number, low: number, high: number): number;
+/** 0 up to low, 1 from high on, smooth between. */
+declare function smoothstep(low: number, high: number, n: number): number;
+/** A vector: {n_x, n_y}. */
+declare function vec2(n_x: number, n_y: number): {n_x: number, n_y: number};
+/** A vector: {n_x, n_y, n_z}, as f_o_p() returns one. */
+declare function vec3(n_x: number, n_y: number, n_z: number): {n_x: number, n_y: number, n_z: number};
+/** A vector's length. */
+declare function length(o: {n_x: number, n_y: number, n_z?: number}): number;
+/** From one point to another. If one is a vec2, in x and y only: as seen from above. */
+declare function distance(o_a: {n_x: number, n_y: number, n_z?: number}, o_b: {n_x: number, n_y: number, n_z?: number}): number;
+`;
+
 function start_monaco() {
     // The worker comes from another origin, so it has to start through a data URL.
     const worker = `self.MonacoEnvironment = {baseUrl: "${monaco_url}/"}; importScripts("${monaco_url}/vs/base/worker/workerMain.js");`;
@@ -364,12 +391,12 @@ function start_monaco() {
     require.config({paths: {vs: `${monaco_url}/vs`}});
     require(["vs/editor/editor.main"], () => {
         // A script is a function's body: its return is no mistake, and it gets o_thread
-        // and sees noise.
-        monaco.languages.typescript.javascriptDefaults.setDiagnosticsOptions({diagnosticCodesToIgnore: [1108]});
-        monaco.languages.typescript.javascriptDefaults.addExtraLib("declare const o_thread: {n_radius: number, n_z: number};"
-            + " declare const noise: {seed(n_seed: number): void, simplex2(x: number, y: number): number,"
-            + " simplex3(x: number, y: number, z: number): number, perlin2(x: number, y: number): number,"
-            + " perlin3(x: number, y: number, z: number): number};");
+        // and sees noise and script_functions. Without the browser's own names, of which
+        // length is one: a script's length() is the vector's.
+        const javascript = monaco.languages.typescript.javascriptDefaults;
+        javascript.setDiagnosticsOptions({diagnosticCodesToIgnore: [1108]});
+        javascript.setCompilerOptions({...javascript.getCompilerOptions(), lib: ["esnext"]});
+        javascript.addExtraLib(script_declarations);
         const editor = monaco.editor.create($("editor"), {
             value: code, language: "javascript", theme: "vs-dark", automaticLayout: true,
             minimap: {enabled: false}, scrollBeyondLastLine: false, fontSize: 13, tabSize: 4, lineNumbersMinChars: 3,

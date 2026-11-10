@@ -15,8 +15,21 @@ const examples = {
 // radius o_thread.n_radius, 33.5, at the height o_thread.n_z, 6.6.
 // The app joins it to layer 1 with straight walls. Stay above it:
 // below is the sockel.
+//
+// A script has Math's functions and constants without their
+// "Math.": sin(), cos(), sqrt(), pow(), abs(), min(), max(),
+// floor(), PI and the others. And these:
+//   fract(n)             n - floor(n): fract(3.25) is 0.25
+//   mix(a, b, n)         from a at n = 0 to b at n = 1
+//   clamp(n, a, b)       n, but not below a and not above b
+//   smoothstep(a, b, n)  0 up to a, 1 from b on, smooth between
+//   vec2(x, y)           a vector, {n_x, n_y}
+//   vec3(x, y, z)        {n_x, n_y, n_z}, as f_o_p() returns one
+//   length(o)            a vector's length
+//   distance(o_a, o_b)   from one point to another. If one is a
+//                        vec2, in x and y only: seen from above.
 
-const n_tau = Math.PI * 2;
+const n_tau = PI * 2;
 const n_height = 100;
 const n_its_layer = 120;
 // A regular polygon: with 3 corners a triangle.
@@ -41,8 +54,7 @@ const n_overhang_dome = 60;
 // n_it_corner_nor: n_it_corner / n_its_corner, around the ring
 // n_it_layer and n_it_corner themselves come as a 3rd and 4th.
 function f_o_p(n_it_layer_nor, n_it_corner_nor) {
-    let n_amp = n_radius_bottom
-        + (n_radius_top - n_radius_bottom) * n_it_layer_nor;
+    let n_amp = mix(n_radius_bottom, n_radius_top, n_it_layer_nor);
     let n_rad_offset = n_it_layer_nor * n_twist * n_tau;
 
     // Noise: noise.simplex2(x, y) and noise.simplex3(x, y, z)
@@ -64,16 +76,16 @@ function f_o_p(n_it_layer_nor, n_it_corner_nor) {
     // x and y go around a circle, so the noise has no seam where
     // the ring closes.
     // n_amp += noise.simplex3(
-    //     Math.sin(n_it_corner_nor * n_tau) * 2,
-    //     Math.cos(n_it_corner_nor * n_tau) * 2,
+    //     sin(n_it_corner_nor * n_tau) * 2,
+    //     cos(n_it_corner_nor * n_tau) * 2,
     //     n_it_layer_nor * 4) * 3;
     //
     // Another pattern, from 1 to 65535. Above f_o_p():
     // noise.seed(7);
 
     return {
-        n_x: Math.sin(n_it_corner_nor * n_tau + n_rad_offset) * n_amp,
-        n_y: Math.cos(n_it_corner_nor * n_tau + n_rad_offset) * n_amp,
+        n_x: sin(n_it_corner_nor * n_tau + n_rad_offset) * n_amp,
+        n_y: cos(n_it_corner_nor * n_tau + n_rad_offset) * n_amp,
         n_z: o_thread.n_z + n_height_cone + n_it_layer_nor * n_height,
     };
 }

@@ -17,7 +17,7 @@ The editor comes from the internet; without it a plain text box replaces it.
 |---|---|
 | `index.html` | layout |
 | `app.js` | editor, 3D view, projects, download |
-| `vase_mesh.js` | the thread, the collar and a script's layers as one mesh; `.stl` |
+| `vase_mesh.js` | the thread, the collar and a script's layers as one mesh; the functions a script sees; `.stl` |
 | `noise.js` | `noise` for the scripts: stlsculpter's `perlin2.js`, Stefan Gustavson's simplex and Perlin noise, public domain by its header |
 | `examples.js` | the scripts the editor offers |
 | `server.js` | serves the app and keeps the projects |
@@ -55,7 +55,7 @@ A vase and V3's spheres fit the same sockel.
 
 ## Script
 
-The editor holds the body of a function: it gets `o_thread`, sees `noise`, and returns `{n_its_layer, n_its_corner, f_o_p}`, with `n_height_dome` for a dome on top.
+The editor holds the body of a function: it gets `o_thread`, sees `noise` and the functions below, and returns `{n_its_layer, n_its_corner, f_o_p}`, with `n_height_dome` for a dome on top.
 
 | Name | Is |
 |---|---|
@@ -71,13 +71,27 @@ The editor holds the body of a function: it gets `o_thread`, sees `noise`, and r
 | `noise.perlin2(x, y)`, `noise.perlin3(x, y, z)` | Perlin noise: the same on a grid of squares; 0 where x, y and z are whole numbers |
 | `noise.seed(n)` | another pattern: a whole number from 1 to 65535, or, as in stlsculpter, between 0 and 1 |
 
+| Function | Is |
+|---|---|
+| `sin()`, `cos()`, `sqrt()`, `pow()`, `abs()`, `min()`, `max()`, `floor()`, `PI` and the others | `Math`'s functions and constants, without their `Math.` |
+| `fract(n)` | `n - floor(n)`: `fract(3.25)` is 0.25 |
+| `mix(a, b, n)` | from `a` at `n` = 0 to `b` at `n` = 1 |
+| `clamp(n, low, high)` | `n`, but not below `low` and not above `high` |
+| `smoothstep(low, high, n)` | 0 up to `low`, 1 from `high` on, smooth between |
+| `vec2(x, y)`, `vec3(x, y, z)` | a vector: `{n_x, n_y}`, and `{n_x, n_y, n_z}`, as `f_o_p()` returns one |
+| `length(o)` | a vector's length |
+| `distance(o_a, o_b)` | from one point to another; if one is a `vec2`, in x and y only, as seen from above |
+
+- A script's own `sin` or `fract` takes the place of these: scripts from before keep working. `Math.sin()` works as before.
+- The editor offers them and shows their arguments. It no longer offers the browser's own names, such as `document`; `console.log()` it knows.
+
 | Noise | Minimal example, in `f_o_p()` |
 |---|---|
 | The layers in and out, by up to 3 mm | `n_amp += noise.simplex2(0.5, n_it_layer_nor * 4) * 3;` |
 | Narrower, deeper | multiply what goes in, what comes out |
 | Each corner of a polygon on its own | `n_amp += noise.simplex2(n_it_corner_nor * n_its_corner, n_it_layer_nor * 3) * 4;` |
 | A twist that wobbles | `n_rad_offset += noise.simplex2(0.5, n_it_layer_nor * 2) * n_tau / 30;` |
-| Bumps around the ring without a seam: x and y on a circle | `n_amp += noise.simplex3(Math.sin(n_it_corner_nor * n_tau) * 2, Math.cos(n_it_corner_nor * n_tau) * 2, n_it_layer_nor * 4) * 3;` |
+| Bumps around the ring without a seam: x and y on a circle | `n_amp += noise.simplex3(sin(n_it_corner_nor * n_tau) * 2, cos(n_it_corner_nor * n_tau) * 2, n_it_layer_nor * 4) * 3;` |
 | Another pattern | `noise.seed(7);` above `f_o_p()` |
 
 - The last four are in `template`'s comments, to try without their `//`.
@@ -188,6 +202,9 @@ Vase mode, as V3's `vase_sphere`: see `../pucklight_sphere/readme.md`, Vase mode
 | Projects in headless Chrome: create from an example, save, new, switch with and without unsaved changes, rename, reload on `#<name>`, download, delete down to none | works, console clean; `script.js` holds the editor's text each time |
 | Names the server refuses, from the app: taken, `../x`, `a/b`, `.git`, a space | the status says why, nothing touched |
 | API with `../..`, `a/b`, `.git`, no script, another site's `Origin` and `Host` | refused, nothing touched |
+| `test_vase_mesh.js`: the functions a script sees | `Math`'s without `Math.`; `fract`, `mix`, `clamp`, `smoothstep`, `length` and `distance` give what the table says, `distance` with a `vec2` either way round; a script's own `sin`, `fract`, `length` and `distance` take their place; `template` with `Math`'s own is the same vase |
+| Functions in headless Chrome 154: `template`, every example, and a script from before with its own `fract`, `sin` and `cos` | drawn, nothing marked; typing `smo`, `fra`, `dis`, `len` offers them first; each explained with its arguments |
+| A mistake's line with the functions, also on line 1 and in a script with its own `sin` | found in Chrome 154 and Firefox 157 |
 | Ctrl+S in headless Chrome 154: in the editor after typing, outside it, with caps lock, without a project, opened as a file | saves what the editor holds, also before the view has caught up; without a project asks for a name; as a file nothing; the browser's own save never comes |
 | Opened as a file | project controls off, the rest works |
 | Views in headless Chrome: each view, the section in each, the slider by mouse and by value | drawn as above; the slider's top is 1.0 |

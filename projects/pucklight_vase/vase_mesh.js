@@ -45,13 +45,36 @@ function neck_radius(z, a) {
     return neck_root_r + Math.max(Math.min(ridge, z), z - neck_height);
 }
 
+// What a script sees besides o_thread and noise: Math's functions and constants without
+// their "Math.", and a few of a shader's. A vector is {n_x, n_y} or {n_x, n_y, n_z}, as
+// f_o_p() returns one.
+const script_functions = {
+    ...Object.fromEntries(Object.getOwnPropertyNames(Math).map((name) => [name, Math[name]])),
+    fract: (n) => n - Math.floor(n),
+    mix: (a, b, n) => a + (b - a) * n,
+    clamp: (n, low, high) => Math.min(Math.max(n, low), high),
+    smoothstep: (low, high, n) => {
+        const t = Math.min(Math.max((n - low) / (high - low), 0), 1);
+        return t * t * (3 - 2 * t);
+    },
+    vec2: (n_x, n_y) => ({n_x, n_y}),
+    vec3: (n_x, n_y, n_z) => ({n_x, n_y, n_z}),
+    length: (o) => Math.hypot(o.n_x, o.n_y, o.n_z ?? 0),
+    // n_z counts if both have one: to a vec2 the distance is the one seen from above.
+    distance: (o_a, o_b) => Math.hypot(o_a.n_x - o_b.n_x, o_a.n_y - o_b.n_y,
+        o_a.n_z === undefined || o_b.n_z === undefined ? 0 : o_a.n_z - o_b.n_z),
+};
+
 // Runs a script: the body of a function that returns {n_its_layer, n_its_corner, f_o_p},
 // and n_height_dome and n_overhang_dome if it wants a dome. It gets o_thread, and sees
 // the noise of noise.js, which starts on seed 0 for each script: whatever the script
-// before it seeded, a script makes the same vase.
+// before it seeded, a script makes the same vase. It is a function inside the one that
+// has script_functions, so its own sin or fract takes the place of these. Its first
+// line stays the third, for the app's error_line().
 function run_script(code) {
     noise.seed(0);
-    return new Function("o_thread", code)({...o_thread});
+    return new Function(...Object.keys(script_functions), `return function (o_thread) {${code}\n}`)(
+        ...Object.values(script_functions))({...o_thread});
 }
 
 // The vase of what a script returns. positions has x, y, z per point; indices has three
