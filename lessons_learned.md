@@ -8,6 +8,8 @@ Diameter clearance = added to the hole diameter, not per side.
 
 | Date | Fit | Part | Hole | Result | Printer / material |
 |---|---|---|---|---|---|
+| 2026-11-10 | Snap lid: lip inside the walls, per side; 45 degree bead on the lip in a groove in a 2.0 wall | esp32_unofficial enclosure V1 | lip 0.2; bead 0.6 proud, 0.4 into the wall, 20 long | untested | ? |
+| 2026-11-10 | ESP32-WROOM-32 clone board (52 × 28.6) between the walls of its case, per side | esp32_unofficial enclosure V1 | 0.3 | untested | ? |
 | 2026-11-10 | ESP32-S3 WROOM-1 board in the pocket of its printed case | OMM enclosure, pocket of V3 to V6 | 64.55 × 28.55, header slots 3.3 | fits | ? |
 | 2026-11-10 | Slide holder's rounded groove mouths on the X slider's ring, per side | OMM XY table v2.5 | 0.4 | untested | ? |
 | 2026-11-10 | Slide holder's grooves on the X slider ring's 4.0 wall | OMM XY table v2.4 | 4.8 (+0.8) | barely goes on. Not the width: the grooves' square mouths overlap the ring's rounded inner corners by 0.85 at four places | ? |
