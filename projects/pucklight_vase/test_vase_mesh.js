@@ -1,7 +1,7 @@
 // Copyright (C) Jonas Immanuel Frey - Licensed under GPL
 // Checks vase_mesh.js against ../pucklight_sphere/pucklight_sphereV3.scad: its thread is
 // the vase mode sphere's, as OpenSCAD exports it, and its collar ends above the ribs in
-// the sockel's cup. Then every example: closed, on the same thread.
+// the sockel's cup. Then every example: closed, on the same thread. Then the dome.
 // Run: node test_vase_mesh.js
 
 const assert = require("assert");
@@ -161,6 +161,56 @@ for (const corners of [3, 5, 180, 500]) {
 }
 console.log("ok  3 to 500 corners, clockwise and counter-clockwise: closed, the same volume");
 
+/* ---- The dome ---- */
+
+const faces_without_area = ({positions: p, indices: t}) => {
+    let count = 0;
+    for (let i = 0; i < t.length; i += 3) {
+        const [a, b, c] = [t[i] * 3, t[i + 1] * 3, t[i + 2] * 3];
+        const u = [p[b] - p[a], p[b + 1] - p[a + 1], p[b + 2] - p[a + 2]];
+        const v = [p[c] - p[a], p[c + 1] - p[a + 1], p[c + 2] - p[a + 2]];
+        if (Math.hypot(u[1] * v[2] - u[2] * v[1], u[2] * v[0] - u[0] * v[2], u[0] * v[1] - u[1] * v[0]) < 1e-9) count++;
+    }
+    return count;
+};
+const top_z = ({positions: p}) => p[p.length - 1];
+// A round vase of radius 40, 60 high, its corners running the given way.
+const round = (dome, turn = 1) => ({n_its_layer: 20, n_its_corner: 90, ...dome, f_o_p: (layer, corner) => ({
+    n_x: 40 * Math.cos(turn * corner * 2 * Math.PI), n_y: 40 * Math.sin(turn * corner * 2 * Math.PI), n_z: collar_top + 60 * layer})});
+const flat = vase_mesh(round({}));
+assert.equal(top_z(flat), Math.fround(collar_top + 60));
+assert.deepEqual(vase_mesh(round({n_height_dome: 0})), flat, "a dome of 0 is no dome");
+// The cone alone, from radius 40 at 60 degrees, is 23.09 high.
+for (const [height, overhang, rings, steepest] of [[40, 60, 19, 60], [40, 45, 0, 45], [30, 45, 0, 53.13], [20, 60, 0, 63.43],
+    [23.1, 60, 1, 60], [30, 89, 30, 89], [300, 60, 29, 60]]) {
+    for (const turn of [1, -1]) {
+        const name = `dome ${height} high, ${overhang} degrees, turning ${turn}`;
+        const mesh = vase_mesh(round({n_height_dome: height, n_overhang_dome: overhang}, turn));
+        assert_closed(mesh, name);
+        assert.equal(faces_without_area(mesh), 0, `${name}: a face without area`);
+        assert.equal((mesh.indices.length - flat.indices.length) / 3, rings * 90 * 2, `${name}: rings`);
+        assert(Math.abs(top_z(mesh) - (collar_top + 60 + height)) < 1e-4, `${name}: the tip's height`);
+        // Of the dome alone: its faces follow the vase's. The steepest lies between two
+        // corners, so it is a little less steep than at a corner.
+        assert.equal(mesh.walls[1], mesh.indices.length, `${name}: the dome counts as a wall`);
+        const {angle} = steepest_wall({...mesh, walls: [flat.walls[1], mesh.indices.length]});
+        assert(angle <= steepest + 0.01 && angle > steepest - 0.2, `${name}: steepest wall ${angle}`);
+        const below = vase_mesh(round({}, turn)).positions;
+        assert.deepEqual(mesh.positions.subarray(0, below.length - 3), below.subarray(0, below.length - 3),
+            `${name}: the dome moved the vase below it`);
+    }
+}
+// Without overhang the default is 60. A flat top does not count as a wall.
+assert.deepEqual(vase_mesh(round({n_height_dome: 40})), vase_mesh(round({n_height_dome: 40, n_overhang_dome: 60})));
+assert.equal(flat.walls[1], flat.indices.length - 90 * 3);
+// On a shape that is not round, with a last layer that is not flat: closed.
+const star = {n_its_layer: 4, n_its_corner: 10, n_height_dome: 30, f_o_p: (layer, corner, n_layer, n_corner) => ({
+    n_x: 7 + (n_corner % 2 ? 20 : 45) * Math.cos(corner * 2 * Math.PI), n_y: (n_corner % 2 ? 20 : 45) * Math.sin(corner * 2 * Math.PI),
+    n_z: collar_top + 40 * layer + (n_corner % 2 ? 4 : 0)})};
+assert_closed(vase_mesh(star), "dome on a star");
+assert.equal(faces_without_area(vase_mesh(star)), 0);
+console.log("ok  dome: round up to its overhang, then a cone to the tip at its height; lower than the cone, a steeper cone");
+
 // What a script must not do.
 const good = {n_its_layer: 2, n_its_corner: 4, f_o_p: (layer, corner) => ({
     n_x: 30 * Math.cos(corner * 2 * Math.PI), n_y: 30 * Math.sin(corner * 2 * Math.PI), n_z: 10 * layer + collar_top})};
@@ -175,6 +225,12 @@ for (const [bad, message] of [
     [{...good, f_o_p: () => ({n_x: 1, n_y: NaN, n_z: 10})}, /n_y = NaN/],
     [{...good, f_o_p: () => undefined}, /n_x = undefined/],
     [{...good, f_o_p: () => ({n_x: 1, n_y: 1, n_z: 6})}, /below o_thread.n_z/],
+    [{...good, n_height_dome: -1}, /n_height_dome/],
+    [{...good, n_height_dome: "5"}, /n_height_dome/],
+    [{...good, n_height_dome: NaN}, /n_height_dome/],
+    [{...good, n_height_dome: 5, n_overhang_dome: 0}, /n_overhang_dome/],
+    [{...good, n_height_dome: 5, n_overhang_dome: 90}, /n_overhang_dome/],
+    [{...good, n_overhang_dome: "steep"}, /n_overhang_dome/],
 ]) assert.throws(() => vase_mesh(bad), message);
 assert.throws(() => run_script("return {"), SyntaxError);
 // A script cannot change what the next one sees.

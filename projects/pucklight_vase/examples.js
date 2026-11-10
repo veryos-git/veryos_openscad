@@ -17,9 +17,15 @@ const examples = {
 // below is the sockel.
 
 const n_tau = Math.PI * 2;
-const n_height = 120;
+const n_height = 100;
 const n_its_layer = 120;
 const n_its_corner = 180;
+// The app closes the last layer with a dome this high. 0 leaves
+// the top flat. The dome is round up to where its wall leans
+// n_overhang_dome from vertical, in degrees. From there a straight
+// cone goes on to the tip: a single wall cannot lie flat.
+const n_height_dome = 35;
+const n_overhang_dome = 60;
 
 // n_it_layer_nor: n_it_layer / n_its_layer, 1 on the top layer
 // n_it_corner_nor: n_it_corner / n_its_corner, around the ring
@@ -40,7 +46,10 @@ function f_o_p(n_it_layer_nor, n_it_corner_nor) {
     };
 }
 
-return {n_its_layer, n_its_corner, f_o_p};
+return {
+    n_its_layer, n_its_corner, f_o_p,
+    n_height_dome, n_overhang_dome,
+};
 `,
     egg: `// An egg that closes on top: a preset to put a pattern on.
 //

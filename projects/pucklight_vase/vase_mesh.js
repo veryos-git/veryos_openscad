@@ -4,7 +4,8 @@
 // "vase_sphere", with its names, so the vase screws into V3's sockel, and a collar that
 // reaches past the ribs in the sockel's cup. Copy changes to the thread over by hand;
 // test_vase_mesh.js compares the two. Everything above the collar is a script's: its
-// f_o_p() is called for each corner of each layer.
+// f_o_p() is called for each corner of each layer. On top the last layer is closed
+// flat, or, if the script asks for one, with a dome.
 //
 // Units: mm and degrees. z = 0 is the print bed, and the floor of the sockel's cup.
 
@@ -30,6 +31,8 @@ const thread_rows = Math.ceil((neck_height + thread_depth) / (thread_pitch / 20)
 const collar_top = 6.6;
 // More points than this in a script's shape only freeze the browser.
 const max_points = 2000000;
+// A dome has a ring every dome_step degrees along its ellipse.
+const dome_step = 3;
 
 // What a script sees: the fixed part's top ring, where its shape starts.
 const o_thread = {n_radius: neck_d / 2, n_z: collar_top};
@@ -42,27 +45,33 @@ function neck_radius(z, a) {
     return neck_root_r + Math.max(Math.min(ridge, z), z - neck_height);
 }
 
-// Runs a script: the body of a function that returns {n_its_layer, n_its_corner, f_o_p}.
+// Runs a script: the body of a function that returns {n_its_layer, n_its_corner, f_o_p},
+// and n_height_dome and n_overhang_dome if it wants a dome.
 function run_script(code) {
     return new Function("o_thread", code)({...o_thread});
 }
 
 // The vase of what a script returns. positions has x, y, z per point; indices has three
 // per triangle, counter-clockwise from outside. The first fixed points are the thread's
-// and the collar's. walls is the range in indices of the script's walls, without the top.
+// and the collar's. walls is the range in indices of the script's walls and its dome,
+// without a flat top.
 function vase_mesh(script) {
-    const {n_its_layer: layers, n_its_corner: corners, f_o_p: point} = script ?? {};
+    const {n_its_layer: layers, n_its_corner: corners, f_o_p: point,
+        n_height_dome: dome_height = 0, n_overhang_dome: dome_overhang = 60} = script ?? {};
     if (typeof point !== "function") throw new Error("the script must return {n_its_layer, n_its_corner, f_o_p}");
     if (!Number.isInteger(layers) || layers < 1) throw new Error(`n_its_layer must be a whole number from 1, not ${layers}`);
     if (!Number.isInteger(corners) || corners < 3) throw new Error(`n_its_corner must be a whole number from 3, not ${corners}`);
     if (layers * corners > max_points) throw new Error(`n_its_layer x n_its_corner is ${layers * corners}: more than ${max_points} points`);
+    if (!Number.isFinite(dome_height) || dome_height < 0) throw new Error(`n_height_dome must be 0 or more, not ${dome_height}`);
+    if (!(dome_overhang > 0 && dome_overhang < 90)) throw new Error(`n_overhang_dome must be above 0 and below 90, not ${dome_overhang}`);
 
-    // The fixed rings, the bottom's centre, the script's rings, the top's centre.
+    // The fixed rings, the bottom's centre, the script's rings, the dome's rings, the top's
+    // centre. How many rings the dome has shows only below: this holds the most there are.
     const fixed_rings = thread_rows + 2;
     const bottom = fixed_rings * columns;
     const fixed = bottom + 1;
-    const top = fixed + layers * corners;
-    const positions = new Float32Array((top + 1) * 3);
+    const last = fixed + (layers - 1) * corners;
+    const positions = new Float32Array((last + (1 + 90 / dome_step) * corners + 1) * 3);
 
     for (let c = 0; c < columns; c++) {
         const a = c * 360 / columns;
@@ -85,10 +94,37 @@ function vase_mesh(script) {
             positions.set([p.n_x, p.n_y, p.n_z], (fixed + (layer - 1) * corners + corner) * 3);
         }
     }
-    const last = fixed + (layers - 1) * corners;
+
+    // The top: the last layer's centre, or the tip of a dome above it. In a dome the last
+    // layer shrinks towards its centre along an ellipse, up to where its wall leans
+    // dome_overhang from vertical. A single wall cannot lie flat, so from there a straight
+    // cone goes on to the tip. cone is the height of that cone alone, from the last
+    // layer's farthest corner: a dome lower than it is a cone, and steeper.
+    const centre = [0, 0, 0];
     for (let corner = 0; corner < corners; corner++) {
-        for (let k = 0; k < 3; k++) positions[top * 3 + k] += positions[(last + corner) * 3 + k] / corners;
+        for (let k = 0; k < 3; k++) centre[k] += positions[(last + corner) * 3 + k] / corners;
     }
+    let radius = 0;
+    for (let corner = 0; corner < corners; corner++) {
+        radius = Math.max(radius, Math.hypot(positions[(last + corner) * 3] - centre[0], positions[(last + corner) * 3 + 1] - centre[1]));
+    }
+    const cone = radius / Math.tan(dome_overhang / deg_per_rad);
+    const ellipse = Math.sqrt(Math.max(0, dome_height ** 2 - cone ** 2));
+    const sweep = Math.atan2(ellipse, cone) * deg_per_rad;
+    const dome_rows = Math.ceil(sweep / dome_step);
+    for (let row = 1; row <= dome_rows; row++) {
+        const a = row * sweep / dome_rows;
+        for (let corner = 0; corner < corners; corner++) {
+            for (let k = 0; k < 3; k++) {
+                positions[(last + row * corners + corner) * 3 + k] = centre[k]
+                    + (positions[(last + corner) * 3 + k] - centre[k]) * cos_d(a) + (k === 2 ? ellipse * sin_d(a) : 0);
+            }
+        }
+    }
+    // The dome's rings count as layers from here on.
+    const rings = layers + dome_rows;
+    const top = fixed + rings * corners;
+    positions.set([centre[0], centre[1], centre[2] + dome_height], top * 3);
 
     // The thread's columns run counter-clockwise, seen from above. A script's corners may
     // run either way and start anywhere: corner_id() counts them counter-clockwise from
@@ -107,7 +143,7 @@ function vase_mesh(script) {
     const turn = area < 0 ? corners - 1 : 1;
     const corner_id = (layer, j) => fixed + (layer - 1) * corners + (start + turn * j) % corners;
 
-    const indices = new Uint32Array((columns * fixed_rings + corners * layers) * 2 * 3);
+    const indices = new Uint32Array((columns * fixed_rings + corners * rings) * 2 * 3);
     let n = 0;
     const face = (a, b, c) => {
         indices[n++] = a;
@@ -134,16 +170,16 @@ function vase_mesh(script) {
             j++;
         }
     }
-    for (let layer = 1; layer < layers; layer++) {
+    for (let layer = 1; layer < rings; layer++) {
         for (let j = 0; j < corners; j++) {
             face(corner_id(layer, j), corner_id(layer + 1, j + 1), corner_id(layer + 1, j));
             face(corner_id(layer, j), corner_id(layer, j + 1), corner_id(layer + 1, j + 1));
         }
     }
-    const walls_end = n;
-    for (let j = 0; j < corners; j++) face(corner_id(layers, j), corner_id(layers, j + 1), top);
+    const walls_end = dome_height > 0 ? indices.length : n;
+    for (let j = 0; j < corners; j++) face(corner_id(rings, j), corner_id(rings, j + 1), top);
 
-    return {positions, indices, fixed, walls: [walls_start, walls_end]};
+    return {positions: positions.subarray(0, (top + 1) * 3), indices, fixed, walls: [walls_start, walls_end]};
 }
 
 // The script's wall that leans most, in or out: its angle from vertical, and its height.
