@@ -1,7 +1,8 @@
 // Copyright (C) Jonas Immanuel Frey - Licensed under GPL
-// The scripts the editor offers. template explains what a script is; the others are
-// vases of stlsculpter (https://github.com/jonasfrey/stlsculpter), with their formulas
-// and names, put on the thread. A new example: add an entry here.
+// The scripts the editor offers. template explains what a script is, and egg is a
+// preset that closes on top; the others are vases of stlsculpter
+// (https://github.com/jonasfrey/stlsculpter), with their formulas and names, put on
+// the thread. A new example: add an entry here.
 
 const examples = {
     template: `// The lamp's shape above the thread, as a solid for a slicer's
@@ -36,6 +37,61 @@ function f_o_p(n_it_layer_nor, n_it_corner_nor) {
         n_x: Math.sin(n_it_corner_nor * n_tau + n_rad_offset) * n_amp,
         n_y: Math.cos(n_it_corner_nor * n_tau + n_rad_offset) * n_amp,
         n_z: o_thread.n_z + n_it_layer_nor * n_height,
+    };
+}
+
+return {n_its_layer, n_its_corner, f_o_p};
+`,
+    egg: `// An egg that closes on top: a preset to put a pattern on.
+//
+// Below its widest ring it is half an ellipse, n_height_bottom high,
+// which starts on the thread's ring. Above, half an ellipse
+// n_height_top high. A single wall cannot lie flat, so the egg is
+// round up to where its wall leans n_overhang, and from there a
+// straight cone closes it. Lower is safer and more pointed.
+
+const n_tau = Math.PI * 2;
+const n_its_layer = 160;
+const n_its_corner = 180;
+const n_radius = 48;
+const n_height_bottom = 52;
+const n_height_top = 80;
+// From vertical, in degrees.
+const n_overhang = 60;
+// The top layer. Not 0: its faces would have no area.
+const n_radius_tip = 0.4;
+
+// The widest ring, the ring where the cone starts, and the top.
+const n_z_widest = o_thread.n_z + n_height_bottom
+    * Math.sqrt(1 - Math.pow(o_thread.n_radius / n_radius, 2));
+const n_tan = Math.tan(n_overhang / 360 * n_tau);
+const n_rad_cone = Math.atan(n_height_top * n_tan / n_radius);
+const n_radius_cone = n_radius * Math.cos(n_rad_cone);
+const n_z_cone = n_z_widest + n_height_top * Math.sin(n_rad_cone);
+const n_z_top = n_z_cone + (n_radius_cone - n_radius_tip) / n_tan;
+
+// The egg's radius at the height n_z.
+let f_n_radius = function(n_z) {
+    if (n_z > n_z_cone) {
+        return n_radius_cone - (n_z - n_z_cone) * n_tan;
+    }
+    let n_height = (n_z < n_z_widest) ? n_height_bottom : n_height_top;
+    let n_nor = (n_z - n_z_widest) / n_height;
+    return n_radius * Math.sqrt(1 - n_nor * n_nor);
+}
+
+function f_o_p(n_it_layer_nor, n_it_corner_nor) {
+    let n_z = o_thread.n_z + n_it_layer_nor * (n_z_top - o_thread.n_z);
+    let n_amp = f_n_radius(n_z);
+    // A pattern goes here, for example ribs that fade out at both ends:
+    // n_amp += Math.sin(n_it_corner_nor * n_tau * 12)
+    //     * Math.sin(n_it_layer_nor * n_tau / 2);
+    let n_rad_offset = 0;
+
+    return {
+        n_x: Math.sin(n_it_corner_nor * n_tau + n_rad_offset) * n_amp,
+        n_y: Math.cos(n_it_corner_nor * n_tau + n_rad_offset) * n_amp,
+        n_z: n_z,
     };
 }
 

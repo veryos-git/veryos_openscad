@@ -47,6 +47,7 @@ The editor holds the body of a function: it gets `o_thread` and returns `{n_its_
 - Corners may run either way around the axis and start anywhere; all layers the same way.
 - At most 2 000 000 points.
 - The last layer is closed with a face. Vase mode leaves it open.
+- A shape that closes on top ends in a cone to a small last layer, as `egg`: a single wall cannot lie flat.
 - A mistake shows in the status and, with its line, in the editor; the last good vase stays.
 - The app keeps no scripts: copy yours out of the editor. A new example: add an entry to `examples.js`.
 
@@ -61,11 +62,12 @@ Gold in the view. `f_o_p()` is not called for it.
 
 ## Examples
 
-`template` explains the script. The others are stlsculpter's, with their formulas and names: the radius starts on the thread's 33.5 instead of `n_radius_base`, or on a cone, and z on `o_thread.n_z`.
+`template` explains the script. `egg` is a preset to put a pattern on. The others are stlsculpter's, with their formulas and names: the radius starts on the thread's 33.5 instead of `n_radius_base`, or on a cone, and z on `o_thread.n_z`.
 
 | Example | stlsculpter's | Layers × corners | Triangles | High × wide | Steepest wall |
 |---|---|---|---|---|---|
 | `template` | `template.js`, changed | 120 × 180 | 61200 | 126.6 × 105.2 | 28° at z = 126 |
+| `egg` | none | 160 × 180 | 75600 | 128.3 × 96.0 | 60° at z = 124: its cone |
 | `exponential_twist` | `vase_exponential_twist.js` | 100 × 400 | 98000 | 106.6 × 87.0 | 51° at z = 39 |
 | `wild_bend` | `vase_wild_bend.js` | 120 × 300 | 90000 | 126.6 × 97.5 | 49° at z = 7 |
 | `four_pillars` | `vase_four_pillars.js` | 120 × 500 | 138000 | 132.6 × 98.6 | 52° at z = 73 |
@@ -85,6 +87,7 @@ Vase mode, as V3's `vase_sphere`: see `../pucklight_sphere/readme.md`, Vase mode
 | Brim | outer, 5 mm | the first layer is one line |
 
 - Steepest wall, in the status: how far a wall of the script leans in or out, from vertical. 45° is safe.
+- `egg` closes at 60°, its `n_overhang`, as V3's `vase_sphere` at its `vase_overhang`.
 - Beyond 45°, from V3's table, overlap per layer of a 0.6 mm line at 0.2 mm layers: 52% at 55°, 42% at 60°, 29% at 65°, 8% at 70°.
 - Screw it in gently: the thread is a single line.
 - Hypothesis, not tried: 2 walls, 0 top and bottom layers and 0% infill instead of vase mode give a sturdier thread.
@@ -114,7 +117,7 @@ Vase mode, as V3's `vase_sphere`: see `../pucklight_sphere/readme.md`, Vase mode
 
 ## Not tested yet
 
-- Not sliced, not printed. Most open: the thread as a single wall in V3's cup, and the examples' walls of up to 52°.
+- Not sliced, not printed. Most open: the thread as a single wall in V3's cup, the examples' walls of up to 52°, and the egg's tip.
 - Only on software WebGL in Chrome: no real GPU. Firefox: only the mistake's line.
 
 ## Not included
