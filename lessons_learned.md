@@ -30,6 +30,7 @@ Diameter clearance = added to the hole diameter, not per side.
 
 ## Rules
 
+- A rail's end that leaves its slot within the travel gets a lead-in: chamfer the vertical edges of the rail's ends (0.6 on a 2.0 rail) and the slot's ends (0.2). The OMM XY table's rebuild had left Onshape's rail chamfers out up to v3.0.1; the user: they are important (2026-11-10).
 - Yaw play of a slider on rails = clearance / guided length along the travel: 0.2 over 61 mm is ±0.19°, ±0.3 mm 90 mm away from the guide. A second rail beside the first does not change it; a longer guide, or a second rail at the far end of the slider, does. *From the geometry (OMM XY table v2.6, 2026-11-10), not yet confirmed by a print.*
 - Inside difference() or intersection(), wrap a for() in union(). The online renderer (openscad.ochafik.com) runs with lazy union: a bare for() counts as separate children, so the second screw boss of the esp32_unofficial enclosure was subtracted instead of added. OpenSCAD 2021.01 does not show it (2026-11-10).
 - A wall beside a pin header hides what wire sits on what pin. Leave the side open where the wiring has to be checked: the OMM enclosure's ESP32 pocket had full walls up to V6, V7 drops the one toward the drivers (2026-11-10).

@@ -1,6 +1,6 @@
 # OMM XY table
 
-Motorised XY stage of the open microscope motorization: moves a standard 76 × 25 × 1 mm glass slide in X and Y with two 28BYJ-48 steppers. `omm_xy_table_v3p0p1.scad` rebuilds the Onshape document OMM_v2 (engraved label v2.3) in OpenSCAD, with the same parts and Onshape's variable names; where a value differs from Onshape, the tables below say so. v2.4 is printed, the later versions not yet. The Y slider's second guide rail, since v2.6, is experimental.
+Motorised XY stage of the open microscope motorization: moves a standard 76 × 25 × 1 mm glass slide in X and Y with two 28BYJ-48 steppers. `omm_xy_table_v3p0p2.scad` rebuilds the Onshape document OMM_v2 (engraved label v2.3) in OpenSCAD, with the same parts and Onshape's variable names; where a value differs from Onshape, the tables below say so. v2.4 is printed, the later versions not yet. The Y slider's second guide rail, since v2.6, is experimental.
 
 ![assembly](preview.png)
 
@@ -8,9 +8,9 @@ Motorised XY stage of the open microscope motorization: moves a standard 76 × 2
 
 | File | What |
 |---|---|
-| `omm_xy_table_v3p0p1.scad` | the generator, standalone, no libraries. `part` picks the assembly, the print layout or one part. `version` is engraved in the table; bump it with the file name |
-| `omm_xy_table_v3p0p1_<part>.stl` | every printed part and the cutting ruler, exported from the generator in print orientation with the brand font |
-| `archive/` | v2.4 to v3.0.0, script and STLs. Each change to the generator makes a new version file; the old one stays |
+| `omm_xy_table_v3p0p2.scad` | the generator, standalone, no libraries. `part` picks the assembly, the print layout or one part. `version` is engraved in the table; bump it with the file name |
+| `omm_xy_table_v3p0p2_<part>.stl` | every printed part and the cutting ruler, exported from the generator in print orientation with the brand font |
+| `archive/` | v2.4 to v3.0.1, script and STLs. Each change to the generator makes a new version file; the old one stays |
 | `OMM_v2_rebuild_kit.zip` | Onshape export, source of every dimension: feature trees, sketches, variables, STEP, STL, DXF, renders and the kit's own README |
 | `omm_params.scad` | the Onshape Variable Studio, 1:1 from the kit |
 | `Onshape_online_CAD_version/` | Onshape print files OMM_v2p2.3mf and OMM_v2p3.3mf |
@@ -20,6 +20,24 @@ Motorised XY stage of the open microscope motorization: moves a standard 76 × 2
 | small | the third number: v3.0.1, v3.0.2 |
 | bigger | the second: v3.1.0, v3.2.0 |
 | substantial | the first: v4.0.0 |
+
+## v3.0.2 against v3.0.1
+
+The table, the Y slider and the X slider changed. The chamfers are lead-ins: within the travel a rail's end leaves its slot and has to find it again.
+
+| Asked for | v3.0.1 | v3.0.2 |
+|---|---|---|
+| The rails' edge chamfers, as Onshape's three `railchamfer` features | square ends | `rail_end_chamfer` = 0.6 on the four vertical edges at the ends of every male rail: the table's two Y rails and the Y slider's X rail taper from 2.0 to 0.8 over their last 0.6 |
+| | square slot ends | `slot_end_chamfer` = 0.2 at both ends of the X slider's slot, on the walls and on the mouth's faces |
+
+| Checked against | Result |
+|---|---|
+| Onshape export, Y slider's X rail | the same corners to 0.001 |
+| Onshape export, X slider's slot ends | the same sections at 12 heights, within 0.002 mm² |
+| `OMM_v2p2.3mf`, table's rail | 0.6 at both ends there too; in Onshape's current model that chamfer fails with the rail |
+| seated in the model | no overlap at Y −13, −1, 0, +8.7, +15, +28 and at X −45, −20, −1, 0, +1, +20, +45; 0.1 per side on the rails' full width |
+
+The table's rails now end square to their axis, at −86.15 where the front edge's scallops reach and at −16.85 at the window's chamfer: 69.3 long, 68.1 of it at full width. The Y slider's arms have no chamfer on their slots, as in Onshape.
 
 ## v3.0.1 against v3.0.0
 
@@ -94,14 +112,14 @@ Only the slide holder and the table's label changed; the other parts print as in
 | adapter's crush ribs | pitch 0.695, the rows 0.2 off centre | pitch 0.7, centred |
 | label | Onshape font | DejaVu Sans Mono Bold, same size and place, 0.4 deep |
 | VeryOS logo | none | table (16 wide) and Y slider (12 wide); no room on the X slider, slide holder, adapter and washer |
-| 0.2–0.6 edge chamfers on the rails | yes | left out |
+| 0.2–0.6 edge chamfers on the rails | yes | left out up to v3.0.1, in since v3.0.2 |
 | three 0.05 deep grooves on the adapter | yes | left out up to v3.0.0, in since v3.0.1 |
 
 Volumes against Onshape: Y slider −0.3 %, X slider +0.1 %, slide holder +0.7 %, adapter and washer equal, table +0.2 % with its rail.
 
 ## How it works
 
-All parts share one optical axis. Each carriage slides on the part below on a printed rail: a 2 × 2 male rail with 45° chamfers up to a top flat one extrusion width wide, in a slot 0.1 wider per side and 0.1 higher.
+All parts share one optical axis. Each carriage slides on the part below on a printed rail: a 2 × 2 male rail with 45° chamfers up to a top flat one extrusion width wide, in a slot 0.1 wider per side and 0.1 higher. The ends of the male rails and of the X slider's slot are chamfered as lead-ins.
 
 | Part | Moves | Rides on |
 |---|---|---|
