@@ -1,6 +1,6 @@
 # OMM XY table
 
-Motorised XY stage of the open microscope motorization: moves a standard 76 × 25 × 1 mm glass slide in X and Y with two 28BYJ-48 steppers. `omm_xy_table_v2p7.scad` rebuilds the Onshape document OMM_v2 (engraved label v2.3) in OpenSCAD, with the same parts and Onshape's variable names; where a value differs from Onshape, the tables below say so. v2.4 is printed, v2.5 to v2.7 not yet. The Y slider's second guide rail, since v2.6, is experimental.
+Motorised XY stage of the open microscope motorization: moves a standard 76 × 25 × 1 mm glass slide in X and Y with two 28BYJ-48 steppers. `omm_xy_table_v3p0p0.scad` rebuilds the Onshape document OMM_v2 (engraved label v2.3) in OpenSCAD, with the same parts and Onshape's variable names; where a value differs from Onshape, the tables below say so. v2.4 is printed, the later versions not yet. The Y slider's second guide rail, since v2.6, is experimental.
 
 ![assembly](preview.png)
 
@@ -8,12 +8,27 @@ Motorised XY stage of the open microscope motorization: moves a standard 76 × 2
 
 | File | What |
 |---|---|
-| `omm_xy_table_v2p7.scad` | the generator, standalone, no libraries. `part` picks the assembly, the print layout or one part. `version` is engraved in the table; bump it with the file name |
-| `omm_xy_table_v2p7_<part>.stl` | every printed part, exported from the generator in print orientation with the brand font |
-| `archive/` | v2.4 to v2.6, script and STLs. Each change to the generator makes a new version file; the old one stays |
+| `omm_xy_table_v3p0p0.scad` | the generator, standalone, no libraries. `part` picks the assembly, the print layout or one part. `version` is engraved in the table; bump it with the file name |
+| `omm_xy_table_v3p0p0_<part>.stl` | every printed part and the cutting ruler, exported from the generator in print orientation with the brand font |
+| `archive/` | v2.4 to v2.7, script and STLs. Each change to the generator makes a new version file; the old one stays |
 | `OMM_v2_rebuild_kit.zip` | Onshape export, source of every dimension: feature trees, sketches, variables, STEP, STL, DXF, renders and the kit's own README |
 | `omm_params.scad` | the Onshape Variable Studio, 1:1 from the kit |
 | `Onshape_online_CAD_version/` | Onshape print files OMM_v2p2.3mf and OMM_v2p3.3mf |
+
+| Change | Next version after v3.0.0 |
+|---|---|
+| small | v3.0.1 |
+| bigger | v3.1.0 |
+| substantial | v4.0.0 |
+
+## v3.0.0 against v2.7
+
+Only the table's label changed; the cutting ruler is new.
+
+| Asked for | v2.7 | v3.0.0 |
+|---|---|---|
+| A ruler to cut the sanding paper strips for the tops of the rails | – | `cutting_ruler`, see sanding paper strips below |
+| The two parallel Y guides count as a major version | label v2.7 | label v3.0.0, three numbers from here on |
 
 ## v2.7 against v2.6
 
@@ -84,9 +99,28 @@ All parts share one optical axis. Each carriage slides on the part below on a pr
 | X slider | X | the Y slider's rail, with its 100 long female rail |
 | slide holder | with the X slider | the ring's two short walls, in its 4.8 wide grooves; lifts off to change the slide |
 
-Drive, as read from the geometry (the Onshape document does not describe it): a 28BYJ-48 hangs on each bracket with two M3 screws through the slotted uprights, 35 apart like the motor's ears. Its shaft is horizontal, 8 below the motor's axis. The shaft adapter rolls on the top of the moving female rail and drives it by friction; the slots set the motor's height and with it the pressure. `part = "assembly"` shows both motors in place, the motor's axis 15.15 above the sliding face.
+Drive, as read from the geometry (the Onshape document does not describe it): a 28BYJ-48 hangs on each bracket with two M3 screws through the slotted uprights, 35 apart like the motor's ears. Its shaft is horizontal, 8 below the motor's axis. The shaft adapter rolls on the top of the moving female rail and drives it by friction; the slots set the motor's height and with it the pressure. `part = "assembly"` shows both motors in place, the motor's axis 15.15 above the sliding face. As built: an O-ring on each shaft adapter and a strip of sanding paper on the top of each driven rail; neither is in the model.
 
 Travel in the model: Y from −13, where the fillet at the first arm's root meets the table's bracket, to about +28, where the arm's end passes the adapter. `table_motor_y` shifts this range, `y_arm_len` widens it. X about ±45 before the rail's end passes the adapter.
+
+## Sanding paper strips
+
+![cutting ruler](cutting_ruler.png)
+
+`part = "cutting_ruler"`: a 55 × 124 × 3 plate with one window per strip. The windows are the tops of the driven rails, without allowance.
+
+| Window | Size | Strip for |
+|---|---|---|
+| X, left | 7.5 × 100 | the top of the X slider's rail |
+| Y, right | 7.5 × 66.25 | the top of the Y slider's first arm, from the frame to the arm's rounded end; the second arm is not driven |
+
+| Step | What |
+|---|---|
+| 1 | sanding paper grit down on a cutting mat |
+| 2 | ruler on the paper's back, pressed down with the flat hand |
+| 3 | knife along all four walls of a window, the blade flat against the wall |
+
+Expected, not tried yet: a strip about 0.5 smaller than its window, half the blade's thickness per side, so it stays inside the rail's top.
 
 ## Print
 
@@ -98,10 +132,11 @@ Travel in the model: Y from −13, where the fillet at the first arm's root meet
 | slide holder | 1 | as is, grooves open to the bed |
 | motor shaft adapter | 2 | closed end down |
 | washer | 4 | flat |
+| cutting ruler | 1 | flat; a tool, not in the print layout |
 
 `part = "print_layout"` puts all parts on a 256 × 256 bed (Bambu A1, as `OMM_v2p3.3mf`). 0.2 mm layers, no supports. The table's 1 mm top chamfer is built in 0.2 steps, one per layer.
 
-Not printed: 2 × 28BYJ-48 with their ULN2003 drivers (in the enclosure, `../enclosure/`), 4 × M3 screw and nut through the motor's ears and the slots, length not given by Onshape, a 76 × 25 × 1 glass slide.
+Not printed: 2 × 28BYJ-48 with their ULN2003 drivers (in the enclosure, `../enclosure/`), 4 × M3 screw and nut through the motor's ears and the slots, length not given by Onshape, a 76 × 25 × 1 glass slide, 2 O-rings for the shaft adapters and sanding paper, sizes not in the model.
 
 ## Check before printing
 
@@ -118,4 +153,4 @@ Onshape's values. Printed in v2.4: the slide holder on the X slider, see `lesson
 
 ## Customize
 
-Every Onshape variable is a Customizer parameter with its Onshape name, grouped by part, except `scl_y_table`, which follows the Y motor. The slide's size sets the slide holder; `scl_y_slide` also sets the X slider's ring and the distance of the rails from the axis, as in Onshape. `thickness_y_slider_frame` and `thickness_table_frame` set the windows, the `[Rails]` group all rails and their clearance, `[Motor bracket]` the uprights. `y_rail2_x` places the Y slider's second arm and its table rail: keep it clear of the first arm and of the label. `table_motor_y` places the Y motor: 1 further from the window is 1 more Y travel toward the motor and 1 less away from it. The table's front edge follows; the print layout fits the 256 bed down to −68. `x_rail_end` is a measured position, not derived: check it after changing sizes.
+Every Onshape variable is a Customizer parameter with its Onshape name, grouped by part, except `scl_y_table`, which follows the Y motor. The slide's size sets the slide holder; `scl_y_slide` also sets the X slider's ring and the distance of the rails from the axis, as in Onshape. `thickness_y_slider_frame` and `thickness_table_frame` set the windows, the `[Rails]` group all rails and their clearance, `[Motor bracket]` the uprights. `y_rail2_x` places the Y slider's second arm and its table rail: keep it clear of the first arm and of the label. `table_motor_y` places the Y motor: 1 further from the window is 1 more Y travel toward the motor and 1 less away from it. The table's front edge follows; the print layout fits the 256 bed down to −68. `x_rail_end` is a measured position, not derived: check it after changing sizes. The cutting ruler's windows follow `scl_x_rail_outer`, `scl_z_rail` and `y_arm_len`.
