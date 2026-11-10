@@ -1,6 +1,6 @@
 # OMM enclosure
 
-Box for the electronics of the open microscope motorization: an ESP32-S3 WROOM-1 dev board, three ULN2003 driver boards and a breadboard power rail. Replaces the food box in `current_setup/`. V6, not printed yet.
+Box for the electronics of the open microscope motorization: an ESP32-S3 WROOM-1 dev board, three ULN2003 driver boards and a breadboard power rail. Replaces the food box in `current_setup/`. V7, not printed yet. Printed before V7: the ESP32 fits its pocket.
 
 ![assembly](preview.png)
 
@@ -10,14 +10,22 @@ Box for the electronics of the open microscope motorization: an ESP32-S3 WROOM-1
 
 | File | What |
 |---|---|
-| `omm_enclosureV6.scad` | the generator, standalone, no libraries. `version` at its top is engraved in every part with the project's name; bump it with the file name |
-| `omm_enclosureV6_base.stl`, `omm_enclosureV6_lid.stl` | exported from the generator with the brand font, for slicers and viewers without DejaVu |
+| `omm_enclosureV7.scad` | the generator, standalone, no libraries. `version` at its top is engraved in every part with the project's name; bump it with the file name |
+| `omm_enclosureV7_base.stl`, `omm_enclosureV7_lid.stl` | exported from the generator with the brand font, for slicers and viewers without DejaVu |
 | `archive/` | every earlier version, script and STLs. Each change to the generator makes a new version file; the old one stays |
 | `readme_hgc.md` | original goal |
 | `current_setup/` | photos of the setup it replaces |
 | `image*.png` | the boards, with the ULN2003 drawing |
 | `../ESP32_S3_WROOM_Case.stl` | printed case that fits the ESP32 board, source of the pocket in the generator |
 | `DXF_ESP32-S3-DevKitC-1_V1.1_20220429.dxf` | Espressif's drawing of the official board, source of V1 and V2's cradle, which the board did not fit |
+
+## V7 against V6
+
+Only the base changed; the lid differs in the engraved version. A printed V6 base becomes a V7 by cutting that wall out.
+
+| Asked for | V6 | V7 |
+|---|---|---|
+| See what wire sits on what pin of the ESP32, on the side toward the drivers | the pocket's side wall stands in front of that header, from the floor to 2 above the board; only the wire windows are open | no side wall beside the pins, only a 9 long stub at the antenna end: all 22 pins, their wires and the board's edge above them are in sight from the drivers' side. The board stays between the far wall, the stub and its own headers, which straddle the rails |
 
 ## V6 against V5
 
@@ -59,7 +67,7 @@ The walls and the lid's edge carry the ribs of the XY table (`current_setup/xy_t
 
 | Part | Where | Held by |
 |---|---|---|
-| ESP32-S3 WROOM-1 board | left, along the depth, USB-C ports at the back wall | the pocket of `ESP32_S3_WROOM_Case.stl`, 64.55 × 28.55 between 2 mm walls, 30 mm above the floor: the board rests on a 0.95 wide rail beside each header, the headers hang in 3.3 wide slots along the walls, open to the floor so the jumper wires fit on the pins below; three windows under the board through the wall on the drivers' side and both rails let the wires out toward the drivers' IN pins; the slots end 7 mm before the end wall and stop the headers; the lid's four pillars press on the module's can and the USB-C shells, the only flat spots on top |
+| ESP32-S3 WROOM-1 board | left, along the depth, USB-C ports at the back wall | the pocket of `ESP32_S3_WROOM_Case.stl`, 64.55 × 28.55 between 2 mm walls, 30 mm above the floor: the board rests on a 0.95 wide rail beside each header, the headers hang 3.3 wide beside the rails, open to the floor so the jumper wires fit on the pins below; toward the drivers the pocket has no side wall beside the pins, so that header and its wires stay in sight; three windows under the board through both rails let the far header's wires out toward the drivers' IN pins; the slots end 7 mm before the end wall and stop the headers; the lid's four pillars press on the module's can and the USB-C shells, the only flat spots on top |
 | 3 × ULN2003 | row at the right, JST plugs toward the back, IN pins toward the ESP32 | Ø6 × 5 standoffs on the 29.6 × 26.6 hole pattern, M3 × 6 thread forming |
 | power rail | along the front wall, under the drivers | the pocket of the driver board holder in `current_setup/`, measured in its STL: 82.1 × 9.7, 8 deep, with a notch for the rail's chaining tab and the side jogs for its dovetails, so it fits one way round only; a 4 mm slit through each end wall, open to the top, lets the 5 V cables out of the rail's end holes |
 | lid | 4 × M3 × 10 into the corner posts | lip inside the walls, tabs in the four cable slots: fits one way round only |
@@ -68,7 +76,8 @@ The walls and the lid's edge carry the ribs of the XY table (`current_setup/xy_t
 |---|---|---|
 | USB-C window | back wall, both ports | 27 × 8: both plugs' overmoulds together span the board's width |
 | motor cable slot | back wall, behind each JST plug | 16 wide, open to the top for the plug; the lid's tab closes it to 5 mm |
-| wire windows | ESP32 pocket, the wall on the drivers' side and both rails, under the board | 3 × 14 wide, 4 apart, 14 high to a 45° roof that peaks at 21; the wires leave above the first driver board |
+| open side | ESP32 pocket, toward the drivers | 57.55 long from the back wall to the slot's end block, floor to top |
+| wire windows | ESP32 pocket, both rails, under the board | 3 × 14 wide, 4 apart, 14 high to a 45° roof that peaks at 21; the far header's wires leave above the first driver board |
 | supply cable slot | front wall, between the ESP32 pocket and the rail pocket, in line with the rail's left slit | 8 wide, open to the top; the lid's tab closes it to 5 mm |
 | feet | bottom, four corners | Ø10 × 1 recess for stick-on feet |
 | logo | lid top 40 wide, floor 15 wide between the drivers and the rail | 0.6 deep |
