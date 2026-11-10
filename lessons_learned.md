@@ -8,6 +8,7 @@ Diameter clearance = added to the hole diameter, not per side.
 
 | Date | Fit | Part | Hole | Result | Printer / material |
 |---|---|---|---|---|---|
+| 2026-11-10 | O-rings with a 2 cord in three grooves on the 28BYJ-48 shaft adapter, Ø6.3 sleeve | OMM XY table v3.0.1 | grooves R1, 0.05 deep, 2 apart, as in Onshape | untested in a print of the script; the user runs O-rings on the Onshape print's adapters | ? |
 | 2026-11-10 | Sanding paper strip cut with a knife inside a window of the cutting ruler, for a 7.5 wide rail top | OMM XY table v3.0.0, cutting ruler | window 7.5 × 100, no allowance | untested; expected strip about 0.5 smaller, half the blade's thickness per side | ? |
 | 2026-11-10 | Y slider's two slots on the table's two rails, 15 apart, total | OMM XY table v2.6 | 2.2 on 2.0 (+0.2) each | untested | ? |
 | 2026-11-10 | Y slider's slot on the table's one rail, total, guided 69 long | OMM XY table, Onshape print with round windows (as OMM_v2p2.3mf) | 2.2 on 2.0 (+0.2) | slides; the Y slider wiggles sideways at the X motor when pushed by hand | ? |
