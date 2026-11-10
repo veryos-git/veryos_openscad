@@ -89,6 +89,24 @@ Gold in the view. `f_o_p()` is not called for it.
 | Thread | 0 to 4.8 | V3's `vase_sphere`: Ø67, 2 mm pitch, 45° flanks, 180 columns, a row every 0.1 mm |
 | Collar | 4.8 to 6.6 | cylinder Ø67; the ribs in the sockel's cup end at 6.19, so a script cannot reach them |
 
+## View
+
+![the views, on a template with fewer layers and corners](views.png)
+
+| Control | Does |
+|---|---|
+| drag, wheel | orbit, zoom |
+| view: `shaded` | the mesh as it is exported, one normal per triangle; what is fixed in gold |
+| view: `edges` | the triangles' edges on it |
+| view: `vertices` | the points on it |
+| view: `x-ray` | shows through: outlines, also of the back and the inside |
+| view: `lean` | the script's walls that lean over 45° from vertical in orange, over 60° in red; what is fixed in grey |
+| slider | section: hides what is above its height, from 0.0, the bed, to 1.0, the top; above it the number, and z in mm |
+
+- The section works in every view. The inside is darker.
+- `lean` has half a degree to spare, so a dome made for 60° stays orange. A flat top is red: vase mode leaves it open.
+- A fine mesh is black with edges or vertices from afar: zoom in.
+
 ## Examples
 
 `template` explains the script. `egg` is a preset to put a pattern on. The others are stlsculpter's, with their formulas and names: the radius starts on the thread's 33.5 instead of `n_radius_base`, or on a cone, and z on `o_thread.n_z`.
@@ -147,6 +165,7 @@ Vase mode, as V3's `vase_sphere`: see `../pucklight_sphere/readme.md`, Vase mode
 | Names the server refuses, from the app: taken, `../x`, `a/b`, `.git`, a space | the status says why, nothing touched |
 | API with `../..`, `a/b`, `.git`, no script, another site's `Origin` and `Host` | refused, nothing touched |
 | Opened as a file | project controls off, the rest works |
+| Views in headless Chrome: each view, the section in each, the slider by mouse and by value | drawn as above; the slider's top is 1.0 |
 | A mistake's line | found in Chrome 154 and Firefox 157 |
 
 ## Not tested yet

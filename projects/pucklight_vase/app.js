@@ -10,6 +10,11 @@ const background = [0.082, 0.106, 0.114];
 // The fixed part, and what the script makes.
 const thread_color = [0.94, 0.72, 0.31];
 const shape_color = [0.97, 0.95, 0.9];
+// Edges and vertices, drawn on the faces.
+const mark_color = [0.06, 0.08, 0.09];
+// How the view shows the vase, and what the faces' shader makes of it: 0 lit, 1 seen
+// through, 2 lit and coloured where a wall leans far from vertical.
+const looks = {shaded: 0, edges: 0, vertices: 0, "x-ray": 1, lean: 2};
 // Waits this long after the last key before running the script, in ms.
 const typing_pause = 400;
 
@@ -29,37 +34,74 @@ gl.attachShader(mesh_program, compile(gl.VERTEX_SHADER, `#version 300 es
 in vec3 a_position;
 uniform mat4 u_view, u_projection;
 uniform int u_fixed;
-uniform vec3 u_thread_color, u_shape_color;
-out vec3 v_position;
-flat out vec3 v_color;
+uniform float u_point_size, u_lift;
+out vec3 v_view;
+out vec3 v_world;
+flat out float v_fixed;
 void main() {
     vec4 p = u_view * vec4(a_position, 1.0);
-    v_position = p.xyz;
-    v_color = gl_VertexID < u_fixed ? u_thread_color : u_shape_color;
+    // Edges and vertices come a little towards the eye, so they show on their faces.
+    p.xyz *= 1.0 - u_lift;
+    v_view = p.xyz;
+    v_world = a_position;
+    v_fixed = gl_VertexID < u_fixed ? 1.0 : 0.0;
     gl_Position = u_projection * p;
+    gl_PointSize = u_point_size;
 }`));
 gl.attachShader(mesh_program, compile(gl.FRAGMENT_SHADER, `#version 300 es
 precision highp float;
-in vec3 v_position;
-flat in vec3 v_color;
+in vec3 v_view;
+in vec3 v_world;
+flat in float v_fixed;
+uniform int u_look;
+uniform float u_cut;
+uniform vec3 u_thread_color, u_shape_color, u_mark_color;
 out vec4 out_color;
 void main() {
+    // The section: nothing above its height.
+    if (v_world.z > u_cut) discard;
+    // An edge or a vertex.
+    if (u_look == 3) {
+        out_color = vec4(u_mark_color, 1.0);
+        return;
+    }
     // One normal per triangle: shows the mesh as it will be exported.
-    vec3 n = normalize(cross(dFdx(v_position), dFdy(v_position)));
+    vec3 n = normalize(cross(dFdx(v_view), dFdy(v_view)));
+    vec3 color = v_fixed > 0.5 ? u_thread_color : u_shape_color;
+    if (u_look == 1) {
+        // Seen through: a face shows the more, the more it is seen from its side.
+        float side = 1.0 - abs(n.z);
+        out_color = vec4(color, 0.05 + 0.5 * side * side);
+        return;
+    }
+    if (u_look == 2) {
+        // How far the script's walls lean from vertical: over 45 degrees orange, over 60
+        // red, with half a degree for a wall made to lean just that far.
+        float lean = degrees(asin(min(abs(normalize(cross(dFdx(v_world), dFdy(v_world))).z), 1.0)));
+        color = v_fixed > 0.5 ? vec3(0.4) : lean > 60.5 ? vec3(0.88, 0.25, 0.2) : lean > 45.5 ? vec3(0.95, 0.55, 0.15) : color;
+    }
     float light = max(dot(n, normalize(vec3(-0.45, 0.6, 0.65))), 0.0);
-    out_color = vec4(v_color * (0.3 + 0.7 * light), 1.0);
+    // The inside, which a section shows, is darker.
+    out_color = vec4(color * (0.3 + 0.7 * light) * (gl_FrontFacing ? 1.0 : 0.6), 1.0);
 }`));
 gl.linkProgram(mesh_program);
 
-const mesh_vao = gl.createVertexArray();
+// The faces and the edges share the points.
 const position_buffer = gl.createBuffer();
 const index_buffer = gl.createBuffer();
-gl.bindVertexArray(mesh_vao);
-gl.bindBuffer(gl.ARRAY_BUFFER, position_buffer);
-gl.enableVertexAttribArray(gl.getAttribLocation(mesh_program, "a_position"));
-gl.vertexAttribPointer(gl.getAttribLocation(mesh_program, "a_position"), 3, gl.FLOAT, false, 0, 0);
-gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, index_buffer);
-gl.bindVertexArray(null);
+const edge_buffer = gl.createBuffer();
+function points_with(indices) {
+    const vao = gl.createVertexArray();
+    gl.bindVertexArray(vao);
+    gl.bindBuffer(gl.ARRAY_BUFFER, position_buffer);
+    gl.enableVertexAttribArray(gl.getAttribLocation(mesh_program, "a_position"));
+    gl.vertexAttribPointer(gl.getAttribLocation(mesh_program, "a_position"), 3, gl.FLOAT, false, 0, 0);
+    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indices);
+    gl.bindVertexArray(null);
+    return vao;
+}
+const mesh_vao = points_with(index_buffer);
+const edge_vao = points_with(edge_buffer);
 
 // The last vase a script made.
 let mesh = null;
@@ -71,6 +113,7 @@ const half_view = 15;
 
 function set_mesh(made) {
     mesh = made;
+    edges_made = false;
     gl.bindVertexArray(mesh_vao);
     gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, mesh.indices, gl.STATIC_DRAW);
     gl.bindVertexArray(null);
@@ -86,6 +129,29 @@ function set_mesh(made) {
     }
     camera.target = [0, 0, mesh.height / 2];
     camera.radius = Math.hypot(mesh.width / 2, mesh.height / 2);
+}
+
+// The mesh's edges, each once: made when the view first shows them.
+let edges_made = false;
+function make_edges() {
+    const t = mesh.indices;
+    // A closed mesh has three edges for every two triangles.
+    const edges = new Uint32Array(t.length);
+    let n = 0;
+    for (let i = 0; i < t.length; i += 3) {
+        for (let k = 0; k < 3; k++) {
+            const [a, b] = [t[i + k], t[i + (k + 1) % 3]];
+            // The triangle on the edge's other side has it the other way round.
+            if (a < b) {
+                edges[n++] = a;
+                edges[n++] = b;
+            }
+        }
+    }
+    gl.bindVertexArray(edge_vao);
+    gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, edges, gl.STATIC_DRAW);
+    gl.bindVertexArray(null);
+    edges_made = true;
 }
 
 function fit_view() {
@@ -121,9 +187,11 @@ function draw() {
     gl.clearColor(...background, 1);
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
     if (!mesh) return;
-    gl.enable(gl.DEPTH_TEST);
+    const look = $("look").value;
+    const cut = +$("cut").value;
+    $("cut_value").textContent = `${cut.toFixed(3)}\nz ${(cut * mesh.height).toFixed(1)}`;
+
     gl.useProgram(mesh_program);
-    gl.bindVertexArray(mesh_vao);
     const uniform = (name) => gl.getUniformLocation(mesh_program, name);
     gl.uniformMatrix4fv(uniform("u_view"), false, view_matrix(camera.az, camera.el, camera.distance));
     gl.uniformMatrix4fv(uniform("u_projection"), false, perspective_matrix(canvas.width / canvas.height,
@@ -131,7 +199,30 @@ function draw() {
     gl.uniform1i(uniform("u_fixed"), mesh.fixed);
     gl.uniform3fv(uniform("u_thread_color"), thread_color);
     gl.uniform3fv(uniform("u_shape_color"), shape_color);
+    gl.uniform3fv(uniform("u_mark_color"), mark_color);
+    gl.uniform1f(uniform("u_point_size"), 4 * dpr);
+    // At 1 the section leaves everything, also the top itself.
+    gl.uniform1f(uniform("u_cut"), cut < 1 ? cut * mesh.height : Infinity);
+
+    // The faces. Seen through, they add up, whatever lies in front.
+    gl.blendFunc(gl.SRC_ALPHA, gl.ONE);
+    for (const [capability, on] of [[gl.DEPTH_TEST, look !== "x-ray"], [gl.BLEND, look === "x-ray"]]) {
+        if (on) gl.enable(capability);
+        else gl.disable(capability);
+    }
+    gl.uniform1i(uniform("u_look"), looks[look]);
+    gl.uniform1f(uniform("u_lift"), 0);
+    gl.bindVertexArray(mesh_vao);
     gl.drawElements(gl.TRIANGLES, mesh.indices.length, gl.UNSIGNED_INT, 0);
+
+    gl.uniform1i(uniform("u_look"), 3);
+    gl.uniform1f(uniform("u_lift"), 0.002);
+    if (look === "edges") {
+        if (!edges_made) make_edges();
+        gl.bindVertexArray(edge_vao);
+        gl.drawElements(gl.LINES, mesh.indices.length, gl.UNSIGNED_INT, 0);
+    }
+    if (look === "vertices") gl.drawArrays(gl.POINTS, 0, mesh.positions.length / 3);
     gl.bindVertexArray(null);
 }
 
@@ -164,6 +255,10 @@ $("view").addEventListener("wheel", (e) => {
     request_draw();
 }, {passive: false});
 new ResizeObserver(request_draw).observe($("right"));
+
+for (const name of Object.keys(looks)) $("look").add(new Option(name));
+$("look").addEventListener("change", request_draw);
+$("cut").addEventListener("input", request_draw);
 
 /* ---- Updating ---- */
 
