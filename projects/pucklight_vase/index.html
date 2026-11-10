@@ -25,8 +25,12 @@
     display: flex; flex-direction: column; gap: 10px; min-height: 0; height: 100vh;
     padding: 14px 16px; background: var(--panel); border-right: 1px solid var(--line);
   }
-  .row { display: flex; align-items: center; gap: 6px; }
-  .row select { flex: 1; padding: 5px 8px; }
+  .row { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+  .row > label { flex: none; width: 58px; }
+  .row select { flex: 1; min-width: 110px; padding: 5px 8px; }
+  .row button { padding: 4px 8px; }
+  button:disabled, select:disabled { opacity: .4; cursor: default; border-color: var(--line); }
+  #project_save.dirty { border-color: var(--accent); color: var(--accent); }
   #logo { width: 34px; margin-left: 10px; color: var(--ink); }
   #editor { flex: 1 1 0; min-height: 120px; border: 1px solid var(--line); overflow: hidden; }
   #editor textarea {
@@ -51,8 +55,16 @@
 <body>
 <section id="left">
   <div class="row">
+    <label for="project">project</label>
+    <select id="project"></select>
+    <button id="project_new" title="New project, as a copy of this one">new</button>
+    <button id="project_save">save</button>
+    <button id="project_rename">rename</button>
+    <button id="project_delete">delete</button>
+  </div>
+  <div class="row">
     <label for="example">example</label>
-    <select id="example"></select>
+    <select id="example" title="Puts an example's script into the editor"><option value="" hidden></option></select>
     <svg id="logo" viewBox="0 0 43.9095293518 31.2528266758" role="img" aria-label="VeryOS logo"><path fill="currentColor" fill-rule="evenodd" d="M 7.7528133542 9.1080260785 L 4.6193976626 1.5432914191 L 0 3.4567085809 L 11.5135290962 31.2528266758 L 32.3960002556 31.2528266758 L 43.9095293518 3.4567085809 L 39.2901316892 1.5432914191 L 36.1567159975 9.1080260785 A 15.6264133379 15.6264133379 0 0 0 7.7528133542 9.1080260785 Z M 30.9694268093 21.2528266758 A 10.6264133379 10.6264133379 0 0 0 21.9547646759 5 A 4.0632066689 4.0632066689 0 0 0 21.9547646759 13.1264133379 A 9.0632066689 9.0632066689 0 0 1 30.9694268093 21.2528266758 Z M 12.9401025425 10 A 9.0632066689 9.0632066689 0 0 0 21.9547646759 18.1264133379 A 4.0632066689 4.0632066689 0 0 1 21.9547646759 26.2528266758 A 10.6264133379 10.6264133379 0 0 1 12.9401025425 10 Z"/></svg>
   </div>
   <div id="editor"></div>

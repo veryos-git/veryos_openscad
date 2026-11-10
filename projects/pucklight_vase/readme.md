@@ -1,6 +1,6 @@
 # Pucklight vase
 
-Webapp: a script in an editor places the corners of each layer, and the app puts them on the thread of the pucklight sphere, so the vase screws into the same sockel. Downloads `.stl`, a solid for a slicer's vase mode. Original description: `readme_hgc.md`.
+Webapp: a script in an editor places the corners of each layer, and the app puts them on the thread of the pucklight sphere, so the vase screws into the same sockel. Keeps its scripts in named projects. Downloads `.stl`, a solid for a slicer's vase mode. Original description: `readme_hgc.md`.
 
 ![the app](preview.png)
 
@@ -8,14 +8,20 @@ Webapp: a script in an editor places the corners of each layer, and the app puts
 
 | Start | |
 |---|---|
-| Open `index.html` in a browser | no server, nothing to install; the editor comes from the internet, without it a plain text box replaces it |
+| `deno task start` in this folder, then http://localhost:8766 | everything; reachable from this computer only |
+| Open `index.html` in a browser | no Deno needed, no projects, the rest works |
+
+The editor comes from the internet; without it a plain text box replaces it.
 
 | File | What |
 |---|---|
 | `index.html` | layout |
-| `app.js` | editor, 3D view, download |
+| `app.js` | editor, 3D view, projects, download |
 | `vase_mesh.js` | the thread, the collar and a script's layers as one mesh; `.stl` |
 | `examples.js` | the scripts the editor offers |
+| `server.js` | serves the app and keeps the projects |
+| `deno.json` | the `start` task |
+| `projects/` | the projects, for git to track: `<name>/script.js` |
 | `test_vase_mesh.js` | `node test_vase_mesh.js`; needs `openscad` |
 | `stlsculpter/` | inspiration, not in git: a clone of github.com/jonasfrey/stlsculpter |
 
@@ -27,6 +33,24 @@ Webapp: a script in an editor places the corners of each layer, and the app puts
 | Sockel, screwin, click base | `../pucklight_sphere/pucklight_sphereV3.scad`, `part = "sockel"`, `"screwin"`, `"clickbase"` |
 
 A vase and V3's spheres fit the same sockel.
+
+## Projects
+
+| | Control | On disk |
+|---|---|---|
+| Create | new: a copy of what is in the editor, under a new name | `projects/<name>/script.js` |
+| Read | the project list; the address `#<name>` opens it again after a reload | |
+| Update | save; a `*` in the list means unsaved | `script.js` |
+| Update | rename | the folder moves |
+| Delete | delete, asks first | the folder goes |
+
+- A project holds its script, as it is in the editor. Other files in its folder, such as a `.3mf`, stay.
+- example puts an example's script into the editor: in a project that is a change to it, to save, or to keep as a new project with new.
+- Without a project, save asks for a name.
+- A name has letters, digits, spaces, `_` and `-`, and is the folder's name.
+- Opening another project or example, or closing the page, with unsaved changes asks first.
+- API: `GET /api/projects`, and `GET`, `POST`, `PUT`, `PATCH`, `DELETE /api/projects/<name>`, the script as `{"code": ...}`.
+- The server writes to `projects/` only, listens on localhost only, and refuses requests from other web pages.
 
 ## Script
 
@@ -49,7 +73,7 @@ The editor holds the body of a function: it gets `o_thread` and returns `{n_its_
 - The last layer is closed with a face. Vase mode leaves it open.
 - A shape that closes on top ends in a cone to a small last layer, as `egg`: a single wall cannot lie flat.
 - A mistake shows in the status and, with its line, in the editor; the last good vase stays.
-- The app keeps no scripts: copy yours out of the editor. A new example: add an entry to `examples.js`.
+- A new example: add an entry to `examples.js`.
 
 ## What is fixed
 
@@ -113,6 +137,10 @@ Vase mode, as V3's `vase_sphere`: see `../pucklight_sphere/readme.md`, Vase mode
 | Same, pushed 0.5 mm down, and turned half a turn without rising | contact, so the check finds one |
 | App in headless Chrome 154: typing, mistakes, examples, the question before discarding a changed script, orbit, zoom, download | works, console clean; the `.stl` has the bytes Node makes |
 | Without the internet | the text box replaces the editor, the rest works |
+| Projects in headless Chrome: create from an example, save, new, switch with and without unsaved changes, rename, reload on `#<name>`, download, delete down to none | works, console clean; `script.js` holds the editor's text each time |
+| Names the server refuses, from the app: taken, `../x`, `a/b`, `.git`, a space | the status says why, nothing touched |
+| API with `../..`, `a/b`, `.git`, no script, another site's `Origin` and `Host` | refused, nothing touched |
+| Opened as a file | project controls off, the rest works |
 | A mistake's line | found in Chrome 154 and Firefox 157 |
 
 ## Not tested yet
@@ -122,7 +150,6 @@ Vase mode, as V3's `vase_sphere`: see `../pucklight_sphere/readme.md`, Vase mode
 
 ## Not included
 
-- Saving scripts, as the projects of `../pucklight_sphere/mathematical`.
 - stlsculpter's vases with noise: they need its Perlin noise library.
 - A normal mode vase with a thick neck, as V3's `sphere`: the inside would need its own surface.
 

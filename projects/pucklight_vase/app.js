@@ -1,7 +1,7 @@
 // Copyright (C) Jonas Immanuel Frey - Licensed under GPL
 // The app around vase_mesh.js: the editor holds a script, whose f_o_p() places the
-// corners of the layers above the thread, and the view shows the vase it makes.
-// See readme.md.
+// corners of the layers above the thread, and the view shows the vase it makes. A
+// project keeps a script under a name, through server.js. See readme.md.
 
 const $ = (id) => document.getElementById(id);
 
@@ -225,6 +225,7 @@ function schedule_update() {
 let typing_timer = null;
 
 function code_changed(text) {
+    paint_project();
     clearTimeout(typing_timer);
     if (text === code) return;
     show_status("updating, please wait...", "busy");
@@ -274,34 +275,182 @@ function start_textarea() {
 
 /* ---- Examples ---- */
 
-// The example in the editor, and whether the script is still as it came.
+// The example the script came from, or "" for a project's script. saved_code is that
+// script as it came, or as it is on disk: leaving a changed one asks first.
 let example = "template";
-const edited = () => get_code() !== examples[example];
+let saved_code = code;
+const is_dirty = () => get_code() !== saved_code;
+
+// Puts another script into the editor, and shows its vase whole.
+function load_code(text) {
+    clearTimeout(typing_timer);
+    code = text;
+    set_code(text);
+    fit_pending = true;
+    schedule_update();
+}
 
 for (const name of Object.keys(examples)) $("example").add(new Option(name));
+$("example").value = example;
 $("example").addEventListener("change", () => {
-    if (edited() && !confirm(`Discard your changes to ${example}?`)) {
+    if (is_dirty() && !confirm(`Discard the changes in ${project ?? example}?`)) {
         $("example").value = example;
         return;
     }
     example = $("example").value;
-    clearTimeout(typing_timer);
-    code = examples[example];
-    set_code(code);
-    fit_pending = true;
-    schedule_update();
+    load_code(examples[example]);
+    // In a project the example is a change to it, to save or not.
+    if (project === null) saved_code = code;
+    paint_project();
 });
-// The app keeps no scripts: a changed one is gone with the page.
 addEventListener("beforeunload", (e) => {
-    if (edited()) e.preventDefault();
+    if (is_dirty()) e.preventDefault();
 });
+
+/* ---- Projects: a name and its script, kept by server.js ---- */
+
+// The name of the open project.
+let project = null;
+let project_names = [];
+
+function paint_project() {
+    const dirty = is_dirty();
+    for (const option of $("project").options) option.text = dirty && option.value === project ? `${project} *` : option.value;
+    $("project_save").classList.toggle("dirty", dirty);
+    $("project_rename").disabled = project === null;
+    $("project_delete").disabled = project === null;
+}
+
+async function api(method, path, body) {
+    const response = await fetch(`api/projects${path}`, {method, body, cache: "no-store"});
+    const result = await response.json();
+    if (!response.ok) throw new Error(result.error);
+    return result;
+}
+
+const project_path = (name) => `/${encodeURIComponent(name)}`;
+
+async function refresh_projects() {
+    project_names = await api("GET", "");
+    $("project").replaceChildren(...project_names.map((name) => new Option(name, name)));
+    $("project").value = project;
+}
+
+// What is in the editor now is what is on disk.
+function mark_saved() {
+    saved_code = get_code();
+    history.replaceState(null, "", project === null ? location.pathname : `#${encodeURIComponent(project)}`);
+    paint_project();
+}
+
+// The editor's script belongs to this project now, not to an example.
+function set_project(name) {
+    project = name;
+    example = "";
+    $("example").value = "";
+}
+
+async function open_project(name) {
+    const {code: script} = await api("GET", project_path(name));
+    set_project(name);
+    $("project").value = name;
+    load_code(script);
+    mark_saved();
+}
+
+const store = (name, method) => api(method, project_path(name), JSON.stringify({code: get_code()}));
+
+async function new_project() {
+    const name = prompt("Name of the new project? It starts as a copy of this one.");
+    if (!name) return;
+    await store(name, "POST");
+    set_project(name);
+    await refresh_projects();
+    mark_saved();
+    show_status(`created ${name}`);
+}
+
+async function save_project() {
+    if (project === null) return new_project();
+    await store(project, "PUT");
+    mark_saved();
+    show_status(`saved ${project}`);
+}
+
+async function rename_project() {
+    const wanted = prompt("New name?", project);
+    if (!wanted || wanted === project) return;
+    const {name} = await api("PATCH", project_path(project), JSON.stringify({name: wanted}));
+    project = name;
+    await refresh_projects();
+    history.replaceState(null, "", `#${encodeURIComponent(name)}`);
+    paint_project();
+}
+
+async function delete_project() {
+    if (!confirm(`Delete the project ${project}?`)) return;
+    await api("DELETE", project_path(project));
+    const deleted = project;
+    project = null;
+    await refresh_projects();
+    if (project_names.length) {
+        await open_project(project_names[0]);
+    } else {
+        // Without a project the editor holds an example.
+        example = "template";
+        $("example").value = example;
+        load_code(examples[example]);
+        mark_saved();
+    }
+    show_status(`deleted ${deleted}`);
+}
+
+async function switch_project() {
+    const name = $("project").value;
+    if (is_dirty() && !confirm(`Discard the changes in ${project}?`)) {
+        $("project").value = project;
+        return;
+    }
+    await open_project(name);
+}
+
+// Without a server, as when opening index.html as a file, there are no projects.
+async function start_projects() {
+    if (location.protocol === "file:") {
+        for (const id of ["project", "project_new", "project_save", "project_rename", "project_delete"]) {
+            $(id).disabled = true;
+            $(id).title = "Projects need the server: deno task start";
+        }
+        return;
+    }
+    await refresh_projects();
+    const wanted = decodeURIComponent(location.hash.slice(1));
+    const first = project_names.includes(wanted) ? wanted : project_names[0];
+    if (first) await open_project(first);
+    else mark_saved();
+}
+
+// Shows what went wrong, as the server said it.
+const project_action = (action) => async () => {
+    try {
+        await action();
+    } catch (error) {
+        show_status(error.message, "error");
+    }
+};
+
+$("project").addEventListener("change", project_action(switch_project));
+$("project_new").addEventListener("click", project_action(new_project));
+$("project_save").addEventListener("click", project_action(save_project));
+$("project_rename").addEventListener("click", project_action(rename_project));
+$("project_delete").addEventListener("click", project_action(delete_project));
 
 /* ---- Download ---- */
 
 $("download_stl").addEventListener("click", () => {
     const link = document.createElement("a");
     link.href = URL.createObjectURL(new Blob([mesh_to_stl(mesh)]));
-    link.download = `pucklight_vase_${example}.stl`;
+    link.download = `pucklight_vase_${(project ?? example).replace(/\s+/g, "_")}.stl`;
     link.click();
     setTimeout(() => URL.revokeObjectURL(link.href), 4000);
 });
@@ -310,4 +459,4 @@ $("download_stl").addEventListener("click", () => {
 
 if (window.require) start_monaco();
 else start_textarea();
-schedule_update();
+project_action(start_projects)().finally(schedule_update);
