@@ -25,6 +25,7 @@ Diameter clearance = added to the hole diameter, not per side.
 
 ## Rules
 
+- Inside difference() or intersection(), wrap a for() in union(). The online renderer (openscad.ochafik.com) runs with lazy union: a bare for() counts as separate children, so the second screw boss of the esp32_unofficial enclosure was subtracted instead of added. OpenSCAD 2021.01 does not show it (2026-11-10).
 - A wall beside a pin header hides what wire sits on what pin. Leave the side open where the wiring has to be checked: the OMM enclosure's ESP32 pocket had full walls up to V6, V7 drops the one toward the drivers (2026-11-10).
 - Seat mating parts on each other in the model and check for overlap before printing; the clearance of the main faces does not show it. OMM XY table v2.4 had 0.4 per side in the grooves, yet their square mouths sat 0.85 inside the ring's rounded corners (2026-11-10).
 - A dev board bought as a clone does not follow the maker's drawing: the OMM enclosure V2 cradle from Espressif's ESP32-S3-DevKitC-1 DXF (25.4 wide) did not take the 28 wide board. Measure the board, or take the pocket of a printed case that fits it (OMM enclosure V3, 2026-11-09).

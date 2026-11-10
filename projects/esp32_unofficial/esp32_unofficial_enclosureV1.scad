@@ -214,8 +214,10 @@ module snaps(len, y_in, z) {
 
 // Outline of the screw bosses on both long walls, also the lid's ears.
 module bosses() {
+    // union(): a renderer with lazy union takes a bare for() as separate
+    // children, and difference() would then subtract the second boss
     difference() {
-        for (m = [0, 1]) translate([outer_x / 2, m ? outer_y : 0]) rotate(m * 180) hull() {
+        union() for (m = [0, 1]) translate([outer_x / 2, m ? outer_y : 0]) rotate(m * 180) hull() {
             translate([0, -boss_c]) circle(d = boss_d);
             translate([-boss_d / 2, 0]) square([boss_d, 0.1]);
         }
@@ -366,7 +368,7 @@ module lid() {
             translate([0, 0, -(top_room - leg_gap)]) linear_extrude(top_room - leg_gap + eps)
                 intersection() {
                     offset(delta = -lip_gap) inner();
-                    for (x = [wall, outer_x - wall - leg], y = [wall, outer_y - wall - leg])
+                    union() for (x = [wall, outer_x - wall - leg], y = [wall, outer_y - wall - leg])
                         translate([x, y]) square(leg);
                 }
             if (lid_fix == "push") snaps(bead_len, lip_gap, -snap_z);
