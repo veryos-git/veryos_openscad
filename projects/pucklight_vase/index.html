@@ -1,0 +1,70 @@
+<!-- Copyright (C) Jonas Immanuel Frey - Licensed under GPL -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>VeryOS pucklight vase</title>
+<link rel="icon" href="data:,">
+<style>
+  :root {
+    --bg: #151b1d; --panel: #192222; --line: #344040; --ink: #f7f2e6; --dim: #c7c8bc; --accent: #f0b750;
+  }
+  * { box-sizing: border-box; }
+  html, body { height: 100%; margin: 0; }
+  body {
+    display: grid; grid-template-columns: minmax(360px, 42%) 1fr;
+    background: var(--bg); color: var(--ink);
+    font: 13px/1.4 ui-monospace, "DejaVu Sans Mono", Menlo, Consolas, monospace;
+  }
+  button, select { font: inherit; color: inherit; background: var(--panel); border: 1px solid var(--line); border-radius: 4px; cursor: pointer; }
+  button:hover, select:hover { border-color: var(--accent); }
+
+  /* left: the script */
+  #left {
+    display: flex; flex-direction: column; gap: 10px; min-height: 0; height: 100vh;
+    padding: 14px 16px; background: var(--panel); border-right: 1px solid var(--line);
+  }
+  .row { display: flex; align-items: center; gap: 6px; }
+  .row select { flex: 1; padding: 5px 8px; }
+  #logo { width: 34px; margin-left: 10px; color: var(--ink); }
+  #editor { flex: 1 1 0; min-height: 120px; border: 1px solid var(--line); overflow: hidden; }
+  #editor textarea {
+    width: 100%; height: 100%; padding: 8px; border: 0; resize: none; outline: 0;
+    background: #1e1e1e; color: var(--ink); font: inherit; white-space: pre; tab-size: 4;
+  }
+
+  /* right: the vase */
+  #right { position: relative; min-width: 0; height: 100vh; overflow: hidden; }
+  #view { position: absolute; inset: 0; width: 100%; height: 100%; display: block; cursor: grab; touch-action: none; }
+  #view:active { cursor: grabbing; }
+  #status {
+    position: absolute; left: 14px; top: 14px; max-width: calc(100% - 28px); padding: 8px 14px;
+    background: var(--panel); border: 1px solid var(--line); border-radius: 14px; pointer-events: none;
+  }
+  #status.busy { border-color: var(--accent); color: var(--accent); }
+  #status.error { border-color: #e06c5a; color: #ffb4a8; }
+  #download { position: absolute; left: 14px; bottom: 14px; display: flex; gap: 10px; align-items: center; }
+  #download button { padding: 8px 14px; }
+</style>
+</head>
+<body>
+<section id="left">
+  <div class="row">
+    <label for="example">example</label>
+    <select id="example"></select>
+    <svg id="logo" viewBox="0 0 43.9095293518 31.2528266758" role="img" aria-label="VeryOS logo"><path fill="currentColor" fill-rule="evenodd" d="M 7.7528133542 9.1080260785 L 4.6193976626 1.5432914191 L 0 3.4567085809 L 11.5135290962 31.2528266758 L 32.3960002556 31.2528266758 L 43.9095293518 3.4567085809 L 39.2901316892 1.5432914191 L 36.1567159975 9.1080260785 A 15.6264133379 15.6264133379 0 0 0 7.7528133542 9.1080260785 Z M 30.9694268093 21.2528266758 A 10.6264133379 10.6264133379 0 0 0 21.9547646759 5 A 4.0632066689 4.0632066689 0 0 0 21.9547646759 13.1264133379 A 9.0632066689 9.0632066689 0 0 1 30.9694268093 21.2528266758 Z M 12.9401025425 10 A 9.0632066689 9.0632066689 0 0 0 21.9547646759 18.1264133379 A 4.0632066689 4.0632066689 0 0 1 21.9547646759 26.2528266758 A 10.6264133379 10.6264133379 0 0 1 12.9401025425 10 Z"/></svg>
+  </div>
+  <div id="editor"></div>
+</section>
+<section id="right">
+  <canvas id="view"></canvas>
+  <div id="status"></div>
+  <div id="download"><span>Download</span><button id="download_stl">.stl</button></div>
+</section>
+<script src="https://cdn.jsdelivr.net/npm/monaco-editor@0.52.2/min/vs/loader.js"></script>
+<script src="vase_mesh.js"></script>
+<script src="examples.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

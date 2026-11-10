@@ -8,6 +8,7 @@ Diameter clearance = added to the hole diameter, not per side.
 
 | Date | Fit | Part | Hole | Result | Printer / material |
 |---|---|---|---|---|---|
+| 2026-11-10 | A script's shape above the ribs in the sockel's cup, axial gap, not a diameter | pucklight_vase, collar | 0.4: starts at z = 6.6, the ribs end at 6.19 | untested | ? |
 | 2026-11-10 | Printed 5 mm screw (2 mm pitch, 45 degree) in a blind thread in an upright boss, per side | esp32_unofficial enclosure V1 | 0.25, as the nuts of fdm_optimized_screws | untested in a boss; fits in the nuts (PETG) | ? |
 | 2026-11-10 | Snap lid: lip inside the walls, per side; 45 degree bead on the lip in a groove in a 2.0 wall | esp32_unofficial enclosure V1 | lip 0.2; bead 0.6 proud, 0.4 into the wall, 20 long | untested | ? |
 | 2026-11-10 | ESP32-WROOM-32 clone board (52 × 28.6) between the walls of its case, per side | esp32_unofficial enclosure V1 | 0.3 | untested | ? |
