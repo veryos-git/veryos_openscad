@@ -136,12 +136,13 @@ for (const [name, code] of Object.entries(examples)) {
         height = Math.max(height, p[i + 2]);
         width = Math.max(width, 2 * Math.hypot(p[i], p[i + 1]));
     }
-    const {angle, z} = steepest_wall(mesh);
+    const {out, inward} = steepest_walls(mesh);
     const stl = new DataView(mesh_to_stl(mesh));
     assert.equal(stl.getUint32(80, true), mesh.indices.length / 3);
     assert.equal(stl.byteLength, 84 + 50 * mesh.indices.length / 3);
     console.log(`ok  ${name}: closed, ${mesh.indices.length / 3} triangles, ${height.toFixed(1)} high, ${width.toFixed(1)} wide, `
-        + `${(signed_volume(mesh) / 1000).toFixed(0)} cm3, steepest wall ${angle.toFixed(1)} degrees at z = ${z.toFixed(1)}`);
+        + `${(signed_volume(mesh) / 1000).toFixed(0)} cm3, overhang up to ${out.angle.toFixed(1)} degrees at z = ${out.z.toFixed(1)}, `
+        + `leans in up to ${inward.angle.toFixed(1)} at z = ${inward.z.toFixed(1)}`);
 }
 
 /* ---- Any script ---- */
@@ -193,8 +194,9 @@ for (const [height, overhang, rings, steepest] of [[40, 60, 19, 60], [40, 45, 0,
         // Of the dome alone: its faces follow the vase's. The steepest lies between two
         // corners, so it is a little less steep than at a corner.
         assert.equal(mesh.walls[1], mesh.indices.length, `${name}: the dome counts as a wall`);
-        const {angle} = steepest_wall({...mesh, walls: [flat.walls[1], mesh.indices.length]});
+        const {out, inward: {angle}} = steepest_walls({...mesh, walls: [flat.walls[1], mesh.indices.length]});
         assert(angle <= steepest + 0.01 && angle > steepest - 0.2, `${name}: steepest wall ${angle}`);
+        assert.equal(out.angle, 0, `${name}: a dome leans in only`);
         const below = vase_mesh(round({}, turn)).positions;
         assert.deepEqual(mesh.positions.subarray(0, below.length - 3), below.subarray(0, below.length - 3),
             `${name}: the dome moved the vase below it`);
@@ -203,6 +205,17 @@ for (const [height, overhang, rings, steepest] of [[40, 60, 19, 60], [40, 45, 0,
 // Without overhang the default is 60. A flat top does not count as a wall.
 assert.deepEqual(vase_mesh(round({n_height_dome: 40})), vase_mesh(round({n_height_dome: 40, n_overhang_dome: 60})));
 assert.equal(flat.walls[1], flat.indices.length - 90 * 3);
+// The round vase goes out from the thread's ring, at 33.5, to radius 40, 3 higher: an
+// overhang, whichever way its corners run. Above that it is upright. With a dome it
+// leans in as well.
+for (const turn of [1, -1]) {
+    const {out, inward} = steepest_walls(vase_mesh(round({}, turn)));
+    assert(Math.abs(out.angle - Math.atan(6.5 / 3) * deg_per_rad) < 0.1 && out.z > collar_top && out.z < collar_top + 3);
+    assert.equal(inward.angle, 0);
+    const domed = steepest_walls(vase_mesh(round({n_height_dome: 40}, turn)));
+    assert.deepEqual(domed.out, out);
+    assert(domed.inward.angle > 59.8 && domed.inward.z > collar_top + 60);
+}
 // On a shape that is not round, with a last layer that is not flat: closed.
 const star = {n_its_layer: 4, n_its_corner: 10, n_height_dome: 30, f_o_p: (layer, corner, n_layer, n_corner) => ({
     n_x: 7 + (n_corner % 2 ? 20 : 45) * Math.cos(corner * 2 * Math.PI), n_y: (n_corner % 2 ? 20 : 45) * Math.sin(corner * 2 * Math.PI),

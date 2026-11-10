@@ -56,6 +56,12 @@
     position: absolute; right: 14px; top: 64px; bottom: 64px; width: 64px;
     display: flex; flex-direction: column; align-items: center; gap: 4px; color: var(--dim);
   }
+  #legend {
+    position: absolute; right: 92px; bottom: 14px; padding: 8px 14px;
+    background: var(--panel); border: 1px solid var(--line); border-radius: 14px; pointer-events: none;
+  }
+  #legend[hidden] { display: none; }
+  #legend i { display: inline-block; width: 11px; height: 11px; margin-right: 8px; border-radius: 2px; }
   #cut_value { color: var(--ink); white-space: pre; text-align: center; margin-bottom: 6px; }
   /* upright, 1.0 at the top */
   #cut { flex: 1; min-height: 0; width: 20px; margin: 0; writing-mode: vertical-lr; direction: rtl; accent-color: var(--accent); }
@@ -84,8 +90,9 @@
   <div id="download"><span>Download</span><button id="download_stl">.stl</button></div>
   <div id="look_row">
     <label for="look">view</label>
-    <select id="look" title="edges and vertices show the mesh; x-ray shows through it; lean marks the script's walls that lean over 45 degrees from vertical orange, over 60 red"></select>
+    <select id="look" title="edges and vertices show the mesh; x-ray shows through it; overhang colours the script's walls that lean over 45 degrees from vertical"></select>
   </div>
+  <div id="legend" hidden></div>
   <div id="section" title="Section: hides what is above this height, from 0.0, the bed, to 1.0, the top">
     <output id="cut_value" for="cut"></output>
     <span>1.0</span>

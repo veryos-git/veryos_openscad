@@ -182,10 +182,12 @@ function vase_mesh(script) {
     return {positions: positions.subarray(0, (top + 1) * 3), indices, fixed, walls: [walls_start, walls_end]};
 }
 
-// The script's wall that leans most, in or out: its angle from vertical, and its height.
-// A single wall prints up to 45 degrees safely; see readme.md for more.
-function steepest_wall({positions: p, indices: t, walls}) {
-    let steepest = {angle: 0, z: 0};
+// The script's walls that lean most from vertical, with their angle and height: out, the
+// one that leans outwards, so that it faces down, an overhang, and inward, the one that
+// leans in. A single wall has as little under it either way, and prints up to 45 degrees
+// safely; see readme.md for more.
+function steepest_walls({positions: p, indices: t, walls}) {
+    const steepest = {out: {angle: 0, z: 0}, inward: {angle: 0, z: 0}};
     for (let i = walls[0]; i < walls[1]; i += 3) {
         const [a, b, c] = [t[i] * 3, t[i + 1] * 3, t[i + 2] * 3];
         const u = [p[b] - p[a], p[b + 1] - p[a + 1], p[b + 2] - p[a + 2]];
@@ -195,7 +197,8 @@ function steepest_wall({positions: p, indices: t, walls}) {
         // Two points in one place make a face without a direction.
         if (length < 1e-9) continue;
         const angle = Math.asin(Math.abs(normal[2]) / length) * deg_per_rad;
-        if (angle > steepest.angle) steepest = {angle, z: (p[a + 2] + p[b + 2] + p[c + 2]) / 3};
+        const way = normal[2] < 0 ? "out" : "inward";
+        if (angle > steepest[way].angle) steepest[way] = {angle, z: (p[a + 2] + p[b + 2] + p[c + 2]) / 3};
     }
     return steepest;
 }

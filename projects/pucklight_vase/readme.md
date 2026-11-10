@@ -91,7 +91,7 @@ Gold in the view. `f_o_p()` is not called for it.
 
 ## View
 
-![the views, on a template with fewer layers and corners](views.png)
+![the views, on a template with fewer layers and corners; lower for the overhang](views.png)
 
 | Control | Does |
 |---|---|
@@ -100,26 +100,28 @@ Gold in the view. `f_o_p()` is not called for it.
 | view: `edges` | the triangles' edges on it |
 | view: `vertices` | the points on it |
 | view: `x-ray` | shows through: outlines, also of the back and the inside |
-| view: `lean` | the script's walls that lean over 45° from vertical in orange, over 60° in red; what is fixed in grey |
+| view: `overhang` | the script's walls that lean over 45° from vertical, with a legend: an overhang, which leans out and faces down, in orange, over 60° in red; a wall that leans in, in light blue, over 60° in blue; what is fixed in grey |
 | slider | section: hides what is above its height, from 0.0, the bed, to 1.0, the top; above it the number, and z in mm |
 
 - The section works in every view. The inside is darker.
-- `lean` has half a degree to spare, so a dome made for 60° stays orange. A flat top is red: vase mode leaves it open.
+- `overhang`: a single wall has as little under it leaning in as leaning out, so both show. Overhangs show from below, walls that lean in from above, both on the inside through a section.
+- `overhang` has half a degree to spare, so a dome made for 60° stays light blue. A flat top is blue: vase mode leaves it open.
+- The status has both in numbers: the steepest overhang and the steepest wall that leans in, with their heights.
 - A fine mesh is black with edges or vertices from afar: zoom in.
 
 ## Examples
 
 `template` explains the script. `egg` is a preset to put a pattern on. The others are stlsculpter's, with their formulas and names: the radius starts on the thread's 33.5 instead of `n_radius_base`, or on a cone, and z on `o_thread.n_z`.
 
-| Example | stlsculpter's | Layers × corners | Triangles | High × wide | Steepest wall |
-|---|---|---|---|---|---|
-| `template` | `template.js`, changed, with a dome | 120 × 180 | 66960 | 141.6 × 105.2 | 60° at z = 131: its dome |
-| `egg` | none | 160 × 180 | 75600 | 128.3 × 96.0 | 60° at z = 124: its cone |
-| `exponential_twist` | `vase_exponential_twist.js` | 100 × 400 | 98000 | 106.6 × 87.0 | 51° at z = 39 |
-| `wild_bend` | `vase_wild_bend.js` | 120 × 300 | 90000 | 126.6 × 97.5 | 49° at z = 7 |
-| `four_pillars` | `vase_four_pillars.js` | 120 × 500 | 138000 | 132.6 × 98.6 | 52° at z = 73 |
-| `starshape_pow` | `template_starshape_pow_function.js` | 240 × 600 | 306000 | 131.6 × 100.5 | 52° at z = 72 |
-| `low_poly` | `vase_long_low_poly_multi_layer.js` | 5 × 12 | 18120 | 156.6 × 86.2 | 26° at z = 137 |
+| Example | stlsculpter's | Layers × corners | Triangles | High × wide | Overhang up to | Leans in up to |
+|---|---|---|---|---|---|---|
+| `template` | `template.js`, changed, with a dome | 120 × 180 | 66960 | 141.6 × 105.2 | 28° at z = 9 | 60° at z = 131: its dome |
+| `egg` | none | 160 × 180 | 75600 | 128.3 × 96.0 | 43° at z = 7 | 60° at z = 124: its cone |
+| `exponential_twist` | `vase_exponential_twist.js` | 100 × 400 | 98000 | 106.6 × 87.0 | 47° at z = 39 | 51° at z = 39 |
+| `wild_bend` | `vase_wild_bend.js` | 120 × 300 | 90000 | 126.6 × 97.5 | 49° at z = 7 | 49° at z = 81 |
+| `four_pillars` | `vase_four_pillars.js` | 120 × 500 | 138000 | 132.6 × 98.6 | 52° at z = 14 | 52° at z = 73 |
+| `starshape_pow` | `template_starshape_pow_function.js` | 240 × 600 | 306000 | 131.6 × 100.5 | 52° at z = 16 | 52° at z = 72 |
+| `low_poly` | `vase_long_low_poly_multi_layer.js` | 5 × 12 | 18120 | 156.6 × 86.2 | 24° at z = 57 | 26° at z = 137 |
 
 ## Printing
 
@@ -133,7 +135,7 @@ Vase mode, as V3's `vase_sphere`: see `../pucklight_sphere/readme.md`, Vase mode
 | Layer height | 0.2 mm | |
 | Brim | outer, 5 mm | the first layer is one line |
 
-- Steepest wall, in the status: how far a wall of the script leans in or out, from vertical. 45° is safe.
+- The status has how far the script's walls lean from vertical at most, out, as an overhang, and in. 45° is safe. The `overhang` view shows where.
 - A dome and `egg` close at 60°, as V3's `vase_sphere` at its `vase_overhang`; `n_overhang_dome` and `egg`'s `n_overhang` change it.
 - Beyond 45°, from V3's table, overlap per layer of a 0.6 mm line at 0.2 mm layers: 52% at 55°, 42% at 60°, 29% at 65°, 8% at 70°.
 - Screw it in gently: the thread is a single line.
@@ -166,6 +168,8 @@ Vase mode, as V3's `vase_sphere`: see `../pucklight_sphere/readme.md`, Vase mode
 | API with `../..`, `a/b`, `.git`, no script, another site's `Origin` and `Host` | refused, nothing touched |
 | Opened as a file | project controls off, the rest works |
 | Views in headless Chrome: each view, the section in each, the slider by mouse and by value | drawn as above; the slider's top is 1.0 |
+| `overhang` on a `wild_bend` half as high, from above, from below and through a section | overhangs orange and red from below and on the inside, walls that lean in blue from above, the legend only in this view |
+| `test_vase_mesh.js`: a wall that goes out 6.5 in 3 mm, with and without a dome | an overhang of 65°, both ways around; the dome leans in only |
 | A mistake's line | found in Chrome 154 and Firefox 157 |
 
 ## Not tested yet

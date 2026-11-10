@@ -14,7 +14,17 @@ const shape_color = [0.97, 0.95, 0.9];
 const mark_color = [0.06, 0.08, 0.09];
 // How the view shows the vase, and what the faces' shader makes of it: 0 lit, 1 seen
 // through, 2 lit and coloured where a wall leans far from vertical.
-const looks = {shaded: 0, edges: 0, vertices: 0, "x-ray": 1, lean: 2};
+const looks = {shaded: 0, edges: 0, vertices: 0, "x-ray": 1, overhang: 2};
+// The overhang view's colours, in the order its shader counts them. A wall that leans
+// out faces down: an overhang. One that leans in closes the vase, and a single wall has
+// as little under it there.
+const overhang_colors = [
+    {text: "overhang, 45 to 60 degrees", color: [0.95, 0.55, 0.15]},
+    {text: "overhang, over 60 degrees", color: [0.88, 0.25, 0.2]},
+    {text: "leans in, 45 to 60 degrees", color: [0.45, 0.72, 0.92]},
+    {text: "leans in, over 60 degrees", color: [0.2, 0.4, 0.85]},
+    {text: "thread: fixed", color: [0.4, 0.4, 0.4]},
+];
 // Waits this long after the last key before running the script, in ms.
 const typing_pause = 400;
 
@@ -56,6 +66,7 @@ flat in float v_fixed;
 uniform int u_look;
 uniform float u_cut;
 uniform vec3 u_thread_color, u_shape_color, u_mark_color;
+uniform vec3 u_overhang_colors[5];
 out vec4 out_color;
 void main() {
     // The section: nothing above its height.
@@ -75,10 +86,13 @@ void main() {
         return;
     }
     if (u_look == 2) {
-        // How far the script's walls lean from vertical: over 45 degrees orange, over 60
-        // red, with half a degree for a wall made to lean just that far.
-        float lean = degrees(asin(min(abs(normalize(cross(dFdx(v_world), dFdy(v_world))).z), 1.0)));
-        color = v_fixed > 0.5 ? vec3(0.4) : lean > 60.5 ? vec3(0.88, 0.25, 0.2) : lean > 45.5 ? vec3(0.95, 0.55, 0.15) : color;
+        // How far the script's walls lean from vertical, and which way. This normal points
+        // at the eye, so on the inside, which a section shows, it is turned round. Half a
+        // degree to spare for a wall made to lean just 45 or 60.
+        vec3 outward = normalize(cross(dFdx(v_world), dFdy(v_world))) * (gl_FrontFacing ? 1.0 : -1.0);
+        float lean = degrees(asin(min(abs(outward.z), 1.0)));
+        int band = (outward.z > 0.0 ? 2 : 0) + (lean > 60.5 ? 1 : 0);
+        color = v_fixed > 0.5 ? u_overhang_colors[4] : lean > 45.5 ? u_overhang_colors[band] : color;
     }
     float light = max(dot(n, normalize(vec3(-0.45, 0.6, 0.65))), 0.0);
     // The inside, which a section shows, is darker.
@@ -200,6 +214,7 @@ function draw() {
     gl.uniform3fv(uniform("u_thread_color"), thread_color);
     gl.uniform3fv(uniform("u_shape_color"), shape_color);
     gl.uniform3fv(uniform("u_mark_color"), mark_color);
+    gl.uniform3fv(uniform("u_overhang_colors"), overhang_colors.flatMap((band) => band.color));
     gl.uniform1f(uniform("u_point_size"), 4 * dpr);
     // At 1 the section leaves everything, also the top itself.
     gl.uniform1f(uniform("u_cut"), cut < 1 ? cut * mesh.height : Infinity);
@@ -257,7 +272,15 @@ $("view").addEventListener("wheel", (e) => {
 new ResizeObserver(request_draw).observe($("right"));
 
 for (const name of Object.keys(looks)) $("look").add(new Option(name));
-$("look").addEventListener("change", request_draw);
+for (const {text, color} of overhang_colors) {
+    const row = $("legend").appendChild(document.createElement("div"));
+    row.appendChild(document.createElement("i")).style.background = `rgb(${color.map((c) => c * 255)})`;
+    row.append(text);
+}
+$("look").addEventListener("change", () => {
+    $("legend").hidden = $("look").value !== "overhang";
+    request_draw();
+});
 $("cut").addEventListener("input", request_draw);
 
 /* ---- Updating ---- */
@@ -275,9 +298,10 @@ function show_status(text, kind = "") {
 
 // What the status says when nothing is going on.
 function show_result() {
-    const {angle, z} = steepest_wall(mesh);
+    const {out, inward} = steepest_walls(mesh);
     show_status(`ready: ${mesh.indices.length / 3} triangles; ${mesh.height.toFixed(1)} mm high, ${mesh.width.toFixed(1)} mm wide; `
-        + `steepest wall ${angle.toFixed(0)} degrees from vertical, at z = ${z.toFixed(0)}`);
+        + `overhang up to ${out.angle.toFixed(0)} degrees, at z = ${out.z.toFixed(0)}; `
+        + `leans in up to ${inward.angle.toFixed(0)}, at z = ${inward.z.toFixed(0)}`);
 }
 
 // The script's line an error came from, if its stack tells: Chrome names the script
