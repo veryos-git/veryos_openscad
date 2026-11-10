@@ -1,6 +1,6 @@
 # OMM XY table
 
-Motorised XY stage of the open microscope motorization: moves a standard 76 × 25 × 1 mm glass slide in X and Y with two 28BYJ-48 steppers. `omm_xy_table_v2p6.scad` rebuilds the Onshape document OMM_v2 (engraved label v2.3) in OpenSCAD, with the same parts and the same Onshape variable names and values. v2.4 is printed, v2.5 and v2.6 not yet. v2.6 is experimental: a second guide rail for the Y slider.
+Motorised XY stage of the open microscope motorization: moves a standard 76 × 25 × 1 mm glass slide in X and Y with two 28BYJ-48 steppers. `omm_xy_table_v2p7.scad` rebuilds the Onshape document OMM_v2 (engraved label v2.3) in OpenSCAD, with the same parts and Onshape's variable names; where a value differs from Onshape, the tables below say so. v2.4 is printed, v2.5 to v2.7 not yet. The Y slider's second guide rail, since v2.6, is experimental.
 
 ![assembly](preview.png)
 
@@ -8,12 +8,22 @@ Motorised XY stage of the open microscope motorization: moves a standard 76 × 2
 
 | File | What |
 |---|---|
-| `omm_xy_table_v2p6.scad` | the generator, standalone, no libraries. `part` picks the assembly, the print layout or one part. `version` is engraved in the table; bump it with the file name |
-| `omm_xy_table_v2p6_<part>.stl` | every printed part, exported from the generator in print orientation with the brand font |
-| `archive/` | v2.4 and v2.5, script and STLs. Each change to the generator makes a new version file; the old one stays |
+| `omm_xy_table_v2p7.scad` | the generator, standalone, no libraries. `part` picks the assembly, the print layout or one part. `version` is engraved in the table; bump it with the file name |
+| `omm_xy_table_v2p7_<part>.stl` | every printed part, exported from the generator in print orientation with the brand font |
+| `archive/` | v2.4 to v2.6, script and STLs. Each change to the generator makes a new version file; the old one stays |
 | `OMM_v2_rebuild_kit.zip` | Onshape export, source of every dimension: feature trees, sketches, variables, STEP, STL, DXF, renders and the kit's own README |
 | `omm_params.scad` | the Onshape Variable Studio, 1:1 from the kit |
 | `Onshape_online_CAD_version/` | Onshape print files OMM_v2p2.3mf and OMM_v2p3.3mf |
+
+## v2.7 against v2.6
+
+Only the table and the Y slider changed; the other parts print as in v2.5.
+
+| Asked for | v2.6 | v2.7 |
+|---|---|---|
+| The Y motor further from the window: it stops the Y slider early | `table_motor_y` = −57.2: Y travel −8 to +33. Moved alone, the bracket leaves the table | `table_motor_y` = −62.2: Y travel −13 to +28. The table's front edge follows the motor, `table_front_margin` = 5.75 in front of the bracket: the table is 135 long, `scl_y_table` is derived |
+| Frames 9 wide, set by the user in the script | `thickness_y_slider_frame`, `thickness_table_frame` = 6: windows 88 × 37.7 | 9: windows 82 × 31.7 |
+| – | both rails 61.4 long | 69.4 long, from the longer table and the wider frames: nominal yaw play ±0.17° at Y 0, ±0.27 sideways at the back edge |
 
 ## v2.6 against v2.5, experimental
 
@@ -76,7 +86,7 @@ All parts share one optical axis. Each carriage slides on the part below on a pr
 
 Drive, as read from the geometry (the Onshape document does not describe it): a 28BYJ-48 hangs on each bracket with two M3 screws through the slotted uprights, 35 apart like the motor's ears. Its shaft is horizontal, 8 below the motor's axis. The shaft adapter rolls on the top of the moving female rail and drives it by friction; the slots set the motor's height and with it the pressure. `part = "assembly"` shows both motors in place, the motor's axis 15.15 above the sliding face.
 
-Travel in the model: Y from −8, where the fillet at the first arm's root meets the table's bracket, to about +33, where the arm's end passes the adapter. X about ±45 before the rail's end passes the adapter.
+Travel in the model: Y from −13, where the fillet at the first arm's root meets the table's bracket, to about +28, where the arm's end passes the adapter. `table_motor_y` shifts this range, `y_arm_len` widens it. X about ±45 before the rail's end passes the adapter.
 
 ## Print
 
@@ -108,4 +118,4 @@ Onshape's values. Printed in v2.4: the slide holder on the X slider, see `lesson
 
 ## Customize
 
-Every Onshape variable is a Customizer parameter with its Onshape name, grouped by part. The slide's size sets the slide holder; `scl_y_slide` also sets the X slider's ring and the distance of the rails from the axis, as in Onshape. `thickness_y_slider_frame` and `thickness_table_frame` set the windows, the `[Rails]` group all rails and their clearance, `[Motor bracket]` the uprights. `y_rail2_x` places the Y slider's second arm and its table rail: keep it clear of the first arm and of the label. `table_motor_y` and `x_rail_end` are measured positions, not derived: check them after changing sizes.
+Every Onshape variable is a Customizer parameter with its Onshape name, grouped by part, except `scl_y_table`, which follows the Y motor. The slide's size sets the slide holder; `scl_y_slide` also sets the X slider's ring and the distance of the rails from the axis, as in Onshape. `thickness_y_slider_frame` and `thickness_table_frame` set the windows, the `[Rails]` group all rails and their clearance, `[Motor bracket]` the uprights. `y_rail2_x` places the Y slider's second arm and its table rail: keep it clear of the first arm and of the label. `table_motor_y` places the Y motor: 1 further from the window is 1 more Y travel toward the motor and 1 less away from it. The table's front edge follows; the print layout fits the 256 bed down to −68. `x_rail_end` is a measured position, not derived: check it after changing sizes.
