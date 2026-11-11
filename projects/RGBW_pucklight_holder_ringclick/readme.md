@@ -9,7 +9,7 @@ The same holder with a cup on top for lampshades, and a test lampshade: `../puck
 
 # OpenSCAD
 
-`RGBW_pucklight_holder_ringclickV3.scad` generates the three parts: top
+`RGBW_pucklight_holder_ringclickV4.scad` generates the three parts: top
 part, bottom screw, click base. `part` shows all parts on the bed, the
 assembly, the assembly cut in half, or one part.
 
@@ -20,6 +20,17 @@ assembly, the assembly cut in half, or one part.
 The window's edge on the lens, cut in half:
 
 ![ring](section_ring.png)
+
+## V4 against V3
+
+| | V3 | V4 |
+|---|---|---|
+| click base | 8.0 high: plate 1.2, tube 6.8 | 8.4: tube 7.2, `tube_raise` 0.4 |
+| printed | the holder floats only a little on the base and barely clicks (2026-11-11) | untested |
+| float on the base, model | 1.1 | 1.5 |
+| pressed, model: ring's underside above the flat ring around the lens | 0.5 | 0.1: the real puck lifts less than its CAD model, so V3 barely clicked |
+| pressed, model: puck off centre | free up to 0.5 | beyond 0.3 the rounded edge reaches the 45 degree shoulder, which centres it, as the window's edge does |
+| top part, bottom screw | | V3's, unchanged: reprint only the click base |
 
 ## V3 against V2
 
@@ -46,7 +57,7 @@ The window's edge on the lens, cut in half:
 
 ## against RGBW_pucklight_holderV4
 
-| | holder V4 | ringclick V3 |
+| | holder V4 | ringclick V4 |
 |---|---|---|
 | presses the lens | cross of 1.6 × 1.6 ribs, at the centre | the window's 45 degree edge, all around at 36 (`contact_d`) |
 | lens covered, seen from above | two 1.6 strips, 10 % | the outer ring from 36 to 40, 19 % |
@@ -61,10 +72,11 @@ The window's edge on the lens, cut in half:
 | state | what touches |
 |---|---|
 | puck on the screw's floor | the lens is 0.7 (`puck_play`) under the window's edge |
-| on the base, released | the tube lifts the puck 0.7 until the lens touches the edge; the holder floats 0.9 above the base (1.1 in the model, which leaves out the 0.2 hollow in the puck's bottom) |
-| pressed down | the tube pushes the button 0.9; the ring's underside stays 0.5 (`cavity_gap`) above the flat ring around the lens, the lip 0.5 off its inner edge, also with the puck 0.5 off centre |
+| on the base, released | the tube lifts the puck until the lens touches the edge; the holder floats 1.5 above the base in the model, 1.3 with the 0.2 hollow in the puck's bottom; V3's base, 0.4 lower, left only a little |
+| pressed down | the tube pushes the button by the float; in the model the ring's underside stays 0.1 (`cavity_gap` − `tube_raise`) above the flat ring around the lens |
 
 - the ring must not reach the flat ring around the lens: that is the puck's housing, which does not move, so the click would stop there. Only the lip, inside the lens's rim, reaches below `cavity_gap` above it; the assert on `contact_d` keeps the lip two lines wide.
+- the bottom screw flush or deeper: if it sticks out below the top part, the base stands on it and the holder floats that much less.
 - the lens's height at 34 comes from the CAD model's 40 × 5.8 spherical cap; the real lens is unmeasured there.
 - without pins the holder can turn on the base. That turns the top part against the screw, whose bar sits in the slot: lift the holder off the base to turn it.
 
@@ -80,7 +92,7 @@ The window's edge on the lens, cut in half:
 
 | problem | change |
 |---|---|
-| no click, or the click is weak | raise `press_height` and reprint only the click base: each 0.1 above the printed top part's takes 0.1 off its `cavity_gap`; or lower `puck_play` |
+| no click, or the click is weak | raise `tube_raise`, below `cavity_gap` (0.5), and reprint only the click base; `press_height` also moves the top part's cavity |
 | the puck rattles in the holder | lower `puck_play` |
 | the lens covers less or more than 40 in the real puck | change `puck_dome_d`: the lip follows the lens's rim |
 
