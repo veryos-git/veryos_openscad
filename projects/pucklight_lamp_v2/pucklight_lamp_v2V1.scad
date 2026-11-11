@@ -1,50 +1,38 @@
 // Copyright (C) Jonas Immanuel Frey - Licensed under GPL
-// V4: V3 with a cup on top whose female thread takes the spheres of
-// ../pucklight_sphere and the vases of ../pucklight_vase, as their sockel's
-// cup does. Inside the cup the top part stands up to the rim around the
-// window, so it still prints upside down: the cup's floor bridges the gap
-// between it and the cup's wall.
-// V3: V2 with a wider window, 36 instead of 34, for more light, and the
-// click base's tube 0.2 higher, since V2's did not click reliably. The ring's
-// underside rises to cavity_gap above the flat ring around the lens, pressed
-// in; a lip inside the lens's rim reaches down to the window's edge.
-// V2: V1 round and with as little material as it needs. The top part is a
-// shell, wall thick all over, that follows the recess, the thread and the
-// cavity's shoulder, narrowing at 45 degrees, so it still prints upside
-// down. The click base is a round plate with a tube instead of the solid
-// disc. The top part's logo is in its top face, the base's in its bottom.
-// V1:../RGBW_pucklight_holder/RGBW_pucklight_holderV4.scad with a ring
-// instead of the cross of ribs, so nothing crosses the light: the window is
-// narrower than the lens, and its edge presses the lens all around near its
-// rim. The top part prints upside down. No guiding pins: the disc in the
-// bottom screw's opening and the bar in the disc's slot are enough, as in
-// pucklight_sphere V2.
+// V1: the holder of
+// ../RGBW_pucklight_holder_ringclick/RGBW_pucklight_holder_ringclickV3.scad
+// with a cup on top, and a simple lampshade that screws into it. The cup's
+// female thread is the one of pucklight_sphere's sockel, so its spheres and
+// the vases of ../pucklight_vase fit too. Inside the cup the top part stands
+// up to the rim around the window, so it still prints upside down: the cup's
+// floor bridges the gap between it and the cup's wall.
 //
-// Holder for an RGBW puck light (62 mm KC007). The puck lies loose in a
+// Lamp with an RGBW puck light (62 mm KC007). The puck lies loose in a
 // round top part, on the floor of a ring that screws into the top part from
 // below. Its lens pokes up through a round window, whose 45 degree edge sits
 // just above the lens near its rim. The holder sits on a click base: a tube
 // reaches up through the ring's opening and lifts the puck until the lens
 // touches the window's edge. Pressing the holder down onto the base presses
 // the lens in: click, the light changes. A bar across the ring's opening
-// turns the ring; the tube has a slot for it. A sphere or a vase screws into
-// the cup on top, down to the cup's floor.
+// turns the ring; the tube has a slot for it. The lampshade screws into the
+// cup on top, down to the cup's floor.
 //
 // Print the top part upside down, its top face on the bed: the cavity
 // narrows from the bottom face up to the window's edge, so every layer sits
 // on the one below; the overhangs are the window's 45 degree chamfer and the
 // cup's floor, a short bridge.
-// Print the bottom screw and the click base standing as they are used. The
-// threads have 45 degree flanks, as in fdm_optimized_screws, so nothing needs
-// support. The VeryOS logo is engraved in the top face of the top part, in
-// the bottom of the screw ring and in the bottom of the click base.
+// Print the bottom screw and the click base standing as they are used, and
+// the lampshade on its neck. The threads have 45 degree flanks, as in
+// fdm_optimized_screws, so nothing needs support. The VeryOS logo is engraved
+// in the top face of the top part, in the bottom of the screw ring and in the
+// bottom of the click base; the lampshade's shell is too thin for one.
 // Origin: centre of the top part's bottom face, which is also the ring's
 // bottom face when it is screwed in flush.
 //
 // Units: mm. No external libraries needed.
 
 /* [View] */
-part = "print_layout"; // [print_layout:All parts on bed,assembly:Assembly on the click base,section:Assembly cut in half,toppart:Top part,bottom_screw:Bottom screw,clickbase:Click base]
+part = "print_layout"; // [print_layout:All parts on bed,assembly:Assembly on the click base,section:Assembly cut in half,lampshade:Lampshade,toppart:Top part,bottom_screw:Bottom screw,clickbase:Click base]
 
 /* [Puck light] */
 // The manufacturer's CAD model (../RGBW_pucklight_holder/rgbw_light_specs)
@@ -74,14 +62,27 @@ contact_d = 36;
 wall = 1.6;
 
 /* [Cup] */
-// The neck that screws in: pucklight_sphere V3's and pucklight_vase's.
+// The neck that screws in: the lampshade's, pucklight_sphere V3's and
+// pucklight_vase's.
 neck_d = 67;
 neck_height = 4;
 // Radial gap between the threads, as in pucklight_sphere.
 neck_clearance = 0.3;
-// Inside the cup the top part stands up to the rim. 1 below the bore of
-// pucklight_sphere's neck, 63, and inside the single wall of a vase.
+// Inside the cup the top part stands up to the rim. 1 below the bore of the
+// necks, 63, and inside the single wall of a vase.
 cup_core_d = 62;
+
+/* [Lampshade] */
+// A plain shade to test the lamp: from its neck a 45 degree cone out to a
+// cylinder, and a 45 degree cone that closes the top. Nothing overhangs more
+// than 45 degrees when it stands on its neck.
+lampshade_d = 100;
+// Height of the cylinder between the two cones.
+lampshade_height = 40;
+// Two 0.4 mm lines; thinner glows more.
+shell = 0.8;
+// Inside the neck's thread root, as in pucklight_sphere.
+neck_wall = 1.2;
 
 /* [Bottom screw] */
 screw_height = 10.4;
@@ -198,6 +199,18 @@ outer_r = recess_r + wall;
 thread_outer_r = max(hole_d, cup_d) / 2 + wall;
 lower_cone_c = recess_r + recess_top + wall * sqrt(2);
 body_d = 2 * outer_r;
+// The lampshade's neck, and its outside: the 45 degree cone r - z =
+// neck_root_r - neck_height from the neck's root, the cylinder from
+// lampshade_cyl_z to lampshade_top_z and the 45 degree cone up to the tip.
+// The inside lies shell inside it.
+neck_root_r = neck_d / 2 - thread_depth;
+neck_bore_r = neck_root_r - neck_wall;
+lampshade_r = lampshade_d / 2;
+lampshade_cyl_z = neck_height + lampshade_r - neck_root_r;
+lampshade_top_z = lampshade_cyl_z + lampshade_height;
+lampshade_tip_z = lampshade_top_z + lampshade_r;
+// Larger than the whole lamp, for cutting it in half.
+view_size = 2 * (lampshade_d + top_z + lampshade_tip_z);
 // Height of the tube above the base's plate, and the slot in it for the bar.
 tube_h = lip_height + press_height;
 slot_w = bar_width + 2 * slide_clearance;
@@ -235,7 +248,8 @@ assert(flange_h >= 1, "screw_thread_length is too long for screw_height: no flan
 assert(shoulder_z >= screw_height + seat_gap, "The cavity's shoulder starts below the bottom screw's top.");
 assert(bore_r - opening_r >= 2, "press_d is too large: the bottom screw's floor must be at least 2 mm wide.");
 assert(press_wall > 1, "press_wall must exceed the 1 mm chamfer at the tube's top.");
-assert(cup_core_d < neck_d - 2 * thread_depth, "cup_core_d must be smaller than the neck's root, or the neck has no room in the cup.");
+assert(cup_core_d <= 2 * neck_bore_r - 1, "cup_core_d must stay 0.5 inside the bore of the lampshade's neck.");
+assert(lampshade_d >= neck_d + 10, "lampshade_d is too small for the neck; lower neck_d.");
 assert(norm([toppart_logo_x + logo_h(toppart_logo_width) / 2, toppart_logo_width / 2]) <= cup_core_r - 0.5
        && toppart_logo_x - logo_h(toppart_logo_width) / 2 >= window_r + 0.5,
        "The top part's logo does not fit on its top face; lower toppart_logo_width.");
@@ -248,6 +262,7 @@ assert(norm([base_logo_x + logo_h(base_logo_width) / 2, base_logo_width / 2]) <=
 if (part == "print_layout") print_layout();
 else if (part == "assembly") assembly();
 else if (part == "section") section();
+else if (part == "lampshade") lampshade();
 else if (part == "toppart") toppart();
 else if (part == "bottom_screw") bottom_screw();
 else if (part == "clickbase") clickbase();
@@ -255,12 +270,13 @@ else if (part == "clickbase") clickbase();
 // Released: the holder rests on the lens, which touches the window's edge,
 // and the puck lies on the tube, so the holder floats press_height -
 // puck_play above the base. Pressing it down that far clicks the light. The
-// puck is a ghost.
+// lampshade sits on the cup's floor. The puck is a ghost.
 module assembly() {
     translate([0, 0, -base_thickness]) color("silver") clickbase();
     translate([0, 0, press_height - puck_play]) {
         color("lightskyblue") toppart();
         color("gold") bottom_screw();
+        color("white", 0.6) translate([0, 0, cup_floor_z]) lampshade();
         %translate([0, 0, lip_height + puck_play]) puck();
     }
 }
@@ -272,6 +288,7 @@ module section() {
         color("lightskyblue") front_cut() toppart();
         color("gold") front_cut() bottom_screw();
         color("white") front_cut() translate([0, 0, lip_height + puck_play]) puck();
+        color("white") front_cut() translate([0, 0, cup_floor_z]) lampshade();
     }
 }
 
@@ -279,15 +296,39 @@ module section() {
 module front_cut()
     render() difference() {
         children();
-        translate([-body_d, -2 * body_d, -body_d]) cube(2 * body_d);
+        translate([-view_size / 2, -view_size, -view_size / 2]) cube(view_size);
     }
 
-// Every part as it prints, side by side: the top part upside down, the
-// others standing as they are used.
+// Every part as it prints, side by side: the lampshade on its neck, the top
+// part upside down, the others standing as they are used.
 module print_layout() {
-    translate([0, 0, top_z]) rotate([180, 0, 0]) toppart();
-    translate([body_d + layout_gap, 0, 0]) clickbase();
-    translate([0, -(outer_r + layout_gap + flange_r), 0]) bottom_screw();
+    lampshade();
+    translate([lampshade_r + outer_r + layout_gap, 0, 0]) {
+        translate([0, 0, top_z]) rotate([180, 0, 0]) toppart();
+        translate([0, -(body_d + layout_gap), 0]) clickbase();
+        translate([0, outer_r + layout_gap + flange_r, 0]) bottom_screw();
+    }
+}
+
+// The lampshade as it prints, on its neck. The neck's thread starts at its
+// bottom, in phase with the cup's, with a 45 degree chamfer at the bed; the
+// shell reaches 1 down into the neck. The union() keeps it one solid with
+// lazy union, as in pucklight_sphere.
+module lampshade() union() {
+    difference() {
+        intersection() {
+            threaded_rod(neck_d, neck_height);
+            cylinder(h = neck_height, r1 = neck_root_r, r2 = neck_root_r + neck_height);
+        }
+        translate([0, 0, -1]) cylinder(r = neck_bore_r, h = neck_height + 2);
+    }
+    rotate_extrude() polygon([
+        [neck_bore_r, neck_height - 1], [neck_root_r, neck_height - 1], [neck_root_r, neck_height],
+        [lampshade_r, lampshade_cyl_z], [lampshade_r, lampshade_top_z], [0, lampshade_tip_z],
+        [0, lampshade_tip_z - shell * sqrt(2)],
+        [lampshade_r - shell, lampshade_top_z - shell * (sqrt(2) - 1)],
+        [lampshade_r - shell, lampshade_cyl_z + shell * (sqrt(2) - 1)],
+        [neck_bore_r, neck_height - neck_wall + shell * sqrt(2)]]);
 }
 
 // Round shell with the cavity, the internal thread, the window and the cup.
