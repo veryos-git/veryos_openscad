@@ -11,8 +11,8 @@ The same holder with a cup on top for lampshades, and a test lampshade: `../puck
 
 `RGBW_pucklight_holder_ringclickV4.scad` generates the three parts: top
 part, bottom screw, click base. `part` shows all parts on the bed, the
-assembly, the assembly cut in half, or one part. `RGBW_pucklight_holder_ringclickV5.scad`
-is experimental: the bottom screw and the click base in one part, see V5 below.
+assembly, the assembly cut in half, or one part. `RGBW_pucklight_holder_ringclickV6.scad`
+puts the bottom screw and the click base into one part, see V5 and V6 below.
 
 ![preview](preview.png)
 
@@ -21,6 +21,26 @@ is experimental: the bottom screw and the click base in one part, see V5 below.
 The window's edge on the lens, cut in half:
 
 ![ring](section_ring.png)
+
+## V6 against V5
+
+| | V5 | V6 |
+|---|---|---|
+| printed | works: the plunger breaks free, slides and clicks (2026-11-12); unscrewed to change the batteries, the plunger falls out through the top | untested |
+| upward stop | none: only the puck | a second 45 degree lip at the plunger's bottom, 0.6 behind the opening (`lip_overlap`), under a 45 degree chamfer of the opening, `slide_gap` off it |
+| plunger's bottom | chamfered 0.4, Ø49.2 on the bed | chamfered 0.4, Ø50.8 on the bed: the bottom lip |
+| top part | | V4's, unchanged |
+
+The same cuts as for V5 below: the bottom lip under the opening's chamfer.
+
+![the plunger with both lips](v6_plunger.png)
+
+| Checked in OpenSCAD, gaps 0.2 / 0.3 / 0.4 | Result |
+|---|---|
+| as printed; dropped 2.1 | no contact |
+| dropped 2.6 | only the top lip on the opening's edge |
+| raised 0.2 | no contact; it never goes higher than printed, when the holder's bottom and its own stand on the desk |
+| raised 0.5, at gap 0.4 0.8 | only the bottom lip on the chamfer: it cannot leave upwards |
 
 ## V5 against V4, experimental
 
@@ -125,7 +145,7 @@ The screwin cut through the plunger's tube (left two) and through the bar's end 
 | `toppart` | upside down, top face on the bed (as `print_layout`) | the window's chamfer and the two outer cones, 45 degrees; the lip's outer 45 degree cone faces up; the cavity narrows from the bottom face up to the window's edge, so every other layer sits on the one below |
 | `bottom_screw` | standing as used | 45 degree flange cone and thread |
 | `clickbase` | standing as used | none |
-| `screwin`, V5 | standing as used, the plunger inside in its pressed position, both on the bed | the lip's 45 degree cone; the counterbore's floor and the ring's floor are flat; nothing bridges |
+| `screwin`, V5 and V6 | standing as used, the plunger inside in its pressed position, both on the bed | the lips' 45 degree cones and the opening's bottom chamfer; the counterbore's floor and the ring's floor are flat; nothing bridges |
 
 ## tuning
 
@@ -141,7 +161,7 @@ The screwin cut through the plunger's tube (left two) and through the bar's end 
 2. Screw in the bottom screw with its bar until it is flush with the bottom.
 3. Put the holder on the click base, the bar in the slot; the base turns freely to meet the bar.
 
-V5: push the plunger down once to free it; put the puck in; screw the screwin in by the plunger's bar until it is flush, the plunger pushed up so the bar's ends sit in the slots; stand the lamp on the desk.
+V5 and V6: push the plunger down once to free it; put the puck in; screw the screwin in by the plunger's bar until it is flush, the plunger pushed up so the bar's ends sit in the slots; stand the lamp on the desk.
 
 ## logo
 
