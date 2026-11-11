@@ -30,6 +30,7 @@ Diameter clearance = added to the hole diameter, not per side.
 
 ## Rules
 
+- A ring pressing the KC007 puck light's lens near its edge needs more than 0.7 travel: RGBW_pucklight_holder_ringclick V2 (window's edge at 34, `press_height` 1.6, 0.7 travel by the CAD lens) did not click reliably; the holder V3's ribs click at the centre with the same 0.7. V3 adds 0.2, untested (2026-11-11, Elegoo Centauri Carbon 2, PLA, 0.2 mm layers).
 - The KC007 puck light's lens clicks wherever it is pressed, also at its edge (tested by hand, 2026-11-11): a ring around the window can press it instead of ribs over the centre (RGBW_pucklight_holder_ringclick V1, untested in print).
 - Ribs in front of the light show through a transparent lampshade: the RGBW puck light holder V3's 2 × 2 ribs over the dome are stable but visible. V4 tries 1.6 × 1.6 with 0.6 chamfers along the top edges, 29 % of V3's bending stiffness; untested (2026-11-11).
 - A rail's end that leaves its slot within the travel gets a lead-in: chamfer the vertical edges of the rail's ends (0.6 on a 2.0 rail) and the slot's ends (0.2). The OMM XY table's rebuild had left Onshape's rail chamfers out up to v3.0.1; the user: they are important (2026-11-10).
