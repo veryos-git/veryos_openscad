@@ -1,13 +1,15 @@
 holder for the RGBW puck light (62 mm KC007), as `../RGBW_pucklight_holder`
 V4, but a ring presses the lens instead of a cross of ribs, so nothing
 crosses the light under a transparent lampshade. The lens clicks wherever it
-is pressed, also at its edge (tested by hand, 2026-11-11).
+is pressed, also at its edge (tested by hand, 2026-11-11). From V4 the spheres
+of `../pucklight_sphere` and the vases of `../pucklight_vase` screw into a cup on
+top.
 
 ![sketch](image.png)
 
 # OpenSCAD
 
-`RGBW_pucklight_holder_ringclickV3.scad` generates the three parts: top
+`RGBW_pucklight_holder_ringclickV4.scad` generates the three parts: top
 part, bottom screw, click base. `part` shows all parts on the bed, the
 assembly, the assembly cut in half, or one part.
 
@@ -15,9 +17,25 @@ assembly, the assembly cut in half, or one part.
 
 ![section](section.png)
 
-The window's edge on the lens, cut in half:
+The window's edge on the lens and the cup, cut in half:
 
 ![ring](section_ring.png)
+
+A pucklight_sphere V3 sphere screwed in:
+
+![cup](section_cup.png)
+
+## V4 against V3
+
+| | V3 | V4 |
+|---|---|---|
+| top | 45 degree cone to a 56.7 top face | cylinder Ø70.8 up to the rim of a cup with a female Ø67 thread, as pucklight_sphere's sockel |
+| inside the cup | | the core stands up to the rim around the window, Ø62 (`cup_core_d`), so the top part still prints upside down |
+| top face | 30.1 | 31.5; the cup's floor 26.7 |
+| ring above the flat ring around the lens | 1.8 | 3.2, the core |
+| top part's logo | 9 wide | 10 wide, in the core's top face |
+| solid volume: top part | 15.8 cm³ | 22.1 cm³; all parts in solid PLA 48 g |
+| unchanged | | cavity, window, lip, bottom screw, click base |
 
 ## V3 against V2
 
@@ -44,15 +62,16 @@ The window's edge on the lens, cut in half:
 
 ## against RGBW_pucklight_holderV4
 
-| | holder V4 | ringclick V3 |
+| | holder V4 | ringclick V4 |
 |---|---|---|
 | presses the lens | cross of 1.6 × 1.6 ribs, at the centre | the window's 45 degree edge, all around at 36 (`contact_d`) |
 | lens covered, seen from above | two 1.6 strips, 10 % | the outer ring from 36 to 40, 19 % |
-| top face | 30.2 | 30.1, `ring_thickness` 1.8 above the flat ring around the lens |
+| top face | 30.2 | 31.5, the cup's rim and the core |
 | highest point | rib tops, 34.1 | the lens, 32.5 |
+| screws on | nothing | pucklight_sphere's spheres, pucklight_vase's vases |
 | top part prints | standing; the ribs bridge 30 | upside down; no bridges |
 | guiding pins | four | none, as pucklight_sphere V2 |
-| body | 76 mm square | round, 74.7 mm across at the bottom |
+| body | 76 mm square | round, 74.7 mm across at the bottom, 70.8 at the cup |
 
 ## how it clicks
 
@@ -70,7 +89,7 @@ The window's edge on the lens, cut in half:
 
 | part | orientation | overhangs |
 |---|---|---|
-| `toppart` | upside down, top face on the bed (as `print_layout`) | the window's chamfer and the two outer cones, 45 degrees; the lip's outer 45 degree cone faces up; the cavity narrows from the bottom face up to the window's edge, so every other layer sits on the one below |
+| `toppart` | upside down, top face on the bed (as `print_layout`) | the window's chamfer and the two outer cones, 45 degrees; the lip's outer 45 degree cone faces up; the cup's floor bridges 2 to 2.8 between the core and the cup's thread; the cavity narrows from the bottom face up to the window's edge, so every other layer sits on the one below |
 | `bottom_screw` | standing as used | 45 degree flange cone and thread |
 | `clickbase` | standing as used | none |
 
@@ -82,12 +101,24 @@ The window's edge on the lens, cut in half:
 | the puck rattles in the holder | lower `puck_play` |
 | the lens covers less or more than 40 in the real puck | change `puck_dome_d`: the lip follows the lens's rim |
 
+## cup and fit
+
+| | |
+|---|---|
+| thread | Ø67, 2 mm pitch, 45 degree flanks, right-handed, 2 turns, as pucklight_sphere V3 |
+| male on | the neck of a sphere or a vase |
+| female in | the cup, Ø67.6: `neck_clearance` 0.3 radial |
+| stop | the neck's bottom on the cup's floor |
+| core | Ø62 inside the neck's Ø63 bore; a vase's single wall is further out |
+| checked in OpenSCAD with V3's sphere | seated: no contact; 0.05 lower: only the neck's bottom on the floor; half a turn out: no contact; raised 1 without turning: the threads collide |
+
 ## assembly
 
 1. Put the puck into the top part from below, lens first.
 2. Screw in the bottom screw with its bar until it is flush with the bottom.
 3. Put the holder on the click base, the bar in the slot; the base turns freely to meet the bar.
+4. Hold the top part and screw a sphere or a vase into the cup until it stops, about 2 turns.
 
 ## logo
 
-The VeryOS logo is engraved 0.6 mm deep (`logo_depth`) in every part: 9 wide in the top face of the top part, 8 wide in the bottom of the screw's flange, 14 wide in the bottom of the click base.
+The VeryOS logo is engraved 0.6 mm deep (`logo_depth`) in every part: 10 wide in the top face of the top part, inside the cup, 8 wide in the bottom of the screw's flange, 14 wide in the bottom of the click base.
