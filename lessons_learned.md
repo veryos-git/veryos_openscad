@@ -8,6 +8,9 @@ Diameter clearance = added to the hole diameter, not per side.
 
 | Date | Fit | Part | Hole | Result | Printer / material |
 |---|---|---|---|---|---|
+| 2026-11-11 | 28BYJ-48 shaft (Ø5, 3 across the flats) in a printed double-D hole, sliding, the platform turns on it | 28byj_minimal_turntable V1, platform's hub | 5.2 × 3.2 (+0.2) | untested | ? |
+| 2026-11-11 | Printed pegs in the 28BYJ-48's Ø4.2 ear holes, motor dropped on | 28byj_minimal_turntable V1, base | pegs 3.8 (−0.4) | untested | ? |
+| 2026-11-11 | 6 mm airsoft BBs (5.95) between two printed 90° V-grooves, faces 2 apart | 28byj_minimal_turntable V1, base's rim and platform's ring | grooves 3.21 deep; the balls touch the flanks 1.1 below the edges | untested | ? |
 | 2026-11-10 | O-rings with a 2 cord in three grooves on the 28BYJ-48 shaft adapter, Ø6.3 sleeve | OMM XY table v3.0.1 | grooves R1, 0.05 deep, 2 apart, as in Onshape | untested in a print of the script; the user runs O-rings on the Onshape print's adapters | ? |
 | 2026-11-10 | Sanding paper strip cut with a knife inside a window of the cutting ruler, for a 7.5 wide rail top | OMM XY table v3.0.0, cutting ruler | window 7.5 × 100, no allowance | untested; expected strip about 0.5 smaller, half the blade's thickness per side | ? |
 | 2026-11-10 | Y slider's two slots on the table's two rails, 15 apart, total | OMM XY table v2.6 | 2.2 on 2.0 (+0.2) each | untested | ? |
