@@ -19,7 +19,7 @@ the enclosure should have parts:
 
 ![preview](preview.png)
 
-`RGBW_pucklight_holderV3.scad` generates the three parts of the Onshape model
+`RGBW_pucklight_holderV4.scad` generates the three parts of the Onshape model
 in `onshape_model`, parametric. The puck's size comes from the
 manufacturer's CAD model in `rgbw_light_specs`: 62 mm wide, 26.8 mm high
 (the spec sheet says 62.2 x 27.6). The Onshape model was built around the
@@ -35,12 +35,24 @@ around the window, which overhangs 2.1 mm over the puck (layer 102 in
 so the top surface is 1.1 mm higher, 30.2 instead of 29.1 mm. The ribs'
 tops stay at 34.5 mm.
 
+`RGBW_pucklight_holderV3.scad` has 2 × 2 mm ribs: stable, but they show
+through a transparent lampshade. V4 against V3:
+
+| | V3 | V4 |
+|---|---|---|
+| rib, width × height above the contact | 2 × 2 | 1.6 × 1.6 (`rib_width`, `rib_height`) |
+| 45 degree chamfer along the top edges | none | 0.6 each side (`rib_chamfer`), 0.4 flat top |
+| ribs' tops | 34.5 | 34.1 |
+| rib's width seen from above / from 45 degrees | 2.0 / 2.8 | 1.6 / 1.8 |
+| bending stiffness where the dome touches | 100 % | 29 % (41 % without the chamfers) |
+| print | stable, works | untested |
+
 ![section](section.png)
 
 How it clicks:
 - the puck lies loose on the floor of the bottom screw. Its dome pokes up
   through the top part's 50 mm window (`window_d`), 0.7 mm (`puck_play`)
-  under a cross of 1 mm ribs. The puck can only move that far.
+  under a cross of 1.6 mm ribs. The puck can only move that far.
 - the holder sits on the click base, guided by four pins in its corners.
   The base's disc reaches up through the bottom screw's opening, 1.6 mm
   (`press_height`) above the floor, and lifts the puck until the dome
@@ -62,7 +74,8 @@ stays loose.
 - `toppart`: 76 mm square body (`wall` 2.25 mm beside the screw), the
   internal thread, the window and the ribs. The ribs' underside is flat over
   30 mm (`rib_contact_d`), where the dome touches, and slopes down to the
-  window's edge. Beside the window they stand on 45 degree feet.
+  window's edge. Beside the window they stand on 45 degree feet. Their top
+  edges are chamfered at 45 degrees; the underside keeps the full width.
 - `bottom_screw`: a ring, 10.4 mm high (`screw_height`), with a 3.5 mm thread
   (`screw_thread_length`) over a wider flange. The flange narrows to the
   thread in a 45 degree cone, and so does its recess in the top part, so the
