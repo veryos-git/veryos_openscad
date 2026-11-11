@@ -8,6 +8,7 @@ Diameter clearance = added to the hole diameter, not per side.
 
 | Date | Fit | Part | Hole | Result | Printer / material |
 |---|---|---|---|---|---|
+| 2026-11-11 | Print-in-place plunger, a Ø50 tube in the screw's opening, per side; bar's ends in two slots | RGBW_pucklight_holder_ringclick V5 | 0.2, one layer (slide test 0.2 / 0.3 / 0.4); slots 0.4; 0.4 chamfer at the plunger's first layer | untested | ? |
 | 2026-11-11 | 28BYJ-48 shaft (Ø5, 3 across the flats) in a printed double-D hole, sliding, the platform turns on it | 28byj_minimal_turntable V1, platform's hub | 5.2 × 3.2 (+0.2) | untested | ? |
 | 2026-11-11 | Printed pegs in the 28BYJ-48's Ø4.2 ear holes, motor dropped on | 28byj_minimal_turntable V1, base | pegs 3.8 (−0.4) | untested | ? |
 | 2026-11-11 | 6 mm airsoft BBs (5.95) between two printed 90° V-grooves, faces 2 apart | 28byj_minimal_turntable V1, base's rim and platform's ring | grooves 3.21 deep; the balls touch the flanks 1.1 below the edges | untested | ? |

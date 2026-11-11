@@ -11,7 +11,8 @@ The same holder with a cup on top for lampshades, and a test lampshade: `../puck
 
 `RGBW_pucklight_holder_ringclickV4.scad` generates the three parts: top
 part, bottom screw, click base. `part` shows all parts on the bed, the
-assembly, the assembly cut in half, or one part.
+assembly, the assembly cut in half, or one part. `RGBW_pucklight_holder_ringclickV5.scad`
+is experimental: the bottom screw and the click base in one part, see V5 below.
 
 ![preview](preview.png)
 
@@ -20,6 +21,43 @@ assembly, the assembly cut in half, or one part.
 The window's edge on the lens, cut in half:
 
 ![ring](section_ring.png)
+
+## V5 against V4, experimental
+
+| | V4 | V5 |
+|---|---|---|
+| parts | top part, bottom screw, click base | top part, screwin: the screw ring with a plunger printed in place inside it |
+| stands on | the click base's Ø74.7 plate | the plunger's Ø50 tube; pressed down, the holder's bottom stands on the desk |
+| lifts the puck | the base's tube, 7.2 above the plate | the plunger, 7.2 high |
+| keeps the plunger | | a 45 degree lip at its top, 0.6 behind the screw's opening (`lip_overlap`); it drops 2.5 (`slide`), then rests on the opening's edge in a counterbore |
+| turns the screw | the screw's bar | the plunger's bar, whose ends reach into two slots in the opening |
+| gap | 1 around the tube | 0.2 (`slide_gap`), one layer; the bar's ends 0.4 in their slots; a 0.4 chamfer on the plunger's bottom edge |
+| solid volume, screw and base | 11.2 + 5.1 cm³ | 13.5 cm³ |
+| top part | | V4's, unchanged |
+
+![V5 cut in half, released](v5_section.png)
+
+The screwin cut through the plunger's tube (left two) and through the bar's end in its slot (right two), as printed and hanging at its stop. Plunger grey, screw ring gold:
+
+![the plunger in the screw ring](v5_plunger.png)
+
+| Checked in OpenSCAD, gaps 0.2 / 0.3 / 0.4 | Result |
+|---|---|
+| as printed | two separate bodies, no contact |
+| dropped 2.1: float 1.5 plus `seat_gap` 0.6 | no contact: the holder rests on the puck, not on the lip |
+| dropped 2.45 | no contact |
+| dropped 2.6 | only the lip on the opening's edge: it cannot fall out |
+
+`part = "slide_test"` prints the screwin cut to Ø58, once per gap in `slide_test_gaps` (0.2, 0.3, 0.4), side by side; 2, 3 or 4 notches in the ring's top edge tell them apart. 16.2 cm³ for all three. Print it before the screwin, then set `slide_gap` to the smallest gap that passes:
+
+| Slide test | Passes when |
+|---|---|
+| after printing | the plunger breaks free with a push from above |
+| sliding | it moves 2.5 down and back without catching |
+| hanging | it does not fall out when shaken |
+| turning | the bar turns the ring |
+
+![slide test](v5_slide_test.png)
 
 ## V4 against V3
 
@@ -87,6 +125,7 @@ The window's edge on the lens, cut in half:
 | `toppart` | upside down, top face on the bed (as `print_layout`) | the window's chamfer and the two outer cones, 45 degrees; the lip's outer 45 degree cone faces up; the cavity narrows from the bottom face up to the window's edge, so every other layer sits on the one below |
 | `bottom_screw` | standing as used | 45 degree flange cone and thread |
 | `clickbase` | standing as used | none |
+| `screwin`, V5 | standing as used, the plunger inside in its pressed position, both on the bed | the lip's 45 degree cone; the counterbore's floor and the ring's floor are flat; nothing bridges |
 
 ## tuning
 
@@ -101,6 +140,8 @@ The window's edge on the lens, cut in half:
 1. Put the puck into the top part from below, lens first.
 2. Screw in the bottom screw with its bar until it is flush with the bottom.
 3. Put the holder on the click base, the bar in the slot; the base turns freely to meet the bar.
+
+V5: push the plunger down once to free it; put the puck in; screw the screwin in by the plunger's bar until it is flush, the plunger pushed up so the bar's ends sit in the slots; stand the lamp on the desk.
 
 ## logo
 
