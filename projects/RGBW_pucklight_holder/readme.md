@@ -17,6 +17,8 @@ the enclosure should have parts:
 
 # OpenSCAD
 
+`../RGBW_pucklight_holder_ringclick` presses the lens with a ring around the window instead of the ribs, so nothing crosses the light.
+
 ![preview](preview.png)
 
 `RGBW_pucklight_holderV4.scad` generates the three parts of the Onshape model
