@@ -42,7 +42,7 @@ PROJECTS = {
         ("door_knob_decorative.scad", [
             ("knob_decorative", "Finished knob with a decorated head", {"part": "knob"})])],
     "esp32_unofficial": [("esp32_unofficial_enclosureV1.scad", "assembly base lid screw")],
-    "finger_claws": [("finger_clawsV2.scad", "assembly sleeve claw")],
+    "finger_claws": [("finger_clawsV3.scad", "assembly sleeve claw")],
     "logo_branding_stamp": [("logo_stampV1.scad", [
         ("stamp", "Stamp, the mirrored logo on its face")])],
     "OMM_open_microscope_motorization/enclosure": [("omm_enclosureV7.scad", "assembly base lid")],
