@@ -1,0 +1,1 @@
+goal: a scad script that can generate a fully 3d printable softbox with parameters for customization. the default parameters are for the smallrig 40 w video led light.

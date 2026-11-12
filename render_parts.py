@@ -64,10 +64,8 @@ PROJECTS = {
     "RGBW_pucklight_lantern3": [
         ("RGBW_pucklight_lantern3V8_simple.scad", "assembly frame roof screwin clickbase window")],
     "ring_sizer2": [("ring_sizer2.scad", [("sizer", "Disk with the measuring rings")])],
-    # no script of its own yet: its print files are V6 of the archived cuboid_video_light_softbox
-    "softbox_smallrig_40W": [(
-        "../01_published_or_archived/cuboid_video_light_softbox/cuboid_video_light_softboxV6.scad",
-        "assembly frame_top frame_front screw thumb_screw wallcover_big wallcover_tripod wallcover_small")],
+    "softbox_smallrig_40W": [("softbox_smallrig_40WV1.scad",
+        "assembly frame_top frame_front light_clamp screw thumb_screw wallcover_big wallcover_small")],
     "veryos_logo_cube": [("V2/veryos_logo_cubeV2.scad", [
         ("cube", "Logo from the front and from the side")])],
     "vorhangstangeschrankadapter": [("vorhangstangeschrankadapter.scad", [
