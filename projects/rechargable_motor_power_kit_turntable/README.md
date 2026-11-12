@@ -1,15 +1,15 @@
 # Rechargeable Power Kit turntable
 
-Turntable for Bambu Lab's Rechargeable Power Kit (ZC003): an N20 gear motor, a 500 mAh LiPo battery and a board with a USB-C socket and a push switch. A printed worm on the motor turns a hoop of teeth under the platform; the number of teeth sets the speed. Six printed parts and the kit, nothing else. V3: V1 is printed and tested, it fits the kit and its platform wobbles; the rail of V3 and the bracket, the screw and the cap of V2 are not printed yet.
+Turntable for Bambu Lab's Rechargeable Power Kit (ZC003): an N20 gear motor, a 500 mAh LiPo battery and a board with a USB-C socket and a push switch. A printed worm on the motor turns a hoop of teeth under the platform; the number of teeth sets the speed. Six printed parts and the kit, nothing else. V4: V3 is printed and tested, the platform runs well on its rail, the teeth skip under a heavy load; the larger worm of V4 is not printed yet.
 
 ![assembly](preview.png)
 
 | File | What |
 |---|---|
-| `rechargable_motor_power_kit_turntableV3.scad` | the generator, standalone, no libraries. `part`: all parts on the bed, assembly, assembly without the platform, section, base, platform, worm, bracket, screw, cap |
-| `rechargable_motor_power_kit_turntableV3_base.stl`, `_platform.stl`, `_worm.stl`, `_bracket.stl`, `_screw.stl`, `_cap.stl` | exported at the defaults, as they print; worm, bracket, screw and cap are the shapes of V2 |
+| `rechargable_motor_power_kit_turntableV4.scad` | the generator, standalone, no libraries. `part`: all parts on the bed, assembly, assembly without the platform, section, base, platform, worm, bracket, screw, cap |
+| `rechargable_motor_power_kit_turntableV4_base.stl`, `_platform.stl`, `_worm.stl`, `_bracket.stl`, `_screw.stl`, `_cap.stl` | exported at the defaults, as they print; all but the worm are the shapes of V3, triangle for triangle |
 | `rendered_parts/` | every part under its name |
-| `archive/` | V1, V2 |
+| `archive/` | V1, V2, V3 |
 | `readme_hgc.md` | original goal |
 | `image.png`, `image copy.png` | the kit and its wiring, Bambu Lab's pictures |
 | `Rechargeable Power Kit-ZC003 model/` | Bambu Lab's CAD model of the kit, source of every kit dimension in the script; not committed |
@@ -18,17 +18,38 @@ Turntable for Bambu Lab's Rechargeable Power Kit (ZC003): an N20 gear motor, a 5
 
 | Part | Qty | Note |
 |---|---|---|
-| base, platform, worm, bracket, screw, cap | 1 each | printed, 45.1 / 58.7 / 1.1 / 1.6 / 0.24 / 0.18 cm³ solid at the defaults |
+| base, platform, worm, bracket, screw, cap | 1 each | printed, 45.1 / 58.7 / 1.2 / 1.6 / 0.24 / 0.18 cm³ solid at the defaults |
 | Bambu Lab Rechargeable Power Kit ZC003 | 1 | motor, battery, board; its five screws are not used |
 | USB-C cable | 1 | to charge |
 | flat screwdriver | | for the printed screw, blade up to 1.2 thick |
 | graphite | | a soft pencil or powder, on the rail |
 
+## V4 against V3
+
+| | V3 | V4 |
+|---|---|---|
+| print | printed and tested 2026-11-12: the rail works well; under a heavy load the teeth skip, with a repeating sound | unprinted |
+| worm | Ø13 over the thread | Ø13.6: 0.3 more radius (`worm_oversize`), the same thread |
+| thread between the hoop's teeth | 0.8 | 1.1 |
+| left of that when worm and hoop are pushed 0.71 apart | 0.09 | 0.39 |
+| worm above the floor | 0.6 | 0.3 |
+| to print | | the worm; base, platform, bracket, screw and cap as V3 |
+
+Why the teeth skip: the 45° flanks push worm and hoop apart about as hard as the worm drives. What gives way, by the model's sizes; the last two rows are estimates:
+
+| Gives way | At the worm |
+|---|---|
+| platform's pin in its tube, 8.3 on 8.0 | 0.15 |
+| motor between its walls, 0.1 on each side | 0.22 |
+| the snap tab beside the gearbox bends, until the gearbox's boss meets the edge of its slot (4.6 for Ø4) | to 0.39, at about 3 N |
+| motor's shaft in its bearing, worm on the shaft | about 0.17 |
+| together | 0.71 |
+
 ## V3 against V2
 
 | | V2 | V3 |
 |---|---|---|
-| print | the platform of V1, which has the same bearing, printed and tested 2026-11-12: it wobbles | unprinted |
+| print | the platform of V1, which has the same bearing, printed and tested 2026-11-12: it wobbles | printed and tested 2026-11-12: the platform runs well on the rail |
 | platform's load | on the pin's Ø6 end, on the floor in the tube; the platform rocks until its underside meets the wall, 0.4 below | on the top of the base's wall, at r 70 |
 | base's wall | 16.8 high, flat top | 17.2 high; its top is a rail, chamfered at 45° from both sides, the last layer 0.42 wide (`rail_width`) |
 | pin | stands on the floor | ends 0.6 (`pin_gap`) above the floor and only centres the platform |
@@ -82,9 +103,9 @@ The speed is not exact: a DC motor slows down under load and as the battery empt
 
 | | |
 |---|---|
-| worm | on the motor's D-shaft, Ø13 over the thread, 10.5 long. Its thread is the 45° thread of `fdm_optimized_screws` at 2.5 pitch, 1.0 deep, so it prints standing without support. Its root is 0.5 wider than the motor, so the hoop's teeth pass the motor |
+| worm | on the motor's D-shaft, Ø13.6 over the thread, 10.5 long: 0.3 (`worm_oversize`) more radius than the Ø13 the base and the hoop are laid out for, so the thread stays between the teeth when the worm's push drives the two apart. Its thread is the 45° thread of `fdm_optimized_screws` at 2.5 pitch, 1.0 deep, so it prints standing without support. Its root is 0.8 wider than the motor, so the hoop's teeth pass the motor |
 | hoop | 83 teeth under the platform, pitch Ø66.0: involutes with a 45° pressure angle, which fit the thread's straight flanks, leaning 3.8° like the thread. Their lower ends are chamfered, so they find their way into the worm |
-| play | 0.35 along the hoop (`backlash`), 0.25 between the thread's crest and the bottom of the teeth (`tip_clearance`). The worm only ever pushes one way, so the play costs nothing |
+| play | laid out for 0.35 along the hoop (`backlash`) and 0.25 between the thread's crest and the bottom of the teeth (`tip_clearance`). The larger worm is 0.6 wider between the teeth: it runs only with worm and hoop at least 0.13 further apart than drawn, which the pin's play (0.15) and the motor's (0.22) allow. Pushed apart by both, 0.49 is left along the hoop. The worm only ever pushes one way, so the play costs nothing |
 | bearing | the platform's flat underside lies on the top of the base's wall and slides on it, at r 70 (68.4 along the panel): the widest circle the base has, so the platform cannot rock |
 | rail | the wall's top: 45° chamfers from both sides leave a ridge 0.42 wide (`rail_width`, one extrusion width) and one layer high, so the last layer is a single line. Rub graphite on it |
 | pin | the platform's Ø8 pin turns in a tube in the middle of the base and only centres it: its end stays 0.6 (`pin_gap`) above the floor |
@@ -151,8 +172,9 @@ The rail's last layer is one line wide, which a slicer only prints with thin wal
 | Problem | Change |
 |---|---|
 | too fast or too slow | `motor_rpm` = counted turns per minute × teeth |
-| the teeth bind | `backlash` 0.45 |
-| the teeth skip under load | `pin_clearance` 0.2, `backlash` 0.25 |
+| the teeth still skip under a load | `worm_oversize` 0.4; only the worm changes |
+| platform runs rough, slow or not at all without a load | `worm_oversize` 0.2; only the worm changes |
+| the teeth bind with `worm_oversize` 0 | `backlash` 0.45; changes the platform |
 | worm tight or loose on the shaft | `shaft_clearance`, 0.2 |
 | platform still rocks | it stands on the pin: `pin_gap` 1; only the platform changes |
 | the rail's last layer is missing or in pieces | slicer: `Detect thin wall` on, or Arachne walls; see Printing |
@@ -166,9 +188,15 @@ The rail's last layer is one line wide, which a slicer only prints with thin wal
 
 | Check | Result |
 |---|---|
-| worm turned through a full turn in three steps, hoop advanced one tooth per turn | never touch |
-| hoop shifted 0.4 × `backlash` either way | free |
-| hoop shifted 0.65 × `backlash` either way | the flanks touch |
+| V4's worm, platform where the drawing has it | worm and hoop overlap; pushed 0.10 apart also, 0.15 apart free |
+| V4's worm turned through a full turn in six steps, hoop advanced one tooth per turn, platform pushed 0.15 away | never touch |
+| a tooth's tip opposite the thread's crest, pushed apart | V3's worm: they meet at 0.75, pass at 0.85; V4's: meet at 1.05, pass at 1.15 |
+| V4's worm in the base | free; lowered 0.25 free, 0.35 on the floor |
+| `worm_oversize` 0.4 | overlap at 0.20 apart, free at 0.25 |
+| base, platform, bracket, screw and cap against V3's | the same triangles |
+| V3's worm turned through a full turn in three steps, hoop advanced one tooth per turn | never touch |
+| hoop shifted 0.4 × `backlash` either way, V3's worm | free |
+| hoop shifted 0.65 × `backlash` either way, V3's worm | the flanks touch |
 | motor, worm, board, battery, bracket, screw, cap and platform in their places | touch nothing they should not; platform and base share no volume |
 | platform lowered 0.1 | meets the base only in the rail's ridge, r 69.8 to 70.2 |
 | platform lowered 0.5, the base's middle | free; at 0.7 the pin is on the floor |
@@ -189,13 +217,14 @@ The rail's last layer is one line wide, which a slicer only prints with thin wal
 |---|---|
 | motor speed | 500 rpm is Bambu Lab's number for the kit; at which voltage is not stated, and the board feeds the motor from the battery, 3.7 V. Expect to correct `motor_rpm` |
 | direction | set by the plugs; unknown which way the platform turns |
-| torque | a worm with 45° flanks loses most of the motor's power to friction, about 85 to 90 % by estimate. Untested how much load it turns |
+| torque | a worm with 45° flanks loses most of the motor's power to friction, about 85 to 90 % by estimate. V3 turns the platform; how much load before the motor stalls is unknown, the teeth skip first |
+| skipping | the larger worm leaves the give of the motor's seat as it is. If the teeth still skip: a stop in the base beside the gearbox's boss, on the side away from the hoop, and the worm closer by the pin's play; not built, needs a new base |
 | run time | unknown |
 | shaft | 2.7 across the flat by the CAD model; N20 shafts usually have 2.5. The bore follows the CAD model, which fits both |
 | charging light | its place on the board is read from the photo, not from the CAD model |
 | USB-C plug | the opening is for a grip up to 13 × 7.4 |
 | load | only its weight holds the platform down; a platform much wider than the base tips with a load on its edge |
-| rail | unprinted. The load brakes at r 70: about 14 mN·m for each 100 g at a friction of 0.2, by estimate (on the pin's end: 0.4). Untested how much the motor still turns, and how graphite, the ridge's seam and the lines of the platform's underside run on each other |
+| rail | works well in V3's print. The load brakes at r 70: about 14 mN·m for each 100 g at a friction of 0.2, by estimate (on the pin's end: 0.4). Unmeasured how much the motor still turns, and how graphite, the ridge's seam and the lines of the platform's underside run on each other |
 | screw | a printed 5 mm thread in a blind hole in a block is unprinted; in `fdm_optimized_screws` it works in nuts, in PETG |
 | cap | its hold on the tip is unprinted; the tip's size is from the CAD model, the plunger's travel a guess from its 2.5 long collar |
 | board's play | the board still slides up to 0.6 in its seat, 0.3 before and 0.3 behind it; the cap makes that harmless. The stops could come closer once the cap is tested |

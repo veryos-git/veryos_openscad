@@ -57,7 +57,7 @@ PROJECTS = {
     "pucklight_sphere": [("pucklight_sphereV3.scad",
         "assembly sphere vase_sphere sockel screwin clickbase")],
     "rechargable_motor_power_kit_turntable": [
-        ("rechargable_motor_power_kit_turntableV3.scad", "assembly open base platform worm bracket screw cap")],
+        ("rechargable_motor_power_kit_turntableV4.scad", "assembly open base platform worm bracket screw cap")],
     "RGBW_pucklight_holder": [("RGBW_pucklight_holderV4.scad", "assembly toppart bottom_screw clickbase")],
     "RGBW_pucklight_holder_ringclick": [
         ("RGBW_pucklight_holder_ringclickV8.scad", "assembly toppart screwin slide_test")],
