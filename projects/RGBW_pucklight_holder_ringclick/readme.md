@@ -14,6 +14,7 @@ part, bottom screw, click base. `part` shows all parts on the bed, the
 assembly, the assembly cut in half, or one part. `RGBW_pucklight_holder_ringclickV6.scad`
 puts the bottom screw and the click base into one part, see V5 and V6 below.
 `RGBW_pucklight_holder_ringclickV7.scad` is V6 with a fingerprint, see V7 below.
+`RGBW_pucklight_holder_ringclickV7_TraceTrove.scad` is V7 with the TraceTrove logo, see below.
 
 ![preview](preview.png)
 
@@ -22,6 +23,24 @@ puts the bottom screw and the click base into one part, see V5 and V6 below.
 The window's edge on the lens, cut in half:
 
 ![ring](section_ring.png)
+
+## TraceTrove version of V7
+
+`RGBW_pucklight_holder_ringclickV7_TraceTrove.scad`: V7 with the TraceTrove logo V3 instead of the VeryOS logo, in a file of its own. Everything else is V7's; a change to V7 has to be made in both files.
+
+| | V7 | V7 TraceTrove |
+|---|---|---|
+| logo | VeryOS, built in the script | TraceTrove logo V3, flat: the outline of `logo_final_flat` in tracetrove_branding's `branding/LOGO_V3/tracetrove_logo.scad`, copied into the script, so it still needs no libraries; compared with it in OpenSCAD: no difference |
+| logo's size | by its width: top part 9, screw 8 | by its height: top part 9.5 (`toppart_logo_height`), screw 9.5 (`screw_logo_height`); 20 wide where it is 31.75 tall |
+| logo's direction | top pointing outwards | along the ring, as in TraceTrove's pucklight_egg V1 |
+| logo's strokes | 0.9 to 1.1 wide | 1.5 wide |
+| fingerprint | the VeryOS logo as relief and as watermark | the TraceTrove logo as relief and as watermark, in the same places, as deep and as high: a copy shows which brand's file it came from |
+| other geometry | | the same: the solids differ by the logos' volumes only; the plunger is identical |
+| printed | untested | untested, not sliced |
+
+The same sections as for the fingerprint below: 0.01 inside the face on the bed, 0.1 inside it, and through the watermark.
+
+![fingerprint, TraceTrove](fingerprint_TraceTrove.png)
 
 ## V7 against V6: fingerprint
 

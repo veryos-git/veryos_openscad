@@ -18,8 +18,27 @@ The lampshade's neck in the cup, and the window's edge on the lens:
 | File | What |
 |---|---|
 | `pucklight_lamp_v2V3.scad` | the generator, standalone, no libraries |
+| `pucklight_lamp_v2V3_TraceTrove.scad` | V3 with the TraceTrove logo instead of the VeryOS logo |
 | `pucklight_lamp_v2V2.scad` | V2: without the fingerprint |
 | `pucklight_lamp_v2V1.scad` | V1: ringclick V3's bottom screw and click base |
+
+## TraceTrove version of V3
+
+`pucklight_lamp_v2V3_TraceTrove.scad`: V3 with the TraceTrove logo V3 instead of the VeryOS logo, in a file of its own. Everything else is V3's; a change to V3 has to be made in both files.
+
+| | V3 | V3 TraceTrove |
+|---|---|---|
+| logo | VeryOS, built in the script | TraceTrove logo V3, flat: the outline of `logo_final_flat` in tracetrove_branding's `branding/LOGO_V3/tracetrove_logo.scad`, copied into the script, so it still needs no libraries; compared with it in OpenSCAD: no difference |
+| logo's size | by its width: top part 10, screw 8 | by its height: top part 11 (`toppart_logo_height`), screw 9.5 (`screw_logo_height`); 20 wide where it is 31.75 tall |
+| logo's direction | top pointing outwards | along the ring, as in TraceTrove's pucklight_egg V1 |
+| logo's strokes | 0.9 to 1.1 wide | 1.5 to 1.7 wide |
+| fingerprint | the VeryOS logo as relief and as watermark | the TraceTrove logo as relief and as watermark, in the same places, as deep and as high: a copy shows which brand's file it came from |
+| other geometry | | the same: the solids differ by the logos' volumes only; the plunger and the lampshade are identical |
+| printed | untested | untested, not sliced |
+
+The same sections as for the fingerprint below: 0.01 inside the face on the bed, 0.1 inside it, and through the watermark.
+
+![fingerprint, TraceTrove](fingerprint_TraceTrove.png)
 
 ## V3 against V2: fingerprint
 
