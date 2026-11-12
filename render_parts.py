@@ -18,8 +18,6 @@ ROOT = Path(__file__).resolve().parent / "projects"
 #        (name, caption, "module();") calls one module of the script.
 PROJECTS = {
     "28byj_minimal_turntable": [("28byj_minimal_turntableV2.scad", "assembly base lid platform")],
-    "articial_fingernails": [("artificial_fingernail.scad", [
-        ("fingernail", "Sleeve over the fingertip with the blade")])],
     "ball_and_socket_joint_ball_head": [
         ("ball_and_socket_joint_ball_headV3.scad", "assembly ball socket screw")],
     "ball_socket_bracket": [("ball_socket_bracket.scad", "assembly ball socket screw")],
@@ -44,6 +42,7 @@ PROJECTS = {
         ("door_knob_decorative.scad", [
             ("knob_decorative", "Finished knob with a decorated head", {"part": "knob"})])],
     "esp32_unofficial": [("esp32_unofficial_enclosureV1.scad", "assembly base lid screw")],
+    "finger_claws": [("finger_clawsV2.scad", "assembly sleeve claw")],
     "logo_branding_stamp": [("logo_stampV1.scad", [
         ("stamp", "Stamp, the mirrored logo on its face")])],
     "OMM_open_microscope_motorization/enclosure": [("omm_enclosureV7.scad", "assembly base lid")],

@@ -8,6 +8,8 @@ Diameter clearance = added to the hole diameter, not per side.
 
 | Date | Fit | Part | Hole | Result | Printer / material |
 |---|---|---|---|---|---|
+| 2026-11-12 | PLA tongue, 13.6 × 3 and 23 long, pushed into the pocket of a TPU sleeve under a 0.8 cover, held by friction, per side | finger_claws V2, claw in sleeve | 0.1; 0 to print both as one | untested | ? |
+| 2026-11-12 | TPU sleeve, wall 1.2, on a fingertip measured as an oval at the last joint's crease and at the nail's middle, added to width and thickness | finger_claws V2, sleeve | 0 | untested | ? |
 | 2026-11-12 | Printed 5 mm screw (2 mm pitch, 45 degree, printed lying) in a blind thread, 8 deep, in a 10 wide block on a wall, per side | rechargable_motor_power_kit_turntable V2, base and screw | 0.25, as the nuts of fdm_optimized_screws | untested | ? |
 | 2026-11-12 | Bracket's rim around three sides of a 10 wide printed block, dropped on from above, per side | rechargable_motor_power_kit_turntable V2, bracket | 0.3 | untested | ? |
 | 2026-11-12 | Printed cap pushed onto the 2.5 × 2 tip of a push switch's plunger, 2.3 deep, held by friction, walls 0.8 | rechargable_motor_power_kit_turntable V2, cap | 2.6 × 2.1 (+0.1) | untested | ? |
@@ -47,6 +49,9 @@ Diameter clearance = added to the hole diameter, not per side.
 
 ## Rules
 
+- A finger is not round: seen from the front it is a flat oval, wider than thick (the user's observation, 2026-11-12; the round claw printed before, inside Ø13.4, hurts after a while). finger_claws V2 takes width and thickness at the last joint's crease and at the nail's middle. Its presets, about ¾ as thick as wide, are estimates, not measured fingers.
+- A hard blade in a soft sleeve is weakest where it leaves the sleeve: the tongue carries the whole bending moment there. finger_claws V2, tongue 13.6 wide, 40 to the tip, printed standing: 2 thick about 5 N at the tip, 3 thick about 10 N, at 25 MPa across the layers. *From the model (2026-11-12), not yet confirmed by a print.*
+- OpenSCAD 2021.01's preview, not its render, shows wrong shapes when the camera is inside a cutting shape: make cutters a little larger than the part, not 200. Where faces of two differently coloured parts lie in one plane, or a hidden face of one crosses the other, the last part's colour shows on both: keep such faces a layer apart and wrap the parts of a section view in render() (finger_claws V2, 2026-11-12).
 - A seat that only cradles a part does not hold it: board and battery fell out of the power-kit turntable's base V1 when it was handled (print, 2026-11-12). Lock every loose part. V2: a bracket over both with a gap, seated on its own block, so the screw's force never reaches the board or the LiPo; untested.
 - A push switch behind a panel must stand proud by its travel plus the board's play in its seat. The power-kit turntable V1's plunger stood 2.1 proud with 0.6 play and was hard to press all the way (print, 2026-11-12). V2 adds a cap standing 3 off the panel; untested.
 - The smallest printed screw is 5 mm (fdm_optimized_screws: 4 bends, 3 broke). Take 5 also where a smaller one would fit by size.
