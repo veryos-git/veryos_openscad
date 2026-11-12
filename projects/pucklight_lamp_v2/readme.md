@@ -1,7 +1,7 @@
 # Pucklight lamp V2
 
 Lamp with the 62 mm RGBW puck light (KC007): the click holder of
-`../RGBW_pucklight_holder_ringclick` V7 with a cup on top, and a simple
+`../RGBW_pucklight_holder_ringclick` V8 with a cup on top, and a simple
 lampshade that screws into it. The cup has pucklight_sphere's thread, so the
 spheres of `../pucklight_sphere` and the vases of `../pucklight_vase` fit too.
 
@@ -17,16 +17,33 @@ The lampshade's neck in the cup, and the window's edge on the lens:
 
 | File | What |
 |---|---|
-| `pucklight_lamp_v2V3.scad` | the generator, standalone, no libraries |
-| `pucklight_lamp_v2V3_TraceTrove.scad` | V3 with the TraceTrove logo instead of the VeryOS logo |
+| `pucklight_lamp_v2V4.scad` | the generator, standalone, no libraries |
+| `pucklight_lamp_v2V4_TraceTrove.scad` | V4 with the TraceTrove logo instead of the VeryOS logo |
+| `pucklight_lamp_v2V3.scad`, `pucklight_lamp_v2V3_TraceTrove.scad` | V3: without the material text |
 | `pucklight_lamp_v2V2.scad` | V2: without the fingerprint |
 | `pucklight_lamp_v2V1.scad` | V1: ringclick V3's bottom screw and click base |
 
-## TraceTrove version of V3
+## V4 against V3: material text
 
-`pucklight_lamp_v2V3_TraceTrove.scad`: V3 with the TraceTrove logo V3 instead of the VeryOS logo, in a file of its own. Everything else is V3's; a change to V3 has to be made in both files.
+| | V3 | V4 |
+|---|---|---|
+| `material` | | `none` (default), `PLA` or `PETG`: engraves the filament's name, so a print tells what it is made of |
+| where | | the top part's top face inside the cup, under the lampshade when it is screwed in; the bottom of the screw's flange, read from below; both opposite the visible logo, along the ring |
+| letters | | 4.5 high, strokes 0.9, as wide as the VeryOS logo's that printed in V6; 0.6 deep (`logo_depth`); DejaVu Sans Mono Bold, as the other VeryOS scripts; each letter is placed by itself, so another font still fits |
+| `none` | | the same geometry as V3: the scripts' output compared |
+| with a text | | the solids lose the letters' volume only: no overlap with the logos, the relief or the watermark |
+| not marked | | the lampshade: its shell is 0.8 thick; the plunger: it is in one file with the screw ring |
+| printed | | untested, not sliced |
 
-| | V3 | V3 TraceTrove |
+The top part from above and the screwin from below, cut 0.1 inside the face on the bed, with `material = "PETG"`:
+
+![material](material.png)
+
+## TraceTrove version of V4
+
+`pucklight_lamp_v2V4_TraceTrove.scad`: V4 with the TraceTrove logo V3 instead of the VeryOS logo, in a file of its own. Everything else is V4's, also `material`; a change to V4 has to be made in both files.
+
+| | V4 | V4 TraceTrove |
 |---|---|---|
 | logo | VeryOS, built in the script | TraceTrove logo V3, flat: the outline of `logo_final_flat` in tracetrove_branding's `branding/LOGO_V3/tracetrove_logo.scad`, copied into the script, so it still needs no libraries; compared with it in OpenSCAD: no difference |
 | logo's size | by its width: top part 10, screw 8 | by its height: top part 11 (`toppart_logo_height`), screw 9.5 (`screw_logo_height`); 20 wide where it is 31.75 tall |
@@ -107,9 +124,9 @@ Also: `assembly`, `section`, `print_layout` (all three parts, 180 × 163 mm), `s
 | Brim | outer, 5 mm | the neck stands on a 1.2 mm ring |
 | Support | off | nothing overhangs more than 45 degrees |
 
-## Holder against RGBW_pucklight_holder_ringclick V7
+## Holder against RGBW_pucklight_holder_ringclick V8
 
-| | ringclick V7 | here |
+| | ringclick V8 | here |
 |---|---|---|
 | top | 45 degree cone to a 56.7 top face | cylinder Ø70.8 up to the rim of a cup with a female Ø67 thread |
 | inside the cup | | the core stands up to the rim around the window, Ø62 (`cup_core_d`), so the top part still prints upside down |
@@ -154,4 +171,4 @@ The VeryOS logo is engraved 0.6 mm deep (`logo_depth`): 10 wide in the top face 
 
 ## Status
 
-V2 printed (2026-11-12): works, with the lampshade's thread in the cup. V3 is V2 with the fingerprint: sliced, not printed.
+V2 printed (2026-11-12): works, with the lampshade's thread in the cup. V3 is V2 with the fingerprint: sliced, not printed. V4 adds the material text: not sliced, not printed.

@@ -14,7 +14,8 @@ part, bottom screw, click base. `part` shows all parts on the bed, the
 assembly, the assembly cut in half, or one part. `RGBW_pucklight_holder_ringclickV6.scad`
 puts the bottom screw and the click base into one part, see V5 and V6 below.
 `RGBW_pucklight_holder_ringclickV7.scad` is V6 with a fingerprint, see V7 below.
-`RGBW_pucklight_holder_ringclickV7_TraceTrove.scad` is V7 with the TraceTrove logo, see below.
+`RGBW_pucklight_holder_ringclickV8.scad` can engrave the filament's name, see V8 below.
+`RGBW_pucklight_holder_ringclickV8_TraceTrove.scad` is V8 with the TraceTrove logo, see below.
 
 ![preview](preview.png)
 
@@ -24,11 +25,27 @@ The window's edge on the lens, cut in half:
 
 ![ring](section_ring.png)
 
-## TraceTrove version of V7
+## V8 against V7: material text
 
-`RGBW_pucklight_holder_ringclickV7_TraceTrove.scad`: V7 with the TraceTrove logo V3 instead of the VeryOS logo, in a file of its own. Everything else is V7's; a change to V7 has to be made in both files.
+| | V7 | V8 |
+|---|---|---|
+| `material` | | `none` (default), `PLA` or `PETG`: engraves the filament's name, so a print tells what it is made of |
+| where | | the top part's top face, beside the window; the bottom of the screw's flange, read from below; both opposite the visible logo, along the ring |
+| letters | | 4.5 high, strokes 0.9, as wide as the VeryOS logo's that printed in V6; 0.6 deep (`logo_depth`); DejaVu Sans Mono Bold, as the other VeryOS scripts; each letter is placed by itself, so another font still fits |
+| `none` | | the same geometry as V7: the scripts' output compared |
+| with a text | | the solids lose the letters' volume only: no overlap with the logos, the relief or the watermark |
+| not marked | | the plunger: it is in one file with the screw ring |
+| printed | | untested, not sliced |
 
-| | V7 | V7 TraceTrove |
+The top part from above and the screwin from below, cut 0.1 inside the face on the bed, with `material = "PETG"`:
+
+![material](material.png)
+
+## TraceTrove version of V8
+
+`RGBW_pucklight_holder_ringclickV8_TraceTrove.scad`: V8 with the TraceTrove logo V3 instead of the VeryOS logo, in a file of its own. Everything else is V8's, also `material`; a change to V8 has to be made in both files. `RGBW_pucklight_holder_ringclickV7_TraceTrove.scad` is the same for V7.
+
+| | V8 | V8 TraceTrove |
 |---|---|---|
 | logo | VeryOS, built in the script | TraceTrove logo V3, flat: the outline of `logo_final_flat` in tracetrove_branding's `branding/LOGO_V3/tracetrove_logo.scad`, copied into the script, so it still needs no libraries; compared with it in OpenSCAD: no difference |
 | logo's size | by its width: top part 9, screw 8 | by its height: top part 9.5 (`toppart_logo_height`), screw 9.5 (`screw_logo_height`); 20 wide where it is 31.75 tall |
