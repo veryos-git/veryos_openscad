@@ -5,13 +5,15 @@
 // network's sign-in page): speed, direction, start and stop, turning by an
 // angle, steps per turn and starting at power on. The settings stay in flash.
 //
-// Wiring, ESP32 DevKit (ESP32-WROOM-32), all on one side of the board:
-//   ULN2003 IN1 IN2 IN3 IN4 -> GPIO 14 27 26 25
-//   ULN2003 +  -> VIN (5 V from USB)
+// Wiring, all on one side of the board:
+//   ULN2003 IN1 IN2 IN3 IN4 -> GPIO 14 27 26 25 on an ESP32 DevKit
+//                              (ESP32-WROOM-32), 4 5 6 7 on an ESP32-S3 DevKit
+//   ULN2003 +  -> VIN or 5V (5 V from USB)
 //   ULN2003 -  -> GND
-// Other boards: change PINS, e.g. 4 5 6 7 on an ESP32-S3 DevKit.
+// Other boards: change PINS.
 //
-// Arduino IDE: board "ESP32 Dev Module", ESP32 core 3.x, no extra libraries.
+// Flash it with ../flash.js, or with the Arduino IDE: board "ESP32 Dev
+// Module" or "ESP32S3 Dev Module", ESP32 core 3.x, no extra libraries.
 
 #include <WiFi.h>
 #include <WebServer.h>
@@ -20,7 +22,12 @@
 #include "esp_timer.h"
 
 const char *SSID = "veryos-turntable";
+// An ESP32-S3 has no GPIO 25 to 27.
+#if CONFIG_IDF_TARGET_ESP32S3
+const int PINS[4] = {4, 5, 6, 7};
+#else
 const int PINS[4] = {14, 27, 26, 25};
+#endif
 // Half steps on IN1..IN4. Forward turns the shaft counterclockwise seen from
 // above, by the datasheet's sequence.
 const uint8_t SEQ[8] = {0b1000, 0b1100, 0b0100, 0b0110, 0b0010, 0b0011, 0b0001, 0b1001};

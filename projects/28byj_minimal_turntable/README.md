@@ -10,6 +10,7 @@ Turntable for the 28BYJ-48 stepper motor: the shaft turns the platform directly,
 | `28byj_minimal_turntableV2_base.stl`, `_lid.stl`, `_platform.stl` | exported at the defaults, as they print |
 | `archive/` | V1, which rolls on 32 airsoft BBs. Each change to the generator makes a new version file; the old one stays |
 | `firmware/turntable/turntable.ino` | ESP32 firmware: open WiFi, web page, stepper |
+| `firmware/flash.js` | Deno script that flashes the firmware onto a connected ESP32 |
 | `readme_hgc.md` | original goal |
 | `image.png`, `image copy 2.png` | the motor and its datasheet drawing, source of the motor's numbers |
 
@@ -104,10 +105,12 @@ Made for 0.2 mm layers: the base's rim, the hub's face and the ring are on multi
 
 | | |
 |---|---|
-| build | Arduino IDE or arduino-cli, board "ESP32 Dev Module", ESP32 core 3.x, no libraries. Compiles with core 3.3.12 for ESP32 and ESP32-S3; not run on a board yet |
+| flash | `deno run --allow-run=arduino-cli firmware/flash.js`: asks for the port and the board, then compiles and uploads with [arduino-cli](https://arduino.github.io/arduino-cli/latest/installation/); offers to install the ESP32 core. Tested against a stand-in for arduino-cli, not with a board |
+| by hand | Arduino IDE, board "ESP32 Dev Module" or "ESP32S3 Dev Module", ESP32 core 3.x, no libraries. Compiles with core 3.3.12 for both; not run on a board yet |
 | WiFi | open network `veryos-turntable`, page at http://192.168.4.1; phones show it as the network's sign-in page |
-| wiring | ULN2003 IN1 IN2 IN3 IN4 → GPIO 14 27 26 25, + → VIN, − → GND, all on one side of the DevKit |
-| other boards | change `PINS`; on an ESP32-S3, 25 to 27 are not free, e.g. 4 5 6 7 |
+| wiring, ESP32 DevKit (ESP32-WROOM-32) | ULN2003 IN1 IN2 IN3 IN4 → GPIO 14 27 26 25, + → VIN, − → GND, all on one side of the board |
+| wiring, ESP32-S3 DevKit | IN1 IN2 IN3 IN4 → GPIO 4 5 6 7, + → 5V, − → GND; the firmware picks these pins when built for the S3 |
+| other boards | change `PINS` |
 | stepping | half steps, timed apart from the web server; starts at up to 5 rpm and speeds up by 10 rpm/s; coils off when stopped |
 | settings | kept in flash |
 
