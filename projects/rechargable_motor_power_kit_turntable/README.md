@@ -1,15 +1,15 @@
 # Rechargeable Power Kit turntable
 
-Turntable for Bambu Lab's Rechargeable Power Kit (ZC003): an N20 gear motor, a 500 mAh LiPo battery and a board with a USB-C socket and a push switch. A printed worm on the motor turns a hoop of teeth under the platform; the number of teeth sets the speed. Six printed parts and the kit, nothing else. V4: V3 is printed and tested, the platform runs well on its rail, the teeth skip under a heavy load; the larger worm of V4 is not printed yet.
+Turntable for Bambu Lab's Rechargeable Power Kit (ZC003): an N20 gear motor, a 500 mAh LiPo battery and a board with a USB-C socket and a push switch. A printed worm on the motor turns a hoop of teeth under the platform; the number of teeth sets the speed. Six printed parts and the kit, nothing else. V5: V3 is printed and tested, the platform runs well on its rail, the teeth skip under a heavy load and the bracket does not press board and battery down; the larger worm of V4 and the pressing bracket of V5 are not printed yet.
 
 ![assembly](preview.png)
 
 | File | What |
 |---|---|
-| `rechargable_motor_power_kit_turntableV4.scad` | the generator, standalone, no libraries. `part`: all parts on the bed, assembly, assembly without the platform, section, base, platform, worm, bracket, screw, cap |
-| `rechargable_motor_power_kit_turntableV4_base.stl`, `_platform.stl`, `_worm.stl`, `_bracket.stl`, `_screw.stl`, `_cap.stl` | exported at the defaults, as they print; all but the worm are the shapes of V3, triangle for triangle |
+| `rechargable_motor_power_kit_turntableV5.scad` | the generator, standalone, no libraries. `part`: all parts on the bed, assembly, assembly without the platform, section, base, platform, worm, bracket, screw, cap |
+| `rechargable_motor_power_kit_turntableV5_base.stl`, `_platform.stl`, `_worm.stl`, `_bracket.stl`, `_screw.stl`, `_cap.stl` | exported at the defaults, as they print; base, platform, screw and cap are the shapes of V3, triangle for triangle, the worm is V4's |
 | `rendered_parts/` | every part under its name |
-| `archive/` | V1, V2, V3 |
+| `archive/` | V1 to V4 |
 | `readme_hgc.md` | original goal |
 | `image.png`, `image copy.png` | the kit and its wiring, Bambu Lab's pictures |
 | `Rechargeable Power Kit-ZC003 model/` | Bambu Lab's CAD model of the kit, source of every kit dimension in the script; not committed |
@@ -18,11 +18,22 @@ Turntable for Bambu Lab's Rechargeable Power Kit (ZC003): an N20 gear motor, a 5
 
 | Part | Qty | Note |
 |---|---|---|
-| base, platform, worm, bracket, screw, cap | 1 each | printed, 45.1 / 58.7 / 1.2 / 1.6 / 0.24 / 0.18 cm³ solid at the defaults |
+| base, platform, worm, bracket, screw, cap | 1 each | printed, 45.1 / 58.7 / 1.2 / 1.3 / 0.24 / 0.18 cm³ solid at the defaults |
 | Bambu Lab Rechargeable Power Kit ZC003 | 1 | motor, battery, board; its five screws are not used |
 | USB-C cable | 1 | to charge |
 | flat screwdriver | | for the printed screw, blade up to 1.2 thick |
 | graphite | | a soft pencil or powder, on the rail |
+
+## V5 against V4
+
+| | V4 | V5 |
+|---|---|---|
+| print | the bracket of V2, printed with V3: it keeps board and battery in, but does not press them down | unprinted |
+| bracket's arms | end 0.4 above the battery and the socket of the battery's plug | end in pads that reach 0.4 (`hold_press`) into the two: screwed down, the arms bend up by it and press |
+| arm over the board | 4.2 thick, stiff | 2 thick as the other, a spring, with a Ø6 pad 3.0 high on the socket |
+| arm over the battery | 2 thick | 2 thick, with a Ø10 pad 0.8 high, its edge chamfered |
+| force of an arm | none | 4 to 9 N by estimate; on the battery at most 0.12 N/mm² |
+| to print | | the bracket; with V4's worm two small parts on V3's base and platform |
 
 ## V4 against V3
 
@@ -112,12 +123,12 @@ The speed is not exact: a DC motor slows down under load and as the battery empt
 | motor | lies in a pocket, flats upright, on a pad that puts the worm 0.6 above the floor. A wall in front of the gearbox with a slot for the shaft, a rib behind the rear beside the terminals, a wall on each side, and a tab whose hook snaps 0.5 over the gearbox. A block 0.8 behind the worm's closed end keeps it on the shaft |
 | board | lies on two ledges, 1.6 above the floor, behind a flat panel in the wall: two guides along its sides, two stops behind its corners, a wedge on the panel over its front edge. The panel has an opening for the USB-C plug (13 × 7.4, for the plug's grip), an opening for the switch's plunger and the cap's stem (5.4 × 5.3), and a slit that shows the charging light |
 | battery | lies in a fence 5 high beside the board, open at the corner where its wire leaves |
-| bracket | a plate on a block on the wall, between the board and the battery. A 2 thick arm ends over the middle of the battery, a 4.2 thick one over the socket of the battery's plug at the board's rear, both 0.4 above: they keep the two in and do not press on them. The board's rear cannot rise over its stops (1.0), the battery not over its fence (5) |
-| block | 10 wide, as high as the bracket's underside, with the thread 8 deep. The bracket's thick part lies around three of its sides with 0.3 play, so the bracket cannot turn with the screw |
-| screw | Ø5, 2 pitch, 45° flanks, 8 long, hex head 9 across the flats with a slot. 5 is the smallest that works in `fdm_optimized_screws`: 4 bends, 3 broke. It only holds the bracket on the block; tightening does not press on the kit |
+| bracket | a plate on a block on the wall, between the board and the battery, with two arms, 2 thick and 10 wide: springs. One ends in a Ø10 pad on the middle of the battery, the other in a Ø6 pad on the socket of the battery's plug at the board's rear. As printed the pads reach 0.4 (`hold_press`) further down than the two are high, so the arms bend up by that and press them down. The board's rear cannot rise over its stops (1.0), the battery not over its fence (5) |
+| block | 10 wide, as high as the bracket's underside, with the thread 8 deep. The bracket's rim lies around three of its sides with 0.3 play, so the bracket cannot turn with the screw |
+| screw | Ø5, 2 pitch, 45° flanks, 8 long, hex head 9 across the flats with a slot. 5 is the smallest that works in `fdm_optimized_screws`: 4 bends, 3 broke. It holds the bracket's plate on the block. The arms' bend presses on the kit, not the screw: turned on, it presses no harder |
 | cap | a 9 × 7 head on a stem, which takes the plunger's 2.5 × 2 tip 2.3 deep and holds by friction. The head stands 3 (`cap_travel`) off the panel, so the switch can be pressed all the way, also when the board slides back in its seat |
 | guard | a wall around the hoop keeps the wires out of the teeth |
-| logo | engraved in the front of the base's wall, in the platform's top face, in the worm's closed end, in the bracket's thick arm and in the cap's face; the screw has no room for it |
+| logo | engraved in the front of the base's wall, in the platform's top face, in the worm's closed end, in the bracket's arm over the board and in the cap's face; the screw has no room for it |
 
 ## Sizes at the defaults
 
@@ -126,7 +137,7 @@ The speed is not exact: a DC motor slows down under load and as the battery empt
 | base | Ø142, 17.2 high, flat panel 30 wide at the back |
 | platform | Ø150, 3 thick |
 | height | 20.2 to the platform's top |
-| bracket | 29 × 43, 4.2 high |
+| bracket | 29 × 43, 5.0 high |
 | cap | stands 5.4 proud of the panel |
 
 ## Assembly
@@ -136,7 +147,7 @@ The speed is not exact: a DC motor slows down under load and as the battery empt
 3. Plug the motor into the board's socket beside the switch (CN-MOTO) and the battery into the one beside it (CN-BAT). The plugs only fit one way.
 4. Put the board in tilted, front edge first: USB-C socket and switch into their openings, the front edge under the wedge, then lower the rear behind the two stops.
 5. Lay the battery in its fence, the wire towards the board.
-6. Set the bracket on the block beside the board: the arm with the logo over the board, the thin one over the battery. Turn the screw in with a flat screwdriver until the bracket sits on the block; no force.
+6. Set the bracket on the block beside the board: the arm with the logo and the high pad over the board, the other over the battery. Turn the screw in with a flat screwdriver until the plate lies on the block: the arms bend up a little and press on battery and board.
 7. Push the cap onto the plunger's tip from outside, logo upright.
 8. Rub graphite on the rail, the ridge on top of the base's wall, all round.
 9. Lower the platform, pin into the tube, and turn it a little until the teeth drop into the worm and the platform lies on the rail.
@@ -153,7 +164,7 @@ The worm cannot be driven backwards: do not turn the platform by hand, lift it o
 | base | standing | the hook and the wedge, 45°; flat bridges over the three openings in the panel, 9, 5.4 and 2.4 long. The rail narrows upwards: 1.82, 1.42, 1.02, 0.62 and 0.42 wide in its last five layers |
 | platform | upside down, top face on the bed, as the STL | none: pin and hoop face up. Its underside, which slides on the rail, is the print's top surface |
 | worm | standing on its closed end, bore up, as the STL | the thread's flanks, 45° |
-| bracket | upside down, top face on the bed, as the STL | none |
+| bracket | upside down, top face on the bed, pads up, as the STL | none |
 | screw | lying on the flat cut into its underside, as the STL | the thread, as in `fdm_optimized_screws` |
 | cap | on its face, stem up, as the STL | none |
 
@@ -179,6 +190,8 @@ The rail's last layer is one line wide, which a slicer only prints with thin wal
 | platform still rocks | it stands on the pin: `pin_gap` 1; only the platform changes |
 | the rail's last layer is missing or in pieces | slicer: `Detect thin wall` on, or Arachne walls; see Printing |
 | motor stalls under a load | more graphite; a lighter load |
+| board or battery still loose under the bracket | `hold_press` 0.8; only the bracket changes |
+| the bracket's plate does not come down on the block, or presses too hard | `hold_press` 0.2, or `bracket_thickness` 1.6 for softer arms |
 | screw tight or loose in the block | `thread_clearance`, 0.25; changes the base |
 | cap falls off | `cap_clearance` 0; only the cap changes |
 | cap does not go on | `cap_clearance` 0.2 |
@@ -193,7 +206,9 @@ The rail's last layer is one line wide, which a slicer only prints with thin wal
 | a tooth's tip opposite the thread's crest, pushed apart | V3's worm: they meet at 0.75, pass at 0.85; V4's: meet at 1.05, pass at 1.15 |
 | V4's worm in the base | free; lowered 0.25 free, 0.35 on the floor |
 | `worm_oversize` 0.4 | overlap at 0.20 apart, free at 0.25 |
-| base, platform, bracket, screw and cap against V3's | the same triangles |
+| V5's base, platform, screw and cap against V3's, its worm against V4's | the same triangles |
+| V5's bracket as it lies screwed down, pads on battery and socket | shares no volume with board, battery, base, motor, worm, screw, cap or platform |
+| V5's bracket as printed, arms straight | meets battery and socket only with its pads, 0.4 deep, Ø10 and Ø6 |
 | V3's worm turned through a full turn in three steps, hoop advanced one tooth per turn | never touch |
 | hoop shifted 0.4 × `backlash` either way, V3's worm | free |
 | hoop shifted 0.65 × `backlash` either way, V3's worm | the flanks touch |
@@ -204,10 +219,9 @@ The rail's last layer is one line wide, which a slicer only prints with thin wal
 | base against V2's below the rail | the same, but for the logo, 0.2 higher with the wall's middle |
 | board tilted 6°, 0.6 back, then pushed forward | free |
 | screw in the block's thread | free all round, 0.25 |
-| bracket turned about the screw | free up to 3° either way, the block stops it before 4.5°; touches nothing else at 4° |
+| bracket turned about the screw | free up to 3° either way, the block stops it before 4.5°; touches nothing else at 4.5° |
 | bracket lifted 3 | free: it goes on straight down |
-| board's rear raised 0.4, battery raised 0.3 | free |
-| board's rear raised 0.7, battery raised 0.6 | the bracket is in the way |
+| V4's bracket: board's rear raised 0.4, battery raised 0.3 | free; raised 0.7 and 0.6 the bracket is in the way |
 | cap pushed in 2.8 | free; at 3.2 its head is on the panel |
 | the collisions again at `rpm` 3, 4 and 10 and at `tooth_pitch` 2 and 3 | the same (V2); V3: the rail measured again at `rpm` 3 and 10 and at `tooth_pitch` 2, 0.42 |
 
@@ -225,6 +239,7 @@ The rail's last layer is one line wide, which a slicer only prints with thin wal
 | USB-C plug | the opening is for a grip up to 13 × 7.4 |
 | load | only its weight holds the platform down; a platform much wider than the base tips with a load on its edge |
 | rail | works well in V3's print. The load brakes at r 70: about 14 mN·m for each 100 g at a friction of 0.2, by estimate (on the pin's end: 0.4). Unmeasured how much the motor still turns, and how graphite, the ridge's seam and the lines of the platform's underside run on each other |
+| bracket | V5's pressing arms are unprinted. Their force is an estimate from the arms' size, 4 to 9 N at 0.4; the real heights of the battery and the socket decide. PLA gives way under a lasting bend: the force drops with time, the pads stay on |
 | screw | a printed 5 mm thread in a blind hole in a block is unprinted; in `fdm_optimized_screws` it works in nuts, in PETG |
 | cap | its hold on the tip is unprinted; the tip's size is from the CAD model, the plunger's travel a guess from its 2.5 long collar |
 | board's play | the board still slides up to 0.6 in its seat, 0.3 before and 0.3 behind it; the cap makes that harmless. The stops could come closer once the cap is tested |
