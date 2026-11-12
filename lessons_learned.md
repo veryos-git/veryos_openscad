@@ -8,6 +8,11 @@ Diameter clearance = added to the hole diameter, not per side.
 
 | Date | Fit | Part | Hole | Result | Printer / material |
 |---|---|---|---|---|---|
+| 2026-11-12 | Printed worm with the 45 degree screw thread, 2.5 pitch, on a hoop of 83 involute teeth with a 45 degree pressure angle; play along the hoop and between crest and tooth bottom, not diameters | rechargable_motor_power_kit_turntable V1 | play 0.35, crest to bottom 0.25 | untested | ? |
+| 2026-11-12 | N20 gear motor's D-shaft (Ø3, 2.7 across the flat by Bambu Lab's CAD model) in the worm's bore, printed standing | rechargable_motor_power_kit_turntable V1, worm | 3.2 × 2.9 (+0.2) | untested | ? |
+| 2026-11-12 | Platform's Ø8 printed pin turning in a printed tube, 12 long | rechargable_motor_power_kit_turntable V1 | 8.3 (+0.3) | untested | ? |
+| 2026-11-12 | N20 gear motor (12 × 10) in its pocket, per side; a hook on a 1.2 × 8 tab, 15 high, snaps over the gearbox | rechargable_motor_power_kit_turntable V1, base | 0.1; hook 0.6, 0.5 over the gearbox | untested | ? |
+| 2026-11-12 | Board of Bambu Lab's Rechargeable Power Kit (25.2 × 25) on its seat, per side; a 45 degree wedge over its front edge | rechargable_motor_power_kit_turntable V1, base | 0.2 at the sides, 0.3 at front and rear; wedge 0.5 over the edge | untested | ? |
 | 2026-11-12 | Lid's thread on the base's wall, Ø57.1, 2 mm pitch, 45 degree flanks, 6 long, per side | 28byj_minimal_turntable V2 | 0.25, as the nuts of fdm_optimized_screws | untested | ? |
 | 2026-11-12 | Ring under the platform above the lid it leans on, axial gap, not a diameter; the Ø12 hub beside it slides on the lid | 28byj_minimal_turntable V2 | 0.2, one layer | untested | ? |
 | 2026-11-12 | Lampshade's Ø67 neck, 2 mm pitch, 45 degree flanks, in the lamp's cup, per side | pucklight_lamp_v2 V2 | 0.3, as pucklight_sphere V3 | works well | Snapmaker U1, 0.2 mm, per v2.3mf |
@@ -38,6 +43,8 @@ Diameter clearance = added to the hole diameter, not per side.
 
 ## Rules
 
+- A worm on a motor's shaft needs a root wider than the motor: the wheel's teeth come as close to the worm's axis as its root, so a thinner worm lets them hit the motor beside it. With the N20's 10 across the flats the worm's root is Ø11. *From the model (rechargable_motor_power_kit_turntable V1, 2026-11-12), not yet confirmed by a print.*
+- Check a gear pair in the model by intersecting it through a turn: both parts advanced in step must never touch, and one shifted by more than half the play must. It catches a wrong hand, twist or phase before printing (rechargable_motor_power_kit_turntable V1, 2026-11-12).
 - A printed sliding bearing belongs near the axis: it brakes with friction coefficient × load × contact radius. 1 kg on a Ø12 hub is about 16 mN·m, on a rim at r 31 about 106, three times the 28BYJ-48's 34. A ring further out with a gap of one layer only stops tipping. *From an estimate with a coefficient of 0.35 (28byj_minimal_turntable V2, 2026-11-12), not yet confirmed by a print.*
 - A fingerprint in the mesh, sliced and remeshed but not printed (RGBW_pucklight_holder_ringclick V7, 2026-11-12): a logo recessed 0.02 into the face on the bed never reaches the G-code (Bambu Studio 2.9.1, 0.2 first layer); a sealed void 0.4 high, 0.8 above the bed, changes 7 layers inside and no outer wall. Decimating keeps the void and loses the relief; a 0.2 voxel remesh fills the void and leaves a third of the relief.
 - A print-in-place slider needs a stop in both directions. The part it pushes is not a stop: ringclick V5's plunger was held upwards only by the puck, and fell out through the top once the screwin was unscrewed to change the batteries (2026-11-12). V6 adds a lip at its bottom.
