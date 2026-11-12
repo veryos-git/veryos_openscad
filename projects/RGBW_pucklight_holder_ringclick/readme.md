@@ -13,6 +13,7 @@ The same holder with a cup on top for lampshades, and a test lampshade: `../puck
 part, bottom screw, click base. `part` shows all parts on the bed, the
 assembly, the assembly cut in half, or one part. `RGBW_pucklight_holder_ringclickV6.scad`
 puts the bottom screw and the click base into one part, see V5 and V6 below.
+`RGBW_pucklight_holder_ringclickV7.scad` is V6 with a fingerprint, see V7 below.
 
 ![preview](preview.png)
 
@@ -22,11 +23,53 @@ The window's edge on the lens, cut in half:
 
 ![ring](section_ring.png)
 
+## V7 against V6: fingerprint
+
+Proof of where a copy of the file comes from, not copy protection. The outside of the parts is V6's.
+
+| | V6 | V7 |
+|---|---|---|
+| visible logos | top part's top face, bottom of the screw's flange | the same |
+| relief | | the logo once more in the same faces, a third of a turn further, 0.02 deep (`relief_depth`): in the file, not in the print |
+| watermark | | the logo as a sealed void inside the solid, two thirds of a turn further, 0.4 high (`watermark_height`), 0.8 above the bed (`watermark_z`): prints as a hidden chamber |
+| plunger | | no mark: it is in one file with the screw ring |
+| printed | works (2026-11-12) | untested in print; sliced, see below |
+
+Sections of the top part (blue, from above) and of the screwin (gold, from below). Left: 0.01 inside the face on the bed. Middle: 0.1 inside it, where a slicer cuts a 0.2 first layer. Right: through the watermark.
+
+![fingerprint](fingerprint.png)
+
+| Sliced with the settings of `v6bambu.3mf`: Bambu Studio 2.9.1, A1, 0.2 layers, 15 % infill | Result |
+|---|---|
+| V6 twice | plastic in the same place in all 151 layers; the G-code's text differs in 69 of them, so compare places, not text |
+| V6 against V6 with the relief only | plastic in the same place in all 151 layers |
+| V6 against V7 | 7 layers differ, 0.6 to 1.8 above the bed, all inside; outer walls differ only around the two voids; 32 s and 0.06 g more |
+
+| Done to V7's `.stl`, in Blender 5.2.1 | relief | watermark |
+|---|---|---|
+| imported and exported again; scaled to 102 % | stays | stays |
+| decimated to 50 % of the triangles | damaged: 60 % (screwin) to 94 % (top part) of its area left | stays |
+| decimated to 10 % | gone | stays, coarser |
+| voxel remesh, 0.2 | traces: 37 to 41 % of its area | gone: the void is filled |
+| the parts made again from the `.scad` without the cuts; not tested | gone | gone |
+
+| Check a file | Shows |
+|---|---|
+| slicer's layer view, 1.0 and 1.2 above the bed | the watermark: a logo shaped hole, 240 degrees from the visible logo |
+| section 0.01 inside the face on the bed, or a mesh viewer that shows edges | the relief: a second logo, 120 degrees from the visible one |
+| shells of the mesh | one void in the top part, one in the screw ring |
+
+- The `.scad` is published with the model, so the marks are public: they catch copies of the `.stl` and `.3mf`, not of the source.
+- GPL allows copies that keep the license and the credit; the marks show the origin where those were dropped.
+- With a translucent top part the watermark may glow through when the light is on: 0.4 less plastic there. Untested.
+- Other slicers are untested. One that cuts the first layer at its bottom, as Cura's slicing tolerance "exclusive", would print the relief as an engraving one layer deep.
+- `part = "slide_test"` cuts the screw ring at Ø58, through its logos: the watermark shows as a slit in the test pieces' rim.
+
 ## V6 against V5
 
 | | V5 | V6 |
 |---|---|---|
-| printed | works: the plunger breaks free, slides and clicks (2026-11-12); unscrewed to change the batteries, the plunger falls out through the top | untested |
+| printed | works: the plunger breaks free, slides and clicks (2026-11-12); unscrewed to change the batteries, the plunger falls out through the top | works (2026-11-12, Bambu Lab A1 per `v6bambu.3mf`): the plunger stays in both ways |
 | upward stop | none: only the puck | a second 45 degree lip at the plunger's bottom, 0.6 behind the opening (`lip_overlap`), under a 45 degree chamfer of the opening, `slide_gap` off it |
 | plunger's bottom | chamfered 0.4, Ø49.2 on the bed | chamfered 0.4, Ø50.8 on the bed: the bottom lip |
 | top part | | V4's, unchanged |
@@ -165,4 +208,4 @@ V5 and V6: push the plunger down once to free it; put the puck in; screw the scr
 
 ## logo
 
-The VeryOS logo is engraved 0.6 mm deep (`logo_depth`) in every part: 9 wide in the top face of the top part, 8 wide in the bottom of the screw's flange, 14 wide in the bottom of the click base.
+The VeryOS logo is engraved 0.6 mm deep (`logo_depth`) in every part: 9 wide in the top face of the top part, 8 wide in the bottom of the screw's flange, 14 wide in the bottom of the click base. From V5 the plunger takes the click base's place and has no room for one. V7 repeats the logo as a fingerprint, see V7 above.

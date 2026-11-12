@@ -1,7 +1,7 @@
 # Pucklight lamp V2
 
 Lamp with the 62 mm RGBW puck light (KC007): the click holder of
-`../RGBW_pucklight_holder_ringclick` V6 with a cup on top, and a simple
+`../RGBW_pucklight_holder_ringclick` V7 with a cup on top, and a simple
 lampshade that screws into it. The cup has pucklight_sphere's thread, so the
 spheres of `../pucklight_sphere` and the vases of `../pucklight_vase` fit too.
 
@@ -17,8 +17,30 @@ The lampshade's neck in the cup, and the window's edge on the lens:
 
 | File | What |
 |---|---|
-| `pucklight_lamp_v2V2.scad` | the generator, standalone, no libraries |
+| `pucklight_lamp_v2V3.scad` | the generator, standalone, no libraries |
+| `pucklight_lamp_v2V2.scad` | V2: without the fingerprint |
 | `pucklight_lamp_v2V1.scad` | V1: ringclick V3's bottom screw and click base |
+
+## V3 against V2: fingerprint
+
+Proof of where a copy of the file comes from, not copy protection: ringclick V7's. The outside of the parts is V2's.
+
+| | V2 | V3 |
+|---|---|---|
+| visible logos | top part's top face inside the cup, bottom of the screw's flange | the same |
+| relief | | the logo once more in the same faces, a third of a turn further, 0.02 deep (`relief_depth`): in the file, not in the print |
+| watermark | | the logo as a sealed void inside the solid, two thirds of a turn further, 0.4 high (`watermark_height`), 0.8 above the bed (`watermark_z`): prints as a hidden chamber |
+| lampshade, plunger | | no mark: the shell is 0.8 thick; the plunger is in one file with the screw ring |
+| printed | works (2026-11-12): the screwin, and the lampshade's thread in the cup | untested in print; sliced, see below |
+
+Sections of the top part (blue, from above) and of the screwin (gold, from below). Left: 0.01 inside the face on the bed. Middle: 0.1 inside it, where a slicer cuts a 0.2 first layer. Right: through the watermark.
+
+![fingerprint](fingerprint.png)
+
+| Top part and screwin, sliced with Bambu Studio 2.9.1, A1, 0.2 layers, 15 % infill: ringclick V6's settings, not this lamp's Snapmaker U1 project | Result |
+|---|---|
+| V2 against V3 | 7 of 157 layers differ, 0.6 to 1.8 above the bed, all inside; outer walls differ only around the two voids; 37 s and 0.14 g more |
+| the relief alone, what it survives, how to check a file | `../RGBW_pucklight_holder_ringclick`, V7 against V6 |
 
 ## V2 against V1
 
@@ -66,9 +88,9 @@ Also: `assembly`, `section`, `print_layout` (all three parts, 180 × 163 mm), `s
 | Brim | outer, 5 mm | the neck stands on a 1.2 mm ring |
 | Support | off | nothing overhangs more than 45 degrees |
 
-## Holder against RGBW_pucklight_holder_ringclick V6
+## Holder against RGBW_pucklight_holder_ringclick V7
 
-| | ringclick V6 | here |
+| | ringclick V7 | here |
 |---|---|---|
 | top | 45 degree cone to a 56.7 top face | cylinder Ø70.8 up to the rim of a cup with a female Ø67 thread |
 | inside the cup | | the core stands up to the rim around the window, Ø62 (`cup_core_d`), so the top part still prints upside down |
@@ -109,8 +131,8 @@ Test the thread before a whole lampshade: in the slicer, print only the lampshad
 
 ## Logo
 
-The VeryOS logo is engraved 0.6 mm deep (`logo_depth`): 10 wide in the top face of the top part, inside the cup; 8 wide in the bottom of the screw's flange. The plunger has no room for one; the lampshade has none: its shell is 0.8 thick and its neck's bottom a 1.2 ring.
+The VeryOS logo is engraved 0.6 mm deep (`logo_depth`): 10 wide in the top face of the top part, inside the cup; 8 wide in the bottom of the screw's flange. The plunger has no room for one; the lampshade has none: its shell is 0.8 thick and its neck's bottom a 1.2 ring. V3 repeats the logo as a fingerprint in the top part and in the screw ring, see V3 above.
 
 ## Status
 
-V2 untested in print (2026-11-12). Its holder is ringclick V6's: V5's screwin works in print, V6 adds the plunger's bottom lip.
+V2 printed (2026-11-12): works, with the lampshade's thread in the cup. V3 is V2 with the fingerprint: sliced, not printed.

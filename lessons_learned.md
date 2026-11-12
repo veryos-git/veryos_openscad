@@ -8,6 +8,8 @@ Diameter clearance = added to the hole diameter, not per side.
 
 | Date | Fit | Part | Hole | Result | Printer / material |
 |---|---|---|---|---|---|
+| 2026-11-12 | Lampshade's Ø67 neck, 2 mm pitch, 45 degree flanks, in the lamp's cup, per side | pucklight_lamp_v2 V2 | 0.3, as pucklight_sphere V3 | works well | Snapmaker U1, 0.2 mm, per v2.3mf |
+| 2026-11-12 | Print-in-place plunger with a lip at its top and at its bottom, per side; the bottom lip under a 45 degree chamfer | RGBW_pucklight_holder_ringclick V6 | 0.2; lips 0.6 behind the opening | works: slides, clicks, stays in when unscrewed | Bambu Lab A1, 0.2 mm, per v6bambu.3mf |
 | 2026-11-11 | Print-in-place plunger, a Ø50 tube in the screw's opening, per side; bar's ends in two slots | RGBW_pucklight_holder_ringclick V5 | 0.2, one layer (slide test 0.2 / 0.3 / 0.4); slots 0.4; 0.4 chamfer at the plunger's first layer | works (2026-11-12): breaks free, slides, clicks; gap as printed assumed to be the default | Elegoo Centauri Carbon 2 as V2 to V4, not confirmed |
 | 2026-11-11 | 28BYJ-48 shaft (Ø5, 3 across the flats) in a printed double-D hole, sliding, the platform turns on it | 28byj_minimal_turntable V1, platform's hub | 5.2 × 3.2 (+0.2) | untested | ? |
 | 2026-11-11 | Printed pegs in the 28BYJ-48's Ø4.2 ear holes, motor dropped on | 28byj_minimal_turntable V1, base | pegs 3.8 (−0.4) | untested | ? |
@@ -34,6 +36,7 @@ Diameter clearance = added to the hole diameter, not per side.
 
 ## Rules
 
+- A fingerprint in the mesh, sliced and remeshed but not printed (RGBW_pucklight_holder_ringclick V7, 2026-11-12): a logo recessed 0.02 into the face on the bed never reaches the G-code (Bambu Studio 2.9.1, 0.2 first layer); a sealed void 0.4 high, 0.8 above the bed, changes 7 layers inside and no outer wall. Decimating keeps the void and loses the relief; a 0.2 voxel remesh fills the void and leaves a third of the relief.
 - A print-in-place slider needs a stop in both directions. The part it pushes is not a stop: ringclick V5's plunger was held upwards only by the puck, and fell out through the top once the screwin was unscrewed to change the batteries (2026-11-12). V6 adds a lip at its bottom.
 - On the ringclick click base the holder floats less than the KC007 puck light's CAD model says: RGBW_pucklight_holder_ringclick V2 (`press_height` 1.6, 0.7 travel by the CAD model) did not click reliably; V3 (1.8, click base 8.0 high, 0.9 travel by the model) floats only a little on the base and barely clicks. The holder V3's ribs click with 0.7 by the model, on a solid disc. Ringclick V4 raises only the tube, +0.4, to 7.2 above the holder's bottom; V5's plunger, as high, clicks (2026-11-12). Cause unmeasured: the puck's bottom where the tube pushes, or its lens at the window's edge (2026-11-11, Elegoo Centauri Carbon 2, PLA, 0.2 mm layers).
 - The KC007 puck light's lens clicks wherever it is pressed, also at its edge (tested by hand, 2026-11-11): a ring around the window can press it instead of ribs over the centre (RGBW_pucklight_holder_ringclick V1, untested in print).
