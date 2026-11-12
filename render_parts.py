@@ -58,7 +58,7 @@ PROJECTS = {
     "pucklight_sphere": [("pucklight_sphereV3.scad",
         "assembly sphere vase_sphere sockel screwin clickbase")],
     "rechargable_motor_power_kit_turntable": [
-        ("rechargable_motor_power_kit_turntableV1.scad", "assembly base platform worm")],
+        ("rechargable_motor_power_kit_turntableV2.scad", "assembly open base platform worm bracket screw cap")],
     "RGBW_pucklight_holder": [("RGBW_pucklight_holderV4.scad", "assembly toppart bottom_screw clickbase")],
     "RGBW_pucklight_holder_ringclick": [
         ("RGBW_pucklight_holder_ringclickV8.scad", "assembly toppart screwin slide_test")],
@@ -79,7 +79,7 @@ PROJECTS = {
 }
 
 # These show several parts in the script's colours: OpenSCAD preview. Parts get a full render.
-PREVIEW = {"assembly", "assembled", "folded", "grid"}
+PREVIEW = {"assembly", "assembled", "folded", "grid", "open"}
 # OpenSCAD looks from the front right, 35 degrees down. Tiles that hide their shape from there
 # get another camera rotation x, y, z.
 CAMERA = {
@@ -89,6 +89,8 @@ CAMERA = {
     ("papercut_fold_house2", "flat"): "0,0,0",
     ("paper_folding_haunted_house", "flat"): "0,0,0",
     ("paper_folding_lantern", "flat"): "0,0,0",
+    ("rechargable_motor_power_kit_turntable", "open"): "45,0,160",
+    ("rechargable_motor_power_kit_turntable", "screw"): "55,0,115",
     ("softbox_smallrig_40W", "screw"): "55,0,115",
     ("softbox_smallrig_40W", "thumb_screw"): "55,0,115",
     ("veryos_logo_cube", "cube"): "75,0,45",

@@ -8,11 +8,15 @@ Diameter clearance = added to the hole diameter, not per side.
 
 | Date | Fit | Part | Hole | Result | Printer / material |
 |---|---|---|---|---|---|
+| 2026-11-12 | Printed 5 mm screw (2 mm pitch, 45 degree, printed lying) in a blind thread, 8 deep, in a 10 wide block on a wall, per side | rechargable_motor_power_kit_turntable V2, base and screw | 0.25, as the nuts of fdm_optimized_screws | untested | ? |
+| 2026-11-12 | Bracket's rim around three sides of a 10 wide printed block, dropped on from above, per side | rechargable_motor_power_kit_turntable V2, bracket | 0.3 | untested | ? |
+| 2026-11-12 | Printed cap pushed onto the 2.5 × 2 tip of a push switch's plunger, 2.3 deep, held by friction, walls 0.8 | rechargable_motor_power_kit_turntable V2, cap | 2.6 × 2.1 (+0.1) | untested | ? |
+| 2026-11-12 | LiPo battery of Bambu Lab's Rechargeable Power Kit (24.5 × 25.6 × 8.8) in a fence 5 high, per side | rechargable_motor_power_kit_turntable V1, base | 0.3 | fits; lies loose and falls out when the base is handled | Elegoo Centauri Carbon 2, 0.2 mm, per v1elegoo.3mf |
 | 2026-11-12 | Printed worm with the 45 degree screw thread, 2.5 pitch, on a hoop of 83 involute teeth with a 45 degree pressure angle; play along the hoop and between crest and tooth bottom, not diameters | rechargable_motor_power_kit_turntable V1 | play 0.35, crest to bottom 0.25 | untested | ? |
 | 2026-11-12 | N20 gear motor's D-shaft (Ø3, 2.7 across the flat by Bambu Lab's CAD model) in the worm's bore, printed standing | rechargable_motor_power_kit_turntable V1, worm | 3.2 × 2.9 (+0.2) | untested | ? |
 | 2026-11-12 | Platform's Ø8 printed pin turning in a printed tube, 12 long | rechargable_motor_power_kit_turntable V1 | 8.3 (+0.3) | untested | ? |
-| 2026-11-12 | N20 gear motor (12 × 10) in its pocket, per side; a hook on a 1.2 × 8 tab, 15 high, snaps over the gearbox | rechargable_motor_power_kit_turntable V1, base | 0.1; hook 0.6, 0.5 over the gearbox | untested | ? |
-| 2026-11-12 | Board of Bambu Lab's Rechargeable Power Kit (25.2 × 25) on its seat, per side; a 45 degree wedge over its front edge | rechargable_motor_power_kit_turntable V1, base | 0.2 at the sides, 0.3 at front and rear; wedge 0.5 over the edge | untested | ? |
+| 2026-11-12 | N20 gear motor (12 × 10) in its pocket, per side; a hook on a 1.2 × 8 tab, 15 high, snaps over the gearbox | rechargable_motor_power_kit_turntable V1, base | 0.1; hook 0.6, 0.5 over the gearbox | fits | Elegoo Centauri Carbon 2, 0.2 mm, per v1elegoo.3mf |
+| 2026-11-12 | Board of Bambu Lab's Rechargeable Power Kit (25.2 × 25) on its seat, per side; a 45 degree wedge over its front edge | rechargable_motor_power_kit_turntable V1, base | 0.2 at the sides, 0.3 at front and rear; wedge 0.5 over the edge | fits; falls out when the base is handled, and slides back under the switch's push | Elegoo Centauri Carbon 2, 0.2 mm, per v1elegoo.3mf |
 | 2026-11-12 | Lid's thread on the base's wall, Ø57.1, 2 mm pitch, 45 degree flanks, 6 long, per side | 28byj_minimal_turntable V2 | 0.25, as the nuts of fdm_optimized_screws | untested | ? |
 | 2026-11-12 | Ring under the platform above the lid it leans on, axial gap, not a diameter; the Ø12 hub beside it slides on the lid | 28byj_minimal_turntable V2 | 0.2, one layer | untested | ? |
 | 2026-11-12 | Lampshade's Ø67 neck, 2 mm pitch, 45 degree flanks, in the lamp's cup, per side | pucklight_lamp_v2 V2 | 0.3, as pucklight_sphere V3 | works well | Snapmaker U1, 0.2 mm, per v2.3mf |
@@ -43,6 +47,9 @@ Diameter clearance = added to the hole diameter, not per side.
 
 ## Rules
 
+- A seat that only cradles a part does not hold it: board and battery fell out of the power-kit turntable's base V1 when it was handled (print, 2026-11-12). Lock every loose part. V2: a bracket over both with a gap, seated on its own block, so the screw's force never reaches the board or the LiPo; untested.
+- A push switch behind a panel must stand proud by its travel plus the board's play in its seat. The power-kit turntable V1's plunger stood 2.1 proud with 0.6 play and was hard to press all the way (print, 2026-11-12). V2 adds a cap standing 3 off the panel; untested.
+- The smallest printed screw is 5 mm (fdm_optimized_screws: 4 bends, 3 broke). Take 5 also where a smaller one would fit by size.
 - A DXF from Onshape can hold entities twice; OpenSCAD 2021.01 then imports a wrong shape without a warning: of `veryos_logo.dxf` (8 of 22 entities doubled) only the ring's hole came out. Check the imported size and area, or strip the doubles with `projects/logo_branding_stamp/build.py dxf` (2026-11-12).
 - CNC milling at JLCCNC, by its design and threaded hole guidelines read on 2026-11-12: metal walls 0.8, at least 0.5; inner corners R0.5 at a depth up to 3, smaller costs more, sharp needs EDM; a thread at most 3 diameters deep, blind with half a diameter unthreaded at the bottom, modelled as a hole of the tap drill's diameter; ±0.1 without a drawing; upload STEP. *From the pages (logo_branding_stamp V1), not yet confirmed by a quote or an order.*
 - A worm on a motor's shaft needs a root wider than the motor: the wheel's teeth come as close to the worm's axis as its root, so a thinner worm lets them hit the motor beside it. With the N20's 10 across the flats the worm's root is Ø11. *From the model (rechargable_motor_power_kit_turntable V1, 2026-11-12), not yet confirmed by a print.*

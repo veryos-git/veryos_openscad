@@ -10,7 +10,7 @@ stands for human generated content, do not edit text in files that have the hgc 
 | files | `overview.png` with all parts, `<part>.png` for each one |
 | names | the values of the script's `part` variable, its Customizer text below |
 | script | the newest version outside `archive/` |
-| look | parts: full render, scaled to fit; `assembly`: preview in the script's colours |
+| look | parts: full render, scaled to fit; `assembly` and `open`: preview in the script's colours |
 | rebuild | `python3 render_parts.py [project ...]` after a new version or project: update its line in `PROJECTS` there first |
 | needs | OpenSCAD with an X display (sandbox off), Pillow, DejaVu Sans Mono |
 
