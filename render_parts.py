@@ -29,8 +29,6 @@ PROJECTS = {
             ("demo", "Test bar with the joints cut", {"part": "demo"}),
             ("cutter", "Cutter, subtracted from a model", {"part": "cutter"}),
             ("keep", "Box minus the cutter", {"part": "keep"})])],
-    "cuboid_video_light_softbox": [("cuboid_video_light_softboxV6.scad",
-        "assembly frame_top frame_front screw thumb_screw wallcover_big wallcover_tripod wallcover_small")],
     "decorative_pillars": [("decorative_pillarsV1.scad",
         [("grid", "Shafts in rows, orders in columns", {"view": "grid"})] + [
         (f"{shaft}_{order}", f"shaft = {shaft}, order = {order}",
@@ -67,6 +65,10 @@ PROJECTS = {
     "RGBW_pucklight_lantern3": [
         ("RGBW_pucklight_lantern3V8_simple.scad", "assembly frame roof screwin clickbase window")],
     "ring_sizer2": [("ring_sizer2.scad", [("sizer", "Disk with the measuring rings")])],
+    # no script of its own yet: its print files are V6 of the archived cuboid_video_light_softbox
+    "softbox_smallrig_40W": [(
+        "../01_published_or_archived/cuboid_video_light_softbox/cuboid_video_light_softboxV6.scad",
+        "assembly frame_top frame_front screw thumb_screw wallcover_big wallcover_tripod wallcover_small")],
     "veryos_logo_cube": [("V2/veryos_logo_cubeV2.scad", [
         ("cube", "Logo from the front and from the side")])],
     "vorhangstangeschrankadapter": [("vorhangstangeschrankadapter.scad", [
@@ -83,12 +85,12 @@ PREVIEW = {"assembly", "assembled", "folded", "grid"}
 CAMERA = {
     ("ball_and_socket_joint_ball_head", "ball"): "55,0,205",
     ("ball_and_socket_joint_ball_head", "socket"): "55,0,205",
-    ("cuboid_video_light_softbox", "screw"): "55,0,115",
-    ("cuboid_video_light_softbox", "thumb_screw"): "55,0,115",
     ("esp32_unofficial", "screw"): "55,0,115",
     ("papercut_fold_house2", "flat"): "0,0,0",
     ("paper_folding_haunted_house", "flat"): "0,0,0",
     ("paper_folding_lantern", "flat"): "0,0,0",
+    ("softbox_smallrig_40W", "screw"): "55,0,115",
+    ("softbox_smallrig_40W", "thumb_screw"): "55,0,115",
     ("veryos_logo_cube", "cube"): "75,0,45",
 }
 IVORY, GRAPHITE, GREY, LINE = "#F4EFE3", "#151B1D", "#5C6163", "#D8D0BC"
