@@ -1,6 +1,6 @@
 // Copyright (C) Jonas Immanuel Frey - Licensed under GPL
-// The vase: every example, the noise, the functions a script sees, any script, the
-// dome, and what a script must not do.
+// The vase: every example, the noise, the functions a script sees, any script, a layer
+// that folds back, the dome, and what a script must not do.
 
 import { assert, assertEquals, assertThrows, f_b_same, f_n_mm3, f_check_closed } from './check.js';
 import { noise } from '../noise.module.js';
@@ -114,6 +114,76 @@ Deno.test('3 to 500 corners, clockwise and counter-clockwise, starting anywhere:
             assert(Math.abs(f_n_mm3(o_vase.positions, o_vase.indices) - f_n_mm3(o_plain.positions, o_plain.indices)) < 10, `${n_its_corner} corners, turning ${n_turn}: another volume`);
         }
     }
+});
+
+// A wave around a circle whose flanks lean over: seen from the axis, the wall goes back
+// and forth. n_fold 0 is a plain wave; above 1 no point sees the whole layer.
+let f_o_script__folded = function(n_fold, n_its_corner, n_turn = 1, o_more = {}){
+    return { n_its_layer: 10, n_its_corner, ...o_more, f_o_p: function(n_it_layer_nor, n_it_corner_nor){
+        let n_phase = n_it_corner_nor * 3 * n_tau;
+        let n_r = 34 + 9 * n_it_layer_nor * Math.sin(n_phase);
+        let n_rad = n_turn * (n_it_corner_nor * n_tau - n_fold / 6 * n_it_layer_nor * Math.sin(2 * n_phase));
+        return { n_x: n_r * Math.cos(n_rad), n_y: n_r * Math.sin(n_rad), n_z: collar_top + 100 * n_it_layer_nor + (o_more.n_mm__rim ?? 0) * Math.sin(n_phase) };
+    } };
+};
+// The flat top's triangles: how many face up and down, seen from above, what they cover,
+// and what the last layer's outline encloses.
+let f_o_top = function(o_vase, n_its_corner){
+    let { positions: p, indices: t, walls } = o_vase;
+    let o_top = { n_cnt: (t.length - walls[1]) / 3, n_cnt__up: 0, n_cnt__down: 0, n_mm2: 0, n_mm2__layer: 0 };
+    for(let n_off = walls[1]; n_off < t.length; n_off += 3){
+        let [a, b, c] = [t[n_off] * 3, t[n_off + 1] * 3, t[n_off + 2] * 3];
+        let n_mm2 = ((p[b] - p[a]) * (p[c + 1] - p[a + 1]) - (p[c] - p[a]) * (p[b + 1] - p[a + 1])) / 2;
+        o_top.n_mm2 += Math.abs(n_mm2);
+        if(n_mm2 > 1e-9){ o_top.n_cnt__up++; } else if(n_mm2 < -1e-9){ o_top.n_cnt__down++; }
+    }
+    let n_first = o_vase.fixed + 9 * n_its_corner;
+    for(let n_it = 0; n_it < n_its_corner; n_it++){
+        let [a, b] = [(n_first + n_it) * 3, (n_first + (n_it + 1) % n_its_corner) * 3];
+        o_top.n_mm2__layer += (p[a] * p[b + 1] - p[b] * p[a + 1]) / 2;
+    }
+    o_top.n_mm2__layer = Math.abs(o_top.n_mm2__layer);
+    return o_top;
+};
+
+Deno.test('a layer that folds back is closed by what it encloses, not by a fan around its centre', function(){
+    // Not folded: the fan, with its centre as the vase's last point.
+    let o_plain = vase_mesh(f_o_script__folded(0.9, 320));
+    let o_top__plain = f_o_top(o_plain, 320);
+    assertEquals([o_top__plain.n_cnt, o_top__plain.n_cnt__down, o_plain.positions.length / 3], [320, 0, o_plain.fixed + 10 * 320 + 1]);
+    for(let [n_fold, n_its_corner, n_turn] of [[1.5, 320, 1], [3, 320, 1], [3, 320, -1], [3, 97, 1], [4.5, 600, -1], [3, 2000, 1]]){
+        let s_label = `folded ${n_fold}, ${n_its_corner} corners, turning ${n_turn}`;
+        let o_vase = vase_mesh(f_o_script__folded(n_fold, n_its_corner, n_turn));
+        f_check_closed(o_vase.positions, o_vase.indices, s_label);
+        let o_top = f_o_top(o_vase, n_its_corner);
+        // Two triangles fewer than a fan has, all facing up, and no centre among the points.
+        assertEquals([o_top.n_cnt, o_top.n_cnt__down, o_vase.positions.length / 3], [n_its_corner - 2, 0, o_vase.fixed + 10 * n_its_corner], s_label);
+        assert(Math.abs(o_top.n_mm2 - o_top.n_mm2__layer) < 1e-3 * o_top.n_mm2__layer, `${s_label}: the top covers ${o_top.n_mm2} mm2, the layer encloses ${o_top.n_mm2__layer}`);
+        assertEquals(f_n_cnt__without_area(o_vase), 0, s_label);
+        // The walls below are the same as the plain wave's, triangle for triangle.
+        assertEquals([o_vase.walls[0], o_vase.walls[1] - o_vase.walls[0]], [o_template.walls[0], (180 + n_its_corner + 9 * 2 * n_its_corner) * 3], s_label);
+        // Every point is the script's.
+        let o_script = f_o_script__folded(n_fold, n_its_corner, n_turn);
+        for(let n_it of [0, 1, n_its_corner - 1]){
+            let o_p = o_script.f_o_p(1, n_it / n_its_corner);
+            let n_off = (o_vase.fixed + 9 * n_its_corner + n_it) * 3;
+            assert(f_b_same(o_vase.positions.subarray(n_off, n_off + 3), Float32Array.of(o_p.n_x, o_p.n_y, o_p.n_z)), `${s_label}: corner ${n_it} of the last layer`);
+        }
+    }
+    // A rim that is not level folds back as well: closed the same way, by how it looks from above.
+    let o_wavy = vase_mesh(f_o_script__folded(3, 320, 1, { n_mm__rim: 6 }));
+    f_check_closed(o_wavy.positions, o_wavy.indices, 'a folded rim that goes up and down');
+    assertEquals([f_o_top(o_wavy, 320).n_cnt, f_o_top(o_wavy, 320).n_cnt__down], [318, 0]);
+    // With a dome every ring is the last layer made smaller: it needs no such top, and keeps its tip.
+    let o_dome = vase_mesh(f_o_script__folded(3, 320, 1, { n_height_dome: 30 }));
+    f_check_closed(o_dome.positions, o_dome.indices, 'a folded layer under a dome');
+    assertEquals(o_dome.indices.length, o_dome.walls[1]);
+    // A layer that crosses itself encloses nothing that could be told: it keeps the fan, and is closed.
+    let o_eight = vase_mesh({ n_its_layer: 4, n_its_corner: 200, f_o_p: function(n_it_layer_nor, n_it_corner_nor){
+        let n_rad = n_it_corner_nor * n_tau;
+        return { n_x: 30 * Math.sin(n_rad) + 10 * (1 - n_it_layer_nor) * Math.cos(n_rad), n_y: 30 * Math.sin(n_rad) * Math.cos(n_rad) + 10 * (1 - n_it_layer_nor) * Math.sin(n_rad), n_z: collar_top + 40 * n_it_layer_nor };
+    } });
+    assertEquals([(o_eight.indices.length - o_eight.walls[1]) / 3, o_eight.positions.length / 3], [200, o_eight.fixed + 4 * 200 + 1]);
 });
 
 Deno.test('the dome: round up to its overhang, then a cone to the tip at its height', function(){

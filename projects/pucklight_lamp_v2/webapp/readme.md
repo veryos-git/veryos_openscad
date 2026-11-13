@@ -145,6 +145,8 @@ The editor holds the body of a function: it gets `o_thread`, sees `noise` and th
 
 - Fixed, gold in the view: the thread, z 0 to 4.8, and a collar Ø67 up to 6.6. Every `n_z` must be 6.6 or more.
 - The last layer is closed flat, which vase mode leaves open, or with a dome.
+- A layer may fold back, so that seen from the axis its wall goes back and forth, as long as it does not cross itself. A last layer that folds back is closed by what it encloses; one that crosses itself, or has more than 20 000 corners, by a fan around its centre, which covers more.
+- The first layer must not fold back: it is joined to the collar's circle corner by corner.
 - Example puts an example's script into the editor: `template` explains the script, the others are stlsculpter's vases.
 - A mistake shows in the status and the editor with its line; the last good vase stays.
 - The examples' numbers, the dome and the noise in detail: `../../01_published_or_archived/pucklight_lamps/readme.md`.
@@ -265,12 +267,14 @@ The editor holds the body of a function: it gets `o_thread`, sees `noise` and th
 
 | Check | Result |
 |---|---|
-| Meshes against the older apps' own files, one-off: 3 spheres with a relief, 8 examples and 14 projects of the vase, 6 eggs | the same points, faces and numbers, to the last bit |
+| Meshes against the older apps' own files, one-off: 3 spheres with a relief, 8 examples and 14 projects of the vase, 6 eggs | the same points, faces and numbers, to the last bit; since then the flat top of `four_pillars` is another, see below |
 | `test/lamp.test.js`: the neck against `../pucklight_lamp_v2V5.scad`'s own lampshade, in OpenSCAD | worst point 0.010 mm off |
 | Same: the neck in the cup of both brands' top parts, by rays to the cup's wall | gap 0.29 to 0.31 mm all around, 0.3 by the generator |
 | Same: both logos against their `.scad` files | areas within 0.3 %, same sizes |
 | Same: STL, OBJ, 3MF; the worker with each kind, a script's mistake, a script with `Math.random()`, the whole lamp | hold the mesh; builds each, names the mistake's line; the print file is the vase built last; three parts, the top part upside down on z = 0 |
 | `test/sphere.test.js`, `vase.test.js`, `egg.test.js` | closed, right way out, at the ends of every setting; only what may move moves; the older apps' tests of dome, noise and script functions |
+| `test/vase.test.js`: last layers that fold back, 97 to 2000 corners, both ways round, a rim that is not level, under a dome, one that crosses itself | the top covers what the layer encloses, every triangle facing up, two fewer than a fan; the walls as before; the dome and the crossing layer keep their fan |
+| The 17 vases in `project/` and the 8 examples, before and after that change, one-off | the same points and faces, but for the tops of `back_and_forth` and `four_pillars` |
 | `test/sphere.test.js`: walls of 0.4 to 2 mm; lamps saved with a depth of 0.2 to 5 | the inside that much under Ø100, the outside and the thread unmoved, the wall at the thread's root no thinner; the same sphere as before, to the last bit |
 | `test/object.test.js` | ball, box, ring, inside-out, holed, overlapping, loose, clipped, thin, large: closed, right way out; a ball's outside within 0.04 mm at 0.8; the neck the egg's; STL and OBJ read |
 | Same, colours: a box with a colour a side, a ball in a gradient, a ball with a hole; OBJs with colours of points, `#MRGB`, materials, a picture | the sides exact, outside and inside; the gradient within 5 of 255 outside, 10 inside; the hole in the colour around it; read, or told why not |
@@ -301,6 +305,7 @@ The editor holds the body of a function: it gets `o_thread`, sees `noise` and th
 | Egg: view | Daylight, Lit, Overhang | also Edges, Vertices, X-ray, the section, the cube and the small views |
 | Lit | rose pink filament | rose pink for an egg, white for a sphere and a vase |
 | Vase's message and `template` | "below is the sockel" | "below is the lamp's cup" |
+| Vase: flat top of a layer that folds back | a fan around its centre: on `four_pillars` 20 of 500 triangles faced down, and it covered 2560 mm² of 2543 | what the layer encloses |
 
 ## Not tested yet
 

@@ -5,7 +5,8 @@
 // cup, and a collar above it. Copy changes to the thread over by hand; test/mesh.test.js
 // compares the two. Everything above the collar is a script's: its f_o_p() is called
 // for each corner of each layer. On top the last layer is closed flat, or, if the
-// script asks for one, with a dome.
+// script asks for one, with a dome. A layer may fold back, as long as it does not
+// cross itself.
 //
 // Units: mm and degrees. z = 0 is the print bed, and the floor of the lamp's cup.
 
@@ -35,6 +36,8 @@ const collar_top = 6.6;
 const max_points = 2000000;
 // A dome has a ring every dome_step degrees along its ellipse.
 const dome_step = 3;
+// Cutting ears takes the square of a layer's corners in steps: a layer of more keeps its fan.
+const max_ear_corners = 20000;
 
 // What a script sees: the fixed part's top ring, where its shape starts.
 const o_thread = {n_radius: neck_d / 2, n_z: collar_top};
@@ -84,6 +87,54 @@ function run_script(code) {
 function error_line(error) {
     const found = /(?:<anonymous>|> Function):(\d+):\d+/.exec(error.stack ?? "");
     return found ? +found[1] - 2 : null;
+}
+
+// The triangles that close a layer which folds back, so that its centre does not see
+// all of it and a fan around the centre closes more than the layer. They come from
+// cutting off the layer's ears one by one: a corner that sticks out, with no other
+// corner in the triangle of it and its two neighbours. ring lists the layer's points
+// counter-clockwise, seen from above. Returns null for a layer that has no ear left to
+// cut: one that crosses itself, or runs the other way.
+function ear_triangles(positions, ring) {
+    const count = ring.length;
+    const x = (i) => positions[ring[i] * 3];
+    const y = (i) => positions[ring[i] * 3 + 1];
+    // Above 0 where the way from a over b to c turns left.
+    const turn = (a, b, c) => (x(b) - x(a)) * (y(c) - y(a)) - (x(c) - x(a)) * (y(b) - y(a));
+    const same = (a, b) => x(a) === x(b) && y(a) === y(b);
+    const next = Array.from({length: count}, (_, i) => (i + 1) % count);
+    const prev = Array.from({length: count}, (_, i) => (i + count - 1) % count);
+    // Only a corner that does not stick out can lie in another corner's triangle.
+    const bent = Array.from({length: count}, (_, i) => turn(prev[i], i, next[i]) <= 0);
+    const ear = (b) => {
+        const [a, c] = [prev[b], next[b]];
+        if (bent[b]) return false;
+        for (let p = next[c]; p !== a; p = next[p]) {
+            if (!bent[p] || same(p, a) || same(p, b) || same(p, c)) continue;
+            if (turn(a, b, p) >= 0 && turn(b, c, p) >= 0 && turn(c, a, p) >= 0) return false;
+        }
+        return true;
+    };
+    const triangles = [];
+    let b = 0;
+    for (let left = count, missed = 0; left > 3;) {
+        if (!ear(b)) {
+            b = next[b];
+            if (++missed > left) return null;
+            continue;
+        }
+        const [a, c] = [prev[b], next[b]];
+        triangles.push(ring[a], ring[b], ring[c]);
+        next[a] = c;
+        prev[c] = a;
+        bent[a] = turn(prev[a], a, c) <= 0;
+        bent[c] = turn(a, c, next[c]) <= 0;
+        b = a;
+        left--;
+        missed = 0;
+    }
+    triangles.push(ring[prev[b]], ring[b], ring[next[b]]);
+    return triangles;
 }
 
 // The vase of what a script returns. positions has x, y, z per point; indices has three
@@ -178,7 +229,17 @@ function vase_mesh(script) {
     const turn = area < 0 ? corners - 1 : 1;
     const corner_id = (layer, j) => fixed + (layer - 1) * corners + (start + turn * j) % corners;
 
-    const indices = new Uint32Array((columns * fixed_rings + corners * rings) * 2 * 3);
+    // A flat top is a fan around the last layer's centre, if the centre sees every corner:
+    // each of the fan's triangles then faces up. A layer that folds back has some that
+    // face down, and gets the triangles of its ears instead, two fewer, without the centre.
+    const ring = Array.from({length: corners}, (_, j) => corner_id(rings, j));
+    const faces_down = (j) => {
+        const [a, b] = [ring[j] * 3, ring[(j + 1) % corners] * 3];
+        return (positions[a] - centre[0]) * (positions[b + 1] - centre[1]) - (positions[b] - centre[0]) * (positions[a + 1] - centre[1]) < -1e-9;
+    };
+    const ears = dome_height === 0 && corners <= max_ear_corners && ring.some((_, j) => faces_down(j)) ? ear_triangles(positions, ring) : null;
+
+    const indices = new Uint32Array((columns * fixed_rings + corners * rings) * 2 * 3 - (ears ? 2 * 3 : 0));
     let n = 0;
     const face = (a, b, c) => {
         indices[n++] = a;
@@ -212,9 +273,10 @@ function vase_mesh(script) {
         }
     }
     const walls_end = dome_height > 0 ? indices.length : n;
-    for (let j = 0; j < corners; j++) face(corner_id(rings, j), corner_id(rings, j + 1), top);
+    if (ears) indices.set(ears, n);
+    else for (let j = 0; j < corners; j++) face(corner_id(rings, j), corner_id(rings, j + 1), top);
 
-    return {positions: positions.subarray(0, (top + 1) * 3), indices, fixed, walls: [walls_start, walls_end]};
+    return {positions: positions.subarray(0, (ears ? top : top + 1) * 3), indices, fixed, walls: [walls_start, walls_end]};
 }
 
 // The script's walls that lean most from vertical, with their angle and height: out, the
