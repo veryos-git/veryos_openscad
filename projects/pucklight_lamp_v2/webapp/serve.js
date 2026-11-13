@@ -2,7 +2,8 @@
 // deno task start
 //
 // Serves this folder and keeps each saved lamp as a folder in project/, for git to
-// track: project/<name>/project.json and, for a sphere with a texture, texture.png.
+// track: project/<name>/project.json and, beside it, a sphere's texture.png or an
+// object's object.stl.
 // Takes an optional port and folder for the lamps: deno task start 8769
 
 import { join, normalize, resolve, sep as SEPARATOR } from 'node:path';
@@ -12,10 +13,14 @@ let s_path__root = resolve(decodeURI(new URL('.', import.meta.url).pathname));
 let s_path__project = resolve(Deno.args[1] ?? join(s_path__root, 'project'));
 // The name is the folder's name, so it must not be able to leave project/.
 let o_regex__name = /^[\p{L}\p{N}_](?:[\p{L}\p{N} _-]{0,62}[\p{L}\p{N}_-])?$/u;
-let a_s_kind = ['sphere', 'vase', 'egg'];
+let a_s_kind = ['sphere', 'vase', 'egg', 'object'];
 let a_s_brand = ['veryos', 'tracetrove'];
 let n_scl__body_max = 2e6;
-let n_scl__texture_max = 64e6;
+// What a lamp can keep beside its settings, by the last part of its address.
+let o_o_file__by_part = {
+    texture: { s_file: 'texture.png', s_type: 'image/png', n_scl__max: 64e6 },
+    object: { s_file: 'object.stl', s_type: 'model/stl', n_scl__max: 400e6 }
+};
 let o_s_type__by_extension = {
     html: 'text/html; charset=utf-8',
     js: 'text/javascript; charset=utf-8',
@@ -103,15 +108,15 @@ let f_o_design__sent = async function(o_request){
     return { s_kind: o_body.s_kind, s_brand: o_body.s_brand, o_setting: o_body.o_setting };
 };
 
-let f_o_response__texture = async function(o_request, s_name){
-    let s_path = join(f_s_path__of_project(s_name), 'texture.png');
+let f_o_response__file_beside = async function(o_request, s_name, o_file){
+    let s_path = join(f_s_path__of_project(s_name), o_file.s_file);
     if(!await f_b_folder(f_s_path__of_project(s_name))){ throw f_o_error(`The lamp “${s_name}” does not exist any more.`, 404); }
     if(o_request.method === 'GET'){
-        return new Response(await Deno.readFile(s_path), { headers: { 'content-type': 'image/png', 'cache-control': 'no-store' } });
+        return new Response(await Deno.readFile(s_path), { headers: { 'content-type': o_file.s_type, 'cache-control': 'no-store' } });
     }
     if(o_request.method === 'PUT'){
         let a_n_u8 = new Uint8Array(await o_request.arrayBuffer());
-        if(a_n_u8.length > n_scl__texture_max){ throw f_o_error('That texture is too large.', 413); }
+        if(a_n_u8.length > o_file.n_scl__max){ throw f_o_error('That file is too large.', 413); }
         await Deno.writeFile(s_path, a_n_u8);
         return f_o_response__json({});
     }
@@ -176,12 +181,12 @@ let f_o_response__api = async function(o_request, s_path__url){
             if(o_request.method !== 'GET'){ throw f_o_error('Use GET.', 405); }
             return f_o_response__json(await f_a_o_project());
         }
-        // What follows is a lamp's name, or its name and /texture. A name has no /.
+        // What follows is a lamp's name, or its name and /texture or /object. A name has no /.
         let s_name = s_path__url.slice('/api/project/'.length);
-        let b_texture = s_name.endsWith('/texture');
-        if(b_texture){ s_name = s_name.slice(0, -'/texture'.length); }
+        let s_part = Object.keys(o_o_file__by_part).find(function(s){ return s_name.endsWith(`/${s}`); });
+        if(s_part){ s_name = s_name.slice(0, -s_part.length - 1); }
         f_check_name(s_name);
-        return b_texture ? await f_o_response__texture(o_request, s_name) : await f_o_response__project(o_request, s_name);
+        return s_part ? await f_o_response__file_beside(o_request, s_name, o_o_file__by_part[s_part]) : await f_o_response__project(o_request, s_name);
     } catch(o_error){
         if(o_error.n_status){ return f_o_response__error(o_error.message, o_error.n_status); }
         if(o_error instanceof Deno.errors.NotFound){ return f_o_response__error('That does not exist any more.', 404); }

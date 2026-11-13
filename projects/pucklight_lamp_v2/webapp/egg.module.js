@@ -624,5 +624,6 @@ export {
     f_o_shape,
     f_o_mesh__egg,
     f_a_n_normal,
+    f_o_stat__mesh,
     f_n_mm__tile_scl_x
 };

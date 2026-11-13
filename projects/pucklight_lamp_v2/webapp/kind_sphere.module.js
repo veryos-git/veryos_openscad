@@ -571,6 +571,10 @@ let f_o_kind__sphere = function(o_app){
             if(!o_response.ok){ throw new Error((await o_response.json()).s_message); }
             b_texture_changed = false;
         },
+        // A lamp that is no sphere any more gives up its texture.
+        f_drop_extra: async function(s_name){
+            await fetch(`/api/project/${encodeURIComponent(s_name)}/texture`, { method: 'DELETE' });
+        },
         f_reset_extra: async function(){
             await f_set_texture(null);
             b_texture_changed = false;

@@ -1,7 +1,8 @@
 // Copyright (C) Jonas Immanuel Frey - Licensed under GPL
 // Shows the lamp with WebGL2: the lampshade, and the base parts under it. One shader
 // does all the looks. Left drag orbits, right drag pans, the wheel zooms and a double
-// click goes back to the start.
+// click goes back to the start. A tool, as the gizmo of a loaded object, draws its
+// lines over the lamp and takes the pointer where it is on one of them.
 
 let n_deg = Math.PI / 180;
 // Half the view's angle.
@@ -23,6 +24,7 @@ layout(location = 1) in vec3 a_nor;
 layout(location = 2) in float a_wall;
 layout(location = 3) in vec3 a_col;
 uniform mat4 o_view_projection;
+uniform mat4 o_model;
 uniform float n_z_model;
 uniform int n_cnt_fixed;
 uniform float n_lift;
@@ -33,7 +35,7 @@ out float n_wall;
 out vec3 o_col;
 flat out float n_fixed;
 void main(){
-    o_pos = a_pos + vec3(0.0, 0.0, n_z_model);
+    o_pos = (o_model * vec4(a_pos, 1.0)).xyz + vec3(0.0, 0.0, n_z_model);
     o_nor = a_nor;
     n_wall = a_wall;
     o_col = a_col;
@@ -66,6 +68,7 @@ uniform float n_z_model;
 uniform float n_z_section;
 uniform int n_look;
 uniform bool b_part;
+uniform vec3 o_part_col;
 uniform bool b_cut;
 uniform bool b_flat;
 uniform bool b_single_wall;
@@ -125,7 +128,7 @@ void main(){
     vec3 o_albedo = pow(o_col, vec3(2.2));
     vec3 o_linear;
     if(b_part){
-        vec3 o_shaded = f_o_shaded(vec3(0.085, 0.078, 0.078), o_n, o_v, 0.2, 0.22);
+        vec3 o_shaded = f_o_shaded(o_part_col, o_n, o_v, 0.2, 0.22);
         o_linear = n_look == n_look_lit ? o_shaded * 0.3 : o_shaded;
     } else if(n_look == n_look_lit){
         float n_distance = length(o_pos - o_light_pos);
@@ -156,6 +159,35 @@ void main(){
     if(!gl_FrontFacing){ o_linear *= 0.6; }
     o_out = vec4(f_o_srgb(o_linear), 1.0);
 }`;
+
+// A tool's lines and points, in one colour each, over everything else.
+let s_vertex__overlay = `#version 300 es
+layout(location = 0) in vec3 a_pos;
+uniform mat4 o_view_projection;
+uniform float n_z_model;
+uniform float n_point;
+uniform vec2 o_shift;
+void main(){
+    gl_Position = o_view_projection * vec4(a_pos + vec3(0.0, 0.0, n_z_model), 1.0);
+    // A line is drawn several times, a pixel apart, to be thicker than one.
+    gl_Position.xy += o_shift * gl_Position.w;
+    gl_PointSize = n_point;
+}`;
+let s_fragment__overlay = `#version 300 es
+precision highp float;
+uniform vec3 o_col;
+uniform bool b_point;
+out vec4 o_out;
+void main(){
+    // A point is round.
+    if(b_point && length(gl_PointCoord - vec2(0.5)) > 0.5){ discard; }
+    o_out = vec4(o_col, 1.0);
+}`;
+
+let a_n_mat4__identity = new Float32Array([1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1]);
+let a_n_col__part = [0.085, 0.078, 0.078];
+// A loaded object as it is, before the lampshade is made of it.
+let a_n_col__ghost = [0.5, 0.56, 0.6];
 
 let f_a_n_mat4__multiplied = function(a_n_a, a_n_b){
     let a_n = new Float32Array(16);
@@ -248,17 +280,28 @@ let f_a_n_pos__from_stl = function(o_buffer){
 let f_o_viewer = function(el_canvas){
     let o_gl = el_canvas.getContext('webgl2', { antialias: true, alpha: true, premultipliedAlpha: true, preserveDrawingBuffer: true });
     if(!o_gl){ throw new Error('this browser has no WebGL2'); }
-    let o_program = o_gl.createProgram();
-    o_gl.attachShader(o_program, f_o_shader(o_gl, o_gl.VERTEX_SHADER, s_vertex));
-    o_gl.attachShader(o_program, f_o_shader(o_gl, o_gl.FRAGMENT_SHADER, s_fragment));
-    o_gl.linkProgram(o_program);
-    if(!o_gl.getProgramParameter(o_program, o_gl.LINK_STATUS)){ throw new Error(o_gl.getProgramInfoLog(o_program)); }
+    let f_o_program = function(s_vertex__of, s_fragment__of, a_s_uniform){
+        let o_program = o_gl.createProgram();
+        o_gl.attachShader(o_program, f_o_shader(o_gl, o_gl.VERTEX_SHADER, s_vertex__of));
+        o_gl.attachShader(o_program, f_o_shader(o_gl, o_gl.FRAGMENT_SHADER, s_fragment__of));
+        o_gl.linkProgram(o_program);
+        if(!o_gl.getProgramParameter(o_program, o_gl.LINK_STATUS)){ throw new Error(o_gl.getProgramInfoLog(o_program)); }
+        let o_uniform = {};
+        for(let s_name of a_s_uniform){ o_uniform[s_name] = o_gl.getUniformLocation(o_program, s_name); }
+        return { o_program, o_uniform };
+    };
+    let { o_program, o_uniform } = f_o_program(s_vertex, s_fragment, ['o_view_projection', 'o_model', 'n_z_model', 'n_cnt_fixed', 'n_lift', 'n_point', 'o_eye',
+        'o_eye_dir', 'b_ortho', 'o_light_pos', 'o_light_col', 'o_absorb', 'n_light', 'n_rad_limit', 'n_z_section', 'n_look', 'b_part', 'o_part_col', 'b_cut', 'b_flat',
+        'b_single_wall']);
+    let o_overlay = f_o_program(s_vertex__overlay, s_fragment__overlay, ['o_view_projection', 'n_z_model', 'n_point', 'o_shift', 'o_col', 'b_point']);
+    o_overlay.o_vao = o_gl.createVertexArray();
+    o_overlay.o_buffer = o_gl.createBuffer();
+    o_gl.bindVertexArray(o_overlay.o_vao);
+    o_gl.bindBuffer(o_gl.ARRAY_BUFFER, o_overlay.o_buffer);
+    o_gl.enableVertexAttribArray(0);
+    o_gl.vertexAttribPointer(0, 3, o_gl.FLOAT, false, 0, 0);
+    o_gl.bindVertexArray(null);
     o_gl.useProgram(o_program);
-    let o_uniform = {};
-    for(let s_name of ['o_view_projection', 'n_z_model', 'n_cnt_fixed', 'n_lift', 'n_point', 'o_eye', 'o_eye_dir', 'b_ortho', 'o_light_pos', 'o_light_col',
-        'o_absorb', 'n_light', 'n_rad_limit', 'n_z_section', 'n_look', 'b_part', 'b_cut', 'b_flat', 'b_single_wall']){
-        o_uniform[s_name] = o_gl.getUniformLocation(o_program, s_name);
-    }
     o_gl.clearColor(0, 0, 0, 0);
 
     // The lampshade. Its faces and its edges share the points.
@@ -271,9 +314,13 @@ let f_o_viewer = function(el_canvas){
     };
     let a_o_part = [];
     let a_o_mini = [];
+    // A loaded object as its file has it, drawn through the matrix of where it stands.
+    let o_ghost = { o_vao: o_gl.createVertexArray(), o_buffer: o_gl.createBuffer(), n_cnt: 0, a_n_mat4: a_n_mat4__identity, b_shown: false };
+    let o_tool = null;
+    let n_id__tool = null;
     let f_on_camera = function(){};
     let o_view = {
-        s_look: 'day', b_cut: false, b_base: true, n_nor__section: 1, n_deg__limit: 45, n_light: 1,
+        s_look: 'day', b_cut: false, b_base: true, b_shade: true, n_nor__section: 1, n_deg__limit: 45, n_light: 1,
         a_n_light__col: [1, 0.86, 0.72], a_n_light__pos: [0, 0, 40], a_n_absorb: [0.4, 0.4, 0.4], b_single_wall: false
     };
     let o_camera = { n_rad__azimuth: 0, n_rad__polar: 0, n_distance: 1, a_n_target: [0, 0, 0] };
@@ -334,7 +381,8 @@ let f_o_viewer = function(el_canvas){
             o_gl.disable(o_gl.BLEND);
         }
         o_gl.uniform1i(o_uniform.n_look, o_look.n_face);
-        if(o_shade.n_cnt > 0){
+        o_gl.uniformMatrix4fv(o_uniform.o_model, false, a_n_mat4__identity);
+        if(o_shade.n_cnt > 0 && o_view.b_shade){
             o_gl.uniform1i(o_uniform.b_part, 0);
             o_gl.uniform1i(o_uniform.b_flat, o_shade.b_flat ? 1 : 0);
             o_gl.uniform1i(o_uniform.n_cnt_fixed, o_shade.n_cnt__fixed);
@@ -356,10 +404,19 @@ let f_o_viewer = function(el_canvas){
                 o_gl.uniform1f(o_uniform.n_lift, 0);
             }
         }
+        o_gl.uniform1i(o_uniform.b_part, 1);
+        o_gl.uniform1i(o_uniform.b_flat, 1);
+        o_gl.uniform1i(o_uniform.n_cnt_fixed, 0);
+        if(o_ghost.b_shown && o_ghost.n_cnt > 0){
+            o_gl.uniform3fv(o_uniform.o_part_col, a_n_col__ghost);
+            o_gl.uniformMatrix4fv(o_uniform.o_model, false, o_ghost.a_n_mat4);
+            o_gl.uniform1f(o_uniform.n_z_model, o_shade.n_z);
+            o_gl.bindVertexArray(o_ghost.o_vao);
+            o_gl.drawArrays(o_gl.TRIANGLES, 0, o_ghost.n_cnt);
+            o_gl.uniformMatrix4fv(o_uniform.o_model, false, a_n_mat4__identity);
+        }
         if(o_view.b_base){
-            o_gl.uniform1i(o_uniform.b_part, 1);
-            o_gl.uniform1i(o_uniform.b_flat, 1);
-            o_gl.uniform1i(o_uniform.n_cnt_fixed, 0);
+            o_gl.uniform3fv(o_uniform.o_part_col, a_n_col__part);
             for(let o_part of a_o_part){
                 o_gl.uniform1f(o_uniform.n_z_model, o_part.n_z);
                 o_gl.bindVertexArray(o_part.o_vao);
@@ -367,6 +424,47 @@ let f_o_viewer = function(el_canvas){
             }
         }
         o_gl.bindVertexArray(null);
+    };
+
+    // The eye as a tool needs it, in the lampshade's own coordinates: its bed on z = 0.
+    let f_o_camera__of_shade = function(){
+        let { a_n_eye, a_n_right } = f_o_eye(o_camera.a_n_target, o_camera.n_rad__azimuth, o_camera.n_rad__polar, o_camera.n_distance);
+        let a_n_back = [a_n_eye[0] - o_camera.a_n_target[0], a_n_eye[1] - o_camera.a_n_target[1], a_n_eye[2] - o_camera.a_n_target[2]].map(function(n_val){ return n_val / o_camera.n_distance; });
+        return {
+            a_n_eye: [a_n_eye[0], a_n_eye[1], a_n_eye[2] - o_shade.n_z],
+            a_n_right,
+            a_n_up: [a_n_back[1] * a_n_right[2] - a_n_back[2] * a_n_right[1], a_n_back[2] * a_n_right[0] - a_n_back[0] * a_n_right[2], a_n_back[0] * a_n_right[1] - a_n_back[1] * a_n_right[0]],
+            a_n_forward: [-a_n_back[0], -a_n_back[1], -a_n_back[2]],
+            n_tan: Math.tan(n_rad__half_view),
+            n_scl_x: el_canvas.clientWidth,
+            n_scl_y: el_canvas.clientHeight
+        };
+    };
+
+    // The tool's lines and points, over the lamp.
+    let f_draw_overlay = function(a_n_view_projection, n_ratio){
+        let a_o_shape = o_tool.f_a_o_shape(f_o_camera__of_shade());
+        if(a_o_shape.length === 0){ return; }
+        o_gl.useProgram(o_overlay.o_program);
+        o_gl.disable(o_gl.DEPTH_TEST);
+        o_gl.disable(o_gl.BLEND);
+        o_gl.uniformMatrix4fv(o_overlay.o_uniform.o_view_projection, false, a_n_view_projection);
+        o_gl.uniform1f(o_overlay.o_uniform.n_z_model, o_shade.n_z);
+        o_gl.bindVertexArray(o_overlay.o_vao);
+        o_gl.bindBuffer(o_gl.ARRAY_BUFFER, o_overlay.o_buffer);
+        for(let o_shape of a_o_shape){
+            o_gl.bufferData(o_gl.ARRAY_BUFFER, o_shape.a_n_pos, o_gl.DYNAMIC_DRAW);
+            o_gl.uniform3fv(o_overlay.o_uniform.o_col, o_shape.a_n_col);
+            o_gl.uniform1i(o_overlay.o_uniform.b_point, o_shape.s_type === 'point' ? 1 : 0);
+            o_gl.uniform1f(o_overlay.o_uniform.n_point, (o_shape.n_px ?? 1) * n_ratio);
+            // Half a pixel to each side: a line two pixels wide.
+            for(let [n_x, n_y] of (o_shape.s_type === 'point' ? [[0, 0]] : [[-1, 0], [1, 0], [0, -1], [0, 1]])){
+                o_gl.uniform2f(o_overlay.o_uniform.o_shift, n_x / el_canvas.width, n_y / el_canvas.height);
+                o_gl.drawArrays(o_shape.s_type === 'point' ? o_gl.POINTS : o_gl.LINES, 0, o_shape.a_n_pos.length / 3);
+            }
+        }
+        o_gl.bindVertexArray(null);
+        o_gl.useProgram(o_program);
     };
 
     let f_draw = function(){
@@ -382,10 +480,12 @@ let f_o_viewer = function(el_canvas){
         o_gl.clearColor(0, 0, 0, 0);
         o_gl.clear(o_gl.COLOR_BUFFER_BIT | o_gl.DEPTH_BUFFER_BIT);
         let { a_n_eye, a_n_right } = f_o_eye(o_camera.a_n_target, o_camera.n_rad__azimuth, o_camera.n_rad__polar, o_camera.n_distance);
-        f_draw_scene(f_a_n_mat4__multiplied(
+        let a_n_view_projection = f_a_n_mat4__multiplied(
             f_a_n_mat4__perspective(2 * n_rad__half_view, n_scl_x / n_scl_y, o_camera.n_distance * 0.1, o_camera.n_distance * 4),
             f_a_n_mat4__look_at(a_n_eye, o_camera.a_n_target, a_n_right)
-        ), a_n_eye, [0, 0, 1], false);
+        );
+        f_draw_scene(a_n_view_projection, a_n_eye, [0, 0, 1], false);
+        if(o_tool){ f_draw_overlay(a_n_view_projection, n_ratio); }
 
         // The small views: the lampshade from three sides, without perspective.
         let o_rect = el_canvas.getBoundingClientRect();
@@ -430,8 +530,20 @@ let f_o_viewer = function(el_canvas){
     let o_pointer__by_id = new Map();
     let n_distance__pinch = 0;
     el_canvas.addEventListener('contextmenu', function(o_evt){ o_evt.preventDefault(); });
+    // Where the pointer is on the canvas, in pixels from its upper left.
+    let f_a_n_px = function(o_evt){
+        let o_rect = el_canvas.getBoundingClientRect();
+        return [o_evt.clientX - o_rect.left, o_evt.clientY - o_rect.top];
+    };
     el_canvas.addEventListener('pointerdown', function(o_evt){
         el_canvas.setPointerCapture(o_evt.pointerId);
+        // A tool's handle under the pointer takes it; else the pointer turns the lamp.
+        if(o_tool && o_evt.button === 0 && !o_evt.shiftKey && o_pointer__by_id.size === 0 && n_id__tool === null
+            && o_tool.f_b_down(...f_a_n_px(o_evt), f_o_camera__of_shade())){
+            n_id__tool = o_evt.pointerId;
+            f_set_dirty();
+            return;
+        }
         o_pointer__by_id.set(o_evt.pointerId, { n_x: o_evt.clientX, n_y: o_evt.clientY, n_button: o_evt.button });
         if(o_pointer__by_id.size === 2){
             let [o_a, o_b] = [...o_pointer__by_id.values()];
@@ -439,8 +551,17 @@ let f_o_viewer = function(el_canvas){
         }
     });
     el_canvas.addEventListener('pointermove', function(o_evt){
+        if(o_evt.pointerId === n_id__tool){
+            o_tool.f_move(...f_a_n_px(o_evt));
+            f_set_dirty();
+            return;
+        }
         let o_pointer = o_pointer__by_id.get(o_evt.pointerId);
-        if(!o_pointer){ return; }
+        if(!o_pointer){
+            // Over the view without a button: a tool's handle under the pointer lights up.
+            if(o_tool && o_tool.f_b_hover(...f_a_n_px(o_evt), f_o_camera__of_shade())){ f_set_dirty(); }
+            return;
+        }
         let n_dx = o_evt.clientX - o_pointer.n_x, n_dy = o_evt.clientY - o_pointer.n_y;
         o_pointer.n_x = o_evt.clientX;
         o_pointer.n_y = o_evt.clientY;
@@ -461,7 +582,14 @@ let f_o_viewer = function(el_canvas){
         }
         f_moved_camera();
     });
-    let f_end_pointer = function(o_evt){ o_pointer__by_id.delete(o_evt.pointerId); };
+    let f_end_pointer = function(o_evt){
+        if(o_evt.pointerId === n_id__tool){
+            n_id__tool = null;
+            o_tool.f_up();
+            f_set_dirty();
+        }
+        o_pointer__by_id.delete(o_evt.pointerId);
+    };
     el_canvas.addEventListener('pointerup', f_end_pointer);
     el_canvas.addEventListener('pointercancel', f_end_pointer);
     el_canvas.addEventListener('wheel', function(o_evt){
@@ -571,6 +699,32 @@ let f_o_viewer = function(el_canvas){
             a_o_mini = a_o;
             f_set_dirty();
         },
+        // A loaded object's triangles as they are in its file, nine numbers each, or
+        // null for none. They are drawn through the matrix of where the object stands.
+        f_set_ghost: function(a_n_tri){
+            o_ghost.n_cnt = a_n_tri ? a_n_tri.length / 3 : 0;
+            if(a_n_tri){
+                o_gl.bindVertexArray(o_ghost.o_vao);
+                o_gl.bindBuffer(o_gl.ARRAY_BUFFER, o_ghost.o_buffer);
+                o_gl.bufferData(o_gl.ARRAY_BUFFER, a_n_tri, o_gl.STATIC_DRAW);
+                o_gl.enableVertexAttribArray(0);
+                o_gl.vertexAttribPointer(0, 3, o_gl.FLOAT, false, 0, 0);
+                o_gl.bindVertexArray(null);
+            }
+            f_set_dirty();
+        },
+        f_set_ghost_place: function(a_n_mat4, b_shown){
+            o_ghost.a_n_mat4 = a_n_mat4;
+            o_ghost.b_shown = b_shown;
+            f_set_dirty();
+        },
+        // A tool, or null for none: { f_a_o_shape(o_camera), f_b_down(n_x, n_y, o_camera),
+        // f_move(n_x, n_y), f_up(), f_b_hover(n_x, n_y, o_camera) }, see gizmo.module.js.
+        f_set_tool: function(o_tool__new){
+            o_tool = o_tool__new;
+            n_id__tool = null;
+            f_set_dirty();
+        },
         // Tells f(n_rad__azimuth, n_rad__polar) whenever the eye has turned.
         f_set_on_camera: function(f){
             f_on_camera = f;
@@ -585,7 +739,8 @@ let f_o_viewer__without_3d = function(){
     let f_nothing = function(){};
     return {
         f_set_mesh: f_nothing, f_set_color: f_nothing, f_set_shade_z: f_nothing, f_set_part: f_nothing, f_set_view: f_nothing,
-        f_frame: f_nothing, f_look_from: f_nothing, f_set_mini: f_nothing, f_set_on_camera: f_nothing, f_set_dirty: f_nothing
+        f_frame: f_nothing, f_look_from: f_nothing, f_set_mini: f_nothing, f_set_on_camera: f_nothing, f_set_dirty: f_nothing,
+        f_set_ghost: f_nothing, f_set_ghost_place: f_nothing, f_set_tool: f_nothing
     };
 };
 

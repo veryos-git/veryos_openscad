@@ -1,8 +1,8 @@
 # Pucklight lamp webapp
 
-One app for the lampshades of the pucklight lamp: it does what the three older apps did, each for one kind. A lamp is the base of a brand and a lampshade of one kind; the app keeps lamps under names and writes their print files.
+One app for the lampshades of the pucklight lamp: it does what the three older apps did, each for one kind, and makes a lampshade of any loaded 3D object. A lamp is the base of a brand and a lampshade of one kind; the app keeps lamps under names and writes their print files.
 
-![a lamp of each kind](preview.png)
+![a sphere, a vase and an egg](preview.png)
 
 | Start | |
 |---|---|
@@ -21,6 +21,7 @@ Needs [Deno](https://deno.com) and a browser with WebGL2. The editor comes from 
 | Sphere | a shader, as in Shadertoy, or a loaded picture: a heightmap | relief on the outside of a Ø100 sphere, smooth inside: planets, lithophanes, patterns | walls, thick where it stands out | `pucklight_sphere/mathematical` |
 | Vase | a script that places the corners of each layer | any shape above the thread | one wall, in a slicer's vase mode | `pucklight_lamps`, before `pucklight_vase` |
 | Egg | a seamless tile of scales, sliders | relief on an egg, the brand's logo engraved if wanted: a dragon egg | walls, or one wall in vase mode | `rose_pink_translucent_lamp/dragon_egg_app` |
+| Object | a loaded 3D object, STL or OBJ, placed with the mouse: no code | the object, hollowed to one wall thickness and joined to the neck | walls; not in vase mode | new, 2026-11-13 |
 
 - The older apps are in `../../01_published_or_archived/`, deprecated. Their saved projects are here in `project/`: 18 spheres, 14 vases.
 - All kinds have one neck: the lampshade's of `../pucklight_lamp_v2V5.scad`, Ø67, 2 mm pitch. They screw into the lamp's cup, and into the sockel of the older lamps.
@@ -31,7 +32,7 @@ Needs [Deno](https://deno.com) and a browser with WebGL2. The editor comes from 
 |---|---|---|
 | Create | type a name, Save or Enter | `project/<name>/project.json` |
 | Read | the list; the address `#<name>` opens it again after a reload | |
-| Update | Save, or Ctrl+S, in the editor too; the line under the name says what is unsaved | `project.json`; a sphere's texture in `texture.png` |
+| Update | Save, or Ctrl+S, in the editor too; the line under the name says what is unsaved | `project.json`; a sphere's texture in `texture.png`; an object's file in `object.stl` |
 | Update | another name, Save | the folder moves, with what else lies in it |
 | Copy | Save copy | `project/<name> copy/` |
 | Delete | × on its row, asks first | the folder goes |
@@ -43,7 +44,7 @@ Needs [Deno](https://deno.com) and a browser with WebGL2. The editor comes from 
 - Before unsaved work is replaced, the app asks: Save first, Discard or Cancel. Closing the page asks too.
 - After deleting the open lamp its settings stay on screen: Save brings it back.
 - Saving a lamp as it is writes the same bytes: git stays clean.
-- API: `GET /api/project`; `GET`, `POST`, `PUT`, `PATCH`, `DELETE /api/project/<name>`; `GET`, `PUT`, `DELETE /api/project/<name>/texture`.
+- API: `GET /api/project`; `GET`, `POST`, `PUT`, `PATCH`, `DELETE /api/project/<name>`; `GET`, `PUT`, `DELETE /api/project/<name>/texture` and `/object`.
 - The server writes to `project/` only, listens on 127.0.0.1 only, and refuses requests from other web pages.
 
 ## Base and brand
@@ -64,7 +65,7 @@ Needs [Deno](https://deno.com) and a browser with WebGL2. The editor comes from 
 |---|---|
 | drag, right drag, wheel, double click | orbit, pan, zoom, back to the start |
 | cube | turns with the lamp; a click on a side looks from there |
-| Daylight | the lampshade in its colours: a sphere's heights, a vase's thread in gold, an egg in rose pink |
+| Daylight | the lampshade in its colours: a sphere's heights, a vase's thread in gold, an egg in rose pink, an object in white |
 | Lit | light through the wall: thin glows, thick stays dark. An estimate, with Brightness and the puck light's colour |
 | Overhang | faces past the Overhang limit: overhangs orange to red; a single wall that leans in, blue; the thread grey |
 | Edges, Vertices | the mesh's triangles and points on it |
@@ -74,7 +75,7 @@ Needs [Deno](https://deno.com) and a browser with WebGL2. The editor comes from 
 | Base | shows the top part and the screwin |
 | ▼ | hides the small views: front, top, left |
 
-- Sphere and vase are drawn with one normal per triangle, as exported. An egg is drawn smooth.
+- Sphere and vase are drawn with one normal per triangle, as exported. An egg and an object are drawn smooth.
 - Through a cut a shell shows its cut wall in one colour; a single wall shows its inside, darker.
 
 ## Print files
@@ -87,11 +88,12 @@ Needs [Deno](https://deno.com) and a browser with WebGL2. The editor comes from 
 | Download whole lamp (3MF) | lampshade, top part upside down and screwin, side by side as they print |
 | toppart, screwin | the brand's base parts alone |
 
-- A sphere and a vase are exported as shown, a vase also where its script uses `Math.random()`. An egg is built anew at its Mesh detail.
+- A sphere and a vase are exported as shown, a vase also where its script uses `Math.random()`. An egg is built anew at its Mesh detail, an object at its Detail.
 
 | Lampshade | Slicer setting | Why | Printed |
 |---|---|---|---|
 | Sphere, egg | walls enough to fill the relief: (wall + relief) / line width; no supports | sparse infill inside a relief shows as a shadow when lit | hypothesis, from the egg's app |
+| Object | walls for Wall / line width, 3 for 1.2 mm; not vase mode; supports inside only if Inside past 45° is large | a shell of two surfaces; its ceilings hang inside | hypothesis, not sliced |
 | Vase, egg in vase mode | spiral vase, **bottom layers 0**, outer wall line 0.6 mm, brim 5 mm | a floor closes the neck: no light | hypothesis, from the vase's app |
 | all | 0.2 mm layers, white or a light filament | it glows | the `.scad` file's lampshade, 2026-11-12 |
 
@@ -157,6 +159,51 @@ The editor holds the body of a function: it gets `o_thread`, sees `noise` and th
 - The app warns when more than 2.5 % of the outside overhangs past 60 degrees: Flip, less relief or fewer tiles help.
 - Mesh detail is the print file's cell size; the view builds coarser while a slider moves.
 
+## Object
+
+| Control | Does |
+|---|---|
+| Load a 3D object…, or a file dropped onto the page | STL, binary or text, or OBJ; one object a lamp |
+| at loading | its numbers are mm; below 20 or above 300 mm it becomes 120 mm; it stands in the middle, 2 mm into the stem |
+| arrows in the view | move along x, y, z |
+| rings in the view | turn around x, y, z |
+| orange ring | resize: as many times larger as the pointer goes further from the middle |
+| orange point in the middle | move across the screen |
+| beside the gizmo | the view's own drag: orbit, pan, zoom |
+| Turn around x, y, z | a quarter turn, then it stands on the stem again |
+| Stand on the stem, To the middle, As loaded | lowest point 2 mm into the stem; x and y to 0; as it came |
+| Size; x, y, z | the longest side and the middle's place as numbers, in mm |
+| Wall | 0.8 to 3 mm, 1.2 by default |
+| Stem | 0 to 40 mm: how high the neck goes on as a tube before a 45 degree cone closes it; shows only where the object is narrower |
+| Detail | the print file's grid, 0.3 to 1.5 mm, 0.6 by default; the note below it says triangles and file size |
+
+| Step | How |
+|---|---|
+| 1. Sample | lines of a grid along x, y and z through the triangles; inside is counted from what a line crosses, the three directions vote |
+| 2. Join | with the stem; what does not hang together with it is left out, and told |
+| 3. Distance | each grid point's distance to the surface, from the crossings and their directions; the stem's from its formula |
+| 4. Surfaces | outside where the distance is 0, inside where the depth is Wall: they cannot cross |
+| 5. Neck | both end on circles at z = 6.6 and are sewn to the thread all kinds have |
+
+| Object | Result |
+|---|---|
+| holes, parts through each other, inside-out, several shells | taken as the solid they enclose |
+| thinner than twice Wall | solid, no cavity |
+| a hollow object | keeps its own hollow, closed in |
+| loose parts, an object above the stem | left out; the stat says how much |
+| finer than Detail | smoothed away; at 0.8 mm a box's sides and edges are up to 0.1 mm out, 0.2 mm in |
+| inside overhangs | not changed: Inside past 45° says how much, Overhang with Cut open shows where |
+| large: more than 16 million grid points | a coarser grid, told below Detail |
+
+| Grid | For | Time, ball Ø110 of 1 million triangles |
+|---|---|---|
+| 1.6 mm | while a handle is dragged the object itself shows; the first lampshade after | 0.25 s |
+| 0.8 mm, or Detail if coarser | the lampshade in the view, once the place is final | 0.7 s |
+| Detail, 0.6 mm | the print file | 1.4 s, 1.2 million triangles |
+
+- `object.stl` holds the object's triangles as they were loaded, an OBJ's too; where it stands is in `project.json` as place, turn and size.
+- A lamp that becomes another kind gives up its `object.stl` at the next save.
+
 ## Scale patterns
 
 | | |
@@ -173,8 +220,9 @@ The editor holds the body of a function: it gets `o_thread`, sees `noise` and th
 |---|---|
 | `index.html`, `style.css` | layout |
 | `client.module.js` | the page: the lamp on screen, the worker, the view's controls, the print files |
-| `kind_sphere.module.js`, `kind_vase.module.js`, `kind_egg.module.js` | each kind's controls and what it tells the worker |
-| `sphere.module.js`, `vase.module.js`, `egg.module.js` | each kind's mesh |
+| `kind_sphere.module.js`, `kind_vase.module.js`, `kind_egg.module.js`, `kind_object.module.js` | each kind's controls and what it tells the worker |
+| `sphere.module.js`, `vase.module.js`, `egg.module.js`, `object.module.js` | each kind's mesh |
+| `mesh_file.module.js`, `gizmo.module.js` | an object's file as triangles; its place, the handles and what a drag of each does |
 | `noise.module.js`, `vase_example.module.js` | a script's noise, public domain by its header; the example scripts |
 | `heightmap.module.js`, `logo.module.js`, `color.module.js` | an egg's 16 bit PNGs; both logos as distance fields; the points' colours |
 | `worker.module.js` | builds the lampshades and writes the print files, away from the page |
@@ -197,11 +245,14 @@ The editor holds the body of a function: it gets `o_thread`, sees `noise` and th
 | Same: both logos against their `.scad` files | areas within 0.3 %, same sizes |
 | Same: STL, OBJ, 3MF; the worker with each kind, a script's mistake, a script with `Math.random()`, the whole lamp | hold the mesh; builds each, names the mistake's line; the print file is the vase built last; three parts, the top part upside down on z = 0 |
 | `test/sphere.test.js`, `vase.test.js`, `egg.test.js` | closed, right way out, at the ends of every setting; only what may move moves; the older apps' tests of dome, noise and script functions |
-| `test/server.test.js` | create, read, update, rename, delete, texture; refuses bad names, bad lamps, other sites' `Origin` and `Host`, paths outside its folder |
-| `test/viewer.test.js`, on Mesa's software renderer | every kind in every look, cut, section, small views; both logos upright |
+| `test/object.test.js` | ball, box, ring, inside-out, holed, overlapping, loose, clipped, thin, large: closed, right way out; a ball's outside within 0.04 mm at 0.8; the neck the egg's; STL and OBJ read |
+| `test/gizmo.test.js` | place as matrix; each handle under the pointer; where a drag of each leads |
+| `test/server.test.js` | create, read, update, rename, delete, texture, object; refuses bad names, bad lamps, other sites' `Origin` and `Host`, paths outside its folder |
+| `test/viewer.test.js`, on Mesa's software renderer | every kind in every look, cut, section, small views; both logos upright; the object while placed, the gizmo's handles, a drag on one and beside them |
 | The 30 lamps carried over first, in headless Chrome 154 | each opens, builds, counts as saved, and saves with the bytes it had |
 | The 2 vases carried over later, `sphere_desert` and `sphereslayers` | built by `vase.module.js`: closed; not opened in the browser |
 | The app in headless Chrome 154: lamps, texture, colours, editor, mistakes, Ctrl+S, questions, cube, drag, print files of each kind, start on each kind | works, console clean but for the refused names |
+| Object in headless Chrome 154: load, drop, each handle by mouse, buttons, numbers, save, reopen, copy, other kind, STL, whole lamp, a file that is none | works, console clean |
 | The print files read back with numpy: STL of each kind, 3MF, OBJ | closed; top part 22.1 cm³ and screwin 13.5 cm³ as the generator's; the top part upside down on z = 0 |
 | Without the internet | a text box replaces the editor, the rest works |
 
@@ -223,6 +274,7 @@ The editor holds the body of a function: it gets `o_thread`, sees `noise` and th
 
 - Not sliced, not printed from this app. The lampshade of the `.scad` file printed and fits (2026-11-12); these necks are its neck.
 - Only on software WebGL in Chrome: no real GPU, no Firefox.
+- Object: only test shapes of this app's own making, no model from the internet; no touch screen; not sliced.
 - A vase's single wall around the cup's core, Ø62 inside the neck's Ø63 bore: by the generator's numbers, not printed.
 
 Licensed under GPL. The planets' textures in `project/` are NASA, USGS and Hubble OPAL data, see `../../01_published_or_archived/pucklight_sphere/planets/readme.md`.

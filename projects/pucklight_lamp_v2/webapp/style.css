@@ -192,6 +192,24 @@ kbd{
 .tile:focus-visible{ outline: 2px solid var(--s_col__text); outline-offset: 1px; }
 .tile[aria-selected="true"]{ border-color: var(--s_col__gold); }
 
+/* a loaded object: its file and the buttons that place it */
+.source__body{ padding: 0 14px 14px; }
+.source__body .action{ margin: 0 0 6px; }
+#el_object_info{ margin: 8px 0; font-size: 12px; color: var(--s_col__text); overflow-wrap: anywhere; }
+#el_object_tool .tool_row{ margin-top: 6px; }
+.number{ display: inline-flex; align-items: center; gap: 5px; color: var(--s_col__muted); }
+.number input{
+    width: 76px;
+    padding: 3px 6px;
+    border: 1px solid var(--s_col__line);
+    border-radius: 5px;
+    background: var(--s_col__black);
+    color: var(--s_col__gold);
+    font: inherit;
+    font-variant-numeric: tabular-nums;
+    text-align: right;
+}
+
 /* the lamp */
 #el_stage{
     position: relative;

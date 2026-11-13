@@ -10,6 +10,10 @@ import { examples as o_s_example } from '../vase_example.module.js';
 import { f_o_param__default, f_o_mesh__egg, f_n_radius__neck } from '../egg.module.js';
 import { f_o_polygon__logo, f_n_area__polygon } from '../logo.module.js';
 import { f_o_blob__stl, f_o_blob__obj, f_o_blob__3mf, f_o_mesh__from_stl, f_n_crc32 } from '../export.module.js';
+import { f_o_param__default as f_o_param__object } from '../object.module.js';
+import { f_a_n_mat4__of_place } from '../gizmo.module.js';
+import { f_o_buffer__stl_of_tri } from '../mesh_file.module.js';
+import { f_a_n_tri__ball } from './shape.js';
 
 let n_tau = Math.PI * 2;
 let o_lamp = JSON.parse(Deno.readTextFileSync(f_s_path('part/lamp.json')));
@@ -260,6 +264,70 @@ print(len(r.findall('.//m:item', ns)))
             assertEquals([s_name__read, Number(s_cnt), Number(s_z__low)], [s_name, n_cnt, 0]);
             assertAlmostEquals(Number(s_z__top), n_z__top, 0.002, s_name);
         });
+    } finally {
+        o_worker.terminate();
+    }
+} });
+
+// A loaded object: its file goes to the worker once, where it stands with every build.
+Deno.test({ name: 'the worker takes an object\'s file and builds its lampshade where the page puts it', sanitizeResources: false, sanitizeOps: false, fn: async function(){
+    let o_worker = new Worker(new URL('../worker.module.js', import.meta.url).href, { type: 'module' });
+    let n_id = 0;
+    let f_o_answer = function(o_request){
+        return new Promise(function(f_resolve){
+            o_worker.onmessage = function(o_event){ f_resolve(o_event.data); };
+            o_worker.postMessage({ n_id: ++n_id, s_kind: 'object', s_brand: 'veryos', ...o_request });
+        });
+    };
+    let o_setting = { ...f_o_param__object(), n_mm__voxel: 0.8 };
+    let f_a_n_mat4 = function(n_z, n_scl){ return f_a_n_mat4__of_place({ a_n_trn: [0, 0, n_z], a_n_rot: [0, 0, 0, 1], n_scl }, [5, 6, 7]); };
+    try{
+        // Without a file: the stem alone, closed and printable, and told so.
+        let o_bare = await f_o_answer({ s_type: 'build', o_setting, a_n_mat4: f_a_n_mat4(60, 1), n_mm__voxel: 1.6, n_id__place: 1 });
+        assertEquals([o_bare.s_type, o_bare.o_stat.b_object], ['built', false], JSON.stringify(o_bare.s_message));
+        f_check_closed(o_bare.a_n_pos, o_bare.a_n_idx, 'no object');
+
+        // A ball of 30 around a middle of its own, as a binary STL.
+        let a_n_tri = f_a_n_tri__ball(30, [5, 6, 7], 24);
+        let o_loaded = await f_o_answer({ s_type: 'object', a_n_u8: new Uint8Array(f_o_buffer__stl_of_tri(a_n_tri)), s_name__file: 'ball.stl' });
+        assertEquals([o_loaded.s_type, o_loaded.n_id, [...o_loaded.a_n_tri]], ['object_loaded', n_id, [...a_n_tri]], JSON.stringify(o_loaded.s_message));
+        o_loaded.a_n_min.forEach(function(n_val, n_idx){ assertAlmostEquals(n_val, [5, 6, 7][n_idx] - 30, 0.01); });
+        o_loaded.a_n_max.forEach(function(n_val, n_idx){ assertAlmostEquals(n_val, [5, 6, 7][n_idx] + 30, 0.01); });
+
+        // Its middle 60 above the neck's foot: a lampshade 90 high, on the view's grid.
+        let o_built = await f_o_answer({ s_type: 'build', o_setting, a_n_mat4: f_a_n_mat4(60, 1), n_mm__voxel: 1.6, n_id__place: 7 });
+        assertEquals([o_built.s_type, o_built.s_kind, o_built.n_id, o_built.n_id__place], ['built', 'object', n_id, 7], JSON.stringify(o_built.s_message));
+        f_check_closed(o_built.a_n_pos, o_built.a_n_idx, 'object');
+        let n_cnt__vertex = o_built.a_n_pos.length / 3;
+        assertEquals([o_built.a_n_wall.length, o_built.a_n_col.length, o_built.a_n_nor.length], [n_cnt__vertex, n_cnt__vertex * 3, n_cnt__vertex * 3]);
+        assertEquals([o_built.b_single_wall, o_built.n_cnt__fixed, o_built.o_stat.n_mm__voxel, o_built.o_stat.b_object, o_built.o_stat.b_touching, o_built.o_stat.n_cnt__triangle],
+            [false, 49 * 180, 1.6, true, true, o_built.a_n_idx.length / 3]);
+        assertAlmostEquals(o_built.o_stat.n_mm__scl_z, 90, 0.3);
+        assertEquals([...o_built.a_n_col.subarray(-3)], [247, 242, 230]);
+        // Half as large again, and 20 higher.
+        let o_larger = await f_o_answer({ s_type: 'build', o_setting, a_n_mat4: f_a_n_mat4(80, 1.5), n_mm__voxel: 1.6, n_id__place: 8 });
+        assertEquals(o_larger.n_id__place, 8);
+        assertAlmostEquals(o_larger.o_stat.n_mm__scl_z, 125, 0.3);
+
+        // A print file is on its own, finer grid, of the object where it stands.
+        let o_stl = await f_o_answer({ s_type: 'export', s_format: 'stl', s_name__project: 'A ball', o_setting, a_n_mat4: f_a_n_mat4(60, 1) });
+        assertEquals([o_stl.s_type, o_stl.s_name], ['exported', 'a_ball_object.stl'], JSON.stringify(o_stl.s_message));
+        assert(o_stl.n_cnt__triangle > 2 * o_built.o_stat.n_cnt__triangle, `the print file has ${o_stl.n_cnt__triangle} triangles, the view ${o_built.o_stat.n_cnt__triangle}`);
+        let o_mesh = f_o_mesh__from_stl(await o_stl.o_blob.arrayBuffer());
+        assertEquals(o_mesh.a_n_idx.length / 3, o_stl.n_cnt__triangle);
+        f_check_closed(o_mesh.a_n_pos, o_mesh.a_n_idx, 'the print file');
+        let n_z__top = 0;
+        for(let n_off = 2; n_off < o_mesh.a_n_pos.length; n_off += 3){ n_z__top = Math.max(n_z__top, o_mesh.a_n_pos[n_off]); }
+        assertAlmostEquals(n_z__top, 90, 0.1);
+
+        // A file that is none is told, and the object before it stays.
+        let o_wrong = await f_o_answer({ s_type: 'object', a_n_u8: new TextEncoder().encode('not a 3D object'), s_name__file: 'notes.stl' });
+        assertEquals([o_wrong.s_type, o_wrong.s_for, o_wrong.n_id], ['error', 'object', n_id]);
+        assert(/neither an STL nor an OBJ/.test(o_wrong.s_message), o_wrong.s_message);
+        assertEquals((await f_o_answer({ s_type: 'build', o_setting, a_n_mat4: f_a_n_mat4(60, 1), n_mm__voxel: 1.6, n_id__place: 9 })).o_stat.b_object, true);
+        // And it can be taken away.
+        assertEquals((await f_o_answer({ s_type: 'object', a_n_u8: null })).a_n_tri, null);
+        assertEquals((await f_o_answer({ s_type: 'build', o_setting, a_n_mat4: f_a_n_mat4(60, 1), n_mm__voxel: 1.6, n_id__place: 10 })).o_stat.b_object, false);
     } finally {
         o_worker.terminate();
     }

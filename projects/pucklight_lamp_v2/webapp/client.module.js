@@ -11,6 +11,7 @@ import { f_o_panel__project } from './project.module.js';
 import { f_o_kind__sphere } from './kind_sphere.module.js';
 import { f_o_kind__vase, s_declaration } from './kind_vase.module.js';
 import { f_o_kind__egg } from './kind_egg.module.js';
+import { f_o_kind__object } from './kind_object.module.js';
 
 let s_key__storage = 'pucklight_lamp_app_v1';
 // A kind that builds a coarse lampshade while a slider moves builds the fine one this
@@ -56,7 +57,7 @@ let f_load_state = function(){
         let o_saved = JSON.parse(localStorage.getItem(s_key__storage));
         if(o_saved){
             Object.assign(o_state.o_view, o_saved.o_view);
-            if(['sphere', 'vase', 'egg'].includes(o_saved.s_kind)){ o_state.s_kind = o_saved.s_kind; }
+            if(o_kind__by_name[o_saved.s_kind]){ o_state.s_kind = o_saved.s_kind; }
         }
     } catch(o_error){ /* Private window or cleared storage: start from the defaults. */ }
 };
@@ -97,12 +98,14 @@ let f_s_triangle = function(n_cnt){
 };
 
 /* ---- The worker: one request at a time. Of the builds only the latest waits, and
-   a print file waits beside it ---- */
+   a print file and a loaded object's file wait beside it ---- */
 
 let o_worker = new Worker('./worker.module.js', { type: 'module' });
 let n_id__next = 1;
 let b_busy = false;
-let o_post__waiting_by_type = { build: null, export: null };
+let o_post__waiting_by_type = { object: null, build: null, export: null };
+// Who waits for the worker to have read an object's file, by the request's number.
+let o_o_promise__by_id = new Map();
 let n_id__timeout = 0;
 let b_exporting = false;
 
@@ -134,6 +137,16 @@ let f_o_post = function(s_type, b_draft){
         },
         a_o_transfer: o_added.a_o_transfer
     };
+};
+
+// Gives the worker a 3D object's file, or null for none. Resolves to what it read:
+// { a_n_tri, a_n_min, a_n_max }, the triangles and the box around them.
+let f_o_object = function(a_n_u8, s_name__file){
+    return new Promise(function(f_resolve, f_reject){
+        let n_id = n_id__next++;
+        o_o_promise__by_id.set(n_id, { f_resolve, f_reject });
+        f_post({ s_type: 'object', n_id, a_n_u8, s_name__file }, a_n_u8 ? [a_n_u8.buffer] : []);
+    });
 };
 
 let f_request_build = function(b_draft){
@@ -213,6 +226,12 @@ o_worker.onmessage = function(o_event){
         setTimeout(function(){ URL.revokeObjectURL(el_link.href); }, 60000);
         f_set_status(`Saved ${o_data.s_name}: ${f_s_triangle(o_data.n_cnt__triangle)} triangles, ${(o_data.o_blob.size / 1e6).toFixed(1)} MB, ${(o_data.n_ms / 1000).toFixed(1)} s`);
         f_set_export_busy(false);
+    } else if(o_data.s_type === 'object_loaded'){
+        o_o_promise__by_id.get(o_data.n_id)?.f_resolve(o_data);
+        o_o_promise__by_id.delete(o_data.n_id);
+    } else if(o_data.s_type === 'error' && o_data.s_for === 'object'){
+        o_o_promise__by_id.get(o_data.n_id)?.f_reject(new Error(o_data.s_message));
+        o_o_promise__by_id.delete(o_data.n_id);
     } else if(o_data.s_type === 'error'){
         if(o_data.s_for === 'export'){
             b_exporting = false;
@@ -224,7 +243,7 @@ o_worker.onmessage = function(o_event){
             f_set_status(o_kind.f_s_error ? o_kind.f_s_error(o_data) : o_data.s_message, true);
         }
     }
-    let o_post = o_post__waiting_by_type.export ?? o_post__waiting_by_type.build;
+    let o_post = o_post__waiting_by_type.object ?? o_post__waiting_by_type.export ?? o_post__waiting_by_type.build;
     if(o_post){
         o_post__waiting_by_type[o_post.o_request.s_type] = null;
         f_post(o_post.o_request, o_post.a_o_transfer);
@@ -248,6 +267,8 @@ let el_editor = f_el('el_editor');
 let o_app = {
     el_source: f_el('el_source'),
     el_control: f_el('el_control'),
+    o_viewer,
+    f_o_object,
     o_editor: f_o_editor(el_editor, function(s_text){ o_kind__by_name[o_state.s_kind].f_typed?.(s_text); }, s_declaration),
     f_changed,
     f_touched,
@@ -258,7 +279,7 @@ let o_app = {
     f_when_safe: function(f_action){ o_panel__project.f_when_safe(f_action); },
     f_n_deg__limit: function(){ return o_state.o_view.n_deg__limit; }
 };
-let o_kind__by_name = Object.fromEntries([f_o_kind__sphere, f_o_kind__vase, f_o_kind__egg].map(function(f_o_kind){
+let o_kind__by_name = Object.fromEntries([f_o_kind__sphere, f_o_kind__vase, f_o_kind__egg, f_o_kind__object].map(function(f_o_kind){
     let o_kind = f_o_kind(o_app);
     return [o_kind.s_kind, o_kind];
 }));
@@ -511,11 +532,12 @@ let f_start = async function(){
         f_new_design: function(){
             return f_set_design({ s_kind: o_state.s_kind, s_brand: 'veryos', o_setting: o_kind__by_name[o_state.s_kind].f_o_setting__default() }, null);
         },
-        // Only a sphere keeps a file beside its settings, its texture: a lamp that is no
-        // sphere any more gives it up.
+        // A sphere keeps a file beside its settings, its texture, and an object its
+        // object: a lamp that is of another kind now gives them up.
         f_save_extra: async function(s_name){
-            if(o_state.s_kind === 'sphere'){ return o_kind__by_name.sphere.f_save_extra(s_name); }
-            await fetch(`/api/project/${encodeURIComponent(s_name)}/texture`, { method: 'DELETE' });
+            for(let o_kind of Object.values(o_kind__by_name)){
+                if(o_kind.s_kind === o_state.s_kind){ await o_kind.f_save_extra?.(s_name); } else { await o_kind.f_drop_extra?.(s_name); }
+            }
         },
         f_b_extra_dirty: function(){ return o_kind__by_name[o_state.s_kind].f_b_extra_dirty?.() ?? false; },
         f_o_row: function(o_project){

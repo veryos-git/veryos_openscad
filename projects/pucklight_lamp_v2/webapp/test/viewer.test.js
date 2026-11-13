@@ -9,7 +9,10 @@ import { f_o_image__from_png, f_o_image__working, f_o_tile } from '../heightmap.
 import { vase_mesh, run_script } from '../vase.module.js';
 import { examples as o_s_example } from '../vase_example.module.js';
 import { sphere_mesh, displace } from '../sphere.module.js';
-import { f_a_n_col__sphere, f_a_n_col__vase, f_a_n_col__egg } from '../color.module.js';
+import { f_a_n_col__sphere, f_a_n_col__vase, f_a_n_col__egg, f_a_n_col__object } from '../color.module.js';
+import { f_o_mesh__object, f_o_param__default as f_o_param__object } from '../object.module.js';
+import { f_a_n_mat4__of_place, f_a_n_tri__moved, f_a_n_px, f_o_gizmo } from '../gizmo.module.js';
+import { f_a_n_tri__ball } from './shape.js';
 
 let n_scl_x = 360, n_scl_y = 460;
 
@@ -30,10 +33,12 @@ Deno.test({ name: 'the viewer draws the lamp, of every kind and in every look', 
     assert(!/__/.test(s_vertex + s_fragment), 'a shader name has two underscores in a row');
     assertEquals(Object.keys(o_look__by_name), ['day', 'lit', 'overhang', 'edges', 'vertices', 'xray']);
 
+    let o_f__by_event = {};
     let o_viewer = f_o_viewer({
         clientWidth: n_scl_x, clientHeight: n_scl_y, width: 0, height: 0,
         getContext: function(){ return o_shim.o_gl; },
-        addEventListener: function(){},
+        addEventListener: function(s_event, f){ o_f__by_event[s_event] = f; },
+        setPointerCapture: function(){},
         getBoundingClientRect: function(){ return { left: 0, top: 0, right: n_scl_x, bottom: n_scl_y, width: n_scl_x, height: n_scl_y }; }
     });
     let o_lamp = JSON.parse(await Deno.readTextFile(f_s_path('part/lamp.json')));
@@ -279,4 +284,100 @@ Deno.test({ name: 'the viewer draws the lamp, of every kind and in every look', 
     o_viewer.f_set_color(new Uint8Array(a_n_col.length).fill(255));
     let a_n_white = f_a_n_picture({ b_base: false });
     assertEquals(f_n_cnt(a_n_white, f_b_yellow) + f_n_cnt(a_n_white, f_b_blue__sphere), 0, 'the new colours did not arrive');
+
+    /* ---- An object: its lampshade, the object itself while it is placed, the gizmo over both ---- */
+
+    let a_n_tri = f_a_n_tri__ball(30, [0, 0, 0], 24);
+    let o_place = { a_n_trn: [0, 0, 60], a_n_rot: [0, 0, 0, 1], n_scl: 1 };
+    let o_object = f_o_mesh__object(f_a_n_tri__moved(a_n_tri, f_a_n_mat4__of_place(o_place, [0, 0, 0])), f_o_param__object(), o_lamp, 1.6, 180);
+    o_viewer.f_set_mesh({ ...o_object, a_n_nor: f_a_n_normal(o_object.a_n_pos, o_object.a_n_idx), a_n_col: f_a_n_col__object(o_object.a_n_wall.length) });
+    o_viewer.f_frame(o_lamp.n_mm__cup_floor_z + 150, 0);
+    o_viewer.f_look_from(-Math.PI / 2, Math.PI / 2);
+    // The lampshade is a warm white, the object as its file has it a cool grey.
+    let f_b_white = (r, g, b, a) => a > 0 && r > 150 && r >= b && r - b < 45;
+    let f_b_ghost = (r, g, b, a) => a > 0 && b > r + 12 && b > 70 && r > 40;
+    let a_n_object = f_a_n_picture({ b_base: false });
+    assert(f_n_cnt(a_n_object, f_b_white) > 0.8 * f_n_cnt(a_n_object, f_b_drawn) && f_n_cnt(a_n_object, f_b_ghost) === 0,
+        `the object's lampshade is not white: ${f_n_cnt(a_n_object, f_b_white)} of ${f_n_cnt(a_n_object, f_b_drawn)}`);
+    // While it is placed: the object as its file has it, where the matrix puts it, and no lampshade.
+    o_viewer.f_set_ghost(a_n_tri);
+    o_viewer.f_set_ghost_place(f_a_n_mat4__of_place(o_place, [0, 0, 0]), true);
+    let a_n_ghost = f_a_n_picture({ b_base: false, b_shade: false });
+    let n_cnt__ghost = f_n_cnt(a_n_ghost, f_b_drawn);
+    assert(f_n_cnt(a_n_ghost, f_b_ghost) > 0.5 * n_cnt__ghost && n_cnt__ghost > 6000 && f_n_cnt(a_n_ghost, f_b_white) === 0,
+        `the object while it is placed: ${f_n_cnt(a_n_ghost, f_b_ghost)} of ${n_cnt__ghost} pixels in its colour, ${f_n_cnt(a_n_ghost, f_b_white)} in the lampshade's`);
+    // Nothing else is drawn now: where its pixels are is where it is.
+    let f_n_x__middle = function(a_n){
+        let n_sum = 0, n_cnt = 0;
+        for(let n_off = 0; n_off < a_n.length; n_off += 4){
+            if(a_n[n_off + 3] > 0){ n_sum += (n_off / 4) % n_scl_x; n_cnt++; }
+        }
+        return n_sum / n_cnt;
+    };
+    assert(Math.abs(f_n_x__middle(a_n_ghost) - n_scl_x / 2) < 2, `the object is not in the middle: ${f_n_x__middle(a_n_ghost)}`);
+    // Twice as large and 20 to the right.
+    o_viewer.f_set_ghost_place(f_a_n_mat4__of_place({ ...o_place, a_n_trn: [20, 0, 60], n_scl: 2 }, [0, 0, 0]), true);
+    let a_n_ghost__moved = f_a_n_picture({ b_base: false, b_shade: false });
+    assert(Math.abs(f_n_cnt(a_n_ghost__moved, f_b_drawn) / n_cnt__ghost - 4) < 0.25, `twice as large is not four times the pixels: ${f_n_cnt(a_n_ghost__moved, f_b_drawn)} after ${n_cnt__ghost}`);
+    assert(f_n_x__middle(a_n_ghost__moved) > n_scl_x / 2 + 15, `the object did not move to the right: ${f_n_x__middle(a_n_ghost__moved)}`);
+    // With the lampshade again, and the object hidden.
+    o_viewer.f_set_ghost_place(f_a_n_mat4__of_place(o_place, [0, 0, 0]), false);
+    assertEquals(f_n_cnt(f_a_n_picture({ b_base: false, b_shade: true }), f_b_ghost), 0, 'the hidden object is drawn');
+
+    // The gizmo: over the lamp, its middle where the object stands, its arrows in the axes' colours.
+    let n_cnt__done = 0;
+    let o_gizmo = f_o_gizmo({
+        f_o_place: function(){ return o_place; },
+        f_set_place: function(o){ o_place = o; },
+        f_done: function(){ n_cnt__done++; }
+    });
+    let o_camera__seen = null;
+    o_viewer.f_set_tool({ ...o_gizmo, f_a_o_shape: function(o_camera){
+        o_camera__seen = o_camera;
+        return o_gizmo.f_a_o_shape(o_camera);
+    } });
+    let a_n_tool = f_a_n_picture({ b_base: false });
+    let a_n_px = f_a_n_px(o_camera__seen, o_place.a_n_trn);
+    assert(Math.abs(a_n_px[0] - n_scl_x / 2) < 1 && a_n_px[1] > 0 && a_n_px[1] < n_scl_y, `the object's middle on screen: ${a_n_px}`);
+    // The colour [right, down] of the object's middle, as the gizmo's own: 0 to 1.
+    let f_check_at = function(a_n, n_dx, n_dy, a_n_col, s_what){
+        let n_off = (Math.round(a_n_px[1] + n_dy) * n_scl_x + Math.round(a_n_px[0] + n_dx)) * 4;
+        let a_n_seen = [...a_n.subarray(n_off, n_off + 4)];
+        assert(a_n_seen[3] === 255 && a_n_col.every(function(n_val, n_idx){ return Math.abs(a_n_seen[n_idx] - n_val * 255) <= 1; }), `${s_what}: ${a_n_seen} is not ${a_n_col}`);
+    };
+    // The middle, the arrows' heads along x and z, the ring that resizes, the ring around y.
+    f_check_at(a_n_tool, 0, 0, [1, 0.55, 0.1], 'the middle');
+    f_check_at(a_n_tool, 100, 0, [0.96, 0.33, 0.3], 'the arrow along x');
+    f_check_at(a_n_tool, 0, -100, [0.36, 0.58, 1], 'the arrow along z');
+    f_check_at(a_n_tool, -122, 0, [1, 0.55, 0.1], 'the ring that resizes');
+    f_check_at(a_n_tool, 74 * Math.SQRT1_2, 74 * Math.SQRT1_2, [0.42, 0.85, 0.4], 'the ring around y');
+    // The pointer over a handle lights it up; down on it, it moves the object and not the eye.
+    let n_cnt__turned = 0;
+    o_viewer.f_set_on_camera(function(){ n_cnt__turned++; });
+    n_cnt__turned = 0;
+    let f_o_evt = function(n_dx, n_dy, o_more = {}){ return { pointerId: 1, button: 0, shiftKey: false, clientX: a_n_px[0] + n_dx, clientY: a_n_px[1] + n_dy, ...o_more }; };
+    o_f__by_event.pointermove(f_o_evt(100, 0));
+    f_check_at(f_a_n_picture({ b_base: false }), 100, 0, [1, 1, 1], 'the arrow under the pointer');
+    o_f__by_event.pointerdown(f_o_evt(100, 0));
+    o_f__by_event.pointermove(f_o_evt(140, 0));
+    o_f__by_event.pointerup(f_o_evt(140, 0));
+    let n_mm_per_px = Math.hypot(...o_camera__seen.a_n_eye.map(function(n_val, n_idx){ return n_val - [0, 0, 60][n_idx]; })) * 2 * o_camera__seen.n_tan / n_scl_y;
+    assert(Math.abs(o_place.a_n_trn[0] - 40 * n_mm_per_px) < 1e-3 && o_place.a_n_trn[1] === 0 && o_place.a_n_trn[2] === 60, `the object after the drag: ${o_place.a_n_trn}`);
+    assertEquals([n_cnt__done, n_cnt__turned], [1, 0]);
+    // The gizmo went with it.
+    a_n_px = f_a_n_px(o_camera__seen, o_place.a_n_trn);
+    f_check_at(f_a_n_picture({ b_base: false }), 0, 0, [1, 0.55, 0.1], 'the middle after the drag');
+    // Beside the handles the pointer turns the lamp, as without a tool; with shift it never takes a handle.
+    o_f__by_event.pointerdown(f_o_evt(40, 40));
+    o_f__by_event.pointermove(f_o_evt(60, 40));
+    o_f__by_event.pointerup(f_o_evt(60, 40));
+    o_f__by_event.pointerdown(f_o_evt(100, 0, { shiftKey: true }));
+    o_f__by_event.pointermove(f_o_evt(120, 0, { shiftKey: true }));
+    o_f__by_event.pointerup(f_o_evt(120, 0, { shiftKey: true }));
+    assertEquals([n_cnt__done, n_cnt__turned], [1, 2]);
+    // Without the tool nothing of it is left.
+    o_viewer.f_set_tool(null);
+    o_viewer.f_look_from(-Math.PI / 2, Math.PI / 2);
+    let a_n_bare = f_a_n_picture({ b_base: false });
+    assertEquals(f_n_cnt(a_n_bare, (r, g, b, a) => a > 0 && r === 255 && g === 140 && b === 26), 0, 'the gizmo is still drawn');
 } });

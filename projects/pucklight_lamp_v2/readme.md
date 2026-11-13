@@ -9,7 +9,7 @@ lampshades of the webapp fit too: spheres, vases and eggs.
 
 ## Webapp
 
-`webapp/`: makes lampshades for this lamp and keeps them as named lamps. It unifies the three older lampshade apps, which are deprecated and archived. Everything about it: `webapp/readme.md`.
+`webapp/`: makes lampshades for this lamp and keeps them as named lamps. It unifies the three older lampshade apps, which are deprecated and archived. It also makes a lampshade of any loaded 3D object. Everything about it: `webapp/readme.md`.
 
 | | |
 |---|---|
@@ -17,6 +17,7 @@ lampshades of the webapp fit too: spheres, vases and eggs.
 | Sphere | a shader or a picture as relief on a sphere: planets, lithophanes; was `../01_published_or_archived/pucklight_sphere/mathematical` |
 | Vase | a script places each layer's corners, for vase mode; was `../01_published_or_archived/pucklight_lamps`, before `pucklight_vase` |
 | Egg | a tile of scales as relief on an egg; was `../01_published_or_archived/rose_pink_translucent_lamp/dragon_egg_app` |
+| Object | a loaded 3D object, STL or OBJ, placed with a gizmo, hollowed and joined to the neck: no code |
 | Base | this generator's top part and screwin, VeryOS's or TraceTrove's, in `webapp/part/` |
 
 ![the webapp](webapp/preview.png)

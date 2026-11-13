@@ -90,6 +90,32 @@ Deno.test({ name: 'lamps can be created, read, changed, renamed and deleted', sa
             assertEquals(f_a_s_file('Planet'), ['project.json']);
             await f_o_call('PUT', '/api/project/Planet/texture', a_n_u8);
         });
+        await t.step('a 3D object beside a lamp', async function(){
+            let o_object = { s_kind: 'object', s_brand: 'veryos', o_setting: { n_mm__wall: 1.2, s_file: 'cat.stl', b_object: true } };
+            assertEquals(await f_o_call('POST', '/api/project/Cat', o_object), { n_status: 201, v: { s_name: 'Cat', ...o_object } });
+            // Larger than a lamp's settings may be.
+            let a_n_u8 = new Uint8Array(3e6).map(function(n_val, n_idx){ return n_idx % 251; });
+            assertEquals((await f_o_call('GET', '/api/project/Cat/object')).n_status, 404);
+            assertEquals((await f_o_call('PUT', '/api/project/Cat/object', a_n_u8)).n_status, 200);
+            assertEquals(Deno.statSync(`${s_dir}/Cat/object.stl`).size, a_n_u8.length);
+            let o_response = await fetch(`${s_url}/api/project/Cat/object`);
+            assertEquals([o_response.status, o_response.headers.get('content-type')], [200, 'model/stl']);
+            let a_n_u8__read = new Uint8Array(await o_response.arrayBuffer());
+            assert(a_n_u8__read.length === a_n_u8.length && a_n_u8__read.every(function(n_val, n_idx){ return n_val === a_n_u8[n_idx]; }), 'the object came back as another');
+            assertEquals((await f_o_call('PUT', '/api/project/Nothing/object', a_n_u8)).n_status, 404);
+            // It lies beside a texture without touching it.
+            await f_o_call('PUT', '/api/project/Cat/texture', new Uint8Array([1, 2, 3]));
+            assertEquals(f_a_s_file('Cat'), ['object.stl', 'project.json', 'texture.png']);
+            assertEquals((await f_o_call('DELETE', '/api/project/Cat/texture')).n_status, 200);
+            assertEquals(f_a_s_file('Cat'), ['object.stl', 'project.json']);
+            assertEquals((await f_o_call('DELETE', '/api/project/Cat/object')).n_status, 200);
+            assertEquals((await f_o_call('DELETE', '/api/project/Cat/object')).n_status, 200, 'gone already is no mistake');
+            assertEquals(f_a_s_file('Cat'), ['project.json']);
+            // With the lamp goes its object.
+            await f_o_call('PUT', '/api/project/Cat/object', a_n_u8);
+            assertEquals((await f_o_call('DELETE', '/api/project/Cat')).n_status, 204);
+            assertEquals(f_a_s_file(), ['Planet', 'Up and down']);
+        });
         await t.step('rename: the folder moves, with what lies in it', async function(){
             assertEquals(await f_o_call('PATCH', '/api/project/Planet', { s_name: 'Mars 2' }), { n_status: 200, v: { s_name: 'Mars 2', ...o_sphere } });
             assertEquals(f_a_s_file(), ['Mars 2', 'Up and down']);
@@ -118,6 +144,8 @@ Deno.test({ name: 'lamps can be created, read, changed, renamed and deleted', sa
             assertEquals((await f_o_call('POST', '/api/project/Wrong', { ...o_vase, o_setting: { s_code: 'x'.repeat(2e6) } })).n_status, 413, 'too much');
             assertEquals((await f_o_call('POST', '/api/project')).n_status, 405);
             assertEquals((await f_o_call('PATCH', '/api/project/Mars%202/texture', {})).n_status, 405);
+            assertEquals((await f_o_call('PATCH', '/api/project/Mars%202/object', {})).n_status, 405);
+            assertEquals((await f_o_call('GET', '/api/project/Mars%202/other')).n_status, 400, 'nothing else lies beside a lamp');
             // Another website's page in the same browser, and a name that points here.
             assertEquals((await f_o_call('GET', '/api/project', undefined, { origin: 'http://evil.example' })).n_status, 403);
             assertEquals((await f_o_call('DELETE', '/api/project/Mars%202', undefined, { origin: 'http://evil.example' })).n_status, 403);
