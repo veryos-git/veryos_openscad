@@ -51,11 +51,13 @@ let f_a_n_col__egg = function(a_n_wall){
     return a_n_col;
 };
 
-// An object: white, as the filament it glows through best.
+// An object: white, as the filament it glows through best. An object with colours of
+// its own is white where it has none: on the neck and the stem.
+let a_n_col__plain = [247, 242, 230];
 let f_a_n_col__object = function(n_cnt__vertex){
     let a_n_col = new Uint8Array(n_cnt__vertex * 3);
-    for(let n_idx = 0; n_idx < n_cnt__vertex; n_idx++){ a_n_col.set([247, 242, 230], n_idx * 3); }
+    for(let n_idx = 0; n_idx < n_cnt__vertex; n_idx++){ a_n_col.set(a_n_col__plain, n_idx * 3); }
     return a_n_col;
 };
 
-export { f_a_n_col__of_stop, f_a_n_col__sphere, f_a_n_col__vase, f_a_n_col__egg, f_a_n_col__object };
+export { f_a_n_col__of_stop, f_a_n_col__sphere, f_a_n_col__vase, f_a_n_col__egg, f_a_n_col__object, a_n_col__plain };

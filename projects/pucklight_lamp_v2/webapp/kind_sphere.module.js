@@ -555,6 +555,8 @@ let f_o_kind__sphere = function(o_app){
         f_s_src__thumbnail: function(o_saved, s_name){
             return o_saved.b_texture ? `/api/project/${encodeURIComponent(s_name)}/texture` : null;
         },
+        // Its colours are worth a print file that has them.
+        f_b_color: function(){ return true; },
         // The texture is a file of its own beside the lamp's settings.
         f_load_extra: async function(s_name, o_saved){
             let o_blob = null;

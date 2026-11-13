@@ -17,11 +17,14 @@
 //      wall: two surfaces of the same numbers, so they cannot cross.
 //   5. Both end on a circle on the grid's lowest plane, and are sewn to the neck: the
 //      thread all lampshades of this lamp have.
+//   6. An object with colours gives each point of the lampshade the colour it has at
+//      the crossing nearest to it, through the wall, so the inside has the outside's.
 //
 // Printed standing on its neck, z up, neck on z = 0. a_n_tri is in these coordinates:
 // nine numbers a triangle. o_lamp is part/lamp.json.
 
 import { f_n_radius__neck, f_a_n_normal, f_o_stat__mesh } from './egg.module.js';
+import { a_n_col__plain } from './color.module.js';
 
 let n_tau = Math.PI * 2;
 // The grid starts on the collar's top, where a vase's shape starts too.
@@ -36,6 +39,9 @@ let n_big = 1e6;
 let n_gram_per_mm3 = 0.00124; // PLA
 let n_bit__object = 1;
 let n_bit__stem = 2;
+// What a grid point has in place of a sample's number: none, or the stem is nearer.
+let n_idx__none = -1;
+let n_idx__stem = -2;
 
 let f_o_param__default = function(){
     return { n_mm__wall: 1.2, n_mm__stem: 4 };
@@ -208,13 +214,15 @@ let a_a_n_corner__tet = [[0, 1, 3, 7], [0, 1, 5, 7], [0, 2, 3, 7], [0, 2, 6, 7],
 
 // The surface where the grid's numbers are n_level, as triangles that face the higher
 // numbers, or with b_flip the lower ones. Open only on the grid's lowest plane: the
-// points there are a_n_idx__bottom.
-let f_o_surface = function(a_n_phi, n_level, o_grid, b_flip){
+// points there are a_n_idx__bottom. With the grid points' samples, a_n_idx__sample
+// tells each point of the surface its own.
+let f_o_surface = function(a_n_phi, n_level, o_grid, b_flip, a_n_idx__sample = null){
     let [n_cnt__x, n_cnt__y, n_cnt__z] = o_grid.a_n_cnt;
     let n_h = o_grid.n_h;
     let [n_x__origin, n_y__origin, n_z__origin] = o_grid.a_n_origin;
     let n_cnt__layer = n_cnt__x * n_cnt__y;
     let o_pos = f_o_list(Float32Array, 1 << 16), o_idx = f_o_list(Uint32Array, 1 << 16), o_bottom = f_o_list(Uint32Array, 1 << 10);
+    let o_sample = f_o_list(Int32Array, 1 << 16);
     // The points already made on the cell edges, by the edge's lower corner and its
     // direction: in a layer x, y and across; between two layers the four that rise.
     let a_n_point__low = new Int32Array(n_cnt__layer * 3).fill(-1);
@@ -239,6 +247,11 @@ let f_o_surface = function(a_n_phi, n_level, o_grid, b_flip){
         o_pos.f_add(n_y__origin + (n_ja + n_t * ((n_dir >> 1) & 1)) * n_h);
         o_pos.f_add(n_z__origin + (n_ka + n_t * (n_dir >> 2)) * n_h);
         if(n_ka === 0 && n_dir < 4){ o_bottom.f_add(n_idx); }
+        if(a_n_idx__sample){
+            // The sample of the edge's nearer end, or of the other end if that one has none.
+            let n_idx__near = a_n_idx__sample[a_n_idx__node[n_t < 0.5 ? n_a : n_b]];
+            o_sample.f_add(n_idx__near === n_idx__none ? a_n_idx__sample[a_n_idx__node[n_t < 0.5 ? n_b : n_a]] : n_idx__near);
+        }
         a_n_cache[n_slot] = n_idx;
         return n_idx;
     };
@@ -313,7 +326,8 @@ let f_o_surface = function(a_n_phi, n_level, o_grid, b_flip){
     return {
         a_n_pos: o_pos.a_n.subarray(0, o_pos.n_cnt),
         a_n_idx: o_idx.a_n.subarray(0, o_idx.n_cnt),
-        a_n_idx__bottom: o_bottom.a_n.subarray(0, o_bottom.n_cnt)
+        a_n_idx__bottom: o_bottom.a_n.subarray(0, o_bottom.n_cnt),
+        a_n_idx__sample: o_sample.a_n.subarray(0, o_sample.n_cnt)
     };
 };
 
@@ -328,21 +342,22 @@ let f_o_grid__coarser = function(o_grid){
         n_cnt: a_n_cnt[0] * a_n_cnt[1] * a_n_cnt[2]
     };
 };
-let f_a_n_phi__coarser = function(a_n_phi, o_grid, o_grid__coarse){
-    let a_n = new Float32Array(o_grid__coarse.n_cnt);
+let f_a_n__coarser = function(a_n__fine, o_grid, o_grid__coarse){
+    let a_n = new a_n__fine.constructor(o_grid__coarse.n_cnt);
     let [n_cnt__x, n_cnt__y, n_cnt__z] = o_grid__coarse.a_n_cnt;
     for(let n_k = 0; n_k < n_cnt__z; n_k++){
         for(let n_j = 0; n_j < n_cnt__y; n_j++){
             let n_from = 2 * (n_j * o_grid.a_n_stride[1] + n_k * o_grid.a_n_stride[2]), n_to = n_cnt__x * (n_j + n_cnt__y * n_k);
-            for(let n_i = 0; n_i < n_cnt__x; n_i++){ a_n[n_to + n_i] = a_n_phi[n_from + 2 * n_i]; }
+            for(let n_i = 0; n_i < n_cnt__x; n_i++){ a_n[n_to + n_i] = a_n__fine[n_from + 2 * n_i]; }
         }
     }
     return a_n;
 };
 
 // The lampshade of an object. n_mm__voxel is the grid's step, n_cnt__neck_column the
-// thread's columns.
-let f_o_mesh__object = function(a_n_tri, o_param, o_lamp, n_mm__voxel, n_cnt__neck_column){
+// thread's columns. a_n_col__corner: the object's colours, r, g, b from 0 to 255 for
+// each corner of each triangle, or null; with them the lampshade has a_n_col.
+let f_o_mesh__object = function(a_n_tri, o_param, o_lamp, n_mm__voxel, n_cnt__neck_column, a_n_col__corner = null){
     let n_r = o_lamp.n_mm__neck_d / 2;
     let n_z__ring = o_lamp.n_mm__neck_scl_z + o_lamp.n_mm__thread_depth;
     let n_z__stem = n_mm__base_z + o_param.n_mm__stem;
@@ -412,9 +427,11 @@ let f_o_mesh__object = function(a_n_tri, o_param, o_lamp, n_mm__voxel, n_cnt__ne
     // edge's other side. Outside is above 0, inside below.
     let a_n_phi = new Float32Array(o_grid.n_cnt);
     for(let n_idx = 0; n_idx < o_grid.n_cnt; n_idx++){ a_n_phi[n_idx] = (a_n_flag[n_idx] & n_bit__object) ? -n_big : n_big; }
-    let a_n_idx__sample = new Int32Array(o_grid.n_cnt).fill(-1);
-    let a_n_idx__sample_2 = new Int32Array(o_grid.n_cnt).fill(-1);
+    let a_n_idx__sample = new Int32Array(o_grid.n_cnt).fill(n_idx__none);
+    let a_n_idx__sample_2 = new Int32Array(o_grid.n_cnt).fill(n_idx__none);
     let o_sample = f_o_list(Float32Array, 1 << 16);
+    // The triangle a sample has its colour from.
+    let o_tri__sample = f_o_list(Int32Array, 1 << 14);
     // How far a grid point is from a sample: by its plane where the point lies in
     // front of it, no further to the side than the samples are apart; by the sample
     // itself where it lies far to its side, as beyond an edge.
@@ -524,8 +541,10 @@ let f_o_mesh__object = function(a_n_tri, o_param, o_lamp, n_mm__voxel, n_cnt__ne
                     let n_w__best = n_w + 0.5 * n_h;
                     a_n_dir[0] = 0; a_n_dir[1] = 0; a_n_dir[2] = 0;
                     a_n_dir[n_axis] = n_sign;
+                    let n_tri = -1;
                     if(n_it < n_to && a_n_w[n_it] <= n_w + n_h){
-                        let n_off = (a_n_from[n_it] >> 1) * 9;
+                        n_tri = a_n_from[n_it] >> 1;
+                        let n_off = n_tri * 9;
                         let n_ux = a_n_tri[n_off + 3] - a_n_tri[n_off], n_uy = a_n_tri[n_off + 4] - a_n_tri[n_off + 1], n_uz = a_n_tri[n_off + 5] - a_n_tri[n_off + 2];
                         let n_vx = a_n_tri[n_off + 6] - a_n_tri[n_off], n_vy = a_n_tri[n_off + 7] - a_n_tri[n_off + 1], n_vz = a_n_tri[n_off + 8] - a_n_tri[n_off + 2];
                         let n_nx = n_uy * n_vz - n_uz * n_vy, n_ny = n_uz * n_vx - n_ux * n_vz, n_nz = n_ux * n_vy - n_uy * n_vx;
@@ -541,6 +560,7 @@ let f_o_mesh__object = function(a_n_tri, o_param, o_lamp, n_mm__voxel, n_cnt__ne
                     let n_idx__sample = o_sample.n_cnt / 6;
                     o_sample.f_add(a_n_point[0]); o_sample.f_add(a_n_point[1]); o_sample.f_add(a_n_point[2]);
                     o_sample.f_add(a_n_dir[0]); o_sample.f_add(a_n_dir[1]); o_sample.f_add(a_n_dir[2]);
+                    o_tri__sample.f_add(n_tri);
                     // The edge's two ends, and their neighbours across the line.
                     for(let n_dn = 0; n_dn <= 1; n_dn++){
                         a_n_at[n_axis] = n_w + n_dn * n_h;
@@ -595,16 +615,46 @@ let f_o_mesh__object = function(a_n_tri, o_param, o_lamp, n_mm__voxel, n_cnt__ne
             for(let n_i = 0; n_i < n_cnt__x; n_i++){
                 let n_idx = n_i + n_cnt__x * (n_j + n_cnt__y * n_k);
                 let n_mm = f_n_mm__to_stem(n_r, n_z__stem, Math.hypot(n_x__origin + n_i * n_h, n_y), n_z);
-                if(n_k === 0 || n_mm < a_n_phi[n_idx]){ a_n_phi[n_idx] = n_mm === 0 ? 1e-4 * n_h : n_mm; }
+                if(n_k === 0 || n_mm < a_n_phi[n_idx]){
+                    a_n_phi[n_idx] = n_mm === 0 ? 1e-4 * n_h : n_mm;
+                    a_n_idx__sample[n_idx] = n_idx__stem;
+                }
             }
+        }
+    }
+
+    // For the colours: where the object's surface has a hole, a sample has no triangle.
+    // A grid point with such a sample takes the sample of the nearest grid point that
+    // has one.
+    if(a_n_col__corner){
+        let a_n_idx__bare = [];
+        for(let n_idx = 0; n_idx < o_grid.n_cnt; n_idx++){
+            if(a_n_idx__sample[n_idx] >= 0 && o_tri__sample.a_n[a_n_idx__sample[n_idx]] < 0){ a_n_idx__bare.push(n_idx); }
+        }
+        for(let n_cnt__before = -1; a_n_idx__bare.length !== n_cnt__before;){
+            n_cnt__before = a_n_idx__bare.length;
+            a_n_idx__bare = a_n_idx__bare.filter(function(n_idx){
+                a_n_point[0] = n_idx % n_cnt__x; a_n_point[1] = Math.floor(n_idx / n_cnt__x) % n_cnt__y; a_n_point[2] = Math.floor(n_idx / n_cnt__layer);
+                for(let n_dir = 0; n_dir < 6; n_dir++){
+                    let n_axis = n_dir >> 1, n_step = (n_dir & 1) ? 1 : -1;
+                    if(a_n_point[n_axis] + n_step < 0 || a_n_point[n_axis] + n_step >= o_grid.a_n_cnt[n_axis]){ continue; }
+                    let n_idx__sample = a_n_idx__sample[n_idx + n_step * o_grid.a_n_stride[n_axis]];
+                    if(n_idx__sample >= 0 && o_tri__sample.a_n[n_idx__sample] >= 0){
+                        a_n_idx__sample[n_idx] = n_idx__sample;
+                        return false;
+                    }
+                }
+                return true;
+            });
         }
     }
 
     // 4. The outside, and the inside one wall deeper. The inside is not seen: every
     // second grid point is enough for it, which is a quarter of the triangles.
-    let o_outside = f_o_surface(a_n_phi, 0, o_grid, false);
+    let o_outside = f_o_surface(a_n_phi, 0, o_grid, false, a_n_col__corner && a_n_idx__sample);
     let o_grid__coarse = f_o_grid__coarser(o_grid);
-    let o_inside = f_o_surface(f_a_n_phi__coarser(a_n_phi, o_grid, o_grid__coarse), -n_mm__wall, o_grid__coarse, true);
+    let o_inside = f_o_surface(f_a_n__coarser(a_n_phi, o_grid, o_grid__coarse), -n_mm__wall, o_grid__coarse, true,
+        a_n_col__corner && f_a_n__coarser(a_n_idx__sample, o_grid, o_grid__coarse));
 
     // 5. The neck, as every lampshade's: the thread's rings, a row every 0.1 mm, then
     // the bore's two rings. The two surfaces are sewn to its top rings.
@@ -642,6 +692,35 @@ let f_o_mesh__object = function(a_n_tri, o_param, o_lamp, n_mm__voxel, n_cnt__ne
         a_n_wall[n_cnt__neck + n_it] = b_cavity ? n_mm__wall : n_mm__solid;
     }
     a_n_wall.fill(n_mm__wall, n_cnt__neck + n_cnt__outside);
+
+    // 6. The colours: a point of the lampshade has its sample's, which is the object's
+    // where the sample lies in its triangle. The neck, the stem and what has no
+    // sample are plain.
+    let a_n_col = null;
+    if(a_n_col__corner){
+        a_n_col = new Uint8Array(n_cnt__vertex * 3);
+        for(let n_it = 0; n_it < n_cnt__vertex; n_it++){ a_n_col.set(a_n_col__plain, n_it * 3); }
+        let f_set_col = function(n_idx__vertex, n_idx__sample){
+            let n_tri = n_idx__sample >= 0 ? o_tri__sample.a_n[n_idx__sample] : -1;
+            if(n_tri < 0){ return; }
+            let n_off = n_tri * 9, n_at = n_idx__sample * 6;
+            let a_n = o_sample.a_n;
+            let n_ux = a_n_tri[n_off + 3] - a_n_tri[n_off], n_uy = a_n_tri[n_off + 4] - a_n_tri[n_off + 1], n_uz = a_n_tri[n_off + 5] - a_n_tri[n_off + 2];
+            let n_vx = a_n_tri[n_off + 6] - a_n_tri[n_off], n_vy = a_n_tri[n_off + 7] - a_n_tri[n_off + 1], n_vz = a_n_tri[n_off + 8] - a_n_tri[n_off + 2];
+            let n_dx = a_n[n_at] - a_n_tri[n_off], n_dy = a_n[n_at + 1] - a_n_tri[n_off + 1], n_dz = a_n[n_at + 2] - a_n_tri[n_off + 2];
+            let n_uu = n_ux * n_ux + n_uy * n_uy + n_uz * n_uz, n_uv = n_ux * n_vx + n_uy * n_vy + n_uz * n_vz, n_vv = n_vx * n_vx + n_vy * n_vy + n_vz * n_vz;
+            let n_du = n_dx * n_ux + n_dy * n_uy + n_dz * n_uz, n_dv = n_dx * n_vx + n_dy * n_vy + n_dz * n_vz;
+            let n_det = n_uu * n_vv - n_uv * n_uv;
+            // The shares of the triangle's second and third corner; the first has the rest.
+            let n_b1 = n_det > 0 ? Math.max(0, Math.min(1, (n_vv * n_du - n_uv * n_dv) / n_det)) : 0;
+            let n_b2 = n_det > 0 ? Math.max(0, Math.min(1 - n_b1, (n_uu * n_dv - n_uv * n_du) / n_det)) : 0;
+            for(let n_k = 0; n_k < 3; n_k++){
+                a_n_col[n_idx__vertex * 3 + n_k] = Math.round((1 - n_b1 - n_b2) * a_n_col__corner[n_off + n_k] + n_b1 * a_n_col__corner[n_off + 3 + n_k] + n_b2 * a_n_col__corner[n_off + 6 + n_k]);
+            }
+        };
+        for(let n_it = 0; n_it < n_cnt__outside; n_it++){ f_set_col(n_cnt__neck + n_it, o_outside.a_n_idx__sample[n_it]); }
+        for(let n_it = 0; n_it < n_cnt__inside; n_it++){ f_set_col(n_cnt__neck + n_cnt__outside + n_it, o_inside.a_n_idx__sample[n_it]); }
+    }
 
     // A surface's points on the lowest plane, in order around the axis: a circle.
     let f_a_n_idx__loop = function(o_surface, n_off__vertex, n_r__expected, s_which){
@@ -711,6 +790,8 @@ let f_o_mesh__object = function(a_n_tri, o_param, o_lamp, n_mm__voxel, n_cnt__ne
         a_n_pos,
         a_n_idx,
         a_n_wall,
+        // Each point's colour, r, g, b from 0 to 255, if the object has colours.
+        a_n_col,
         // The thread's points, which no setting moves.
         n_cnt__fixed: (n_cnt__neck_row + 1) * n_cnt__column,
         o_stat: {

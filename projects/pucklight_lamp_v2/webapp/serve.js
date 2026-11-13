@@ -19,7 +19,9 @@ let n_scl__body_max = 2e6;
 // What a lamp can keep beside its settings, by the last part of its address.
 let o_o_file__by_part = {
     texture: { s_file: 'texture.png', s_type: 'image/png', n_scl__max: 64e6 },
-    object: { s_file: 'object.stl', s_type: 'model/stl', n_scl__max: 400e6 }
+    object: { s_file: 'object.stl', s_type: 'model/stl', n_scl__max: 400e6 },
+    // The colours of the object's corners: r, g, b for each corner of each triangle.
+    color: { s_file: 'object_color.bin', s_type: 'application/octet-stream', n_scl__max: 100e6 }
 };
 let o_s_type__by_extension = {
     html: 'text/html; charset=utf-8',
@@ -181,7 +183,7 @@ let f_o_response__api = async function(o_request, s_path__url){
             if(o_request.method !== 'GET'){ throw f_o_error('Use GET.', 405); }
             return f_o_response__json(await f_a_o_project());
         }
-        // What follows is a lamp's name, or its name and /texture or /object. A name has no /.
+        // What follows is a lamp's name, or its name and /texture, /object or /color. A name has no /.
         let s_name = s_path__url.slice('/api/project/'.length);
         let s_part = Object.keys(o_o_file__by_part).find(function(s){ return s_name.endsWith(`/${s}`); });
         if(s_part){ s_name = s_name.slice(0, -s_part.length - 1); }

@@ -1,7 +1,8 @@
 // Copyright (C) Jonas Immanuel Frey - Licensed under GPL
 // The object: a loaded 3D object, an STL or an OBJ, as a lampshade. It is moved,
 // turned and resized with a gizmo in the view; the app joins it to a stem on the neck
-// and hollows it. Nothing here needs writing code.
+// and hollows it. An OBJ's colours become the lampshade's. Nothing here needs
+// writing code.
 
 import { el } from './dom.module.js';
 import { f_el__control, f_el__group, f_el__button } from './control.module.js';
@@ -28,7 +29,7 @@ let a_o_control__shade = [
 let o_control__voxel = { s_key: 'n_mm__voxel', s_label: 'Detail', n_min: 0.3, n_max: 1.5, n_step: 0.05, s_unit: ' mm', n_decimal: 2, s_id__note: 'el_note__voxel' };
 
 let f_o_setting__default = function(){
-    return { ...f_o_param__default(), n_mm__voxel: 0.6, s_file: '', b_object: false, o_place: f_o_place__default() };
+    return { ...f_o_param__default(), n_mm__voxel: 0.6, s_file: '', b_object: false, b_color: false, o_place: f_o_place__default() };
 };
 
 let f_s_triangle = function(n_cnt){
@@ -48,6 +49,8 @@ let f_o_kind__object = function(o_app){
     // The object's triangles as its file has them, and the middle of the box around them.
     let a_n_tri = null;
     let a_n_pivot = [0, 0, 0];
+    // Its colours, r, g, b for each corner of each triangle, or null if it has none.
+    let a_n_col = null;
     // Since the lamp was last saved or opened, and under which name its file is kept.
     let b_object_changed = false;
     let s_name__stored = null;
@@ -66,16 +69,19 @@ let f_o_kind__object = function(o_app){
 
     /* ---- Controls ---- */
 
-    let el_file = el('input', { type: 'file', accept: '.stl,.obj', hidden: true });
+    let el_file = el('input', { type: 'file', accept: '.stl,.obj,.mtl', multiple: true, hidden: true });
     let el_info = el('p', { id: 'el_object_info' });
+    // Why an object that speaks of colours has none here.
+    let el_note__color = el('p', { className: 'row__note', hidden: true });
     let el_tool = el('div', { id: 'el_object_tool', hidden: true });
     let el_source = el('div', { className: 'source source--object', hidden: true }, [
         el('header', { className: 'panel__head' }, [el('h2', { textContent: '3D object' })]),
         el('div', { className: 'source__body' }, [
             f_el__button('Load a 3D object…', function(){ el_file.click(); }, 'action action--main'),
             el_file,
-            el('p', { className: 'row__note', textContent: 'An STL or an OBJ. Or drop the file onto this page.' }),
+            el('p', { className: 'row__note', textContent: 'An STL or an OBJ. An OBJ may have colours: if they are in an .mtl file, choose both. Or drop the files onto this page.' }),
             el_info,
+            el_note__color,
             el_tool
         ])
     ]);
@@ -113,7 +119,7 @@ let f_o_kind__object = function(o_app){
         }
         let o_bound = f_o_bound();
         let a_n_scl = o_bound.a_n_max.map(function(n_max, n_idx){ return n_max - o_bound.a_n_min[n_idx]; });
-        el_info.textContent = `${o_setting.s_file} · ${f_s_triangle(a_n_tri.length / 9)} triangles · ${a_n_scl.map(function(n){ return n.toFixed(0); }).join(' × ')} mm`;
+        el_info.textContent = `${o_setting.s_file} · ${f_s_triangle(a_n_tri.length / 9)} triangles · ${a_n_scl.map(function(n){ return n.toFixed(0); }).join(' × ')} mm${a_n_col ? ' · in its colours' : ''}`;
         if(document.activeElement !== el_size){ el_size.value = Math.max(...a_n_scl).toFixed(1); }
         a_el_trn.forEach(function(el_input, n_idx){
             if(document.activeElement !== el_input){ el_input.value = o_setting.o_place.a_n_trn[n_idx].toFixed(1); }
@@ -198,26 +204,39 @@ let f_o_kind__object = function(o_app){
         }
     });
 
-    // Takes an object's triangles from the worker, or null for none.
+    // Takes an object's triangles and colours from the worker, or null for none.
     let f_take = function(o_loaded){
         a_n_tri = o_loaded.a_n_tri;
+        a_n_col = o_loaded.a_n_col ?? null;
+        el_note__color.textContent = o_loaded.s_note ?? '';
+        el_note__color.hidden = !o_loaded.s_note;
         if(a_n_tri){ a_n_pivot = o_loaded.a_n_min.map(function(n_min, n_idx){ return 0.5 * (n_min + o_loaded.a_n_max[n_idx]); }); }
-        o_app.o_viewer.f_set_ghost(a_n_tri);
+        o_app.o_viewer.f_set_ghost(a_n_tri, a_n_col);
+        o_app.f_render_export();
         if(!a_n_tri){
             o_app.o_viewer.f_set_ghost_place(f_a_n_mat4__of_place(f_o_place__default(), [0, 0, 0]), false);
             o_app.o_viewer.f_set_view({ b_shade: true });
         }
     };
-    let f_load_file = async function(o_file){
+    // The files chosen or dropped: the object's, and with an OBJ its MTL, which has
+    // the colours of its materials.
+    let f_load_file = async function(a_o_file){
+        let o_file__mtl = a_o_file.find(function(o){ return /\.mtl$/i.test(o.name); });
+        let o_file = a_o_file.find(function(o){ return /\.(stl|obj)$/i.test(o.name); }) ?? a_o_file.find(function(o){ return o !== o_file__mtl; });
+        if(!o_file){
+            if(o_file__mtl){ o_app.f_set_status(`${o_file__mtl.name} has an object’s colours alone: choose it together with its .obj.`, true); }
+            return;
+        }
         o_app.f_set_status(`Reading ${o_file.name}…`);
         try{
-            f_take(await o_app.f_o_object(new Uint8Array(await o_file.arrayBuffer()), o_file.name));
+            f_take(await o_app.f_o_object(new Uint8Array(await o_file.arrayBuffer()), o_file.name, { s_text__mtl: o_file__mtl ? await o_file__mtl.text() : null }));
         } catch(o_error){
             o_app.f_set_status(o_error.message, true);
             return;
         }
         o_setting.s_file = o_file.name;
         o_setting.b_object = true;
+        o_setting.b_color = a_n_col !== null;
         b_object_changed = true;
         f_fit();
         n_id__place++;
@@ -227,9 +246,9 @@ let f_o_kind__object = function(o_app){
         o_app.f_changed(true);
     };
     el_file.addEventListener('change', function(){
-        let [o_file] = el_file.files;
+        let a_o_file = [...el_file.files];
         el_file.value = '';
-        if(o_file){ f_load_file(o_file); }
+        f_load_file(a_o_file);
     });
     // A file dropped anywhere on the page, while this kind is on screen.
     document.addEventListener('dragover', function(o_evt){
@@ -238,12 +257,15 @@ let f_o_kind__object = function(o_app){
     document.addEventListener('drop', function(o_evt){
         if(!b_shown){ return; }
         o_evt.preventDefault();
-        let [o_file] = o_evt.dataTransfer?.files ?? [];
-        if(o_file){ f_load_file(o_file); }
+        f_load_file([...(o_evt.dataTransfer?.files ?? [])]);
     });
 
+    // Where a lamp keeps its object, and its object's colours.
     let f_s_url__object = function(s_name){
         return `/api/project/${encodeURIComponent(s_name)}/object`;
+    };
+    let f_s_url__color = function(s_name){
+        return `/api/project/${encodeURIComponent(s_name)}/color`;
     };
 
     return {
@@ -346,15 +368,21 @@ let f_o_kind__object = function(o_app){
             return { a_a_s_row, a_s_note, s_error: '' };
         },
         f_s_summary: function(o_saved){
-            return `Object · ${o_saved.s_file || 'no file yet'}`;
+            return `Object · ${o_saved.s_file || 'no file yet'}${o_saved.b_color ? ' · in colours' : ''}`;
         },
         f_s_src__thumbnail: function(){ return null; },
-        // The object is a file of its own beside the lamp's settings.
+        // An object's colours are worth a print file that has them.
+        f_b_color: function(){ return a_n_col !== null; },
+        // The object is a file of its own beside the lamp's settings, and so are its colours.
         f_load_extra: async function(s_name, o_saved){
             let o_loaded = { a_n_tri: null };
             if(o_saved.b_object){
                 let o_response = await fetch(f_s_url__object(s_name), { cache: 'no-store' });
-                if(o_response.ok){ o_loaded = await o_app.f_o_object(new Uint8Array(await o_response.arrayBuffer()), o_saved.s_file); }
+                let o_response__color = o_response.ok && o_saved.b_color ? await fetch(f_s_url__color(s_name), { cache: 'no-store' }) : null;
+                if(o_response.ok){
+                    o_loaded = await o_app.f_o_object(new Uint8Array(await o_response.arrayBuffer()), o_saved.s_file,
+                        { a_n_col: o_response__color?.ok ? new Uint8Array(await o_response__color.arrayBuffer()) : null });
+                }
             }
             if(!o_loaded.a_n_tri){ await o_app.f_o_object(null, ''); }
             f_take(o_loaded);
@@ -365,11 +393,18 @@ let f_o_kind__object = function(o_app){
         f_save_extra: async function(s_name){
             if(!a_n_tri){
                 await fetch(f_s_url__object(s_name), { method: 'DELETE' });
+                await fetch(f_s_url__color(s_name), { method: 'DELETE' });
             } else if(b_object_changed || s_name__stored !== s_name){
                 let o_response = await fetch(f_s_url__object(s_name), { method: 'PUT', body: f_o_buffer__stl_of_tri(a_n_tri) });
                 if(!o_response.ok){
                     let o_answer = await o_response.json().catch(function(){ return {}; });
                     throw new Error(o_answer.s_message ?? 'The object could not be saved: the app’s server has to be started anew for this kind of lamp.');
+                }
+                let o_response__color = await fetch(f_s_url__color(s_name), a_n_col ? { method: 'PUT', body: a_n_col } : { method: 'DELETE' });
+                // A server started before colours were kept takes their address for a lamp's name.
+                if(a_n_col && !o_response__color.ok){
+                    let o_answer = await o_response__color.json().catch(function(){ return {}; });
+                    throw new Error(o_response__color.status === 400 ? 'The object is saved, its colours are not: stop the app’s server, start it anew with deno task start, and save again.' : (o_answer.s_message ?? 'The object’s colours could not be saved.'));
                 }
             }
             b_object_changed = false;
@@ -378,6 +413,7 @@ let f_o_kind__object = function(o_app){
         // A lamp that is no object any more gives up its file.
         f_drop_extra: async function(s_name){
             await fetch(f_s_url__object(s_name), { method: 'DELETE' });
+            await fetch(f_s_url__color(s_name), { method: 'DELETE' });
         },
         f_reset_extra: async function(){
             f_take(await o_app.f_o_object(null, ''));

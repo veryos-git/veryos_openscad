@@ -13,7 +13,7 @@ import { f_o_blob__stl, f_o_blob__obj, f_o_blob__3mf, f_o_mesh__from_stl, f_n_cr
 import { f_o_param__default as f_o_param__object } from '../object.module.js';
 import { f_a_n_mat4__of_place } from '../gizmo.module.js';
 import { f_o_buffer__stl_of_tri } from '../mesh_file.module.js';
-import { f_a_n_tri__ball } from './shape.js';
+import { f_a_n_tri__ball, f_a_n_tri__box, f_a_n_col__of_tri, f_s_obj__of_tri } from './shape.js';
 
 let n_tau = Math.PI * 2;
 let o_lamp = JSON.parse(Deno.readTextFileSync(f_s_path('part/lamp.json')));
@@ -319,6 +319,48 @@ Deno.test({ name: 'the worker takes an object\'s file and builds its lampshade w
         let n_z__top = 0;
         for(let n_off = 2; n_off < o_mesh.a_n_pos.length; n_off += 3){ n_z__top = Math.max(n_z__top, o_mesh.a_n_pos[n_off]); }
         assertAlmostEquals(n_z__top, 90, 0.1);
+
+        // An OBJ in colours, red to the right of its middle and blue to the left: the
+        // lampshade has them, and so has its OBJ.
+        let a_n_col = f_a_n_col__of_tri(a_n_tri, function(n_x){ return n_x > 5 ? [255, 0, 0] : [0, 0, 255]; });
+        let o_colored = await f_o_answer({ s_type: 'object', a_n_u8: new TextEncoder().encode(f_s_obj__of_tri(a_n_tri, a_n_col)), s_name__file: 'ball.obj' });
+        assertEquals([o_colored.s_type, o_colored.s_note, [...o_colored.a_n_col]], ['object_loaded', '', [...a_n_col]], JSON.stringify(o_colored.s_message));
+        let f_check_red_and_blue = function(a_n_pos, f_a_n_col, s_what){
+            let n_cnt__red = 0, n_cnt__blue = 0;
+            for(let n_idx = 0; n_idx < a_n_pos.length / 3; n_idx++){
+                // Above the stem, and away from where the two colours meet.
+                if(a_n_pos[n_idx * 3 + 2] < 45 || Math.abs(a_n_pos[n_idx * 3]) < 4){ continue; }
+                assertEquals(f_a_n_col(n_idx), a_n_pos[n_idx * 3] > 0 ? [255, 0, 0] : [0, 0, 255], `${s_what} at ${[...a_n_pos.subarray(n_idx * 3, n_idx * 3 + 3)]}`);
+                if(a_n_pos[n_idx * 3] > 0){ n_cnt__red++; } else { n_cnt__blue++; }
+            }
+            assert(n_cnt__red > 1000 && n_cnt__blue > 1000, `${s_what}: ${n_cnt__red} red and ${n_cnt__blue} blue points`);
+        };
+        let o_built__colored = await f_o_answer({ s_type: 'build', o_setting, a_n_mat4: f_a_n_mat4(60, 1), n_mm__voxel: 1.6, n_id__place: 11 });
+        f_check_closed(o_built__colored.a_n_pos, o_built__colored.a_n_idx, 'an object in colours');
+        assertEquals([[...o_built__colored.a_n_pos], [...o_built__colored.a_n_col.subarray(0, 3)]], [[...o_built.a_n_pos], [247, 242, 230]], 'the same lampshade, on a plain neck');
+        f_check_red_and_blue(o_built__colored.a_n_pos, function(n_idx){ return [...o_built__colored.a_n_col.subarray(n_idx * 3, n_idx * 3 + 3)]; }, 'the view');
+        let o_obj = await f_o_answer({ s_type: 'export', s_format: 'obj', s_name__project: 'A ball', o_setting: { ...o_setting, n_mm__voxel: 1.2 }, a_n_mat4: f_a_n_mat4(60, 1) });
+        assertEquals([o_obj.s_type, o_obj.s_name], ['exported', 'a_ball_object.obj'], JSON.stringify(o_obj.s_message));
+        let a_a_n__point = (await o_obj.o_blob.text()).split('\n').filter(function(s_line){ return s_line.startsWith('v '); }).map(function(s_line){ return s_line.split(' ').slice(1).map(Number); });
+        assert(a_a_n__point.every(function(a_n){ return a_n.length === 6; }), 'a point of the OBJ without a colour');
+        f_check_red_and_blue(Float32Array.from(a_a_n__point.flatMap(function(a_n){ return a_n.slice(0, 3); })), function(n_idx){ return a_a_n__point[n_idx].slice(3).map(function(n_val){ return Math.round(n_val * 255); }); }, 'the print file');
+
+        // A lamp's own file has no colours: they come beside it, and count if they are the object's.
+        let a_n_u8__stl = new Uint8Array(f_o_buffer__stl_of_tri(a_n_tri));
+        let o_again = await f_o_answer({ s_type: 'object', a_n_u8: a_n_u8__stl.slice(), s_name__file: 'ball.obj', a_n_col: a_n_col.slice() });
+        assertEquals([...o_again.a_n_col], [...a_n_col]);
+        assertEquals((await f_o_answer({ s_type: 'object', a_n_u8: a_n_u8__stl.slice(), s_name__file: 'ball.obj', a_n_col: a_n_col.slice(9) })).a_n_col, null, 'colours of another object');
+        assertEquals((await f_o_answer({ s_type: 'object', a_n_u8: a_n_u8__stl.slice(), s_name__file: 'ball.obj', a_n_col: null })).a_n_col, null);
+        assertEquals((await f_o_answer({ s_type: 'build', o_setting, a_n_mat4: f_a_n_mat4(60, 1), n_mm__voxel: 1.6, n_id__place: 12 })).a_n_col.every(function(n_val, n_idx){ return n_val === [247, 242, 230][n_idx % 3]; }), true, 'without colours it is plain');
+
+        // An OBJ whose colours are its materials': with its MTL it has them, without it says where they are.
+        let a_n_tri__box = f_a_n_tri__box([-30, -30, 0], [30, 30, 60]);
+        let s_obj__material = 'mtllib box.mtl\n' + f_s_obj__of_tri(a_n_tri__box).replace('f 1 2 3', 'usemtl down\nf 1 2 3').replace('f 7 8 9', 'usemtl rest\nf 7 8 9');
+        let o_material = await f_o_answer({ s_type: 'object', a_n_u8: new TextEncoder().encode(s_obj__material), s_name__file: 'box.obj', s_text__mtl: 'newmtl down\nKd 0 1 0\nnewmtl rest\nKd 1 1 0\n' });
+        assertEquals([[...o_material.a_n_col.subarray(0, 3)], [...o_material.a_n_col.subarray(18, 21)], [...o_material.a_n_col.subarray(-3)], o_material.s_note], [[0, 255, 0], [255, 255, 0], [255, 255, 0], '']);
+        let o_alone = await f_o_answer({ s_type: 'object', a_n_u8: new TextEncoder().encode(s_obj__material), s_name__file: 'box.obj' });
+        assertEquals([o_alone.a_n_col, o_alone.s_note], [null, 'Its colours are in box.mtl: choose both files together to have them.']);
+        await f_o_answer({ s_type: 'object', a_n_u8: a_n_u8__stl.slice(), s_name__file: 'ball.stl' });
 
         // A file that is none is told, and the object before it stays.
         let o_wrong = await f_o_answer({ s_type: 'object', a_n_u8: new TextEncoder().encode('not a 3D object'), s_name__file: 'notes.stl' });

@@ -140,12 +140,15 @@ let f_o_post = function(s_type, b_draft){
 };
 
 // Gives the worker a 3D object's file, or null for none. Resolves to what it read:
-// { a_n_tri, a_n_min, a_n_max }, the triangles and the box around them.
-let f_o_object = function(a_n_u8, s_name__file){
+// { a_n_tri, a_n_col, s_note, a_n_min, a_n_max }: the triangles, their colours if there
+// are any, why not if the file speaks of some, and the box around the triangles.
+// o_more: { s_text__mtl }, the text of an OBJ's MTL, or { a_n_col }, the colours a lamp
+// keeps beside its object.
+let f_o_object = function(a_n_u8, s_name__file, o_more = {}){
     return new Promise(function(f_resolve, f_reject){
         let n_id = n_id__next++;
         o_o_promise__by_id.set(n_id, { f_resolve, f_reject });
-        f_post({ s_type: 'object', n_id, a_n_u8, s_name__file }, a_n_u8 ? [a_n_u8.buffer] : []);
+        f_post({ s_type: 'object', n_id, a_n_u8, s_name__file, ...o_more }, a_n_u8 ? [a_n_u8.buffer] : []);
     });
 };
 
@@ -273,6 +276,8 @@ let o_app = {
     f_changed,
     f_touched,
     f_render_stat,
+    // The print files on offer are others once an object has colours.
+    f_render_export: function(){ f_render_export(); },
     f_set_status,
     // Other colours for the lampshade on screen.
     f_recolored: function(a_n_col){ o_viewer.f_set_color(a_n_col); },
@@ -437,7 +442,7 @@ let f_render_export = function(){
         f_el__export('Download lampshade (STL)', 'stl', 'action action--main'),
         f_el__export('Download lampshade (3MF, smaller file)', '3mf')
     ];
-    if(o_state.s_kind === 'sphere'){ a_el.push(f_el__export('Download lampshade (OBJ, with its colours)', 'obj')); }
+    if(o_kind__by_name[o_state.s_kind].f_b_color?.()){ a_el.push(f_el__export('Download lampshade (OBJ, with its colours)', 'obj')); }
     a_el.push(
         f_el__export('Download whole lamp (3MF, 3 parts)', 'lamp'),
         el('p', { className: 'row__note', textContent: 'The base parts alone, as they are in every lamp of the brand:' }),

@@ -9,7 +9,7 @@ import { f_o_mesh__egg, f_a_n_normal, f_o_shape, f_n_mm__tile_scl_x } from './eg
 import { sphere_mesh, displace, shell, neck_wall, thread_depth } from './sphere.module.js';
 import { run_script, error_line, vase_mesh, steepest_walls } from './vase.module.js';
 import { f_o_mesh__object } from './object.module.js';
-import { f_a_n_tri__from_file, f_o_bound } from './mesh_file.module.js';
+import { f_o_object__from_file, f_o_bound } from './mesh_file.module.js';
 import { f_a_n_tri__moved } from './gizmo.module.js';
 import { f_a_n_col__sphere, f_a_n_col__vase, f_a_n_col__egg, f_a_n_col__object } from './color.module.js';
 import { f_o_blob__stl, f_o_blob__obj, f_o_mesh__from_stl, f_o_blob__3mf } from './export.module.js';
@@ -24,8 +24,10 @@ let o_tile__cached = null;
 let o_sphere__cached = null;
 // The vase on screen, and the script it came from.
 let o_vase__shown = null;
-// The loaded object's triangles, as its file has them.
+// The loaded object's triangles, as its file has them, and its colours if it has any:
+// r, g, b for each corner of each triangle.
 let a_n_tri__object = null;
+let a_n_col__object = null;
 let o_lamp = null;
 
 // The width, the height and the volume of a closed mesh on the bed.
@@ -182,13 +184,14 @@ let f_o_built__egg = async function(o_data, b_export){
 let f_o_built__object = function(o_data, b_export){
     let o_setting = o_data.o_setting;
     let a_n_tri = a_n_tri__object ? f_a_n_tri__moved(a_n_tri__object, o_data.a_n_mat4) : new Float32Array(0);
-    let o_mesh = f_o_mesh__object(a_n_tri, o_setting, o_lamp, b_export ? o_setting.n_mm__voxel : o_data.n_mm__voxel, b_export ? 360 : 180);
+    let o_mesh = f_o_mesh__object(a_n_tri, o_setting, o_lamp, b_export ? o_setting.n_mm__voxel : o_data.n_mm__voxel, b_export ? 360 : 180,
+        a_n_tri__object ? a_n_col__object : null);
     return {
         a_n_pos: o_mesh.a_n_pos,
         a_n_idx: o_mesh.a_n_idx,
         a_n_nor: b_export ? null : f_a_n_normal(o_mesh.a_n_pos, o_mesh.a_n_idx),
         a_n_wall: o_mesh.a_n_wall,
-        a_n_col: f_a_n_col__object(o_mesh.a_n_wall.length),
+        a_n_col: o_mesh.a_n_col ?? f_a_n_col__object(o_mesh.a_n_wall.length),
         n_cnt__fixed: o_mesh.n_cnt__fixed,
         b_single_wall: false,
         // Which place of the object this is the lampshade of: the page's own count.
@@ -197,12 +200,23 @@ let f_o_built__object = function(o_data, b_export){
     };
 };
 
-// Takes a 3D object's file, or null for none, and tells the page its triangles.
+// Takes a 3D object's file, or null for none, and tells the page its triangles and
+// its colours. An OBJ's colours may be in its MTL, s_text__mtl. A lamp's own file has
+// none: the lamp keeps them beside it, a_n_col.
 let f_o_message__object = function(o_data){
-    a_n_tri__object = o_data.a_n_u8 ? f_a_n_tri__from_file(o_data.a_n_u8, o_data.s_name__file) : null;
-    if(!a_n_tri__object){ return { o_message: { s_type: 'object_loaded', n_id: o_data.n_id, a_n_tri: null }, a_o_transfer: [] }; }
-    let a_n_tri = a_n_tri__object.slice();
-    return { o_message: { s_type: 'object_loaded', n_id: o_data.n_id, a_n_tri, ...f_o_bound(a_n_tri) }, a_o_transfer: [a_n_tri.buffer] };
+    if(!o_data.a_n_u8){
+        a_n_tri__object = null;
+        a_n_col__object = null;
+        return { o_message: { s_type: 'object_loaded', n_id: o_data.n_id, a_n_tri: null, a_n_col: null, s_note: '' }, a_o_transfer: [] };
+    }
+    let o_object = f_o_object__from_file(o_data.a_n_u8, o_data.s_name__file, o_data.s_text__mtl ?? null);
+    a_n_tri__object = o_object.a_n_tri;
+    a_n_col__object = o_object.a_n_col ?? (o_data.a_n_col?.length === a_n_tri__object.length ? o_data.a_n_col : null);
+    let a_n_tri = a_n_tri__object.slice(), a_n_col = a_n_col__object ? a_n_col__object.slice() : null;
+    return {
+        o_message: { s_type: 'object_loaded', n_id: o_data.n_id, a_n_tri, a_n_col, s_note: o_object.s_note, ...f_o_bound(a_n_tri) },
+        a_o_transfer: a_n_col ? [a_n_tri.buffer, a_n_col.buffer] : [a_n_tri.buffer]
+    };
 };
 
 let f_o_built = async function(o_data, b_export){

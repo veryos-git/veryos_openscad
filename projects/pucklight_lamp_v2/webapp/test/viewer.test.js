@@ -12,7 +12,7 @@ import { sphere_mesh, displace } from '../sphere.module.js';
 import { f_a_n_col__sphere, f_a_n_col__vase, f_a_n_col__egg, f_a_n_col__object } from '../color.module.js';
 import { f_o_mesh__object, f_o_param__default as f_o_param__object } from '../object.module.js';
 import { f_a_n_mat4__of_place, f_a_n_tri__moved, f_a_n_px, f_o_gizmo } from '../gizmo.module.js';
-import { f_a_n_tri__ball } from './shape.js';
+import { f_a_n_tri__ball, f_a_n_col__of_tri } from './shape.js';
 
 let n_scl_x = 360, n_scl_y = 460;
 
@@ -320,6 +320,26 @@ Deno.test({ name: 'the viewer draws the lamp, of every kind and in every look', 
     let a_n_ghost__moved = f_a_n_picture({ b_base: false, b_shade: false });
     assert(Math.abs(f_n_cnt(a_n_ghost__moved, f_b_drawn) / n_cnt__ghost - 4) < 0.25, `twice as large is not four times the pixels: ${f_n_cnt(a_n_ghost__moved, f_b_drawn)} after ${n_cnt__ghost}`);
     assert(f_n_x__middle(a_n_ghost__moved) > n_scl_x / 2 + 15, `the object did not move to the right: ${f_n_x__middle(a_n_ghost__moved)}`);
+    // An object with colours of its own shows them while it is placed: red to the right, blue to the left.
+    o_viewer.f_set_ghost(a_n_tri, f_a_n_col__of_tri(a_n_tri, function(n_x){ return n_x > 0 ? [255, 40, 40] : [40, 40, 255]; }));
+    o_viewer.f_set_ghost_place(f_a_n_mat4__of_place(o_place, [0, 0, 0]), true);
+    let a_n_ghost__colored = f_a_n_picture({ b_base: false, b_shade: false });
+    let f_n_cnt__half = function(a_n, b_right, f_b){
+        let n_cnt = 0;
+        for(let n_off = 0; n_off < a_n.length; n_off += 4){
+            if(((n_off / 4) % n_scl_x > n_scl_x / 2) === b_right && f_b(a_n[n_off], a_n[n_off + 1], a_n[n_off + 2], a_n[n_off + 3])){ n_cnt++; }
+        }
+        return n_cnt;
+    };
+    let f_b_red = (r, g, b, a) => a > 0 && r > 2 * g && r > 2 * b;
+    let f_b_blue__ghost = (r, g, b, a) => a > 0 && b > 2 * g && b > 2 * r;
+    let a_n_cnt__colored = [f_n_cnt__half(a_n_ghost__colored, true, f_b_red), f_n_cnt__half(a_n_ghost__colored, false, f_b_blue__ghost), f_n_cnt__half(a_n_ghost__colored, false, f_b_red), f_n_cnt__half(a_n_ghost__colored, true, f_b_blue__ghost)];
+    assert(a_n_cnt__colored[0] > 0.4 * n_cnt__ghost && a_n_cnt__colored[1] > 0.4 * n_cnt__ghost && a_n_cnt__colored[2] + a_n_cnt__colored[3] < 0.01 * n_cnt__ghost,
+        `the object in its colours: ${a_n_cnt__colored} pixels red right, blue left, red left, blue right, of ${n_cnt__ghost}`);
+    assertEquals(f_n_cnt(a_n_ghost__colored, f_b_drawn), n_cnt__ghost, 'colours changed its outline');
+    // Another object without colours is grey again.
+    o_viewer.f_set_ghost(a_n_tri);
+    assert(f_n_cnt(f_a_n_picture({ b_base: false, b_shade: false }), f_b_ghost) > 0.5 * n_cnt__ghost, 'the colours of the object before stayed');
     // With the lampshade again, and the object hidden.
     o_viewer.f_set_ghost_place(f_a_n_mat4__of_place(o_place, [0, 0, 0]), false);
     assertEquals(f_n_cnt(f_a_n_picture({ b_base: false, b_shade: true }), f_b_ghost), 0, 'the hidden object is drawn');

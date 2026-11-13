@@ -1,12 +1,14 @@
 // Copyright (C) Jonas Immanuel Frey - Licensed under GPL
 // The object: the lampshade of any triangles is closed and right way out, as thick as
-// asked, on the neck every lampshade has; and files of triangles are read.
+// asked, on the neck every lampshade has, in the object's colours if it has any; and
+// files of triangles are read, an OBJ with its colours.
 
 import { assert, assertEquals, assertAlmostEquals, assertThrows, f_s_path, f_check_closed } from './check.js';
-import { f_a_n_tri__ball, f_a_n_tri__box, f_a_n_tri__ring, f_a_n_tri__joined } from './shape.js';
+import { f_a_n_tri__ball, f_a_n_tri__box, f_a_n_tri__ring, f_a_n_tri__joined, f_a_n_col__of_tri } from './shape.js';
 import { f_o_mesh__object, f_o_param__default, n_mm__base_z } from '../object.module.js';
 import { f_o_mesh__egg, f_o_param__default as f_o_param__default_of_egg } from '../egg.module.js';
-import { f_a_n_tri__from_file, f_o_bound, f_o_buffer__stl_of_tri } from '../mesh_file.module.js';
+import { f_o_object__from_file, f_o_bound, f_o_buffer__stl_of_tri } from '../mesh_file.module.js';
+import { f_o_blob__obj } from '../export.module.js';
 
 let o_lamp = JSON.parse(Deno.readTextFileSync(f_s_path('part/lamp.json')));
 let o_param = f_o_param__default();
@@ -177,11 +179,80 @@ Deno.test('a very large object gets a coarser grid than asked for', function(){
     assert(f_o_mesh__object(a_n_tri__ball, o_param, o_lamp, 0.8, 180).o_stat.n_mm__voxel_min < 0.4);
 });
 
-Deno.test('files of triangles are read: STL as numbers and as text, OBJ; and written as STL', function(){
+Deno.test('an object\'s colours are its lampshade\'s, through the wall', function(){
+    let f_a_n_col__at = function(o_mesh, n_idx){ return [...o_mesh.a_n_col.subarray(n_idx * 3, n_idx * 3 + 3)]; };
+    // A box on the stem, each of its six sides in a colour of its own: two triangles a side.
+    let a_a_n_col__side = [[0, 255, 255], [255, 0, 255], [255, 255, 0], [0, 0, 255], [0, 255, 0], [255, 0, 0]];
+    let a_n_tri = f_a_n_tri__box([-30, -30, 8], [30, 30, 68]);
+    let a_n_col__corner = f_a_n_col__of_tri(a_n_tri, function(n_x, n_y, n_z, n_tri){ return a_a_n_col__side[n_tri >> 1]; });
+    for(let n_mm__voxel of [1.6, 0.8]){
+        let o_mesh = f_o_mesh__object(a_n_tri, o_param, o_lamp, n_mm__voxel, 180, a_n_col__corner);
+        f_check_closed(o_mesh.a_n_pos, o_mesh.a_n_idx, 'a box in colours');
+        assertEquals(o_mesh.a_n_col.length, o_mesh.a_n_pos.length);
+        // The same lampshade as without colours.
+        let o_mesh__plain = f_o_mesh__object(a_n_tri, o_param, o_lamp, n_mm__voxel, 180);
+        assertEquals([o_mesh__plain.a_n_col, o_mesh__plain.a_n_pos.length, o_mesh__plain.a_n_idx.length], [null, o_mesh.a_n_pos.length, o_mesh.a_n_idx.length]);
+        let n_cnt__side = 0, n_cnt__inside = 0, n_cnt__stem = 0;
+        for(let n_idx = 0; n_idx < o_mesh.a_n_pos.length / 3; n_idx++){
+            let [n_x, n_y, n_z] = o_mesh.a_n_pos.subarray(n_idx * 3, n_idx * 3 + 3);
+            if(n_idx < n_cnt__neck){
+                assertEquals(f_a_n_col__at(o_mesh, n_idx), [247, 242, 230], 'the neck is plain');
+            } else if(n_z > 20 && n_z < 60 && Math.abs(n_y) < 22 && Math.abs(n_x) > 25){
+                // The sides to the right and to the left, away from their edges: on the outside, and one wall deeper.
+                assertEquals(f_a_n_col__at(o_mesh, n_idx), n_x > 0 ? [255, 0, 0] : [0, 255, 0], `at ${n_x}, ${n_y}, ${n_z}`);
+                if(Math.abs(n_x) > 29.5){ n_cnt__side++; } else { n_cnt__inside++; }
+            } else if(n_z > 66 && Math.abs(n_x) < 22 && Math.abs(n_y) < 22){
+                assertEquals(f_a_n_col__at(o_mesh, n_idx), [255, 0, 255], `on top, at ${n_x}, ${n_y}, ${n_z}`);
+            } else if(n_z < 6.9 && Math.hypot(n_x, n_y) > 33){
+                // The stem is wider than the box, and shows below it: here, where both end on the neck.
+                assertEquals(f_a_n_col__at(o_mesh, n_idx), [247, 242, 230], 'the stem is plain');
+                n_cnt__stem++;
+            }
+        }
+        assert(n_cnt__side > 500 && n_cnt__inside > 100 && n_cnt__stem > 50, `${n_cnt__side} points on the sides, ${n_cnt__inside} inside, ${n_cnt__stem} on the stem`);
+    }
+
+    // A ball that goes from blue on the left to red on the right, and is the greener the higher.
+    let f_a_n_col = function(n_x, n_y, n_z){ return [255 * (n_x + 40) / 80, 255 * (n_z - 10) / 80, 255 * (40 - n_x) / 80]; };
+    let o_ball = f_o_mesh__object(a_n_tri__ball, o_param, o_lamp, 0.8, 180, f_a_n_col__of_tri(a_n_tri__ball, f_a_n_col));
+    let n_off__worst = 0, n_off__worst_inside = 0;
+    for(let n_idx = n_cnt__neck; n_idx < o_ball.a_n_pos.length / 3; n_idx++){
+        let [n_x, n_y, n_z] = o_ball.a_n_pos.subarray(n_idx * 3, n_idx * 3 + 3);
+        // Above where the stem and the ball meet.
+        if(n_z < 30){ continue; }
+        let n_r = Math.hypot(n_x, n_y, n_z - 50);
+        // What the ball has there, on its surface straight outwards.
+        let a_n_col = f_a_n_col(n_x * 40 / n_r, n_y * 40 / n_r, 50 + (n_z - 50) * 40 / n_r);
+        let n_off = Math.max(...a_n_col.map(function(n_val, n_k){ return Math.abs(n_val - o_ball.a_n_col[n_idx * 3 + n_k]); }));
+        if(n_r > 39.5){ n_off__worst = Math.max(n_off__worst, n_off); } else { n_off__worst_inside = Math.max(n_off__worst_inside, n_off); }
+    }
+    // A step of the grid is 2.5 of 255 here.
+    assert(n_off__worst < 5 && n_off__worst_inside < 10, `colours off by up to ${n_off__worst} of 255 outside, ${n_off__worst_inside} inside`);
+
+    // Where its surface has a hole the lampshade is closed over it, in the colour around the hole.
+    let a_n_hole = [32, 24, 50];
+    let a_n_tri__hole = Float32Array.from(Array.from({ length: a_n_tri__ball.length / 9 }, function(v, n_tri){ return a_n_tri__ball.subarray(n_tri * 9, n_tri * 9 + 9); }).filter(function(a_n){
+        return Math.hypot(...a_n_hole.map(function(n_val, n_k){ return (a_n[n_k] + a_n[3 + n_k] + a_n[6 + n_k]) / 3 - n_val; })) > 6;
+    }).flatMap(function(a_n){ return [...a_n]; }));
+    assert(a_n_tri__hole.length < a_n_tri__ball.length - 9 * 10, 'no hole was made');
+    let o_hole = f_o_mesh__object(a_n_tri__hole, o_param, o_lamp, 0.8, 180, f_a_n_col__of_tri(a_n_tri__hole, function(){ return [200, 30, 30]; }));
+    f_check_closed(o_hole.a_n_pos, o_hole.a_n_idx, 'a ball in one colour with a hole');
+    let n_cnt__over_hole = 0;
+    for(let n_idx = n_cnt__neck; n_idx < o_hole.a_n_pos.length / 3; n_idx++){
+        let a_n = o_hole.a_n_pos.subarray(n_idx * 3, n_idx * 3 + 3);
+        if(a_n[2] < 30){ continue; }
+        if(Math.hypot(a_n[0] - a_n_hole[0], a_n[1] - a_n_hole[1], a_n[2] - a_n_hole[2]) < 4){ n_cnt__over_hole++; }
+        assertEquals([...o_hole.a_n_col.subarray(n_idx * 3, n_idx * 3 + 3)], [200, 30, 30], `at ${[...a_n]}`);
+    }
+    assert(n_cnt__over_hole > 50, `only ${n_cnt__over_hole} points over the hole`);
+});
+
+Deno.test('files of triangles are read: STL as numbers and as text, OBJ with its colours; and written as STL', async function(){
     let a_n_tri = f_a_n_tri__box([0, 0, 0], [10, 20, 30]);
     let a_n_u8__stl = new Uint8Array(f_o_buffer__stl_of_tri(a_n_tri));
     assertEquals(a_n_u8__stl.length, 84 + 50 * 12);
-    assertEquals([...f_a_n_tri__from_file(a_n_u8__stl, 'box.stl')], [...a_n_tri]);
+    assertEquals([...f_o_object__from_file(a_n_u8__stl, 'box.stl').a_n_tri], [...a_n_tri]);
+    assertEquals([f_o_object__from_file(a_n_u8__stl, 'box.stl').a_n_col, f_o_object__from_file(a_n_u8__stl, 'box.stl').s_note], [null, '']);
     // The normal of the first triangle, which lies in the box's bottom and faces down.
     assertEquals([0, 4, 8].map(function(n_off){ return new DataView(a_n_u8__stl.buffer).getFloat32(84 + n_off, true); }), [0, 0, -1]);
     assertEquals(f_o_bound(a_n_tri), { a_n_min: [0, 0, 0], a_n_max: [10, 20, 30] });
@@ -190,18 +261,47 @@ Deno.test('files of triangles are read: STL as numbers and as text, OBJ; and wri
         let a_n = a_n_tri.subarray(n_it * 9, n_it * 9 + 9);
         return ` facet normal 0 0 0\n  outer loop\n   vertex ${a_n[0]} ${a_n[1]} ${a_n[2]}\n   vertex ${a_n[3]} ${a_n[4]} ${a_n[5]}\n   vertex ${a_n[6].toExponential()} ${a_n[7]} ${a_n[8]}\n  endloop\n endfacet\n`;
     }).join('') + 'endsolid box\n';
-    assertEquals([...f_a_n_tri__from_file(new TextEncoder().encode(s_text), 'box.stl')], [...a_n_tri]);
+    assertEquals([...f_o_object__from_file(new TextEncoder().encode(s_text), 'box.stl').a_n_tri], [...a_n_tri]);
 
     // Squares become two triangles each; a corner may have more than a point, and may count from the end.
     let s_obj = '# a box\nv 0 0 0\nv 10 0 0\nv 10 20 0\nv 0 20 0\nv 0 0 30\nv 10 0 30\nv 10 20 30\nv 0 20 30\nvn 0 0 1\n'
         + 'f 1 4 3 2\nf 5/1/1 6/2/1 7/3/1 8/4/1\nf 1//1 2//1 6//1 5//1\nf 2 3 7 6\nf 3 4 8 7\nf -5 -8 -4 -1\n';
-    let a_n_tri__obj = f_a_n_tri__from_file(new TextEncoder().encode(s_obj), 'box.obj');
+    let o_object = f_o_object__from_file(new TextEncoder().encode(s_obj), 'box.obj');
+    assertEquals([o_object.a_n_col, o_object.s_note], [null, ''], 'an OBJ without colours');
+    let a_n_tri__obj = o_object.a_n_tri;
     assertEquals(a_n_tri__obj.length, 12 * 9);
     assertEquals(f_o_bound(a_n_tri__obj), { a_n_min: [0, 0, 0], a_n_max: [10, 20, 30] });
     assertEquals([...a_n_tri__obj.subarray(0, 18)], [0, 0, 0, 0, 20, 0, 10, 20, 0, 0, 0, 0, 10, 20, 0, 10, 0, 0]);
     assertEquals([...a_n_tri__obj.subarray(-18)], [0, 20, 0, 0, 0, 0, 0, 0, 30, 0, 20, 0, 0, 0, 30, 0, 20, 30], 'corners counted from the end');
     let o_mesh = f_o_mesh__object(a_n_tri__obj.map(function(n_val, n_idx){ return n_idx % 3 === 2 ? n_val + 8 : n_val * 4 - 20; }), o_param, o_lamp, 1.6, 180);
     f_check_closed(o_mesh.a_n_pos, o_mesh.a_n_idx, 'the lampshade of an OBJ');
+
+    // An OBJ's colours: a point's own, from 0 to 1 or from 0 to 255, or in ZBrush's lines; else its material's.
+    let f_o_read = function(s_obj, s_mtl = null){
+        let o = f_o_object__from_file(new TextEncoder().encode(s_obj), 'model.obj', s_mtl);
+        return { n_cnt: o.a_n_tri.length / 9, a_n_col: o.a_n_col && [...o.a_n_col], s_note: o.s_note };
+    };
+    let s_point = 'v 0 0 0\nv 1 0 0\nv 0 1 0\nv 1 1 0\n';
+    assertEquals(f_o_read('v 0 0 0 1 0 0\nv 1 0 0 0 1.0 0\nv 0 1 0 0 0 0.5\nf 1 2 3\n'), { n_cnt: 1, a_n_col: [255, 0, 0, 0, 255, 0, 0, 0, 128], s_note: '' });
+    assertEquals(f_o_read('v 0 0 0 255 0 0\nv 1 0 0 0 128 0\nv 0 1 0\nf 3 2 1\n').a_n_col, [255, 255, 255, 0, 128, 0, 255, 0, 0], 'a point without a colour is white');
+    assertEquals(f_o_read(s_point + '#MRGB ffff0000ff00ff00\n#MRGB ff0000ff00102030\nf 1 2 3 4\n').a_n_col, [255, 0, 0, 0, 255, 0, 0, 0, 255, 255, 0, 0, 0, 0, 255, 16, 32, 48]);
+    let s_material = 'mtllib two colours.mtl\n' + s_point + 'usemtl red one\nf 1 2 3\nusemtl blue\nf 2 4 3\n';
+    assertEquals(f_o_read(s_material), { n_cnt: 2, a_n_col: null, s_note: 'Its colours are in two colours.mtl: choose both files together to have them.' });
+    assertEquals(f_o_read(s_material, '# two\nnewmtl red one\nKa 0 0 0\nKd 1 0 0\n\nnewmtl blue\r\nKd 0 0.2 1.000\r\n'),
+        { n_cnt: 2, a_n_col: [255, 0, 0, 255, 0, 0, 255, 0, 0, 0, 51, 255, 0, 51, 255, 0, 51, 255], s_note: '' });
+    assertEquals(f_o_read(s_material, 'newmtl blue\nKd 0 0 1\n').a_n_col.slice(0, 9), Array(9).fill(255), 'a material the MTL does not have is white');
+    // A point's own colour goes before its material's.
+    assertEquals(f_o_read('v 0 0 0 0 1 0\nv 1 0 0 0 1 0\nv 0 1 0 1 1 0\nusemtl blue\nf 1 2 3\n', 'newmtl blue\nKd 0 0 1\n').a_n_col, [0, 255, 0, 0, 255, 0, 255, 255, 0]);
+    // One colour alone is none, and neither is a picture.
+    assertEquals(f_o_read('v 0 0 0 0.5 0.5 0.5\nv 1 0 0 0.5 0.5 0.5\nv 0 1 0 0.5 0.5 0.5\nf 1 2 3\n'), { n_cnt: 1, a_n_col: null, s_note: '' });
+    assertEquals(f_o_read(s_point + 'usemtl skin\nf 1 2 3\nf 2 4 3\n', 'newmtl skin\nKd 0.8 0.8 0.8\n'), { n_cnt: 2, a_n_col: null, s_note: '' });
+    let o_picture = f_o_read(s_material, 'newmtl red one\nKd 1 1 1\nmap_Kd skin.png\nnewmtl blue\nKd 1 1 1\n');
+    assert(o_picture.a_n_col === null && /a picture, a texture, which is not read/.test(o_picture.s_note), o_picture.s_note);
+    // The OBJ this app writes of a lampshade is read with the colours it had.
+    let a_n_col__written = Uint8Array.from([255, 0, 0, 0, 128, 255, 1, 2, 3, 247, 242, 230]);
+    let o_blob = f_o_blob__obj(new Float32Array([0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1]), new Uint32Array([0, 1, 2, 0, 2, 3]), a_n_col__written);
+    let o_again = f_o_object__from_file(new Uint8Array(await o_blob.arrayBuffer()), 'lampshade.obj');
+    assertEquals([...o_again.a_n_col], [255, 0, 0, 0, 128, 255, 1, 2, 3, 255, 0, 0, 1, 2, 3, 247, 242, 230]);
 
     for(let [s_what, a_n_u8, o_regex] of [
         ['no model', new TextEncoder().encode('this is no model at all'), /neither an STL nor an OBJ/],
@@ -210,5 +310,5 @@ Deno.test('files of triangles are read: STL as numbers and as text, OBJ; and wri
         ['an STL of text cut short', new TextEncoder().encode('solid x\n facet normal 0 0 1\n  outer loop\n   vertex 0 0 0\n   vertex 1 0 0\n'), /middle of a triangle/],
         ['an STL with a corner that is no number', new TextEncoder().encode('solid x\n facet normal 0 0 1\n  outer loop\n   vertex 0 0 0\n   vertex 1 0 0\n   vertex 0 nan 0\n  endloop\n endfacet\n'), /not a number/],
         ['a file that is empty', new Uint8Array(0), /neither an STL nor an OBJ/]
-    ]){ assertThrows(function(){ f_a_n_tri__from_file(a_n_u8, 'model.stl'); }, o_regex, s_what); }
+    ]){ assertThrows(function(){ f_o_object__from_file(a_n_u8, 'model.stl'); }, o_regex, s_what); }
 });

@@ -69,6 +69,7 @@ uniform float n_z_section;
 uniform int n_look;
 uniform bool b_part;
 uniform vec3 o_part_col;
+uniform bool b_own_col;
 uniform bool b_cut;
 uniform bool b_flat;
 uniform bool b_single_wall;
@@ -128,7 +129,8 @@ void main(){
     vec3 o_albedo = pow(o_col, vec3(2.2));
     vec3 o_linear;
     if(b_part){
-        vec3 o_shaded = f_o_shaded(o_part_col, o_n, o_v, 0.2, 0.22);
+        // A part is of one colour, but for a loaded object that has colours of its own.
+        vec3 o_shaded = f_o_shaded(b_own_col ? o_albedo : o_part_col, o_n, o_v, 0.2, 0.22);
         o_linear = n_look == n_look_lit ? o_shaded * 0.3 : o_shaded;
     } else if(n_look == n_look_lit){
         float n_distance = length(o_pos - o_light_pos);
@@ -291,7 +293,7 @@ let f_o_viewer = function(el_canvas){
         return { o_program, o_uniform };
     };
     let { o_program, o_uniform } = f_o_program(s_vertex, s_fragment, ['o_view_projection', 'o_model', 'n_z_model', 'n_cnt_fixed', 'n_lift', 'n_point', 'o_eye',
-        'o_eye_dir', 'b_ortho', 'o_light_pos', 'o_light_col', 'o_absorb', 'n_light', 'n_rad_limit', 'n_z_section', 'n_look', 'b_part', 'o_part_col', 'b_cut', 'b_flat',
+        'o_eye_dir', 'b_ortho', 'o_light_pos', 'o_light_col', 'o_absorb', 'n_light', 'n_rad_limit', 'n_z_section', 'n_look', 'b_part', 'o_part_col', 'b_own_col', 'b_cut', 'b_flat',
         'b_single_wall']);
     let o_overlay = f_o_program(s_vertex__overlay, s_fragment__overlay, ['o_view_projection', 'n_z_model', 'n_point', 'o_shift', 'o_col', 'b_point']);
     o_overlay.o_vao = o_gl.createVertexArray();
@@ -315,7 +317,7 @@ let f_o_viewer = function(el_canvas){
     let a_o_part = [];
     let a_o_mini = [];
     // A loaded object as its file has it, drawn through the matrix of where it stands.
-    let o_ghost = { o_vao: o_gl.createVertexArray(), o_buffer: o_gl.createBuffer(), n_cnt: 0, a_n_mat4: a_n_mat4__identity, b_shown: false };
+    let o_ghost = { o_vao: o_gl.createVertexArray(), o_buffer: o_gl.createBuffer(), o_buffer__col: o_gl.createBuffer(), n_cnt: 0, b_col: false, a_n_mat4: a_n_mat4__identity, b_shown: false };
     let o_tool = null;
     let n_id__tool = null;
     let f_on_camera = function(){};
@@ -409,10 +411,12 @@ let f_o_viewer = function(el_canvas){
         o_gl.uniform1i(o_uniform.n_cnt_fixed, 0);
         if(o_ghost.b_shown && o_ghost.n_cnt > 0){
             o_gl.uniform3fv(o_uniform.o_part_col, a_n_col__ghost);
+            o_gl.uniform1i(o_uniform.b_own_col, o_ghost.b_col ? 1 : 0);
             o_gl.uniformMatrix4fv(o_uniform.o_model, false, o_ghost.a_n_mat4);
             o_gl.uniform1f(o_uniform.n_z_model, o_shade.n_z);
             o_gl.bindVertexArray(o_ghost.o_vao);
             o_gl.drawArrays(o_gl.TRIANGLES, 0, o_ghost.n_cnt);
+            o_gl.uniform1i(o_uniform.b_own_col, 0);
             o_gl.uniformMatrix4fv(o_uniform.o_model, false, a_n_mat4__identity);
         }
         if(o_view.b_base){
@@ -700,15 +704,25 @@ let f_o_viewer = function(el_canvas){
             f_set_dirty();
         },
         // A loaded object's triangles as they are in its file, nine numbers each, or
-        // null for none. They are drawn through the matrix of where the object stands.
-        f_set_ghost: function(a_n_tri){
+        // null for none. They are drawn through the matrix of where the object stands,
+        // in the colours of their corners if it has any: r, g, b from 0 to 255 each.
+        f_set_ghost: function(a_n_tri, a_n_col = null){
             o_ghost.n_cnt = a_n_tri ? a_n_tri.length / 3 : 0;
+            o_ghost.b_col = Boolean(a_n_tri && a_n_col);
             if(a_n_tri){
                 o_gl.bindVertexArray(o_ghost.o_vao);
                 o_gl.bindBuffer(o_gl.ARRAY_BUFFER, o_ghost.o_buffer);
                 o_gl.bufferData(o_gl.ARRAY_BUFFER, a_n_tri, o_gl.STATIC_DRAW);
                 o_gl.enableVertexAttribArray(0);
                 o_gl.vertexAttribPointer(0, 3, o_gl.FLOAT, false, 0, 0);
+                if(a_n_col){
+                    o_gl.bindBuffer(o_gl.ARRAY_BUFFER, o_ghost.o_buffer__col);
+                    o_gl.bufferData(o_gl.ARRAY_BUFFER, a_n_col, o_gl.STATIC_DRAW);
+                    o_gl.enableVertexAttribArray(3);
+                    o_gl.vertexAttribPointer(3, 3, o_gl.UNSIGNED_BYTE, true, 0, 0);
+                } else {
+                    o_gl.disableVertexAttribArray(3);
+                }
                 o_gl.bindVertexArray(null);
             }
             f_set_dirty();

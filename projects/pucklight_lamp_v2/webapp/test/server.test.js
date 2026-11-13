@@ -103,6 +103,15 @@ Deno.test({ name: 'lamps can be created, read, changed, renamed and deleted', sa
             let a_n_u8__read = new Uint8Array(await o_response.arrayBuffer());
             assert(a_n_u8__read.length === a_n_u8.length && a_n_u8__read.every(function(n_val, n_idx){ return n_val === a_n_u8[n_idx]; }), 'the object came back as another');
             assertEquals((await f_o_call('PUT', '/api/project/Nothing/object', a_n_u8)).n_status, 404);
+            // Its colours, three numbers for each corner of each triangle, in a file of their own.
+            let a_n_u8__color = new Uint8Array([255, 0, 0, 0, 128, 255, 1, 2, 3]);
+            assertEquals((await f_o_call('GET', '/api/project/Cat/color')).n_status, 404);
+            assertEquals((await f_o_call('PUT', '/api/project/Cat/color', a_n_u8__color)).n_status, 200);
+            assertEquals([...Deno.readFileSync(`${s_dir}/Cat/object_color.bin`)], [...a_n_u8__color]);
+            assertEquals([...(await f_o_call('GET', '/api/project/Cat/color')).v], [...a_n_u8__color]);
+            assertEquals(Deno.statSync(`${s_dir}/Cat/object.stl`).size, a_n_u8.length, 'the object is as it was');
+            assertEquals((await f_o_call('DELETE', '/api/project/Cat/color')).n_status, 200);
+            assertEquals((await f_o_call('DELETE', '/api/project/Cat/color')).n_status, 200, 'gone already is no mistake');
             // It lies beside a texture without touching it.
             await f_o_call('PUT', '/api/project/Cat/texture', new Uint8Array([1, 2, 3]));
             assertEquals(f_a_s_file('Cat'), ['object.stl', 'project.json', 'texture.png']);

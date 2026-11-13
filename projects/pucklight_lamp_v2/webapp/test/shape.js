@@ -58,4 +58,26 @@ let f_a_n_tri__joined = function(...a_a_n_tri){
     return a_n;
 };
 
-export { f_a_n_tri__ball, f_a_n_tri__box, f_a_n_tri__ring, f_a_n_tri__joined };
+// Colours for triangles, as a file may hold them: r, g, b from 0 to 255 for each corner,
+// by f_a_n_col(x, y, z, the triangle's number).
+let f_a_n_col__of_tri = function(a_n_tri, f_a_n_col){
+    let a_n_col = new Uint8Array(a_n_tri.length);
+    for(let n_off = 0; n_off < a_n_tri.length; n_off += 3){
+        a_n_col.set(f_a_n_col(a_n_tri[n_off], a_n_tri[n_off + 1], a_n_tri[n_off + 2], Math.floor(n_off / 9)), n_off);
+    }
+    return a_n_col;
+};
+
+// Triangles as the text of an OBJ, each corner a point of its own; with a_n_col each
+// point has its colour behind it, from 0 to 1.
+let f_s_obj__of_tri = function(a_n_tri, a_n_col = null){
+    let a_s = [];
+    for(let n_off = 0; n_off < a_n_tri.length; n_off += 3){
+        a_s.push(`v ${a_n_tri[n_off]} ${a_n_tri[n_off + 1]} ${a_n_tri[n_off + 2]}`
+            + (a_n_col ? ` ${a_n_col[n_off] / 255} ${a_n_col[n_off + 1] / 255} ${a_n_col[n_off + 2] / 255}` : ''));
+    }
+    for(let n_it = 0; n_it < a_n_tri.length / 9; n_it++){ a_s.push(`f ${n_it * 3 + 1} ${n_it * 3 + 2} ${n_it * 3 + 3}`); }
+    return a_s.join('\n') + '\n';
+};
+
+export { f_a_n_tri__ball, f_a_n_tri__box, f_a_n_tri__ring, f_a_n_tri__joined, f_a_n_col__of_tri, f_s_obj__of_tri };
