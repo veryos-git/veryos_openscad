@@ -1,0 +1,15 @@
+{
+  "n_mm__neck_d": 67,
+  "n_mm__neck_scl_z": 4,
+  "n_mm__neck_wall": 1.2,
+  "n_mm__thread_pitch": 2,
+  "n_mm__thread_depth": 0.8,
+  "n_mm__thread_tip": 0.1,
+  "n_mm__sockel_scl_x": 72,
+  "n_mm__sockel_scl_z": 33.0066,
+  "n_mm__cup_scl_z": 4.8,
+  "n_mm__seat_z": 28.2066,
+  "n_mm__puck_top_z": 32.4,
+  "n_mm__clickbase_z": -1.2,
+  "n_mm__sockel_z": 1
+}

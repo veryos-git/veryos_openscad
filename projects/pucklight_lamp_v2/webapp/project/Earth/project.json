@@ -1,0 +1,57 @@
+{
+  "s_kind": "sphere",
+  "s_brand": "veryos",
+  "o_setting": {
+    "s_template": "texture",
+    "s_code": "// The loaded texture as the heightmap. White stands out by the full depth.\n//\n// iChannel0 is the texture; its left and right edges wrap around. This turns the\n// middle of the map to the sphere's front: change 0.25 to turn it.\n\nvoid mainImage(out vec4 fragColor, in vec2 fragCoord) {\n    vec2 uv = fragCoord / iResolution.xy;\n    fragColor = texture(iChannel0, uv - vec2(0.25, 0.0));\n}\n",
+    "n_scale": 12,
+    "n_seed": 3,
+    "n_gamma": 0.45,
+    "n_mm__depth": 3,
+    "n_deg__relief_from": -43,
+    "n_cnt__column": 720,
+    "a_o_stop": [
+      {
+        "n_t": 0,
+        "a_n_col": [
+          28,
+          78,
+          138
+        ]
+      },
+      {
+        "n_t": 0.03,
+        "a_n_col": [
+          28,
+          78,
+          138
+        ]
+      },
+      {
+        "n_t": 0.06,
+        "a_n_col": [
+          63,
+          143,
+          70
+        ]
+      },
+      {
+        "n_t": 0.5,
+        "a_n_col": [
+          201,
+          169,
+          92
+        ]
+      },
+      {
+        "n_t": 0.9,
+        "a_n_col": [
+          255,
+          255,
+          255
+        ]
+      }
+    ],
+    "b_texture": true
+  }
+}

@@ -1,0 +1,9 @@
+{
+  "lock": false,
+  "tasks": {
+    "start": "deno run --allow-net=127.0.0.1 --allow-read=. --allow-write=dragon_egg_app/project dragon_egg_app/serve.js",
+    "test": "deno test --allow-all --no-check dragon_egg_app/test/",
+    "part": "python3 dragon_egg_app/make_asset.py part",
+    "thumbnail": "python3 dragon_egg_app/make_asset.py thumbnail"
+  }
+}

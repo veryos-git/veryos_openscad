@@ -1,0 +1,14 @@
+{
+  "n_mm__neck_d": 67,
+  "n_mm__neck_scl_z": 4,
+  "n_mm__neck_wall": 1.2,
+  "n_mm__thread_pitch": 2,
+  "n_mm__thread_depth": 0.8,
+  "n_mm__thread_tip": 0.1,
+  "n_mm__cup_floor_z": 26.6693,
+  "n_mm__top_z": 31.4693,
+  "n_mm__float_z": 1.5,
+  "n_mm__body_d": 74.7,
+  "n_mm__flange_d": 70.5,
+  "n_mm__puck_top_z": 32.5
+}

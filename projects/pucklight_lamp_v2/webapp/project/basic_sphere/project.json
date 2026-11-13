@@ -1,0 +1,7 @@
+{
+  "s_kind": "vase",
+  "s_brand": "veryos",
+  "o_setting": {
+    "s_code": "\n\nconst n_tau = PI * 2;\nconst n_height = 100;\nconst n_its_layer = 120;\n// A regular polygon: with 3 corners a triangle.\nconst n_its_corner = 120;\n// How far its corners are from the axis, on the bottom and on the\n// top layer. Between them it shrinks linearly.\nconst n_radius_bottom = 45;\nconst n_radius_top = 22;\n// How far it turns one way on its way up, linearly: 1 is a turn.\nconst n_twist = 1 / 6;\n// Layer 1 is this far above the thread's ring, so the straight\n// walls from the round ring to the triangle stand steep enough.\nconst n_height_cone = 12;\n\nfunction f_o_p(n_it_layer_nor, n_it_corner_nor) {\n    let n_amp = mix(n_radius_bottom, n_radius_top, n_it_layer_nor);\n    let n_rad_offset = n_it_layer_nor * n_twist * n_tau;\n\n    let n_z  = n_it_layer_nor * n_height;   // Höhe in mm (0 bis 100)\n    let n_R  = 55;                          // Radius der Kugel\n    let n_zc = 0.5*n_height;              // Höhe der Kugelmitte\n\n\n    n_amp = Math.sqrt(Math.max(0, n_R * n_R - (n_z - n_zc) ** 2));\n\n    return {\n        n_x: sin(n_it_corner_nor * n_tau + n_rad_offset) * n_amp,\n        n_y: cos(n_it_corner_nor * n_tau + n_rad_offset) * n_amp,\n        n_z: o_thread.n_z + n_height_cone + n_it_layer_nor * n_height,\n    };\n}\n\nreturn {\n    n_its_layer, n_its_corner, f_o_p\n};\n"
+  }
+}

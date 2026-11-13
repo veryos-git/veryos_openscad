@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Dragon Egg Lamp</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<main id="el_app">
+    <section id="el_panel__pattern" class="panel" aria-label="Scale pattern">
+        <header class="panel__head">
+            <h1>Dragon egg lamp</h1>
+        </header>
+        <section id="el_project" aria-label="Saved lamps"></section>
+        <header class="panel__head panel__head--pattern">
+            <h2>Scale pattern</h2>
+            <p><kbd>&larr;</kbd> <kbd>&rarr;</kbd> step through them.</p>
+        </header>
+        <div id="el_gallery" role="listbox" aria-label="Scale patterns"></div>
+    </section>
+
+    <section id="el_stage" aria-label="3D preview">
+        <canvas id="el_canvas"></canvas>
+        <p id="el_no_3d" role="alert" hidden></p>
+        <div id="el_view_bar" role="group" aria-label="View">
+            <div class="segment" id="el_mode"></div>
+            <label class="check"><input type="checkbox" id="el_cut"> Cut open</label>
+            <label class="check"><input type="checkbox" id="el_base" checked> Base</label>
+        </div>
+        <div id="el_status" role="status"></div>
+        <p id="el_hint">Drag to orbit &middot; right drag to pan &middot; scroll to zoom &middot; double click to reset</p>
+    </section>
+
+    <section id="el_panel__control" class="panel" aria-label="Settings">
+        <div id="el_control"></div>
+        <div id="el_stat"></div>
+        <div id="el_export"></div>
+    </section>
+</main>
+<script type="module" src="client.module.js"></script>
+</body>
+</html>

@@ -3,9 +3,25 @@
 Lamp with the 62 mm RGBW puck light (KC007): the click holder of
 `../RGBW_pucklight_holder_ringclick` V8 with a cup on top, and a simple
 lampshade that screws into it. The cup has pucklight_sphere's thread, so the
-spheres of `../pucklight_sphere` and the vases of `../pucklight_vase` fit too.
+lampshades of the webapp fit too: spheres, vases and eggs.
 
 ![the lamp](preview.png)
+
+## Webapp
+
+`webapp/`: makes lampshades for this lamp and keeps them as named lamps. It unifies the three older lampshade apps, which are deprecated and archived. Everything about it: `webapp/readme.md`.
+
+| | |
+|---|---|
+| Start | `deno task start` in this folder, then http://127.0.0.1:8768 |
+| Sphere | a shader or a picture as relief on a sphere: planets, lithophanes; was `../01_published_or_archived/pucklight_sphere/mathematical` |
+| Vase | a script places each layer's corners, for vase mode; was `../01_published_or_archived/pucklight_lamps`, before `pucklight_vase` |
+| Egg | a tile of scales as relief on an egg; was `../01_published_or_archived/rose_pink_translucent_lamp/dragon_egg_app` |
+| Base | this generator's top part and screwin, VeryOS's or TraceTrove's, in `webapp/part/` |
+
+![the webapp](webapp/preview.png)
+
+## Generator
 
 ![cut in half](section.png)
 
@@ -17,6 +33,7 @@ The lampshade's neck in the cup, and the window's edge on the lens:
 
 | File | What |
 |---|---|
+| `webapp/`, `deno.json` | the webapp and its tasks, see above |
 | `pucklight_lamp_v2V5.scad` | the generator, standalone, no libraries |
 | `pucklight_lamp_v2V5_TraceTrove.scad` | V5 with the TraceTrove logo and name instead of VeryOS's |
 | `pucklight_lamp_v2V4.scad`, `pucklight_lamp_v2V4_TraceTrove.scad` | V4: without the bottom text |
@@ -192,4 +209,4 @@ The VeryOS logo is engraved 0.6 mm deep (`logo_depth`): 10 wide in the top face 
 
 ## Status
 
-V2 printed (2026-11-12): works, with the lampshade's thread in the cup. V3 is V2 with the fingerprint: sliced, not printed. V4 adds the material text, V5 the bottom text: not sliced, not printed.
+V2 printed (2026-11-12): works, with the lampshade's thread in the cup. V3 is V2 with the fingerprint: sliced, not printed. V4 adds the material text, V5 the bottom text: not sliced, not printed. Webapp (2026-11-13): tested in the browser, its lampshades not sliced, not printed.

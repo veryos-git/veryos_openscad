@@ -1,0 +1,228 @@
+# Pucklight lamp webapp
+
+One app for the lampshades of the pucklight lamp: it does what the three older apps did, each for one kind. A lamp is the base of a brand and a lampshade of one kind; the app keeps lamps under names and writes their print files.
+
+![a lamp of each kind](preview.png)
+
+| Start | |
+|---|---|
+| `deno task start` in `pucklight_lamp_v2/`, then http://127.0.0.1:8768 | everything; reachable from this computer only |
+| `deno task start 8769` | on another port |
+| `deno task test` | the tests, see Checks |
+| `deno task part` | the base parts again, after a change to the `.scad` files; needs `openscad` |
+| `deno task thumbnail` | the scale patterns' pictures again, after adding height maps; needs Python with numpy and Pillow |
+
+Needs [Deno](https://deno.com) and a browser with WebGL2. The editor comes from the internet; without it a plain text box replaces it.
+
+## Kinds of lampshade
+
+| Kind | Made from | Is | Prints as | Was |
+|---|---|---|---|---|
+| Sphere | a shader, as in Shadertoy, or a loaded picture: a heightmap | relief on the outside of a Ø100 sphere, smooth inside: planets, lithophanes, patterns | walls, thick where it stands out | `pucklight_sphere/mathematical` |
+| Vase | a script that places the corners of each layer | any shape above the thread | one wall, in a slicer's vase mode | `pucklight_lamps`, before `pucklight_vase` |
+| Egg | a seamless tile of scales, sliders | relief on an egg, the brand's logo engraved if wanted: a dragon egg | walls, or one wall in vase mode | `rose_pink_translucent_lamp/dragon_egg_app` |
+
+- The older apps are in `../../01_published_or_archived/`, deprecated. Their saved projects are here in `project/`: 18 spheres, 14 vases.
+- All kinds have one neck: the lampshade's of `../pucklight_lamp_v2V5.scad`, Ø67, 2 mm pitch. They screw into the lamp's cup, and into the sockel of the older lamps.
+
+## Lamps
+
+| | Control | On disk |
+|---|---|---|
+| Create | type a name, Save or Enter | `project/<name>/project.json` |
+| Read | the list; the address `#<name>` opens it again after a reload | |
+| Update | Save, or Ctrl+S, in the editor too; the line under the name says what is unsaved | `project.json`; a sphere's texture in `texture.png` |
+| Update | another name, Save | the folder moves, with what else lies in it |
+| Copy | Save copy | `project/<name> copy/` |
+| Delete | × on its row, asks first | the folder goes |
+| Start over | New: a new lamp of the kind on screen | |
+
+- A lamp holds its kind, its brand and that kind's settings. The view's settings and the kind last used are the browser's.
+- The Lampshade buttons change the open lamp's kind. Each kind's settings stay while the page is open; saved are those of the kind on screen.
+- A name has letters, digits, spaces, `_` and `-`, 64 at most, and is the folder's name.
+- Before unsaved work is replaced, the app asks: Save first, Discard or Cancel. Closing the page asks too.
+- After deleting the open lamp its settings stay on screen: Save brings it back.
+- Saving a lamp as it is writes the same bytes: git stays clean.
+- API: `GET /api/project`; `GET`, `POST`, `PUT`, `PATCH`, `DELETE /api/project/<name>`; `GET`, `PUT`, `DELETE /api/project/<name>/texture`.
+- The server writes to `project/` only, listens on 127.0.0.1 only, and refuses requests from other web pages.
+
+## Base and brand
+
+| Part | From | Prints |
+|---|---|---|
+| Top part | `../pucklight_lamp_v2V5.scad`, `part = "toppart"` | upside down, its top face on the bed |
+| Screwin | same, `part = "screwin"` | standing as used |
+| TraceTrove's | `../pucklight_lamp_v2V5_TraceTrove.scad` | the same |
+
+- Brand: VeryOS or TraceTrove. It chooses the base parts, and the logo an egg has engraved.
+- The parts are in `part/<brand>/`, their measures in `part/lamp.json`: `deno task part` writes both.
+- The view shows the lamp pressed down onto the desk. Released it stands 1.5 mm higher: the stat's height.
+
+## View
+
+| Control | Does |
+|---|---|
+| drag, right drag, wheel, double click | orbit, pan, zoom, back to the start |
+| cube | turns with the lamp; a click on a side looks from there |
+| Daylight | the lampshade in its colours: a sphere's heights, a vase's thread in gold, an egg in rose pink |
+| Lit | light through the wall: thin glows, thick stays dark. An estimate, with Brightness and the puck light's colour |
+| Overhang | faces past the Overhang limit: overhangs orange to red; a single wall that leans in, blue; the thread grey |
+| Edges, Vertices | the mesh's triangles and points on it |
+| X-ray | shows through |
+| Cut open | hides the front half |
+| slider on the right | section: hides what is above its height of the lampshade, from 0.0 to 1.0 |
+| Base | shows the top part and the screwin |
+| ▼ | hides the small views: front, top, left |
+
+- Sphere and vase are drawn with one normal per triangle, as exported. An egg is drawn smooth.
+- Through a cut a shell shows its cut wall in one colour; a single wall shows its inside, darker.
+
+## Print files
+
+| Button | File |
+|---|---|
+| Download lampshade (STL) | `<name>_<kind>.stl` |
+| Download lampshade (3MF) | the same mesh, a smaller file |
+| Download lampshade (OBJ) | a sphere with its colours per point: `v x y z r g b` |
+| Download whole lamp (3MF) | lampshade, top part upside down and screwin, side by side as they print |
+| toppart, screwin | the brand's base parts alone |
+
+- A sphere and a vase are exported as shown, a vase also where its script uses `Math.random()`. An egg is built anew at its Mesh detail.
+
+| Lampshade | Slicer setting | Why | Printed |
+|---|---|---|---|
+| Sphere, egg | walls enough to fill the relief: (wall + relief) / line width; no supports | sparse infill inside a relief shows as a shadow when lit | hypothesis, from the egg's app |
+| Vase, egg in vase mode | spiral vase, **bottom layers 0**, outer wall line 0.6 mm, brim 5 mm | a floor closes the neck: no light | hypothesis, from the vase's app |
+| all | 0.2 mm layers, white or a light filament | it glows | the `.scad` file's lampshade, 2026-11-12 |
+
+## Sphere
+
+| Control | Does |
+|---|---|
+| Template | puts a starting shader into the editor: `voronoi`, `texture`, `lithophane` |
+| Texture | Load: PNG, JPEG, WebP, up to 4096 wide, as `iChannel0`; not TIFF |
+| Scale, Seed | `iScale`, `iSeed`; off if the shader does not read them |
+| Gamma | height = brightness ^ gamma, after the shader |
+| Depth | how far 1.0 stands out, in mm |
+| From latitude | where the relief starts: -19.7 by default, -43 for a planet |
+| Columns | the mesh's resolution: 180 to 2048 |
+| Colours | height to colour, for the view and the `.obj`; a click on a stop opens its picker |
+
+| Shader name | Is |
+|---|---|
+| `mainImage(out vec4 fragColor, in vec2 fragCoord)` | as in Shadertoy, without buffers and `iChannel1` to `3` |
+| `fragCoord / iResolution.xy` | longitude and latitude, 0 to 1; y = 1 at the top |
+| `iChannel0` | the texture; its top is the sphere's top, it repeats from left to right |
+| `sphereDir(uv)` | the point on the unit sphere: no seam, no squeezed cells at the top |
+| `iTime`, `iFrame`, `iMouse` | always 0 |
+| Map | 2048 x 1024, 8 bit, brightness = 0.299 r + 0.587 g + 0.114 b |
+
+- Moves: the outside from From latitude to 80 degrees, fading in and out over 15. The thread, the neck, the inside and the poles stay.
+- A mistake shows in the status and the editor with its line; the last good shader stays.
+- A texture on an unedited template that does not read `iChannel0` switches to the `texture` template.
+- Overhang by planet and file sizes by columns: `../../01_published_or_archived/pucklight_sphere/mathematical/readme.md`.
+
+## Vase
+
+The editor holds the body of a function: it gets `o_thread`, sees `noise` and the functions below, and returns `{n_its_layer, n_its_corner, f_o_p}`, with `n_height_dome` for a dome on top.
+
+| Name | Is |
+|---|---|
+| `n_its_layer`, `n_its_corner` | layers above the thread, from 1; corners of each layer, from 3; at most 2 000 000 points |
+| `f_o_p(n_it_layer_nor, n_it_corner_nor, n_it_layer, n_it_corner)` | called for each corner of each layer; returns `{n_x, n_y, n_z}` in mm |
+| `o_thread.n_radius`, `o_thread.n_z` | 33.5 and 6.6: the top ring of what is fixed, as it were layer 0 |
+| `n_height_dome`, `n_overhang_dome` | optional: closes the last layer with a dome this high, which leans up to 60 degrees, or as given |
+| `noise.simplex2`, `simplex3`, `perlin2`, `perlin3`, `noise.seed(n)` | noise from -1 to 1; a script starts on seed 0 |
+| `sin()`, `cos()`, `PI` and the others | `Math`'s, without their `Math.` |
+| `fract`, `mix`, `clamp`, `smoothstep`, `vec2`, `vec3`, `length`, `distance` | as in a shader |
+
+- Fixed, gold in the view: the thread, z 0 to 4.8, and a collar Ø67 up to 6.6. Every `n_z` must be 6.6 or more.
+- The last layer is closed flat, which vase mode leaves open, or with a dome.
+- Example puts an example's script into the editor: `template` explains the script, the others are stlsculpter's vases.
+- A mistake shows in the status and the editor with its line; the last good vase stays.
+- The examples' numbers, the dome and the noise in detail: `../../01_published_or_archived/pucklight_lamps/readme.md`.
+
+## Egg
+
+| Is | How |
+|---|---|
+| Outline | Hügelschäffer's egg; Width without the relief, Height from the bed to the tip |
+| Bottom | a 45 degree cone from the neck up to where the egg overhangs 45 degrees |
+| Top | bends less and less, up to Steepest overhang at the tip |
+| Scales | tiles keep their shape and get smaller towards the ends; the relief shrinks with them and fades out above the cup's rim |
+| Walls | smooth inside; relief only adds to Thinnest wall |
+| Logo | the brand's, on the front, off by default; leaves 0.4 mm of wall |
+| Vase mode | the egg without its inside, for one wall that follows the scales |
+
+- The app warns when more than 2.5 % of the outside overhangs past 60 degrees: Flip, less relief or fewer tiles help.
+- Mesh detail is the print file's cell size; the view builds coarser while a slider moves.
+
+## Scale patterns
+
+| | |
+|---|---|
+| Where | `.gitignored/tile/`: seamless greyscale PNG height maps, 8 or 16 bit; bright is high |
+| Not in git | the 55 patterns here are the texture pack `MG-Tile Scale`; its licence is not recorded here, so it stays out of the public repo |
+| After adding | `deno task thumbnail` writes `thumbnail/<number>.jpg` and `index.json` there |
+| Number | the last number in a file's name |
+| Without them | no patterns to choose from, and an egg is smooth; the rest works |
+
+## Files
+
+| File | What |
+|---|---|
+| `index.html`, `style.css` | layout |
+| `client.module.js` | the page: the lamp on screen, the worker, the view's controls, the print files |
+| `kind_sphere.module.js`, `kind_vase.module.js`, `kind_egg.module.js` | each kind's controls and what it tells the worker |
+| `sphere.module.js`, `vase.module.js`, `egg.module.js` | each kind's mesh |
+| `noise.module.js`, `vase_example.module.js` | a script's noise, public domain by its header; the example scripts |
+| `heightmap.module.js`, `logo.module.js`, `color.module.js` | an egg's 16 bit PNGs; both logos as distance fields; the points' colours |
+| `worker.module.js` | builds the lampshades and writes the print files, away from the page |
+| `viewer.module.js` | the 3D view and its shaders |
+| `editor.module.js`, `control.module.js`, `dom.module.js` | the editor; sliders, lists and tick boxes |
+| `project.module.js` | the saved lamps' panel |
+| `export.module.js` | STL, OBJ, 3MF |
+| `serve.js` | the server: files and the lamps' API |
+| `make_asset.py` | writes `part/` and the patterns' thumbnails |
+| `project/` | the lamps, tracked by git |
+| `test/` | the tests |
+
+## Checks
+
+| Check | Result |
+|---|---|
+| Meshes against the older apps' own files, one-off: 3 spheres with a relief, 8 examples and 14 projects of the vase, 6 eggs | the same points, faces and numbers, to the last bit |
+| `test/lamp.test.js`: the neck against `../pucklight_lamp_v2V5.scad`'s own lampshade, in OpenSCAD | worst point 0.010 mm off |
+| Same: the neck in the cup of both brands' top parts, by rays to the cup's wall | gap 0.29 to 0.31 mm all around, 0.3 by the generator |
+| Same: both logos against their `.scad` files | areas within 0.3 %, same sizes |
+| Same: STL, OBJ, 3MF; the worker with each kind, a script's mistake, a script with `Math.random()`, the whole lamp | hold the mesh; builds each, names the mistake's line; the print file is the vase built last; three parts, the top part upside down on z = 0 |
+| `test/sphere.test.js`, `vase.test.js`, `egg.test.js` | closed, right way out, at the ends of every setting; only what may move moves; the older apps' tests of dome, noise and script functions |
+| `test/server.test.js` | create, read, update, rename, delete, texture; refuses bad names, bad lamps, other sites' `Origin` and `Host`, paths outside its folder |
+| `test/viewer.test.js`, on Mesa's software renderer | every kind in every look, cut, section, small views; both logos upright |
+| The 30 lamps carried over first, in headless Chrome 154 | each opens, builds, counts as saved, and saves with the bytes it had |
+| The 2 vases carried over later, `sphere_desert` and `sphereslayers` | built by `vase.module.js`: closed; not opened in the browser |
+| The app in headless Chrome 154: lamps, texture, colours, editor, mistakes, Ctrl+S, questions, cube, drag, print files of each kind, start on each kind | works, console clean but for the refused names |
+| The print files read back with numpy: STL of each kind, 3MF, OBJ | closed; top part 22.1 cm³ and screwin 13.5 cm³ as the generator's; the top part upside down on z = 0 |
+| Without the internet | a text box replaces the editor, the rest works |
+
+## Against the older apps
+
+| | Before | Now |
+|---|---|---|
+| Sphere, vase: projects | a list with new, save, rename, delete and browser dialogs | the egg app's panel, for all kinds |
+| Egg: lamps | numbered files, unsaved work kept over a reload | named folders; a reload asks first, and opens the lamp of the address |
+| Egg: logo | TraceTrove's | the brand's: VeryOS or TraceTrove |
+| Base | sockel, screwin, click base | `pucklight_lamp_v2`'s top part and screwin |
+| Vase: overhang view | two steps, at 45 and 60 degrees | from the Overhang limit on, as the egg's |
+| Sphere, vase: view | one light | the egg app's lights; Lit, Cut open and Base for all kinds |
+| Egg: view | Daylight, Lit, Overhang | also Edges, Vertices, X-ray, the section, the cube and the small views |
+| Lit | rose pink filament | rose pink for an egg, white for a sphere and a vase |
+| Vase's message and `template` | "below is the sockel" | "below is the lamp's cup" |
+
+## Not tested yet
+
+- Not sliced, not printed from this app. The lampshade of the `.scad` file printed and fits (2026-11-12); these necks are its neck.
+- Only on software WebGL in Chrome: no real GPU, no Firefox.
+- A vase's single wall around the cup's core, Ø62 inside the neck's Ø63 bore: by the generator's numbers, not printed.
+
+Licensed under GPL. The planets' textures in `project/` are NASA, USGS and Hubble OPAL data, see `../../01_published_or_archived/pucklight_sphere/planets/readme.md`.

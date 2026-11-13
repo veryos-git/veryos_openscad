@@ -1,0 +1,49 @@
+{
+  "s_kind": "sphere",
+  "s_brand": "veryos",
+  "o_setting": {
+    "s_template": "lithophane",
+    "s_code": "// The loaded texture as a lithophane. Black stands out by the full depth, so the\n// dark parts are thick and dark when lit, and the light parts glow: as in the photo.\n//\n// iChannel0 is the texture; its left and right edges wrap around. This turns the\n// middle of the map to the sphere's front: change 0.25 to turn it.\n\nvoid mainImage(out vec4 fragColor, in vec2 fragCoord) {\n    vec2 uv = fragCoord / iResolution.xy;\n    fragColor = vec4(1.0 - texture(iChannel0, uv - vec2(0.25, 0.0)).rgb, 1.0);\n}\n",
+    "n_scale": 12,
+    "n_seed": 3,
+    "n_gamma": 1,
+    "n_mm__depth": 3,
+    "n_deg__relief_from": -43,
+    "n_cnt__column": 720,
+    "a_o_stop": [
+      {
+        "n_t": 0,
+        "a_n_col": [
+          244,
+          236,
+          220
+        ]
+      },
+      {
+        "n_t": 0.35,
+        "a_n_col": [
+          220,
+          194,
+          156
+        ]
+      },
+      {
+        "n_t": 0.7,
+        "a_n_col": [
+          173,
+          108,
+          70
+        ]
+      },
+      {
+        "n_t": 1,
+        "a_n_col": [
+          110,
+          58,
+          40
+        ]
+      }
+    ],
+    "b_texture": true
+  }
+}
