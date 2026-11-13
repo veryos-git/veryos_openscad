@@ -43,7 +43,7 @@ Needs [Deno](https://deno.com) and a browser with WebGL2. The editor comes from 
 - A name has letters, digits, spaces, `_` and `-`, 64 at most, and is the folder's name.
 - Before unsaved work is replaced, the app asks: Save first, Discard or Cancel. Closing the page asks too.
 - After deleting the open lamp its settings stay on screen: Save brings it back.
-- Saving a lamp as it is writes the same bytes: git stays clean.
+- Saving a lamp as it is writes the same bytes: git stays clean. One saved by an older version is written once with what was added since.
 - API: `GET /api/project`; `GET`, `POST`, `PUT`, `PATCH`, `DELETE /api/project/<name>`; `GET`, `PUT`, `DELETE /api/project/<name>/texture`, `/object` and `/color`.
 - The server writes to `project/` only, listens on 127.0.0.1 only, and refuses requests from other web pages.
 
@@ -92,7 +92,7 @@ Needs [Deno](https://deno.com) and a browser with WebGL2. The editor comes from 
 
 | Lampshade | Slicer setting | Why | Printed |
 |---|---|---|---|
-| Sphere, egg | walls enough to fill the relief: (wall + relief) / line width; no supports | sparse infill inside a relief shows as a shadow when lit | hypothesis, from the egg's app |
+| Sphere, egg | walls enough to fill the wall at its thickest: thickest / line width, 8 for 3.2 mm; no supports | sparse infill inside a relief shows as a shadow when lit | hypothesis, from the egg's app |
 | Object | walls for Wall / line width, 3 for 1.2 mm; not vase mode; supports inside only if Inside past 45° is large | a shell of two surfaces; its ceilings hang inside | hypothesis, not sliced |
 | Object in colours | the OBJ; Bambu Studio asks at import which filament each colour is | the wall has one colour through, so it glows in it | by Bambu's wiki, not tried |
 | Vase, egg in vase mode | spiral vase, **bottom layers 0**, outer wall line 0.6 mm, brim 5 mm | a floor closes the neck: no light | hypothesis, from the vase's app |
@@ -106,7 +106,8 @@ Needs [Deno](https://deno.com) and a browser with WebGL2. The editor comes from 
 | Texture | Load: PNG, JPEG, WebP, up to 4096 wide, as `iChannel0`; not TIFF |
 | Scale, Seed | `iScale`, `iSeed`; off if the shader does not read them |
 | Gamma | height = brightness ^ gamma, after the shader |
-| Depth | how far 1.0 stands out, in mm |
+| Thinnest wall | where the map is black, and where there is no relief: 0.4 to 2 mm, 0.5 for a new lamp; the inside moves |
+| Thickest wall | where the map is white: 0.8 to 6 mm, 3.2 for a new lamp; white stands out by the difference of the two |
 | From latitude | where the relief starts: -19.7 by default, -43 for a planet |
 | Columns | the mesh's resolution: 180 to 2048 |
 | Colours | height to colour, for the view and the `.obj`; a click on a stop opens its picker |
@@ -121,6 +122,9 @@ Needs [Deno](https://deno.com) and a browser with WebGL2. The editor comes from 
 | Map | 2048 x 1024, 8 bit, brightness = 0.299 r + 0.587 g + 0.114 b |
 
 - Moves: the outside from From latitude to 80 degrees, fading in and out over 15. The thread, the neck, the inside and the poles stay.
+- The thinnest wall is the sphere's wherever it has no relief: below From latitude down to the thread, and at the top. At 0.5 mm that is one line of a 0.4 mm nozzle.
+- A thickest wall that is no thicker than the thinnest leaves the sphere smooth; the page says so.
+- A lamp saved with `n_mm__depth` had a wall of 0.8, and the depth more where white: it opens as 0.8 and 0.8 + depth, the same sphere.
 - A mistake shows in the status and the editor with its line; the last good shader stays.
 - A texture on an unedited template that does not read `iChannel0` switches to the `texture` template.
 - Overhang by planet and file sizes by columns: `../../01_published_or_archived/pucklight_sphere/mathematical/readme.md`.
@@ -267,6 +271,7 @@ The editor holds the body of a function: it gets `o_thread`, sees `noise` and th
 | Same: both logos against their `.scad` files | areas within 0.3 %, same sizes |
 | Same: STL, OBJ, 3MF; the worker with each kind, a script's mistake, a script with `Math.random()`, the whole lamp | hold the mesh; builds each, names the mistake's line; the print file is the vase built last; three parts, the top part upside down on z = 0 |
 | `test/sphere.test.js`, `vase.test.js`, `egg.test.js` | closed, right way out, at the ends of every setting; only what may move moves; the older apps' tests of dome, noise and script functions |
+| `test/sphere.test.js`: walls of 0.4 to 2 mm; lamps saved with a depth of 0.2 to 5 | the inside that much under Ø100, the outside and the thread unmoved, the wall at the thread's root no thinner; the same sphere as before, to the last bit |
 | `test/object.test.js` | ball, box, ring, inside-out, holed, overlapping, loose, clipped, thin, large: closed, right way out; a ball's outside within 0.04 mm at 0.8; the neck the egg's; STL and OBJ read |
 | Same, colours: a box with a colour a side, a ball in a gradient, a ball with a hole; OBJs with colours of points, `#MRGB`, materials, a picture | the sides exact, outside and inside; the gradient within 5 of 255 outside, 10 inside; the hole in the colour around it; read, or told why not |
 | `test/gizmo.test.js` | place as matrix; each handle under the pointer; where a drag of each leads |
@@ -277,7 +282,8 @@ The editor holds the body of a function: it gets `o_thread`, sees `noise` and th
 | The app in headless Chrome 154: lamps, texture, colours, editor, mistakes, Ctrl+S, questions, cube, drag, print files of each kind, start on each kind | works, console clean but for the refused names |
 | Object in headless Chrome 154: load, drop, each handle by mouse, buttons, numbers, save, reopen, copy, other kind, STL, whole lamp, a file that is none | works, console clean |
 | Object in colours, same: an OBJ with its points' colours, one with and without its `.mtl`, one with a picture; save, reopen, copy, the OBJ print file, an object without colours over it, other kind | works, console clean; the print file has the five colours |
-| The 35 lamps in `project/` on 2026-11-13, same | each opens, builds, counts as saved, and saves with the bytes it had |
+| The 35 lamps in `project/` on 2026-11-13, same | each opens, builds, counts as saved; saved again it has the bytes it had, but for the 17 spheres' walls in place of their depth and an object's `b_color` |
+| A sphere's wall, same: a new lamp, both sliders, a thickest below the thinnest, the Moon saved with a depth of 3 | 0.5 and 3.2; more plastic with a thicker wall; smooth and told; opens as 0.8 and 3.8, saved and opened again with 0.5 and 3.2 |
 | The print files read back with numpy: STL of each kind, 3MF, OBJ | closed; top part 22.1 cm³ and screwin 13.5 cm³ as the generator's; the top part upside down on z = 0 |
 | Without the internet | a text box replaces the editor, the rest works |
 
@@ -290,6 +296,7 @@ The editor holds the body of a function: it gets `o_thread`, sees `noise` and th
 | Egg: logo | TraceTrove's | the brand's: VeryOS or TraceTrove |
 | Base | sockel, screwin, click base | `pucklight_lamp_v2`'s top part and screwin |
 | Vase: overhang view | two steps, at 45 and 60 degrees | from the Overhang limit on, as the egg's |
+| Sphere: wall | 0.8, and Depth more where white | Thinnest wall and Thickest wall, 0.5 and 3.2 for a new lamp |
 | Sphere, vase: view | one light | the egg app's lights; Lit, Cut open and Base for all kinds |
 | Egg: view | Daylight, Lit, Overhang | also Edges, Vertices, X-ray, the section, the cube and the small views |
 | Lit | rose pink filament | rose pink for an egg, white for a sphere and a vase |
@@ -301,6 +308,7 @@ The editor holds the body of a function: it gets `o_thread`, sees `noise` and th
 - Only on software WebGL in Chrome: no real GPU, no Firefox.
 - Object: only test shapes of this app's own making, no model from the internet; no touch screen; not sliced.
 - Object in colours: only OBJs the tests wrote, none from Nomad Sculpt, ZBrush, Blender or a slicer; the OBJ print file not opened in a slicer.
+- A sphere's thinnest wall of 0.5 mm: not sliced, not printed; it also carries the sphere above the neck.
 - A vase's single wall around the cup's core, Ø62 inside the neck's Ø63 bore: by the generator's numbers, not printed.
 
 Licensed under GPL. The planets' textures in `project/` are NASA, USGS and Hubble OPAL data, see `../../01_published_or_archived/pucklight_sphere/planets/readme.md`.

@@ -6,7 +6,8 @@
 //
 // As in V3's outer_radius(), only the outside above the fade's bottom and below fade_top
 // moves, away from the sphere's centre. The thread, the neck, the inside and the poles
-// stay. V3's fade_bottom is the default; a planet can reach lower.
+// stay. V3's fade_bottom is the default; a planet can reach lower. V3's shell is the
+// default too; a lithophane can have a thinner one, which moves the inside.
 //
 // Units: mm and degrees.
 
@@ -37,14 +38,10 @@ const logo_w = 2 * (logo_b + logo_arm * sin_d(logo_angle));
 const neck_root_r = neck_d / 2 - thread_depth;
 const neck_bore_r = neck_root_r - neck_wall;
 const sphere_r = sphere_d / 2;
-const inner_r = sphere_r - shell;
 const start_r = Math.max(sphere_r * cos_d(45), neck_d / 2 + 1);
 const sphere_start = -Math.acos(start_r / sphere_r) * deg_per_rad;
 const start_z = neck_height + start_r - neck_root_r;
 const centre_z = start_z - sphere_r * sin_d(sphere_start);
-const inner_start_r = inner_r * cos_d(sphere_start);
-const inner_start_z = centre_z + inner_r * sin_d(sphere_start);
-const bore_top = inner_start_z - (inner_start_r - neck_bore_r);
 const logo_half_lat = deg_per_rad * (front_logo_width * 2 * logo_r / logo_w) / 2 / sphere_r;
 const front_logo_lat = sphere_start + 7 + logo_half_lat;
 const fade_bottom = front_logo_lat + logo_half_lat + 2;
@@ -66,11 +63,15 @@ function neck_radius(z, a) {
     return neck_root_r + Math.max(Math.min(ridge, z), z - neck_height);
 }
 
-// The smooth sphere, neck on the bed. positions has x, y, z per point; indices has
-// three per triangle, counter-clockwise from outside; rest has the positions before
-// any displace(); heights has each point's height from 0 to 1, as last set by
-// displace(); rows lists the outside's rings, which can move.
-function sphere_mesh(columns) {
+// The smooth sphere, neck on the bed, its wall as thick as wall. positions has x, y, z
+// per point; indices has three per triangle, counter-clockwise from outside; rest has
+// the positions before any displace(); heights has each point's height from 0 to 1, as
+// last set by displace(); rows lists the outside's rings, which can move.
+function sphere_mesh(columns, wall = shell) {
+    const inner_r = sphere_r - wall;
+    const inner_start_r = inner_r * cos_d(sphere_start);
+    const inner_start_z = centre_z + inner_r * sin_d(sphere_start);
+    const bore_top = inner_start_z - (inner_start_r - neck_bore_r);
     const thread_rows = Math.ceil((neck_height + thread_depth) / (thread_pitch / 20));
     const row_count = Math.ceil((90 - sphere_start) * columns / 360);
     const sphere_step = (90 - sphere_start) / row_count;
@@ -123,7 +124,7 @@ function sphere_mesh(columns) {
     ring_strip(n_rings - 1, 0);
 
     const rows = sphere_rows.map((lat, i) => ({ring: thread_rows + 1 + i, lat}));
-    return {columns, positions, rest: positions.slice(), indices, heights: new Float32Array(pole_in + 1), rows};
+    return {columns, shell: wall, positions, rest: positions.slice(), indices, heights: new Float32Array(pole_in + 1), rows};
 }
 
 // Moves the outside to height(lat, lon), from 0 to 1, times depth above the smooth

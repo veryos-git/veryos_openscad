@@ -6,6 +6,7 @@
 import { el } from './dom.module.js';
 import { f_el__control, f_el__group, f_el__button } from './control.module.js';
 import { f_a_n_col__of_stop, f_a_n_col__sphere } from './color.module.js';
+import { shell } from './sphere.module.js';
 
 // One pixel per column and per row at the largest Columns, 2048.
 let n_scl_x__map = 2048;
@@ -111,7 +112,8 @@ let a_o_control = [
     { s_key: 'n_scale', s_label: 'Scale', n_min: 2, n_max: 24, n_step: 0.1, s_unit: '', n_decimal: 1 },
     { s_key: 'n_seed', s_label: 'Seed', n_min: 0, n_max: 100, n_step: 1, s_unit: '', n_decimal: 0 },
     { s_key: 'n_gamma', s_label: 'Gamma', n_min: 0.3, n_max: 3, n_step: 0.05, s_unit: '', n_decimal: 2, s_note: 'Height = brightness ^ gamma, after the shader.' },
-    { s_key: 'n_mm__depth', s_label: 'Depth', n_min: 0.2, n_max: 5, n_step: 0.1, s_unit: ' mm', n_decimal: 1, s_note: 'How far white stands out.' },
+    { s_key: 'n_mm__wall_min', s_label: 'Thinnest wall', n_min: 0.4, n_max: 2, n_step: 0.1, s_unit: ' mm', n_decimal: 1, s_note: 'Where the map is black, and where there is no relief: the brightest when lit.' },
+    { s_key: 'n_mm__wall_max', s_label: 'Thickest wall', n_min: 0.8, n_max: 6, n_step: 0.1, s_unit: ' mm', n_decimal: 1, s_note: 'Where the map is white: the darkest when lit. White stands out by the difference of the two.' },
     { s_key: 'n_deg__relief_from', s_label: 'From latitude', n_min: -43, n_max: 10, n_step: 0.1, s_unit: '°', n_decimal: 1, s_note: 'Where the relief starts; below it the sphere stays smooth. A planet can reach down to the neck.' },
     { s_key: 'n_cnt__column', s_label: 'Columns', a_v_option: [180, 360, 720, 1024, 1440, 2048], s_note: 'The mesh’s resolution around the sphere.' }
 ];
@@ -123,7 +125,8 @@ let f_o_setting__default = function(){
         n_scale: 12,
         n_seed: 3,
         n_gamma: 1,
-        n_mm__depth: 0.8,
+        n_mm__wall_min: 0.5,
+        n_mm__wall_max: 3.2,
         n_deg__relief_from: -19.7,
         n_cnt__column: 720,
         // n_t is the height, from 0 to 1, and a_n_col is r, g, b from 0 to 255.
@@ -135,6 +138,21 @@ let f_o_setting__default = function(){
         ],
         b_texture: false
     };
+};
+
+// A lamp saved by an older version gets the defaults of what was added since. One
+// saved before the wall had its two ends has a depth instead: its wall was the
+// generator's shell, and the depth more where the map is white. That is the same sphere.
+let f_o_setting__of_saved = function(o_saved){
+    let o_setting = { ...f_o_setting__default(), ...structuredClone(o_saved) };
+    if(o_saved.n_mm__depth !== undefined){
+        if(o_saved.n_mm__wall_min === undefined){
+            o_setting.n_mm__wall_min = shell;
+            o_setting.n_mm__wall_max = Math.round((shell + o_saved.n_mm__depth) * 1000) / 1000;
+        }
+        delete o_setting.n_mm__depth;
+    }
+    return o_setting;
 };
 
 let f_s_rgb = function(a_n_col){ return `rgb(${a_n_col[0]} ${a_n_col[1]} ${a_n_col[2]})`; };
@@ -490,10 +508,7 @@ let f_o_kind__sphere = function(o_app){
         b_draft: false,
         b_editor: true,
         f_o_setting__default,
-        // A lamp saved by an older version gets the defaults of what was added since.
-        f_o_setting__of_saved: function(o_saved){
-            return { ...f_o_setting__default(), ...structuredClone(o_saved) };
-        },
+        f_o_setting__of_saved,
         // Puts a lamp's settings on screen: from here on they are the ones it changes.
         f_show: function(o_setting__shown){
             o_setting = o_setting__shown;
@@ -539,10 +554,14 @@ let f_o_kind__sphere = function(o_app){
             if(o_blob__texture && o_gl.getUniformLocation(o_program, 'iChannel0') === null){
                 a_s_note.push('This shader does not use the texture: iChannel0.');
             }
+            if(o_setting.n_mm__wall_max <= o_setting.n_mm__wall_min){
+                a_s_note.push('The thickest wall is no thicker than the thinnest: the sphere is smooth.');
+            }
             return {
                 a_a_s_row: [
                     ['Vertices', String(o_stat.n_cnt__vertex)],
                     ['Moved by the relief', String(o_stat.n_cnt__offset)],
+                    ['Wall', `${o_setting.n_mm__wall_min.toFixed(1)} to ${Math.max(o_setting.n_mm__wall_min, o_setting.n_mm__wall_max).toFixed(1)} mm`],
                     ['Filament', `${(o_stat.n_mm3 * n_gram_per_mm3).toFixed(0)} g`]
                 ],
                 a_s_note,
@@ -585,4 +604,4 @@ let f_o_kind__sphere = function(o_app){
     };
 };
 
-export { f_o_kind__sphere };
+export { f_o_kind__sphere, f_o_setting__default, f_o_setting__of_saved };

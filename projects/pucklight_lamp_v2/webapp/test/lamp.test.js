@@ -4,7 +4,7 @@
 // files hold the mesh; and the worker builds every kind.
 
 import { assert, assertEquals, assertAlmostEquals, f_s_path, f_n_mm3, f_check_closed, f_a_n_radius__hit, f_b_openscad } from './check.js';
-import { sphere_mesh, neck_radius as f_n_radius__sphere } from '../sphere.module.js';
+import { sphere_mesh, neck_radius as f_n_radius__sphere, centre_z as n_z__sphere_centre } from '../sphere.module.js';
 import { vase_mesh, run_script, neck_radius as f_n_radius__vase } from '../vase.module.js';
 import { examples as o_s_example } from '../vase_example.module.js';
 import { f_o_param__default, f_o_mesh__egg, f_n_radius__neck } from '../egg.module.js';
@@ -196,7 +196,7 @@ Deno.test({ name: 'the worker builds every kind, and says what is wrong with a s
         let a_n_u8__map = new Uint8Array(n_scl_x__map * n_scl_y__map).fill(255, n_scl_x__map * n_scl_y__map / 2);
         let a_o_stop = [{ n_t: 0, a_n_col: [10, 20, 30] }, { n_t: 1, a_n_col: [250, 240, 230] }];
         let o_sphere = await f_o_answer({ s_kind: 'sphere', a_n_u8__map, n_scl_x__map, n_scl_y__map,
-            o_setting: { n_cnt__column: 64, n_mm__depth: 3, n_deg__relief_from: -43, a_o_stop } });
+            o_setting: { n_cnt__column: 64, n_mm__wall_min: 0.8, n_mm__wall_max: 3.8, n_deg__relief_from: -43, a_o_stop } });
         f_check_built(o_sphere, 'sphere');
         assertEquals([o_sphere.b_single_wall, o_sphere.a_n_nor, o_sphere.n_cnt__fixed, o_sphere.a_n_height.length], [false, null, 49 * 64, o_sphere.a_n_pos.length / 3]);
         let n_wall__min = Infinity, n_wall__max = 0, n_r__max = 0;
@@ -212,6 +212,41 @@ Deno.test({ name: 'the worker builds every kind, and says what is wrong with a s
         assert(n_r__max > 52.5 && n_r__max < 53.01, `widest radius ${n_r__max}`);
         assertEquals([[...o_sphere.a_n_col.subarray(0, 3)], Math.max(...o_sphere.a_n_height)], [[10, 20, 30], 1]);
         assert(o_sphere.o_stat.n_cnt__offset > 0);
+        // A lithophane's wall: 0.5 where the map is black, 3.2 where it is white. The inside is
+        // 0.5 under the smooth sphere's Ø100, the outside 2.7 above it where white.
+        let f_o_wall = function(o_built){
+            let o_wall = { n_min: Infinity, n_max: 0, n_r__in: Infinity, n_r__out: 0 };
+            for(let n_idx = o_built.n_cnt__fixed; n_idx < o_built.a_n_wall.length; n_idx++){
+                o_wall.n_min = Math.min(o_wall.n_min, o_built.a_n_wall[n_idx]);
+                o_wall.n_max = Math.max(o_wall.n_max, o_built.a_n_wall[n_idx]);
+                let [n_x, n_y, n_z] = o_built.a_n_pos.subarray(n_idx * 3, n_idx * 3 + 3);
+                // Above the equator, where no neck is.
+                if(n_z < 45){ continue; }
+                let n_r = Math.hypot(n_x, n_y, n_z - n_z__sphere_centre);
+                o_wall.n_r__in = Math.min(o_wall.n_r__in, n_r);
+                o_wall.n_r__out = Math.max(o_wall.n_r__out, n_r);
+            }
+            return o_wall;
+        };
+        let o_wall__before = f_o_wall(o_sphere);
+        assertAlmostEquals(o_wall__before.n_r__in, 49.2, 1e-3);
+        assertAlmostEquals(o_wall__before.n_r__out, 53, 1e-2);
+        let o_setting__thin = { n_cnt__column: 64, n_mm__wall_min: 0.5, n_mm__wall_max: 3.2, n_deg__relief_from: -43, a_o_stop };
+        let o_thin = await f_o_answer({ s_kind: 'sphere', a_n_u8__map: a_n_u8__map.slice(), n_scl_x__map, n_scl_y__map, o_setting: o_setting__thin });
+        f_check_built(o_thin, 'sphere');
+        let o_wall = f_o_wall(o_thin);
+        assertAlmostEquals(o_wall.n_min, 0.5, 1e-6);
+        assertAlmostEquals(o_wall.n_max, 3.2, 1e-3);
+        assertAlmostEquals(o_wall.n_r__in, 49.5, 1e-3);
+        assertAlmostEquals(o_wall.n_r__out, 52.7, 1e-2);
+        assert(o_thin.o_stat.n_mm3 < o_sphere.o_stat.n_mm3, 'a thinner wall is not less plastic');
+        // A thickest wall below the thinnest is no relief, not one that goes inwards.
+        let o_smooth = await f_o_answer({ s_kind: 'sphere', a_n_u8__map: a_n_u8__map.slice(), n_scl_x__map, n_scl_y__map, o_setting: { ...o_setting__thin, n_mm__wall_min: 1.5, n_mm__wall_max: 1 } });
+        f_check_built(o_smooth, 'sphere');
+        let o_wall__smooth = f_o_wall(o_smooth);
+        assertEquals([o_wall__smooth.n_min, o_wall__smooth.n_max], [1.5, 1.5]);
+        assertAlmostEquals(o_wall__smooth.n_r__in, 48.5, 1e-3);
+        assertAlmostEquals(o_wall__smooth.n_r__out, 50, 1e-3);
 
         let o_egg = await f_o_answer({ s_kind: 'egg', n_mm__cell: 1.5, o_setting: { ...f_o_param__default(), n_mm__cell_export: 0.4 } });
         f_check_built(o_egg, 'egg');

@@ -6,7 +6,7 @@
 
 import { f_o_image__from_png, f_o_image__working, f_o_image__blurred, f_o_tile } from './heightmap.module.js';
 import { f_o_mesh__egg, f_a_n_normal, f_o_shape, f_n_mm__tile_scl_x } from './egg.module.js';
-import { sphere_mesh, displace, shell, neck_wall, thread_depth } from './sphere.module.js';
+import { sphere_mesh, displace, neck_wall, thread_depth } from './sphere.module.js';
 import { run_script, error_line, vase_mesh, steepest_walls } from './vase.module.js';
 import { f_o_mesh__object } from './object.module.js';
 import { f_o_object__from_file, f_o_bound } from './mesh_file.module.js';
@@ -53,12 +53,15 @@ let f_o_stat__mesh = function(a_n_pos, a_n_idx){
 };
 
 // Sphere: the page's heightmap, one byte per pixel, its rows bottom up, moves the
-// outside of the smooth sphere.
+// outside of the smooth sphere. The smooth sphere's wall is the thinnest, where the
+// map is black; where it is white the wall is the thickest.
 let f_o_built__sphere = function(o_data){
     let o_setting = o_data.o_setting;
-    if(!o_sphere__cached || o_sphere__cached.columns !== o_setting.n_cnt__column){
-        o_sphere__cached = sphere_mesh(o_setting.n_cnt__column);
+    if(!o_sphere__cached || o_sphere__cached.columns !== o_setting.n_cnt__column || o_sphere__cached.shell !== o_setting.n_mm__wall_min){
+        o_sphere__cached = sphere_mesh(o_setting.n_cnt__column, o_setting.n_mm__wall_min);
     }
+    // A thickest wall that is no thicker than the thinnest leaves the sphere smooth.
+    let n_mm__depth = Math.max(0, o_setting.n_mm__wall_max - o_setting.n_mm__wall_min);
     let o_sphere = o_sphere__cached;
     let { a_n_u8__map, n_scl_x__map, n_scl_y__map } = o_data;
     // The map between its pixels, from 0 to 1. It wraps around in longitude.
@@ -75,12 +78,12 @@ let f_o_built__sphere = function(o_data){
         let n_high = a_n_u8__map[n_yb + n_xa] * (1 - n_fx) + a_n_u8__map[n_yb + n_xb] * n_fx;
         return (n_low * (1 - n_fy) + n_high * n_fy) / 255;
     };
-    let n_cnt__offset = displace(o_sphere, f_n_height, o_setting.n_mm__depth, o_setting.n_deg__relief_from);
+    let n_cnt__offset = displace(o_sphere, f_n_height, n_mm__depth, o_setting.n_deg__relief_from);
     let n_cnt__fixed = o_sphere.rows[0].ring * o_sphere.columns;
     let a_n_height = o_sphere.heights.slice();
     let a_n_wall = new Float32Array(a_n_height.length);
     for(let n_idx = 0; n_idx < a_n_wall.length; n_idx++){
-        a_n_wall[n_idx] = n_idx < n_cnt__fixed ? neck_wall + thread_depth : shell + o_setting.n_mm__depth * a_n_height[n_idx];
+        a_n_wall[n_idx] = n_idx < n_cnt__fixed ? neck_wall + thread_depth : o_setting.n_mm__wall_min + n_mm__depth * a_n_height[n_idx];
     }
     let a_n_pos = o_sphere.positions.slice();
     let a_n_idx = o_sphere.indices.slice();
