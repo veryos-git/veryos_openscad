@@ -17,11 +17,30 @@ The lampshade's neck in the cup, and the window's edge on the lens:
 
 | File | What |
 |---|---|
-| `pucklight_lamp_v2V4.scad` | the generator, standalone, no libraries |
-| `pucklight_lamp_v2V4_TraceTrove.scad` | V4 with the TraceTrove logo instead of the VeryOS logo |
+| `pucklight_lamp_v2V5.scad` | the generator, standalone, no libraries |
+| `pucklight_lamp_v2V5_TraceTrove.scad` | V5 with the TraceTrove logo and name instead of VeryOS's |
+| `pucklight_lamp_v2V4.scad`, `pucklight_lamp_v2V4_TraceTrove.scad` | V4: without the bottom text |
 | `pucklight_lamp_v2V3.scad`, `pucklight_lamp_v2V3_TraceTrove.scad` | V3: without the material text |
 | `pucklight_lamp_v2V2.scad` | V2: without the fingerprint |
 | `pucklight_lamp_v2V1.scad` | V1: ringclick V3's bottom screw and click base |
+
+## V5 against V4: bottom text
+
+| | V4 | V5 |
+|---|---|---|
+| `bottom_text` | | a short text engraved in the bottom of the screw's flange, read from below; default `VeryOS`, in the TraceTrove file `TraceTrove`; empty: none |
+| where | | after the logo, clockwise as read: centred 60 degrees from it, halfway to the fingerprint's relief; the letters' tops pointing outwards, as `material`'s |
+| letters | | `material`'s: 4.5 high, 0.6 deep (`logo_depth`), DejaVu Sans Mono Bold |
+| length | | up to 13 letters; a longer text would reach the logo or the relief and stops with an error |
+| empty | | the same triangles as V4's screwin, in both brands' files: the scripts' output compared |
+| with the text | | the screwin loses the letters' volume only, 25.9 mm³ for `VeryOS` and 36.2 mm³ for `TraceTrove`, also with `material = "PETG"`: no overlap with the logo, the relief or the material; the watermark lies on the logo's other side |
+| top part, lampshade, plunger | | unchanged |
+| `slide_test` | | its pieces end at radius 29, so their bottoms show the letters' inner 1 mm, as they show a part of the logo |
+| printed | | untested, not sliced |
+
+The screwin from below, cut 0.1 inside the face on the bed: V5, and V5 TraceTrove with `material = "PETG"`:
+
+![bottom text](bottom_text.png)
 
 ## V4 against V3: material text
 
@@ -39,18 +58,19 @@ The top part from above and the screwin from below, cut 0.1 inside the face on t
 
 ![material](material.png)
 
-## TraceTrove version of V4
+## TraceTrove version of V5
 
-`pucklight_lamp_v2V4_TraceTrove.scad`: V4 with the TraceTrove logo V3 instead of the VeryOS logo, in a file of its own. Everything else is V4's, also `material`; a change to V4 has to be made in both files.
+`pucklight_lamp_v2V5_TraceTrove.scad`: V5 with the TraceTrove logo V3 instead of the VeryOS logo and `TraceTrove` as the bottom text, in a file of its own. Everything else is V5's, also `material`; a change to V5 has to be made in both files.
 
-| | V4 | V4 TraceTrove |
+| | V5 | V5 TraceTrove |
 |---|---|---|
+| `bottom_text` | `VeryOS` | `TraceTrove` |
 | logo | VeryOS, built in the script | TraceTrove logo V3, flat: the outline of `logo_final_flat` in tracetrove_branding's `branding/LOGO_V3/tracetrove_logo.scad`, copied into the script, so it still needs no libraries; compared with it in OpenSCAD: no difference |
 | logo's size | by its width: top part 10, screw 8 | by its height: top part 11 (`toppart_logo_height`), screw 9.5 (`screw_logo_height`); 20 wide where it is 31.75 tall |
 | logo's direction | top pointing outwards | along the ring, as in TraceTrove's pucklight_egg V1 |
 | logo's strokes | 0.9 to 1.1 wide | 1.5 to 1.7 wide |
 | fingerprint | the VeryOS logo as relief and as watermark | the TraceTrove logo as relief and as watermark, in the same places, as deep and as high: a copy shows which brand's file it came from |
-| other geometry | | the same: the solids differ by the logos' volumes only; the plunger and the lampshade are identical |
+| other geometry | | the same: the solids differ by the logos' and the bottom texts' volumes only; the plunger and the lampshade are identical |
 | printed | untested | untested, not sliced |
 
 The same sections as for the fingerprint below: 0.01 inside the face on the bed, 0.1 inside it, and through the watermark.
@@ -133,6 +153,7 @@ Also: `assembly`, `section`, `print_layout` (all three parts, 180 × 163 mm), `s
 | top face | 30.1 | 31.5; the cup's floor 26.7 |
 | ring above the flat ring around the lens | 1.8 | 3.2, the core |
 | top part's logo | 9 wide | 10 wide, in the core's top face |
+| bottom text | none | `bottom_text`, see V5 above |
 | top part, solid | 15.8 cm³ | 22.1 cm³ |
 | unchanged | | cavity, window, lip, screwin; how it clicks, the plunger and its tuning: `../RGBW_pucklight_holder_ringclick` |
 
@@ -167,8 +188,8 @@ Test the thread before a whole lampshade: in the slicer, print only the lampshad
 
 ## Logo
 
-The VeryOS logo is engraved 0.6 mm deep (`logo_depth`): 10 wide in the top face of the top part, inside the cup; 8 wide in the bottom of the screw's flange. The plunger has no room for one; the lampshade has none: its shell is 0.8 thick and its neck's bottom a 1.2 ring. V3 repeats the logo as a fingerprint in the top part and in the screw ring, see V3 above.
+The VeryOS logo is engraved 0.6 mm deep (`logo_depth`): 10 wide in the top face of the top part, inside the cup; 8 wide in the bottom of the screw's flange. The plunger has no room for one; the lampshade has none: its shell is 0.8 thick and its neck's bottom a 1.2 ring. V3 repeats the logo as a fingerprint in the top part and in the screw ring, see V3 above. V5 adds the brand's name after the logo in the screw's flange (`bottom_text`), see V5 above.
 
 ## Status
 
-V2 printed (2026-11-12): works, with the lampshade's thread in the cup. V3 is V2 with the fingerprint: sliced, not printed. V4 adds the material text: not sliced, not printed.
+V2 printed (2026-11-12): works, with the lampshade's thread in the cup. V3 is V2 with the fingerprint: sliced, not printed. V4 adds the material text, V5 the bottom text: not sliced, not printed.

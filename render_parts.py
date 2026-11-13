@@ -53,7 +53,7 @@ PROJECTS = {
     "paper_folding_lantern": [("paper_folding_lantern.scad", "folded flat", "output")],
     "published_christmas_star": [("star.scad", [
         ("star", "One star (grid_count = 1)", {"grid_count": 1})])],
-    "pucklight_lamp_v2": [("pucklight_lamp_v2V4.scad", "assembly lampshade toppart screwin slide_test")],
+    "pucklight_lamp_v2": [("pucklight_lamp_v2V5.scad", "assembly lampshade toppart screwin slide_test")],
     "pucklight_sphere": [("pucklight_sphereV3.scad",
         "assembly sphere vase_sphere sockel screwin clickbase")],
     "rechargable_motor_power_kit_turntable": [
