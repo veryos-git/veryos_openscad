@@ -3,11 +3,11 @@
 // on the neck every bulb has, in the object's colours if it has any; and files of
 // triangles are read, an OBJ with its colours.
 
-import { assert, assertEquals, assertAlmostEquals, assertThrows, f_s_path, f_check_closed } from './check.js';
+import { assert, assertEquals, assertAlmostEquals, f_s_path, f_check_closed } from './check.js';
 import { f_a_n_tri__ball, f_a_n_tri__box, f_a_n_tri__ring, f_a_n_tri__joined, f_a_n_col__of_tri } from './shape.js';
 import { f_o_mesh__object, f_o_param__default, n_mm__base_z } from '../object.module.js';
 import { f_n_radius__bore } from '../neck.module.js';
-import { f_o_object__from_file, f_o_bound, f_o_buffer__stl_of_tri } from '../mesh_file.module.js';
+import { f_o_object__from_file as f_o_object__from_file_async, f_o_bound, f_o_buffer__stl_of_tri } from '../mesh_file.module.js';
 import { f_o_blob__obj } from '../export.module.js';
 
 let n_tau = Math.PI * 2;
@@ -262,12 +262,18 @@ Deno.test('an object\'s colours are its bulb\'s, through the wall', function(){
     assert(n_cnt__over_hole > 20, `only ${n_cnt__over_hole} points over the hole`);
 });
 
+// A file's bytes and name, and an MTL's text beside it if given.
+let f_o_object__from_file = function(a_n_u8, s_name, s_mtl = null){
+    return f_o_object__from_file_async({ a_n_u8, s_name }, s_mtl === null ? [] : [{ s_name: 'model.mtl', a_n_u8: new TextEncoder().encode(s_mtl) }]);
+};
+
 Deno.test('files of triangles are read: STL as numbers and as text, OBJ with its colours; and written as STL', async function(){
     let a_n_tri = f_a_n_tri__box([0, 0, 0], [10, 20, 30]);
     let a_n_u8__stl = new Uint8Array(f_o_buffer__stl_of_tri(a_n_tri));
     assertEquals(a_n_u8__stl.length, 84 + 50 * 12);
-    assertEquals([...f_o_object__from_file(a_n_u8__stl, 'box.stl').a_n_tri], [...a_n_tri]);
-    assertEquals([f_o_object__from_file(a_n_u8__stl, 'box.stl').a_n_col, f_o_object__from_file(a_n_u8__stl, 'box.stl').s_note], [null, '']);
+    let o_stl = await f_o_object__from_file(a_n_u8__stl, 'box.stl');
+    assertEquals([...o_stl.a_n_tri], [...a_n_tri]);
+    assertEquals([o_stl.a_n_col, o_stl.s_note, o_stl.a_s_item], [null, '', null]);
     // The normal of the first triangle, which lies in the box's bottom and faces down.
     assertEquals([0, 4, 8].map(function(n_off){ return new DataView(a_n_u8__stl.buffer).getFloat32(84 + n_off, true); }), [0, 0, -1]);
     assertEquals(f_o_bound(a_n_tri), { a_n_min: [0, 0, 0], a_n_max: [10, 20, 30] });
@@ -276,12 +282,12 @@ Deno.test('files of triangles are read: STL as numbers and as text, OBJ with its
         let a_n = a_n_tri.subarray(n_it * 9, n_it * 9 + 9);
         return ` facet normal 0 0 0\n  outer loop\n   vertex ${a_n[0]} ${a_n[1]} ${a_n[2]}\n   vertex ${a_n[3]} ${a_n[4]} ${a_n[5]}\n   vertex ${a_n[6].toExponential()} ${a_n[7]} ${a_n[8]}\n  endloop\n endfacet\n`;
     }).join('') + 'endsolid box\n';
-    assertEquals([...f_o_object__from_file(new TextEncoder().encode(s_text), 'box.stl').a_n_tri], [...a_n_tri]);
+    assertEquals([...(await f_o_object__from_file(new TextEncoder().encode(s_text), 'box.stl')).a_n_tri], [...a_n_tri]);
 
     // Squares become two triangles each; a corner may have more than a point, and may count from the end.
     let s_obj = '# a box\nv 0 0 0\nv 10 0 0\nv 10 20 0\nv 0 20 0\nv 0 0 30\nv 10 0 30\nv 10 20 30\nv 0 20 30\nvn 0 0 1\n'
         + 'f 1 4 3 2\nf 5/1/1 6/2/1 7/3/1 8/4/1\nf 1//1 2//1 6//1 5//1\nf 2 3 7 6\nf 3 4 8 7\nf -5 -8 -4 -1\n';
-    let o_object = f_o_object__from_file(new TextEncoder().encode(s_obj), 'box.obj');
+    let o_object = await f_o_object__from_file(new TextEncoder().encode(s_obj), 'box.obj');
     assertEquals([o_object.a_n_col, o_object.s_note], [null, ''], 'an OBJ without colours');
     let a_n_tri__obj = o_object.a_n_tri;
     assertEquals(a_n_tri__obj.length, 12 * 9);
@@ -292,38 +298,43 @@ Deno.test('files of triangles are read: STL as numbers and as text, OBJ with its
     f_check_closed(o_mesh.a_n_pos, o_mesh.a_n_idx, 'the bulb of an OBJ');
 
     // An OBJ's colours: a point's own, from 0 to 1 or from 0 to 255, or in ZBrush's lines; else its material's.
-    let f_o_read = function(s_obj, s_mtl = null){
-        let o = f_o_object__from_file(new TextEncoder().encode(s_obj), 'model.obj', s_mtl);
+    let f_o_read = async function(s_obj, s_mtl = null){
+        let o = await f_o_object__from_file(new TextEncoder().encode(s_obj), 'model.obj', s_mtl);
         return { n_cnt: o.a_n_tri.length / 9, a_n_col: o.a_n_col && [...o.a_n_col], s_note: o.s_note };
     };
     let s_point = 'v 0 0 0\nv 1 0 0\nv 0 1 0\nv 1 1 0\n';
-    assertEquals(f_o_read('v 0 0 0 1 0 0\nv 1 0 0 0 1.0 0\nv 0 1 0 0 0 0.5\nf 1 2 3\n'), { n_cnt: 1, a_n_col: [255, 0, 0, 0, 255, 0, 0, 0, 128], s_note: '' });
-    assertEquals(f_o_read('v 0 0 0 255 0 0\nv 1 0 0 0 128 0\nv 0 1 0\nf 3 2 1\n').a_n_col, [255, 255, 255, 0, 128, 0, 255, 0, 0], 'a point without a colour is white');
-    assertEquals(f_o_read(s_point + '#MRGB ffff0000ff00ff00\n#MRGB ff0000ff00102030\nf 1 2 3 4\n').a_n_col, [255, 0, 0, 0, 255, 0, 0, 0, 255, 255, 0, 0, 0, 0, 255, 16, 32, 48]);
+    assertEquals(await f_o_read('v 0 0 0 1 0 0\nv 1 0 0 0 1.0 0\nv 0 1 0 0 0 0.5\nf 1 2 3\n'), { n_cnt: 1, a_n_col: [255, 0, 0, 0, 255, 0, 0, 0, 128], s_note: '' });
+    assertEquals((await f_o_read('v 0 0 0 255 0 0\nv 1 0 0 0 128 0\nv 0 1 0\nf 3 2 1\n')).a_n_col, [255, 255, 255, 0, 128, 0, 255, 0, 0], 'a point without a colour is white');
+    assertEquals((await f_o_read(s_point + '#MRGB ffff0000ff00ff00\n#MRGB ff0000ff00102030\nf 1 2 3 4\n')).a_n_col, [255, 0, 0, 0, 255, 0, 0, 0, 255, 255, 0, 0, 0, 0, 255, 16, 32, 48]);
     let s_material = 'mtllib two colours.mtl\n' + s_point + 'usemtl red one\nf 1 2 3\nusemtl blue\nf 2 4 3\n';
-    assertEquals(f_o_read(s_material), { n_cnt: 2, a_n_col: null, s_note: 'Its colours are in two colours.mtl: choose both files together to have them.' });
-    assertEquals(f_o_read(s_material, '# two\nnewmtl red one\nKa 0 0 0\nKd 1 0 0\n\nnewmtl blue\r\nKd 0 0.2 1.000\r\n'),
+    assertEquals(await f_o_read(s_material), { n_cnt: 2, a_n_col: null, s_note: 'Its colours are in two colours.mtl: choose both files together to have them.' });
+    assertEquals(await f_o_read(s_material, '# two\nnewmtl red one\nKa 0 0 0\nKd 1 0 0\n\nnewmtl blue\r\nKd 0 0.2 1.000\r\n'),
         { n_cnt: 2, a_n_col: [255, 0, 0, 255, 0, 0, 255, 0, 0, 0, 51, 255, 0, 51, 255, 0, 51, 255], s_note: '' });
-    assertEquals(f_o_read(s_material, 'newmtl blue\nKd 0 0 1\n').a_n_col.slice(0, 9), Array(9).fill(255), 'a material the MTL does not have is white');
+    assertEquals((await f_o_read(s_material, 'newmtl blue\nKd 0 0 1\n')).a_n_col.slice(0, 9), Array(9).fill(255), 'a material the MTL does not have is white');
     // A point's own colour goes before its material's.
-    assertEquals(f_o_read('v 0 0 0 0 1 0\nv 1 0 0 0 1 0\nv 0 1 0 1 1 0\nusemtl blue\nf 1 2 3\n', 'newmtl blue\nKd 0 0 1\n').a_n_col, [0, 255, 0, 0, 255, 0, 255, 255, 0]);
+    assertEquals((await f_o_read('v 0 0 0 0 1 0\nv 1 0 0 0 1 0\nv 0 1 0 1 1 0\nusemtl blue\nf 1 2 3\n', 'newmtl blue\nKd 0 0 1\n')).a_n_col, [0, 255, 0, 0, 255, 0, 255, 255, 0]);
     // One colour alone is none, and neither is a picture.
-    assertEquals(f_o_read('v 0 0 0 0.5 0.5 0.5\nv 1 0 0 0.5 0.5 0.5\nv 0 1 0 0.5 0.5 0.5\nf 1 2 3\n'), { n_cnt: 1, a_n_col: null, s_note: '' });
-    assertEquals(f_o_read(s_point + 'usemtl skin\nf 1 2 3\nf 2 4 3\n', 'newmtl skin\nKd 0.8 0.8 0.8\n'), { n_cnt: 2, a_n_col: null, s_note: '' });
-    let o_picture = f_o_read(s_material, 'newmtl red one\nKd 1 1 1\nmap_Kd skin.png\nnewmtl blue\nKd 1 1 1\n');
-    assert(o_picture.a_n_col === null && /a picture, a texture, which is not read/.test(o_picture.s_note), o_picture.s_note);
+    assertEquals(await f_o_read('v 0 0 0 0.5 0.5 0.5\nv 1 0 0 0.5 0.5 0.5\nv 0 1 0 0.5 0.5 0.5\nf 1 2 3\n'), { n_cnt: 1, a_n_col: null, s_note: '' });
+    assertEquals(await f_o_read(s_point + 'usemtl skin\nf 1 2 3\nf 2 4 3\n', 'newmtl skin\nKd 0.8 0.8 0.8\n'), { n_cnt: 2, a_n_col: null, s_note: '' });
+    // A picture that is not chosen with it: said so, and its material's colour meanwhile.
+    let o_picture = await f_o_read(s_material, 'newmtl red one\nKd 1 1 1\nmap_Kd -s 1 1 1 skin.png\nnewmtl blue\nKd 1 1 1\n');
+    assert(o_picture.a_n_col === null && /Its colours are in a picture, skin\.png: choose it together/.test(o_picture.s_note), o_picture.s_note);
     // The OBJ this app writes of a bulb is read with the colours it had.
     let a_n_col__written = Uint8Array.from([255, 0, 0, 0, 128, 255, 1, 2, 3, 247, 242, 230]);
     let o_blob = f_o_blob__obj(new Float32Array([0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1]), new Uint32Array([0, 1, 2, 0, 2, 3]), a_n_col__written);
-    let o_again = f_o_object__from_file(new Uint8Array(await o_blob.arrayBuffer()), 'bulb.obj');
+    let o_again = await f_o_object__from_file(new Uint8Array(await o_blob.arrayBuffer()), 'bulb.obj');
     assertEquals([...o_again.a_n_col], [255, 0, 0, 0, 128, 255, 1, 2, 3, 255, 0, 0, 1, 2, 3, 247, 242, 230]);
 
     for(let [s_what, a_n_u8, o_regex] of [
-        ['no model', new TextEncoder().encode('this is no model at all'), /neither an STL nor an OBJ/],
+        ['no model', new TextEncoder().encode('this is no model at all'), /none of STL, OBJ, 3MF, GLB, glTF and PLY/],
         ['an empty OBJ', new TextEncoder().encode('v 0 0 0\nv 1 0 0\nv 0 1 0\n'), /no triangles/],
         ['an OBJ with a corner that is not there', new TextEncoder().encode('v 0 0 0\nv 1 0 0\nv 0 1 0\nf 1 2 9\n'), /corner that is not there/],
         ['an STL of text cut short', new TextEncoder().encode('solid x\n facet normal 0 0 1\n  outer loop\n   vertex 0 0 0\n   vertex 1 0 0\n'), /middle of a triangle/],
         ['an STL with a corner that is no number', new TextEncoder().encode('solid x\n facet normal 0 0 1\n  outer loop\n   vertex 0 0 0\n   vertex 1 0 0\n   vertex 0 nan 0\n  endloop\n endfacet\n'), /not a number/],
-        ['a file that is empty', new Uint8Array(0), /neither an STL nor an OBJ/]
-    ]){ assertThrows(function(){ f_o_object__from_file(a_n_u8, 'model.stl'); }, o_regex, s_what); }
+        ['a file that is empty', new Uint8Array(0), /none of STL, OBJ, 3MF, GLB, glTF and PLY/]
+    ]){
+        let s_message = null;
+        try{ await f_o_object__from_file(a_n_u8, 'model.stl'); } catch(o_error){ s_message = o_error.message; }
+        assert(s_message !== null && o_regex.test(s_message), `${s_what}: ${s_message}`);
+    }
 });

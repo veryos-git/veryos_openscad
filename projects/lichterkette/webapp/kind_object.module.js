@@ -1,30 +1,37 @@
 // Copyright (C) Jonas Immanuel Frey - Licensed under GPL
-// The object: a loaded 3D object, an STL or an OBJ, as a string light's bulb. It is
-// moved, turned and resized with a gizmo in the view; the app joins it to a stem on the
-// neck and hollows it. An OBJ's colours become the bulb's. Nothing here needs writing
-// code.
+// The object: a loaded 3D object, STL, OBJ, 3MF, GLB, glTF or PLY, as a string light's
+// bulb. It is moved, turned and resized with a gizmo in the view; the app joins it to a
+// stem on the neck and hollows it. The file's colours become the bulb's. Nothing here
+// needs writing code.
 
 import { el } from './dom.module.js';
 import { f_el__control, f_el__group, f_el__button } from './control.module.js';
 import { f_o_param__default, n_mm__base_z } from './object.module.js';
 import { f_o_buffer__stl_of_tri } from './mesh_file.module.js';
-import { f_o_place__default, f_a_n_rot__of_axis, f_a_n_rot__multiplied, f_a_n_mat4__of_place, f_o_bound__moved, f_o_gizmo } from './gizmo.module.js';
+import { f_o_place__default, f_a_n_rot__of_axis, f_a_n_rot__multiplied, f_a_n_mat4__of_place, f_o_bound__moved, f_o_gizmo, f_a_n_tri__moved } from './gizmo.module.js';
 
 // The grid's step for the view: while something moves, then once settled. A print
 // file has the lamp's own.
 let n_mm__voxel_draft = 0.8;
 let n_mm__voxel_settled = 0.4;
-// How deep an object stands in the stem, so the two are one.
+// How deep the stem reaches into an object, so the two are one.
 let n_mm__sunk = 2;
+let n_mm__stem_max = 40;
+// Where lines go up to the object when the line along the axis misses it.
+let n_mm__around_axis = 3;
 // An object whose size in its file cannot be mm is made this large.
 let n_mm__size_fitted = 40;
 let n_mm__size_min = 10;
 let n_mm__size_max = 200;
 let n_cm2__inside_warn = 0.5;
+// The files a 3D object can be, the first of them the object when several are chosen;
+// and what may come with them.
+let a_s_extension__object = ['3mf', 'glb', 'gltf', 'obj', 'ply', 'stl'];
+let s_accept = '.stl,.obj,.mtl,.3mf,.glb,.gltf,.bin,.ply,.png,.jpg,.jpeg,.webp';
 
 let a_o_control__shade = [
     { s_key: 'n_mm__wall', s_label: 'Wall', n_min: 0.4, n_max: 3, n_step: 0.05, s_unit: ' mm', n_decimal: 2, s_note: 'Thinner glows more. 0.5 is one line of a 0.4 mm nozzle, as the printed bulbs have; 0.8 is two lines.' },
-    { s_key: 'n_mm__stem', s_label: 'Stem', n_min: 0, n_max: 20, n_step: 0.5, s_unit: ' mm', n_decimal: 1, s_note: 'How high the neck goes on as a tube before it closes to a point. It shows only where the object is narrower.' }
+    { s_key: 'n_mm__stem', s_label: 'Stem', n_min: 0, n_max: n_mm__stem_max, n_step: 0.5, s_unit: ' mm', n_decimal: 1, s_note: 'How high the neck goes on as a tube before it closes to a point. Standing the object on it makes it reach 2 mm into the object above the neck. It shows only where the object is narrower.' }
 ];
 let o_control__voxel = { s_key: 'n_mm__voxel', s_label: 'Detail', n_min: 0.15, n_max: 1, n_step: 0.05, s_unit: ' mm', n_decimal: 2, s_id__note: 'el_note__voxel' };
 let o_control__filament = { s_key: 'n_cnt__filament', s_label: 'Filaments in the 3MF', n_min: 1, n_max: 16, n_step: 1, s_unit: '', n_decimal: 0, s_note: 'At most this many colours: the most used ones, the others joined to the nearest. 4 is one AMS.' };
@@ -63,25 +70,74 @@ let f_o_kind__object = function(o_app){
     let f_a_n_mat4 = function(){
         return f_a_n_mat4__of_place(o_setting.o_place, a_n_pivot);
     };
-    // The top of the stem's tube: an object stands a little below it.
-    let f_n_z__stem = function(){
-        return n_mm__base_z + o_setting.n_mm__stem;
+    // The bulb's sliders, with the settings as they are now.
+    let f_render_slider = function(){
+        el_slider.replaceChildren(
+            ...a_o_control__shade.map(function(o_control){
+                return f_el__control(o_control, o_setting, function(){
+                    // The object stays where it is; the next bulb is of the same place.
+                    o_app.f_changed();
+                });
+            }),
+            f_el__control(o_control__voxel, o_setting, function(){
+                // The print file's detail does not change the bulb on screen.
+                o_app.f_touched();
+                o_app.f_render_stat();
+            }),
+            // Only an object in colours has filaments to choose: the view's bulb
+            // tells their colours, so it is built anew.
+            el_row__filament = f_el__control(o_control__filament, o_setting, function(){ o_app.f_changed(); })
+        );
+        el_row__filament.hidden = !a_n_col;
+    };
+
+    // Where the object is lowest above the neck: along the axis, else the lowest of lines
+    // around it; null if none meets the object.
+    let f_n_z__over_neck = function(){
+        let a_n_moved = f_a_n_tri__moved(a_n_tri, f_a_n_mat4());
+        let f_n_z__low_at = function(n_x, n_y){
+            let n_low = null;
+            for(let n = 0; n < a_n_moved.length; n += 9){
+                let n_ax = a_n_moved[n] - n_x, n_ay = a_n_moved[n + 1] - n_y, n_bx = a_n_moved[n + 3] - n_x, n_by = a_n_moved[n + 4] - n_y, n_cx = a_n_moved[n + 6] - n_x, n_cy = a_n_moved[n + 7] - n_y;
+                // The line inside the triangle as seen from above: its three corners' shares.
+                let n_w0 = n_bx * n_cy - n_by * n_cx, n_w1 = n_cx * n_ay - n_cy * n_ax, n_w2 = n_ax * n_by - n_ay * n_bx;
+                if((n_w0 < 0 || n_w1 < 0 || n_w2 < 0) && (n_w0 > 0 || n_w1 > 0 || n_w2 > 0)){ continue; }
+                let n_sum = n_w0 + n_w1 + n_w2;
+                if(n_sum === 0){ continue; }
+                let n_z = (n_w0 * a_n_moved[n + 2] + n_w1 * a_n_moved[n + 5] + n_w2 * a_n_moved[n + 8]) / n_sum;
+                if(n_low === null || n_z < n_low){ n_low = n_z; }
+            }
+            return n_low;
+        };
+        let n_z = f_n_z__low_at(0, 0);
+        if(n_z !== null){ return n_z; }
+        let a_n_z = Array.from({ length: 8 }, function(v, n_it){
+            return f_n_z__low_at(n_mm__around_axis * Math.cos(n_it * Math.PI / 4), n_mm__around_axis * Math.sin(n_it * Math.PI / 4));
+        }).filter(function(n){ return n !== null; });
+        return a_n_z.length ? Math.min(...a_n_z) : null;
     };
 
     /* ---- Controls ---- */
 
-    let el_file = el('input', { type: 'file', accept: '.stl,.obj,.mtl', multiple: true, hidden: true });
+    let el_file = el('input', { type: 'file', accept: s_accept, multiple: true, hidden: true });
     let el_info = el('p', { id: 'el_object_info' });
     // Why an object that speaks of colours has none here.
     let el_note__color = el('p', { className: 'row__note', hidden: true });
+    // A 3MF of several objects: which of them is the bulb.
+    let el_item = el('select', { id: 'el_object_item' });
+    el_item.setAttribute('aria-label', 'Object in the file');
+    let el_row__item = el('label', { className: 'row', hidden: true }, [el('span', { className: 'row__top' }, [el('span', { textContent: 'Object in the file' }), el_item])]);
+    // The files last chosen, kept to read another of their objects.
+    let o_file__last = null;
     let el_tool = el('div', { id: 'el_object_tool', hidden: true });
     let el_source = el('div', { className: 'source source--object', hidden: true }, [
         el('header', { className: 'panel__head' }, [el('h2', { textContent: '3D object' })]),
         el('div', { className: 'source__body' }, [
             f_el__button('Load a 3D object…', function(){ el_file.click(); }, 'action action--main'),
             el_file,
-            el('p', { className: 'row__note', textContent: 'An STL or an OBJ. An OBJ may have colours: if they are in an .mtl file, choose both. Or drop the files onto this page.' }),
+            el('p', { className: 'row__note', textContent: 'STL, OBJ, 3MF, GLB, glTF or PLY, in its colours: painted or by parts in a 3MF, of points, materials or a picture otherwise. Choose the files that come with it too: an OBJ\u2019s .mtl and picture, a glTF\u2019s .bin and pictures. Or drop them all onto this page.' }),
             el_info,
+            el_row__item,
             el_note__color,
             el_tool
         ])
@@ -142,8 +198,16 @@ let f_o_kind__object = function(o_app){
             o_app.f_changed();
         }
     };
+    // On the neck: its lowest point on the grid's lowest plane, 1 mm above the neck's
+    // top; and the stem as high as reaches 2 mm into it above the neck, whatever is
+    // there: a round bottom, a dent between feet, an opening.
     let f_stand = function(){
-        o_setting.o_place.a_n_trn[2] += f_n_z__stem() - n_mm__sunk - f_o_bound().a_n_min[2];
+        o_setting.o_place.a_n_trn[2] += n_mm__base_z - f_o_bound().a_n_min[2];
+        let n_z = f_n_z__over_neck();
+        if(n_z !== null){
+            o_setting.n_mm__stem = Math.min(n_mm__stem_max, Math.max(0, Math.ceil(2 * (n_z + n_mm__sunk - n_mm__base_z)) / 2));
+            f_render_slider();
+        }
     };
     let f_centre = function(){
         let o_bound = f_o_bound();
@@ -206,8 +270,36 @@ let f_o_kind__object = function(o_app){
         }
     });
 
+    // The worker's reading of the files kept, the n_item-th object of a 3MF. The main
+    // file's bytes go to the worker; the others are copied.
+    let f_o_loaded = function(o_file, n_item){
+        let o_main = o_file.a_o_read.find(function(o){ return o.s_name === o_file.s_name; });
+        return o_app.f_o_object(o_main.a_n_u8.slice(), o_main.s_name, {
+            a_o_file__side: o_file.a_o_read.filter(function(o){ return o !== o_main; }),
+            n_item
+        });
+    };
+    el_item.addEventListener('change', async function(){
+        if(!o_file__last){ return; }
+        o_app.f_set_status(`Reading ${el_item.selectedOptions[0]?.textContent ?? 'the object'}…`);
+        try{
+            f_take(await f_o_loaded(o_file__last, Number(el_item.value)));
+        } catch(o_error){
+            o_app.f_set_status(o_error.message, true);
+            return;
+        }
+        o_setting.b_color = a_n_col !== null;
+        b_object_changed = true;
+        f_fit();
+        f_placed(true);
+    });
     // Takes an object's triangles and colours from the worker, or null for none.
     let f_take = function(o_loaded){
+        el_row__item.hidden = !o_loaded.a_s_item;
+        if(o_loaded.a_s_item){
+            el_item.replaceChildren(...o_loaded.a_s_item.map(function(s_item, n_idx){ return el('option', { value: String(n_idx), textContent: `${n_idx + 1}. ${s_item}` }); }));
+            el_item.value = String(o_loaded.n_item ?? 0);
+        }
         a_n_tri = o_loaded.a_n_tri;
         a_n_col = o_loaded.a_n_col ?? null;
         el_note__color.textContent = o_loaded.s_note ?? '';
@@ -221,18 +313,21 @@ let f_o_kind__object = function(o_app){
             o_app.o_viewer.f_set_view({ b_shade: true });
         }
     };
-    // The files chosen or dropped: the object's, and with an OBJ its MTL, which has
-    // the colours of its materials.
-    let f_load_file = async function(a_o_file){
-        let o_file__mtl = a_o_file.find(function(o){ return /\.mtl$/i.test(o.name); });
-        let o_file = a_o_file.find(function(o){ return /\.(stl|obj)$/i.test(o.name); }) ?? a_o_file.find(function(o){ return o !== o_file__mtl; });
-        if(!o_file){
-            if(o_file__mtl){ o_app.f_set_status(`${o_file__mtl.name} has an object’s colours alone: choose it together with its .obj.`, true); }
+    // The files chosen or dropped: the object's, and what comes with it: an OBJ's MTL
+    // and pictures, a glTF's .bin and pictures. Read as { s_name, a_n_u8 }, kept for
+    // reading another object of a 3MF, n_item.
+    let f_load_file = async function(a_o_file, n_item = 0){
+        let f_n_rank = function(o){ let n = a_s_extension__object.indexOf(o.name.split('.').pop().toLowerCase()); return n < 0 ? Infinity : n; };
+        let o_file = [...a_o_file].sort(function(o_a, o_b){ return f_n_rank(o_a) - f_n_rank(o_b); })[0];
+        if(!o_file || f_n_rank(o_file) === Infinity){
+            if(a_o_file.length){ o_app.f_set_status(`${a_o_file.map(function(o){ return o.name; }).join(', ')}: none of them is a 3D object. Choose the object's file together with these.`, true); }
             return;
         }
         o_app.f_set_status(`Reading ${o_file.name}…`);
         try{
-            f_take(await o_app.f_o_object(new Uint8Array(await o_file.arrayBuffer()), o_file.name, { s_text__mtl: o_file__mtl ? await o_file__mtl.text() : null }));
+            let a_o_read = await Promise.all(a_o_file.map(async function(o){ return { s_name: o.name, a_n_u8: new Uint8Array(await o.arrayBuffer()) }; }));
+            o_file__last = { s_name: o_file.name, a_o_read };
+            f_take(await f_o_loaded(o_file__last, n_item));
         } catch(o_error){
             o_app.f_set_status(o_error.message, true);
             return;
@@ -288,23 +383,7 @@ let f_o_kind__object = function(o_app){
         f_show: function(o_setting__shown){
             o_setting = o_setting__shown;
             b_shown = true;
-            el_slider.replaceChildren(
-                ...a_o_control__shade.map(function(o_control){
-                    return f_el__control(o_control, o_setting, function(){
-                        // The object stays where it is; the next bulb is of the same place.
-                        o_app.f_changed();
-                    });
-                }),
-                f_el__control(o_control__voxel, o_setting, function(){
-                    // The print file's detail does not change the bulb on screen.
-                    o_app.f_touched();
-                    o_app.f_render_stat();
-                }),
-                // Only an object in colours has filaments to choose: the view's bulb
-                // tells their colours, so it is built anew.
-                el_row__filament = f_el__control(o_control__filament, o_setting, function(){ o_app.f_changed(); })
-            );
-            el_row__filament.hidden = !a_n_col;
+            f_render_slider();
             f_render_number();
             o_app.o_viewer.f_set_tool(o_gizmo);
             n_id__place++;

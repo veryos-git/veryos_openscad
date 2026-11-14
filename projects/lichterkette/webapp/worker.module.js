@@ -64,21 +64,33 @@ let f_o_built = function(o_data, b_export){
     };
 };
 
+// A picture's pixels, as texture.module.js takes them: decoded by the browser, its
+// colours as they are in the file.
+let f_o_image__decoded = async function(a_n_u8){
+    let o_bitmap = await createImageBitmap(new Blob([a_n_u8]), { premultiplyAlpha: 'none', colorSpaceConversion: 'none' });
+    let o_canvas = new OffscreenCanvas(o_bitmap.width, o_bitmap.height);
+    let o_ctx = o_canvas.getContext('2d', { willReadFrequently: true });
+    o_ctx.drawImage(o_bitmap, 0, 0);
+    return { n_scl_x: o_bitmap.width, n_scl_y: o_bitmap.height, a_n_rgba: o_ctx.getImageData(0, 0, o_bitmap.width, o_bitmap.height).data };
+};
+
 // Takes a 3D object's file, or null for none, and tells the page its triangles and
-// its colours. An OBJ's colours may be in its MTL, s_text__mtl. A bulb's own file has
-// none: the bulb keeps them beside it, a_n_col.
-let f_o_message__object = function(o_data){
+// its colours. Beside it a_o_file__side, the files chosen with it: an OBJ's MTL and
+// pictures, a glTF's .bin and pictures; n_item, which object of a 3MF. A bulb's own file
+// has no colours: the bulb keeps them beside it, a_n_col.
+let f_o_message__object = async function(o_data){
     if(!o_data.a_n_u8){
         a_n_tri__object = null;
         a_n_col__object = null;
         return { o_message: { s_type: 'object_loaded', n_id: o_data.n_id, a_n_tri: null, a_n_col: null, s_note: '' }, a_o_transfer: [] };
     }
-    let o_object = f_o_object__from_file(o_data.a_n_u8, o_data.s_name__file, o_data.s_text__mtl ?? null);
+    let o_object = await f_o_object__from_file({ s_name: o_data.s_name__file ?? '', a_n_u8: o_data.a_n_u8 }, o_data.a_o_file__side ?? [],
+        typeof OffscreenCanvas === 'undefined' ? null : f_o_image__decoded, o_data.n_item ?? 0);
     a_n_tri__object = o_object.a_n_tri;
     a_n_col__object = o_object.a_n_col ?? (o_data.a_n_col?.length === a_n_tri__object.length ? o_data.a_n_col : null);
     let a_n_tri = a_n_tri__object.slice(), a_n_col = a_n_col__object ? a_n_col__object.slice() : null;
     return {
-        o_message: { s_type: 'object_loaded', n_id: o_data.n_id, a_n_tri, a_n_col, s_note: o_object.s_note, ...f_o_bound(a_n_tri) },
+        o_message: { s_type: 'object_loaded', n_id: o_data.n_id, a_n_tri, a_n_col, s_note: o_object.s_note, a_s_item: o_object.a_s_item, n_item: o_object.n_item, ...f_o_bound(a_n_tri) },
         a_o_transfer: a_n_col ? [a_n_tri.buffer, a_n_col.buffer] : [a_n_tri.buffer]
     };
 };
@@ -147,7 +159,7 @@ self.onmessage = async function(o_event){
             o_bulb = await o_response.json();
         }
         let n_ms__start = performance.now();
-        let o_result = o_data.s_type === 'object' ? f_o_message__object(o_data)
+        let o_result = o_data.s_type === 'object' ? await f_o_message__object(o_data)
             : (o_data.s_type === 'build' ? f_o_message__build(o_data) : await f_o_message__export(o_data));
         o_result.o_message.n_ms = performance.now() - n_ms__start;
         self.postMessage(o_result.o_message, o_result.a_o_transfer);
