@@ -8,6 +8,7 @@ Diameter clearance = added to the hole diameter, not per side.
 
 | Date | Fit | Part | Hole | Result | Printer / material |
 |---|---|---|---|---|---|
+| 2026-11-14 | Clip, a C (Ø4.2 bore, 0.6 wall) with a Ø7 thread (2 mm pitch, 45 degree), screwed 7 deep into a thread that narrows towards its end, per side | lichterkette V2, clip in the bulb's neck | 0.25 at the entry, −0.3 at the end: the C closes by 0.6 | works, a bit tight. V3: both threads cones, 0.4 at the first turn, −0.2 all along when in; untested | ? |
 | 2026-11-13 | Motor bracket's arm, 1.4 thick, 10 wide, 12 free, printed on its side, with a pad on the can of an N20 motor, 25 degrees from its top; the pad's reach into the can, not a diameter | rechargable_motor_power_kit_turntable V6, motor bracket | −0.4: the arm bends up by it, about 3 to 4 N by estimate | untested | ? |
 | 2026-11-13 | N20 gearbox's Ø4 boss in the slot of the wall in front of it, on the side the worm's push leans the motor to; 0.3 on the other side | rechargable_motor_power_kit_turntable V6, base | 0.1 | untested | ? |
 | 2026-11-12 | Bracket's two arms, 2 thick, 10 wide, about 14 to 18 free, with pads on a LiPo battery (Ø10) and on a plug's socket on the board (Ø6); the pads' reach below the tops of the two, axial, not a diameter | rechargable_motor_power_kit_turntable V5, bracket | −0.4: the arms bend up by it, 4 to 9 N each by estimate | works: board and battery are locked (2026-11-13) | Elegoo Centauri Carbon 2, 0.2 mm, per v5_elegoo.3mf |
