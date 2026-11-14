@@ -11,7 +11,8 @@ Printed bulbs for an LED string light (Landi Schweiz). A clip snaps onto the soc
 | `rendered_parts/` | every part under its name |
 | `archive/` | V2 and its STLs |
 | `lichterketten_standards/landi_schweiz/` | `v1.scad`, the published push-in version (needs BOSL2 and an OpenSCAD newer than 2021.01), and its pictures |
-| `webapp/` | planned web app, see its `readme_hgc.md` |
+| `webapp/` | any 3D object as a bulb: placed with the mouse, hollowed, on this neck, OBJ colours painted into a 3MF for Bambu Studio, a slice view; `deno task start`, port 8770, see `webapp/readme.md` |
+| `deno.json` | the webapp's tasks: start, test, part |
 | `readme_hgc.md` | original goal |
 
 ## Parts

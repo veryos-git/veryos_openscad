@@ -1,0 +1,68 @@
+<!-- Copyright (C) Jonas Immanuel Frey - Licensed under GPL -->
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>VeryOS lichterkette bulb</title>
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<main id="el_app">
+    <section id="el_panel__left" class="panel" aria-label="Bulb">
+        <header class="panel__head panel__head--title">
+            <h1>Lichterkette bulb</h1>
+            <svg id="el_logo" viewBox="0 0 43.9095293518 31.2528266758" role="img" aria-label="VeryOS logo"><path fill="currentColor" fill-rule="evenodd" d="M 7.7528133542 9.1080260785 L 4.6193976626 1.5432914191 L 0 3.4567085809 L 11.5135290962 31.2528266758 L 32.3960002556 31.2528266758 L 43.9095293518 3.4567085809 L 39.2901316892 1.5432914191 L 36.1567159975 9.1080260785 A 15.6264133379 15.6264133379 0 0 0 7.7528133542 9.1080260785 Z M 30.9694268093 21.2528266758 A 10.6264133379 10.6264133379 0 0 0 21.9547646759 5 A 4.0632066689 4.0632066689 0 0 0 21.9547646759 13.1264133379 A 9.0632066689 9.0632066689 0 0 1 30.9694268093 21.2528266758 Z M 12.9401025425 10 A 9.0632066689 9.0632066689 0 0 0 21.9547646759 18.1264133379 A 4.0632066689 4.0632066689 0 0 1 21.9547646759 26.2528266758 A 10.6264133379 10.6264133379 0 0 1 12.9401025425 10 Z"/></svg>
+        </header>
+        <section id="el_project" aria-label="Saved bulbs"></section>
+        <div id="el_source"></div>
+    </section>
+
+    <section id="el_stage" aria-label="3D preview">
+        <canvas id="el_canvas"></canvas>
+        <p id="el_no_3d" role="alert" hidden></p>
+        <div id="el_view_bar" role="group" aria-label="View">
+            <div class="segment" id="el_look"></div>
+            <label class="check"><input type="checkbox" id="el_cut"> Cut open</label>
+            <label class="check"><input type="checkbox" id="el_base" checked> Clip</label>
+        </div>
+        <div id="el_cube_scene"><div id="el_cube">
+            <button type="button" data-az="-90" data-el="0" style="transform: translateZ(32px)">front</button>
+            <button type="button" data-az="90" data-el="0" style="transform: rotateY(180deg) translateZ(32px)">back</button>
+            <button type="button" data-az="180" data-el="0" style="transform: rotateY(-90deg) translateZ(32px)">left</button>
+            <button type="button" data-az="0" data-el="0" style="transform: rotateY(90deg) translateZ(32px)">right</button>
+            <button type="button" data-az="-90" data-el="90" style="transform: rotateX(90deg) translateZ(32px)">top</button>
+            <button type="button" data-az="-90" data-el="-90" style="transform: rotateX(-90deg) translateZ(32px)">bottom</button>
+        </div></div>
+        <div id="el_section" title="Section: hides what is above this height of the bulb, from 0.0, its bed, to 1.0, its top; below the top the slice shows the layer there">
+            <output id="el_section_val" for="el_section_range"></output>
+            <span>1.0</span>
+            <input id="el_section_range" type="range" min="0" max="1" step="0.001" value="1" aria-label="Section height">
+            <span>0.0</span>
+        </div>
+        <div id="el_mini">
+            <div class="mini" data-az="-90" data-el="0"><span>front</span></div>
+            <div class="mini" data-az="-90" data-el="90"><span>top</span></div>
+            <div class="mini" data-az="180" data-el="0"><span>left</span></div>
+        </div>
+        <button type="button" id="el_mini_toggle" title="Show or hide the front, top and left views">▼</button>
+        <figure id="el_slice" hidden>
+            <canvas id="el_slice_canvas" width="240" height="240" aria-label="The layer at the section's height, from above"></canvas>
+            <figcaption id="el_slice_label"></figcaption>
+        </figure>
+        <div id="el_legend" hidden></div>
+        <div id="el_status" role="status"></div>
+        <p id="el_hint">Drag to orbit &middot; right drag to pan &middot; scroll to zoom &middot; double click to reset</p>
+    </section>
+
+    <section id="el_panel__control" class="panel" aria-label="Settings">
+        <div id="el_control"></div>
+        <div id="el_view"></div>
+        <div id="el_stat"></div>
+        <div id="el_export"></div>
+    </section>
+</main>
+<script type="module" src="client.module.js"></script>
+</body>
+</html>

@@ -1,0 +1,13 @@
+{
+  "n_mm__neck_d": 10,
+  "n_mm__neck_scl_z": 7,
+  "n_mm__thread_d": 6.4,
+  "n_mm__thread_taper": 1.2,
+  "n_mm__thread_pitch": 2,
+  "n_mm__thread_depth": 0.8,
+  "n_mm__thread_tip": 0.1,
+  "n_mm__lead_in": 0.4,
+  "n_mm__clip_scl_z": 9,
+  "n_mm__clip_tip_d": 6.8,
+  "n_mm__clip_d": 8.34286
+}
