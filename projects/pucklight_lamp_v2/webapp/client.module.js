@@ -140,10 +140,11 @@ let f_o_post = function(s_type, b_draft){
 };
 
 // Gives the worker a 3D object's file, or null for none. Resolves to what it read:
-// { a_n_tri, a_n_col, s_note, a_n_min, a_n_max }: the triangles, their colours if there
-// are any, why not if the file speaks of some, and the box around the triangles.
-// o_more: { s_text__mtl }, the text of an OBJ's MTL, or { a_n_col }, the colours a lamp
-// keeps beside its object.
+// { a_n_tri, a_n_col, s_note, a_s_item, n_item, a_n_min, a_n_max }: the triangles, their
+// colours if there are any, why not if the file speaks of some, a 3MF's objects to choose
+// from and which of them this is, and the box around the triangles. o_more:
+// { a_o_file__side, n_item }, the files chosen with it, { s_name, a_n_u8 }, and which
+// object of a 3MF; or { a_n_col }, the colours a lamp keeps beside its object.
 let f_o_object = function(a_n_u8, s_name__file, o_more = {}){
     return new Promise(function(f_resolve, f_reject){
         let n_id = n_id__next++;

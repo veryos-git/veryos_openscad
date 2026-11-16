@@ -1,8 +1,8 @@
 // Copyright (C) Jonas Immanuel Frey - Licensed under GPL
-// The object: a loaded 3D object, an STL or an OBJ, as a lampshade. It is moved,
-// turned and resized with a gizmo in the view; the app joins it to a stem on the neck
-// and hollows it. An OBJ's colours become the lampshade's. Nothing here needs
-// writing code.
+// The object: a loaded 3D object, STL, OBJ, 3MF, GLB, glTF or PLY, as a lampshade. It
+// is moved, turned and resized with a gizmo in the view; the app joins it to a stem on
+// the neck and hollows it. The file's colours become the lampshade's. Nothing here
+// needs writing code.
 
 import { el } from './dom.module.js';
 import { f_el__control, f_el__group, f_el__button } from './control.module.js';
@@ -21,6 +21,10 @@ let n_mm__size_fitted = 120;
 let n_mm__size_min = 20;
 let n_mm__size_max = 300;
 let n_cm2__inside_warn = 3;
+// The files a 3D object can be, the first of them the object when several are chosen;
+// and what may come with them.
+let a_s_extension__object = ['3mf', 'glb', 'gltf', 'obj', 'ply', 'stl'];
+let s_accept = '.stl,.obj,.mtl,.3mf,.glb,.gltf,.bin,.ply,.png,.jpg,.jpeg,.webp';
 
 let a_o_control__shade = [
     { s_key: 'n_mm__wall', s_label: 'Wall', n_min: 0.8, n_max: 3, n_step: 0.1, s_unit: ' mm', n_decimal: 1, s_note: 'Thinner glows more. 0.8 is two lines of a 0.4 mm nozzle.' },
@@ -69,19 +73,26 @@ let f_o_kind__object = function(o_app){
 
     /* ---- Controls ---- */
 
-    let el_file = el('input', { type: 'file', accept: '.stl,.obj,.mtl', multiple: true, hidden: true });
+    let el_file = el('input', { type: 'file', accept: s_accept, multiple: true, hidden: true });
     let el_info = el('p', { id: 'el_object_info' });
     // Why an object that speaks of colours has none here.
     let el_note__color = el('p', { className: 'row__note', hidden: true });
     let el_tool = el('div', { id: 'el_object_tool', hidden: true });
+    // A 3MF of several objects: which of them is the lampshade.
+    let el_item = el('select', { id: 'el_object_item' });
+    el_item.setAttribute('aria-label', 'Object in the file');
+    let el_row__item = el('label', { className: 'row', hidden: true }, [el('span', { className: 'row__top' }, [el('span', { textContent: 'Object in the file' }), el_item])]);
+    // The files last chosen, kept to read another of their objects.
+    let o_file__last = null;
     let el_source = el('div', { className: 'source source--object', hidden: true }, [
         el('header', { className: 'panel__head' }, [el('h2', { textContent: '3D object' })]),
         el('div', { className: 'source__body' }, [
             f_el__button('Load a 3D object…', function(){ el_file.click(); }, 'action action--main'),
             el_file,
-            el('p', { className: 'row__note', textContent: 'An STL or an OBJ. An OBJ may have colours: if they are in an .mtl file, choose both. Or drop the files onto this page.' }),
+            el('p', { className: 'row__note', textContent: 'STL, OBJ, 3MF, GLB, glTF or PLY, in its colours: painted or by parts in a 3MF, of points, materials or a picture otherwise. Choose the files that come with it too: an OBJ\u2019s .mtl and picture, a glTF\u2019s .bin and pictures. Or drop them all onto this page.' }),
             el_info,
             el_note__color,
+            el_row__item,
             el_tool
         ])
     ]);
@@ -204,10 +215,39 @@ let f_o_kind__object = function(o_app){
         }
     });
 
+    // The worker's reading of the files kept, the n_item-th object of a 3MF. The main
+    // file's bytes go to the worker; the others are copied.
+    let f_o_loaded = function(o_file, n_item){
+        let o_main = o_file.a_o_read.find(function(o){ return o.s_name === o_file.s_name; });
+        return o_app.f_o_object(o_main.a_n_u8.slice(), o_main.s_name, {
+            a_o_file__side: o_file.a_o_read.filter(function(o){ return o !== o_main; }),
+            n_item
+        });
+    };
+    el_item.addEventListener('change', async function(){
+        if(!o_file__last){ return; }
+        o_app.f_set_status(`Reading ${el_item.selectedOptions[0]?.textContent ?? 'the object'}…`);
+        try{
+            f_take(await f_o_loaded(o_file__last, Number(el_item.value)));
+        } catch(o_error){
+            o_app.f_set_status(o_error.message, true);
+            return;
+        }
+        o_setting.b_color = a_n_col !== null;
+        b_object_changed = true;
+        f_fit();
+        f_placed(true);
+    });
+
     // Takes an object's triangles and colours from the worker, or null for none.
     let f_take = function(o_loaded){
         a_n_tri = o_loaded.a_n_tri;
         a_n_col = o_loaded.a_n_col ?? null;
+        el_row__item.hidden = !o_loaded.a_s_item;
+        if(o_loaded.a_s_item){
+            el_item.replaceChildren(...o_loaded.a_s_item.map(function(s_item, n_idx){ return el('option', { value: String(n_idx), textContent: `${n_idx + 1}. ${s_item}` }); }));
+            el_item.value = String(o_loaded.n_item ?? 0);
+        }
         el_note__color.textContent = o_loaded.s_note ?? '';
         el_note__color.hidden = !o_loaded.s_note;
         if(a_n_tri){ a_n_pivot = o_loaded.a_n_min.map(function(n_min, n_idx){ return 0.5 * (n_min + o_loaded.a_n_max[n_idx]); }); }
@@ -218,18 +258,21 @@ let f_o_kind__object = function(o_app){
             o_app.o_viewer.f_set_view({ b_shade: true });
         }
     };
-    // The files chosen or dropped: the object's, and with an OBJ its MTL, which has
-    // the colours of its materials.
+    // The files chosen or dropped: the object's, and what comes with it: an OBJ's MTL
+    // and pictures, a glTF's .bin and pictures. Read as { s_name, a_n_u8 }, kept for
+    // reading another object of a 3MF.
     let f_load_file = async function(a_o_file){
-        let o_file__mtl = a_o_file.find(function(o){ return /\.mtl$/i.test(o.name); });
-        let o_file = a_o_file.find(function(o){ return /\.(stl|obj)$/i.test(o.name); }) ?? a_o_file.find(function(o){ return o !== o_file__mtl; });
-        if(!o_file){
-            if(o_file__mtl){ o_app.f_set_status(`${o_file__mtl.name} has an object’s colours alone: choose it together with its .obj.`, true); }
+        let f_n_rank = function(o){ let n = a_s_extension__object.indexOf(o.name.split('.').pop().toLowerCase()); return n < 0 ? Infinity : n; };
+        let o_file = [...a_o_file].sort(function(o_a, o_b){ return f_n_rank(o_a) - f_n_rank(o_b); })[0];
+        if(!o_file || f_n_rank(o_file) === Infinity){
+            if(a_o_file.length){ o_app.f_set_status(`${a_o_file.map(function(o){ return o.name; }).join(', ')}: none of them is a 3D object. Choose the object's file together with these.`, true); }
             return;
         }
         o_app.f_set_status(`Reading ${o_file.name}…`);
         try{
-            f_take(await o_app.f_o_object(new Uint8Array(await o_file.arrayBuffer()), o_file.name, { s_text__mtl: o_file__mtl ? await o_file__mtl.text() : null }));
+            let a_o_read = await Promise.all(a_o_file.map(async function(o){ return { s_name: o.name, a_n_u8: new Uint8Array(await o.arrayBuffer()) }; }));
+            o_file__last = { s_name: o_file.name, a_o_read };
+            f_take(await f_o_loaded(o_file__last, 0));
         } catch(o_error){
             o_app.f_set_status(o_error.message, true);
             return;

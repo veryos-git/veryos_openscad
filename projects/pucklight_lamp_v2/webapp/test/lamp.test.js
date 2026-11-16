@@ -391,7 +391,7 @@ Deno.test({ name: 'the worker takes an object\'s file and builds its lampshade w
         // An OBJ whose colours are its materials': with its MTL it has them, without it says where they are.
         let a_n_tri__box = f_a_n_tri__box([-30, -30, 0], [30, 30, 60]);
         let s_obj__material = 'mtllib box.mtl\n' + f_s_obj__of_tri(a_n_tri__box).replace('f 1 2 3', 'usemtl down\nf 1 2 3').replace('f 7 8 9', 'usemtl rest\nf 7 8 9');
-        let o_material = await f_o_answer({ s_type: 'object', a_n_u8: new TextEncoder().encode(s_obj__material), s_name__file: 'box.obj', s_text__mtl: 'newmtl down\nKd 0 1 0\nnewmtl rest\nKd 1 1 0\n' });
+        let o_material = await f_o_answer({ s_type: 'object', a_n_u8: new TextEncoder().encode(s_obj__material), s_name__file: 'box.obj', a_o_file__side: [{ s_name: 'box.mtl', a_n_u8: new TextEncoder().encode('newmtl down\nKd 0 1 0\nnewmtl rest\nKd 1 1 0\n') }] });
         assertEquals([[...o_material.a_n_col.subarray(0, 3)], [...o_material.a_n_col.subarray(18, 21)], [...o_material.a_n_col.subarray(-3)], o_material.s_note], [[0, 255, 0], [255, 255, 0], [255, 255, 0], '']);
         let o_alone = await f_o_answer({ s_type: 'object', a_n_u8: new TextEncoder().encode(s_obj__material), s_name__file: 'box.obj' });
         assertEquals([o_alone.a_n_col, o_alone.s_note], [null, 'Its colours are in box.mtl: choose both files together to have them.']);
@@ -400,7 +400,7 @@ Deno.test({ name: 'the worker takes an object\'s file and builds its lampshade w
         // A file that is none is told, and the object before it stays.
         let o_wrong = await f_o_answer({ s_type: 'object', a_n_u8: new TextEncoder().encode('not a 3D object'), s_name__file: 'notes.stl' });
         assertEquals([o_wrong.s_type, o_wrong.s_for, o_wrong.n_id], ['error', 'object', n_id]);
-        assert(/neither an STL nor an OBJ/.test(o_wrong.s_message), o_wrong.s_message);
+        assert(/none of STL, OBJ, 3MF, GLB, glTF and PLY/.test(o_wrong.s_message), o_wrong.s_message);
         assertEquals((await f_o_answer({ s_type: 'build', o_setting, a_n_mat4: f_a_n_mat4(60, 1), n_mm__voxel: 1.6, n_id__place: 9 })).o_stat.b_object, true);
         // And it can be taken away.
         assertEquals((await f_o_answer({ s_type: 'object', a_n_u8: null })).a_n_tri, null);

@@ -197,6 +197,8 @@ kbd{
 .source__body .action{ margin: 0 0 6px; }
 #el_object_info{ margin: 8px 0; font-size: 12px; color: var(--s_col__text); overflow-wrap: anywhere; }
 #el_object_tool .tool_row{ margin-top: 6px; }
+/* a 3MF's objects: the list takes what is left of the row, long names cut short */
+#el_object_item{ flex: 1 1 0; min-width: 0; }
 .number{ display: inline-flex; align-items: center; gap: 5px; color: var(--s_col__muted); }
 .number input{
     width: 76px;

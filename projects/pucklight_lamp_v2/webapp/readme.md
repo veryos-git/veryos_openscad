@@ -21,7 +21,7 @@ Needs [Deno](https://deno.com) and a browser with WebGL2. The editor comes from 
 | Sphere | a shader, as in Shadertoy, or a loaded picture: a heightmap | relief on the outside of a Ø100 sphere, smooth inside: planets, lithophanes, patterns | walls, thick where it stands out | `pucklight_sphere/mathematical` |
 | Vase | a script that places the corners of each layer | any shape above the thread | one wall, in a slicer's vase mode | `pucklight_lamps`, before `pucklight_vase` |
 | Egg | a seamless tile of scales, sliders | relief on an egg, the brand's logo engraved if wanted: a dragon egg | walls, or one wall in vase mode | `rose_pink_translucent_lamp/dragon_egg_app` |
-| Object | a loaded 3D object, STL or OBJ, placed with the mouse: no code | the object, hollowed to one wall thickness and joined to the neck, in the colours an OBJ has | walls; not in vase mode | new, 2026-11-13 |
+| Object | a loaded 3D object, STL, OBJ, 3MF, GLB, glTF or PLY, placed with the mouse: no code | the object, hollowed to one wall thickness and joined to the neck, in the colours the file has | walls; not in vase mode | new, 2026-11-13 |
 
 - The older apps are in `../../01_published_or_archived/`, deprecated. Their saved projects are here in `project/`: 18 spheres, 14 vases.
 - All kinds have one neck: the lampshade's of `../pucklight_lamp_v2V5.scad`, Ø67, 2 mm pitch. They screw into the lamp's cup, and into the sockel of the older lamps.
@@ -170,8 +170,9 @@ The editor holds the body of a function: it gets `o_thread`, sees `noise` and th
 
 | Control | Does |
 |---|---|
-| Load a 3D object…, or files dropped onto the page | STL, binary or text, or OBJ; with an OBJ its `.mtl`, if its colours are there; one object a lamp |
-| at loading | its numbers are mm; below 20 or above 300 mm it becomes 120 mm; it stands in the middle, 2 mm into the stem |
+| Load a 3D object…, or files dropped onto the page | STL, binary or text, OBJ, 3MF, GLB, glTF, PLY, and what comes with it: an OBJ's `.mtl` and picture, a glTF's `.bin` and pictures; one object a lamp |
+| Object in the file | a 3MF of several objects: which one is the lampshade |
+| at loading | its numbers are mm, a glTF's metres; below 20 or above 300 mm it becomes 120 mm; it stands in the middle, 2 mm into the stem |
 | arrows in the view | move along x, y, z |
 | rings in the view | turn around x, y, z |
 | orange ring | resize: as many times larger as the pointer goes further from the middle |
@@ -209,14 +210,16 @@ The editor holds the body of a function: it gets `o_thread`, sees `noise` and th
 | 0.8 mm, or Detail if coarser | the lampshade in the view, once the place is final | 0.7 s |
 | Detail, 0.6 mm | the print file | 1.4 s, 1.2 million triangles |
 
-| Colours of an OBJ | Read |
+| File | Colours read |
 |---|---|
-| a point's own, `v x y z r g b`, from 0 to 1 or from 0 to 255 | yes; this app's own OBJ is such a file |
-| ZBrush's `#MRGB` lines | yes |
-| a material's, `usemtl` with `Kd` in the `.mtl` | yes, if the `.mtl` is chosen or dropped together with the OBJ; else the page says where they are |
-| a picture, `map_Kd` | no; the page says so |
-| one colour alone | counts as none: the lampshade stays white |
+| 3MF | painted filaments of Bambu Studio, Orca and PrusaSlicer (`paint_color`, `slic3rpe:mmu_segmentation`), triangles cut by the paint too; else each part's filament (`Metadata/model_settings.config`, `Slic3r_PE_model.config`); else the 3MF's own `basematerials` and `colorgroup`. Filament colours from `project_settings.config` or `Slic3r_PE.config`, stand-ins if missing. Modifiers, negative parts and support blockers left out. Units as the file says |
+| GLB, glTF | base colour of the material × points' `COLOR_0` × base colour picture (PNG, JPEG, WebP), all meshes where the scene's nodes put them; y up to z up, metres to mm |
+| OBJ | points' colours (`v x y z r g b`, from 0 to 1 or 255; ZBrush's `#MRGB`); else the material's picture (`map_Kd`), else its `Kd`; the `.mtl` and the picture chosen or dropped with the OBJ, else the page says where they are |
+| PLY | text or numbers, points' or faces' `red green blue` |
 | STL | has none |
+| a picture | turned into colours of corners: triangles cut until their corners are 2 pixels of the picture apart, or 1/500 of the object; 2.5 million triangles at most, coarser beyond, and told |
+| not read | Draco or meshopt packed glTF (told to export without), a 3MF's pictures, KTX2 pictures; a PLY of points alone, a scan's cloud or a Gaussian splat, is refused: it has no surface |
+| one colour alone | counts as none: the lampshade stays white |
 
 | Where | Colour |
 |---|---|
@@ -229,7 +232,8 @@ The editor holds the body of a function: it gets `o_thread`, sees `noise` and th
 | print file | the OBJ; STL and 3MF have no colours |
 | `object_color.bin` | r, g, b, a byte each, for each corner of each triangle of `object.stl` |
 
-- `object.stl` holds the object's triangles as they were loaded, an OBJ's too; where it stands is in `project.json` as place, turn and size.
+- `object.stl` holds the object's triangles as they were loaded, of any file, cut where a picture's colours needed it; where it stands is in `project.json` as place, turn and size.
+- A picture makes `object.stl` large: an AI generator's GLB of 34 MB with a 4096 picture, 1.9 million triangles, became 95 MB and `object_color.bin` 17 MB.
 - A lamp that becomes another kind gives up its `object.stl` at the next save.
 
 ## Scale patterns
@@ -250,7 +254,8 @@ The editor holds the body of a function: it gets `o_thread`, sees `noise` and th
 | `client.module.js` | the page: the lamp on screen, the worker, the view's controls, the print files |
 | `kind_sphere.module.js`, `kind_vase.module.js`, `kind_egg.module.js`, `kind_object.module.js` | each kind's controls and what it tells the worker |
 | `sphere.module.js`, `vase.module.js`, `egg.module.js`, `object.module.js` | each kind's mesh |
-| `mesh_file.module.js`, `gizmo.module.js` | an object's file as triangles and colours; its place, the handles and what a drag of each does |
+| `mesh_file.module.js`, `mesh_file_3mf.module.js`, `mesh_file_glb.module.js`, `mesh_file_ply.module.js`, `texture.module.js` | an object's file as triangles and colours: STL and OBJ, 3MF, glTF, PLY; pictures into colours of corners; from `../../lichterkette/webapp/` |
+| `gizmo.module.js` | an object's place, the handles and what a drag of each does |
 | `noise.module.js`, `vase_example.module.js` | a script's noise, public domain by its header; the example scripts |
 | `heightmap.module.js`, `logo.module.js`, `color.module.js` | an egg's 16 bit PNGs; both logos as distance fields; the points' colours |
 | `worker.module.js` | builds the lampshades and writes the print files, away from the page |
@@ -278,6 +283,8 @@ The editor holds the body of a function: it gets `o_thread`, sees `noise` and th
 | `test/sphere.test.js`: walls of 0.4 to 2 mm; lamps saved with a depth of 0.2 to 5 | the inside that much under Ø100, the outside and the thread unmoved, the wall at the thread's root no thinner; the same sphere as before, to the last bit |
 | `test/object.test.js` | ball, box, ring, inside-out, holed, overlapping, loose, clipped, thin, large: closed, right way out; a ball's outside within 0.04 mm at 0.8; the neck the egg's; STL and OBJ read |
 | Same, colours: a box with a colour a side, a ball in a gradient, a ball with a hole; OBJs with colours of points, `#MRGB`, materials, a picture | the sides exact, outside and inside; the gradient within 5 of 255 outside, 10 inside; the hole in the colour around it; read, or told why not |
+| `test/file.test.js`, the Lichterkette app's: files made in the test: a 3MF with its own colours in cm; a Bambu Studio 3MF of two objects, parts in filaments, a negative part, paint whole and cut; this app's whole lamp 3MF, each object chosen; glTF with materials, points' colours, nodes, a mirroring node, Draco; glTF and OBJ with a picture; PLY as text and as numbers both ways round, a splat | the colours and sizes asked for; refusals told |
+| Real files in headless Chrome 154, 2026-11-16: an AI generator's GLB with a 4096 picture, a GLB with points' colours, a 3MF of 4 objects and its second, a coloured PLY relief, a Gaussian splat; the GLB saved and opened again | each a lampshade in 3 to 5 s, the GLB's in its colours; the 3MF's objects to choose; the splat told; saved and reopened in its colours, counts as saved; console clean |
 | `test/gizmo.test.js` | place as matrix; each handle under the pointer; where a drag of each leads |
 | `test/server.test.js` | create, read, update, rename, delete, texture, object and its colours; refuses bad names, bad lamps, other sites' `Origin` and `Host`, paths outside its folder |
 | `test/viewer.test.js`, on Mesa's software renderer | every kind in every look, cut, section, small views; both logos upright; the object while placed, grey or in its colours, the gizmo's handles, a drag on one and beside them |
@@ -312,7 +319,7 @@ The editor holds the body of a function: it gets `o_thread`, sees `noise` and th
 - Not sliced, not printed from this app. The lampshade of the `.scad` file printed and fits (2026-11-12); these necks are its neck.
 - Only on software WebGL in Chrome: no real GPU, no Firefox.
 - Object: only test shapes of this app's own making, no model from the internet; no touch screen; not sliced.
-- Object in colours: only OBJs the tests wrote, none from Nomad Sculpt, ZBrush, Blender or a slicer; the OBJ print file not opened in a slicer.
+- Object in colours: OBJs only the tests wrote, none from Nomad Sculpt, ZBrush, Blender or a slicer; of the other files only those under Checks; the OBJ print file not opened in a slicer.
 - A sphere's thinnest wall of 0.5 mm: not sliced, not printed; it also carries the sphere above the neck.
 - A vase's single wall around the cup's core, Ø62 inside the neck's Ø63 bore: by the generator's numbers, not printed.
 
