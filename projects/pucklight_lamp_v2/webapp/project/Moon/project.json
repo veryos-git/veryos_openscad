@@ -7,9 +7,10 @@
     "n_scale": 12,
     "n_seed": 3,
     "n_gamma": 1,
-    "n_mm__depth": 3,
+    "n_mm__wall_min": 0.6,
+    "n_mm__wall_max": 3.4,
     "n_deg__relief_from": -43,
-    "n_cnt__column": 720,
+    "n_cnt__column": 2048,
     "a_o_stop": [
       {
         "n_t": 0,

@@ -78,6 +78,8 @@ VeryOS brand and identity: veryos stands for very open source. the core phylosop
 projects:projects are stored and worked on in the 'projects' folder. each project should contain a .md file that describes the project. each project should have the veryos logo engraved if possible. if  a project contains multiple parts, the logo should be engraved on each part. 
  if this is not possible because of missing space, it can be omitted.
 
+ if a project is a scad script , please also create a folder 'rendered_parts' with simple rendered images of each part and a rendered image with an overview of all parts and clearly labeled so that when talking about a part like for example , 'the "top lid" in project x is to small"' it is clear what part is meant.  
+
 ---
 lessons learned: lessons_learned.md in the workspace root collects findings from real prints (clearances, fits). check it before choosing clearances. add new findings there as compact table rows or one-line rules, no floating text.
 
