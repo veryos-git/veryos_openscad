@@ -151,6 +151,20 @@ The editor holds the body of a function: it gets `o_thread`, sees `noise` and th
 - A mistake shows in the status and the editor with its line; the last good vase stays.
 - The examples' numbers, the dome and the noise in detail: `../../01_published_or_archived/pucklight_lamps/readme.md`.
 
+Graph, below Script: formulas of x drawn as in Desmos, to see what a script's functions do before they shape a vase.
+
+| Control | Does |
+|---|---|
+| a row `y1 = …` | a formula of x as a script writes it: `sin()`, `mix()`, `fract()`, `noise.simplex2()`, `PI` and the others; `y =` in front is left out; `^` is a power, in a script `**` or `pow()` |
+| + Formula, × | another row; that row goes |
+| drag, wheel, double click | move; zoom around the pointer, with Shift x only, with Ctrl y only; back to x from -10 to 10 |
+| pointer over the graph | each formula's point at its x, the numbers below |
+| Graph | opens and closes it |
+
+- A mistake shows under its row: `sin(x` as a missing `)`, a name the formula does not know, such as a script's own `n_tau`, as not defined.
+- A line breaks where its formula has no number or jumps, as `fract()` and `tan()` do, not where it is only steep.
+- The formulas, the view and whether it is open are this browser's, not the lamp's: `project.json` stays as it was.
+
 ## Egg
 
 | Is | How |
@@ -257,6 +271,7 @@ The editor holds the body of a function: it gets `o_thread`, sees `noise` and th
 | `mesh_file.module.js`, `mesh_file_3mf.module.js`, `mesh_file_glb.module.js`, `mesh_file_ply.module.js`, `texture.module.js` | an object's file as triangles and colours: STL and OBJ, 3MF, glTF, PLY; pictures into colours of corners; from `../../lichterkette/webapp/` |
 | `gizmo.module.js` | an object's place, the handles and what a drag of each does |
 | `noise.module.js`, `vase_example.module.js` | a script's noise, public domain by its header; the example scripts |
+| `graph.module.js` | a vase's graph of formulas of x |
 | `heightmap.module.js`, `logo.module.js`, `color.module.js` | an egg's 16 bit PNGs; both logos as distance fields; the points' colours |
 | `worker.module.js` | builds the lampshades and writes the print files, away from the page |
 | `viewer.module.js` | the 3D view and its shaders |
@@ -286,6 +301,8 @@ The editor holds the body of a function: it gets `o_thread`, sees `noise` and th
 | `test/file.test.js`, the Lichterkette app's: files made in the test: a 3MF with its own colours in cm; a Bambu Studio 3MF of two objects, parts in filaments, a negative part, paint whole and cut; this app's whole lamp 3MF, each object chosen; glTF with materials, points' colours, nodes, a mirroring node, Draco; glTF and OBJ with a picture; PLY as text and as numbers both ways round, a splat | the colours and sizes asked for; refusals told |
 | Real files in headless Chrome 154, 2026-11-16: an AI generator's GLB with a 4096 picture, a GLB with points' colours, a 3MF of 4 objects and its second, a coloured PLY relief, a Gaussian splat; the GLB saved and opened again | each a lampshade in 3 to 5 s, the GLB's in its colours; the 3MF's objects to choose; the splat told; saved and reopened in its colours, counts as saved; console clean |
 | `test/gizmo.test.js` | place as matrix; each handle under the pointer; where a drag of each leads |
+| `test/graph.test.js`: formulas with a script's functions, `y =`, `^`, a comment, mistakes; the grid; `fract`, `floor`, `tan`, `1 / x`, `sin(x*x)` | the right numbers; mistakes in the formula's words; the grid's steps 1, 2, 5 and short numbers; a line broken at each jump and pole, not where steep |
+| The graph in headless Chrome 157, 2026-11-17: formulas, mistakes, pointer, wheel, Shift + wheel, drag, reload, double click, close | works; formulas and view back after the reload; console clean but for the scale patterns' missing `index.json` |
 | `test/server.test.js` | create, read, update, rename, delete, texture, object and its colours; refuses bad names, bad lamps, other sites' `Origin` and `Host`, paths outside its folder |
 | `test/viewer.test.js`, on Mesa's software renderer | every kind in every look, cut, section, small views; both logos upright; the object while placed, grey or in its colours, the gizmo's handles, a drag on one and beside them |
 | The 30 lamps carried over first, in headless Chrome 154 | each opens, builds, counts as saved, and saves with the bytes it had |
@@ -322,5 +339,6 @@ The editor holds the body of a function: it gets `o_thread`, sees `noise` and th
 - Object in colours: OBJs only the tests wrote, none from Nomad Sculpt, ZBrush, Blender or a slicer; of the other files only those under Checks; the OBJ print file not opened in a slicer.
 - A sphere's thinnest wall of 0.5 mm: not sliced, not printed; it also carries the sphere above the neck.
 - A vase's single wall around the cup's core, Ø62 inside the neck's Ø63 bore: by the generator's numbers, not printed.
+- The vase's graph: no pinch on a touch screen, not in Firefox.
 
 Licensed under GPL. The planets' textures in `project/` are NASA, USGS and Hubble OPAL data, see `../../01_published_or_archived/pucklight_sphere/planets/readme.md`.

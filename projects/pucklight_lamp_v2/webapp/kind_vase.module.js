@@ -5,6 +5,7 @@
 import { el } from './dom.module.js';
 import { f_el__group } from './control.module.js';
 import { examples as o_s_example } from './vase_example.module.js';
+import { f_el__graph } from './graph.module.js';
 
 // Waits this long after the last key before running the script, in ms.
 let n_ms__typing = 400;
@@ -72,7 +73,7 @@ let f_o_kind__vase = function(o_app){
             el('span', { className: 'row__top' }, [el('span', { textContent: 'Example' }), el_example]),
             el('small', { className: 'row__note', textContent: 'The script returns {n_its_layer, n_its_corner, f_o_p}: f_o_p() is called for each corner of each layer above the thread, and returns {n_x, n_y, n_z} in mm. template explains it.' })
         ])
-    ]));
+    ]), f_el__graph());
     o_app.el_control.append(el_control);
 
     return {
