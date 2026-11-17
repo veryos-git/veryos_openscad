@@ -1,5 +1,5 @@
 // Copyright (C) Jonas Immanuel Frey - Licensed under GPL
-// The saved lamps: create, open, change, rename and delete them, through serve.js. A
+// The saved lamps: create, open, change, copy and delete them, through serve.js. A
 // lamp is { s_name, s_kind, s_brand, o_setting }, and its name is its folder's.
 
 import { el } from './dom.module.js';
@@ -84,7 +84,13 @@ let f_o_panel__project = function({
 
     let f_render_state = function(){
         let b_dirty = f_b_dirty();
-        let s_state = f_o_project__open() ? (b_dirty ? 'Unsaved changes' : 'All changes saved') : (b_dirty ? 'Not saved yet' : 'A new lamp');
+        let o_open = f_o_project__open();
+        let s_state = o_open ? (b_dirty ? 'Unsaved changes' : 'All changes saved') : (b_dirty ? 'Not saved yet' : 'A new lamp');
+        if(o_open && f_s_name() && f_s_name() !== o_open.s_name){
+            s_state = a_o_project.some(function(o_project){ return o_project.s_name === f_s_name(); })
+                ? `“${f_s_name()}” is another lamp’s name`
+                : `Save makes a new lamp, “${o_open.s_name}” stays as saved`;
+        }
         el_state.textContent = s_note || s_state;
         el_state.dataset.state = s_note ? 'note' : (b_dirty ? 'dirty' : 'clean');
     };
@@ -93,14 +99,13 @@ let f_o_panel__project = function({
         a_o_project.sort(function(o_a, o_b){ return o_a.s_name.localeCompare(o_b.s_name); });
     };
 
-    // Saves what is on screen under the name in the box: a new lamp, the open one, or
-    // the open one under its new name. A lamp deleted in the meantime, say in another
-    // window, is saved as a new one.
+    // Saves what is on screen under the name in the box: the open lamp under its own
+    // name, else a new lamp, and the open one stays as it was saved. A lamp deleted in
+    // the meantime, say in another window, is saved as a new one.
     let f_o_project__stored = async function(s_name){
         let o_design = f_o_design();
-        if(s_name__open !== null){
+        if(s_name === s_name__open){
             try{
-                if(s_name !== s_name__open){ await f_v_fetched(f_s_url__of_name(s_name__open), f_o_option__json('PATCH', { s_name })); }
                 return await f_v_fetched(f_s_url__of_name(s_name), f_o_option__json('PUT', o_design));
             } catch(o_error){
                 if(o_error.n_status !== 404){ throw o_error; }
@@ -121,7 +126,7 @@ let f_o_panel__project = function({
         try{
             let o_saved = await f_o_project__stored(s_name);
             await f_save_extra(o_saved.s_name);
-            a_o_project = [o_saved, ...a_o_project.filter(function(o_project){ return o_project.s_name !== o_saved.s_name && o_project.s_name !== s_name__open; })];
+            a_o_project = [o_saved, ...a_o_project.filter(function(o_project){ return o_project.s_name !== o_saved.s_name; })];
             f_sort();
             f_set_open(o_saved.s_name);
             el_name.value = o_saved.s_name;

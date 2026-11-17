@@ -31,9 +31,9 @@ Needs [Deno](https://deno.com) and a browser with WebGL2. The editor comes from 
 | | Control | On disk |
 |---|---|---|
 | Create | type a name, Save or Enter | `project/<name>/project.json` |
+| Create | another name, Save | a new lamp; the open one stays as it was saved |
 | Read | the list; the address `#<name>` opens it again after a reload | |
 | Update | Save, or Ctrl+S, in the editor too; the line under the name says what is unsaved | `project.json`; a sphere's texture in `texture.png`; an object in `object.stl`, its colours in `object_color.bin` |
-| Update | another name, Save | the folder moves, with what else lies in it |
 | Copy | Save copy | `project/<name> copy/` |
 | Delete | × on its row, asks first | the folder goes |
 | Start over | New: a new lamp of the kind on screen | |
@@ -311,6 +311,7 @@ Graph, below Script: formulas of x drawn as in Desmos, to see what a script's fu
 | Object in headless Chrome 154: load, drop, each handle by mouse, buttons, numbers, save, reopen, copy, other kind, STL, whole lamp, a file that is none | works, console clean |
 | Object in colours, same: an OBJ with its points' colours, one with and without its `.mtl`, one with a picture; save, reopen, copy, the OBJ print file, an object without colours over it, other kind | works, console clean; the print file has the five colours |
 | The 35 lamps in `project/` on 2026-11-13, same | each opens, builds, counts as saved; saved again it has the bytes it had, but for the 17 spheres' walls in place of their depth and an object's `b_color` |
+| Save under another name, same, 2026-11-17: a vase, the Moon with its texture, an object; Ctrl+S under its own name; another lamp's name | a new lamp each, with its texture or object; the open one's files as they were, to the byte; no new folder; refused and told, that lamp unchanged; console clean |
 | A sphere's wall, same: a new lamp, both sliders, a thickest below the thinnest, the Moon saved with a depth of 3 | 0.5 and 3.2; more plastic with a thicker wall; smooth and told; opens as 0.8 and 3.8, saved and opened again with 0.5 and 3.2 |
 | The print files read back with numpy: STL of each kind, 3MF, OBJ | closed; top part 22.1 cm³ and screwin 13.5 cm³ as the generator's; the top part upside down on z = 0 |
 | Without the internet | a text box replaces the editor, the rest works |
