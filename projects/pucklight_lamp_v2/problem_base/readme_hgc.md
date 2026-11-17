@@ -45,3 +45,5 @@ return {
 `
 
 the base looks weird
+
+fixed in 162d396: vase.module.js joins the collar to layer 1 by angle around the axis, not by shorter edges. this may already be fixed uncommitted on another pc: there keep one of the two fixes, not both, and run `deno task test`.
