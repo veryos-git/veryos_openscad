@@ -116,6 +116,31 @@ Deno.test('3 to 500 corners, clockwise and counter-clockwise, starting anywhere:
     }
 });
 
+Deno.test('a first layer whose radius jumps from corner to corner is joined to the collar where it lies, seen from the axis', function(){
+    // 15 half circles, 10 mm high, on radius 45: at their feet the radius jumps by 2 mm from
+    // one corner to the next. Each triangle from the collar to layer 1 spans one step of
+    // either ring, 2 degrees on the collar, not half the vase.
+    for(let n_turn of [1, -1]){
+        let n_its_corner = 444;
+        let o_vase = vase_mesh({ n_its_layer: 2, n_its_corner, f_o_p: function(n_it_layer_nor, n_it_corner_nor){
+            let n_b = (30 * n_it_corner_nor) % 2 - 1;
+            let n_r = 45 + 10 * Math.sqrt(1 - n_b * n_b);
+            return { n_x: n_r * Math.sin(n_turn * n_it_corner_nor * n_tau), n_y: n_r * Math.cos(n_it_corner_nor * n_tau), n_z: collar_top + 12 + 100 * n_it_layer_nor };
+        } });
+        f_check_closed(o_vase.positions, o_vase.indices, `half circles, turning ${n_turn}`);
+        let p = o_vase.positions, t = o_vase.indices;
+        let f_n_deg = function(n_id){ return Math.atan2(p[n_id * 3 + 1], p[n_id * 3]) * 360 / n_tau; };
+        let n_deg__widest = 0;
+        for(let n_off = o_vase.walls[0]; n_off < o_vase.walls[0] + (180 + n_its_corner) * 3; n_off += 3){
+            for(let [a, b] of [[t[n_off], t[n_off + 1]], [t[n_off + 1], t[n_off + 2]], [t[n_off + 2], t[n_off]]]){
+                let n_deg = Math.abs(f_n_deg(a) - f_n_deg(b));
+                n_deg__widest = Math.max(n_deg__widest, Math.min(n_deg, 360 - n_deg));
+            }
+        }
+        assert(n_deg__widest < 3, `half circles, turning ${n_turn}: a triangle from the collar spans ${n_deg__widest} degrees`);
+    }
+});
+
 // A wave around a circle whose flanks lean over: seen from the axis, the wall goes back
 // and forth. n_fold 0 is a plain wave; above 1 no point sees the whole layer.
 let f_o_script__folded = function(n_fold, n_its_corner, n_turn = 1, o_more = {}){

@@ -255,10 +255,21 @@ function vase_mesh(script) {
     }
     const walls_start = n;
     // The collar's ring to the script's first layer: they differ in their number of
-    // points, so each step goes on along the ring where that makes the shorter edge.
+    // points, so each step goes on along the ring whose next edge's middle comes first
+    // around the axis, seen from above. The angles count on past a turn, from the first
+    // corner and the collar's column nearest to it. Shorter edges led the steps astray
+    // on a layer whose radius jumps from corner to corner: one corner took half the collar.
+    const angle = (id) => Math.atan2(positions[id * 3 + 1], positions[id * 3]) * deg_per_rad;
+    const layer_angles = [(angle(corner_id(1, 0)) + 360) % 360];
+    for (let j = 1; j <= corners; j++) {
+        const step = angle(corner_id(1, j)) - angle(corner_id(1, j - 1));
+        layer_angles.push(layer_angles[j - 1] + step - 360 * Math.round(step / 360));
+    }
+    const first = Math.round(layer_angles[0] * columns / 360);
+    const column_angle = (i) => (first + i) * 360 / columns;
     for (let i = 0, j = 0; i < columns || j < corners;) {
-        const [a, a1, b, b1] = [ring_id(collar, i), ring_id(collar, i + 1), corner_id(1, j), corner_id(1, j + 1)];
-        if (j === corners || (i < columns && distance2(a1, b) <= distance2(a, b1))) {
+        const [a, a1, b, b1] = [ring_id(collar, first + i), ring_id(collar, first + i + 1), corner_id(1, j), corner_id(1, j + 1)];
+        if (j === corners || (i < columns && column_angle(i) + column_angle(i + 1) <= layer_angles[j] + layer_angles[j + 1])) {
             face(a, a1, b);
             i++;
         } else {
