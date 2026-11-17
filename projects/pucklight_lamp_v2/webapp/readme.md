@@ -40,6 +40,7 @@ Needs [Deno](https://deno.com) and a browser with WebGL2. The editor comes from 
 
 - A lamp holds its kind, its brand and that kind's settings. The view's settings and the kind last used are the browser's.
 - The Lampshade buttons change the open lamp's kind. Each kind's settings stay while the page is open; saved are those of the kind on screen.
+- Saving the open lamp as another kind under its own name asks first: Replace or Cancel. Another name keeps it.
 - A name has letters, digits, spaces, `_` and `-`, 64 at most, and is the folder's name.
 - Before unsaved work is replaced, the app asks: Save first, Discard or Cancel. Closing the page asks too.
 - After deleting the open lamp its settings stay on screen: Save brings it back.
@@ -312,6 +313,7 @@ Graph, below Script: formulas of x drawn as in Desmos, to see what a script's fu
 | Object in colours, same: an OBJ with its points' colours, one with and without its `.mtl`, one with a picture; save, reopen, copy, the OBJ print file, an object without colours over it, other kind | works, console clean; the print file has the five colours |
 | The 35 lamps in `project/` on 2026-11-13, same | each opens, builds, counts as saved; saved again it has the bytes it had, but for the 17 spheres' walls in place of their depth and an object's `b_color` |
 | Save under another name, same, 2026-11-17: a vase, the Moon with its texture, an object; Ctrl+S under its own name; another lamp's name | a new lamp each, with its texture or object; the open one's files as they were, to the byte; no new folder; refused and told, that lamp unchanged; console clean |
+| Save as another kind, same: a vase as a sphere, Cancel and Replace, Ctrl+S twice; the Moon as a vase through Save first on opening another lamp, Cancel and Replace; an object as a vase under a new name | asks once; Cancel leaves the file, the work stays unsaved; Replace saves the new kind, the Moon without its texture, then the other lamp opens; Cancel there brings back the unsaved question; a new name asks nothing; console clean |
 | A sphere's wall, same: a new lamp, both sliders, a thickest below the thinnest, the Moon saved with a depth of 3 | 0.5 and 3.2; more plastic with a thicker wall; smooth and told; opens as 0.8 and 3.8, saved and opened again with 0.5 and 3.2 |
 | The print files read back with numpy: STL of each kind, 3MF, OBJ | closed; top part 22.1 cm³ and screwin 13.5 cm³ as the generator's; the top part upside down on z = 0 |
 | Without the internet | a text box replaces the editor, the rest works |

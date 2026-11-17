@@ -55,6 +55,7 @@ let f_o_panel__project = function({
     let s_name__open = null;
     let s_name__deleting = null;
     let o_question = null;
+    let o_ask__kind = null;
     let s_note = '';
 
     let el_name = el('input', { type: 'text', id: 'el_name', maxLength: 64, placeholder: 'Name this lamp', autocomplete: 'off' });
@@ -95,6 +96,19 @@ let f_o_panel__project = function({
         el_state.dataset.state = s_note ? 'note' : (b_dirty ? 'dirty' : 'clean');
     };
 
+    let f_s_kind = function(s_kind){
+        return `${/^[aeiou]/.test(s_kind) ? 'an' : 'a'} ${s_kind}`;
+    };
+
+    // Saving the open lamp as another kind replaces what only its kind keeps, such as a
+    // sphere's texture: asks first, and answers whether to go on.
+    let f_b_kind_replaced = function(o_open){
+        return new Promise(function(f_answer){
+            o_ask__kind = { s_name: o_open.s_name, s_kind__saved: o_open.s_kind, s_kind: f_o_design().s_kind, f_answer };
+            f_render_tool();
+        });
+    };
+
     let f_sort = function(){
         a_o_project.sort(function(o_a, o_b){ return o_a.s_name.localeCompare(o_b.s_name); });
     };
@@ -115,6 +129,7 @@ let f_o_panel__project = function({
     };
 
     let f_b_saved = async function(){
+        if(o_ask__kind){ return false; }
         s_note = '';
         let s_name = f_s_name();
         if(!s_name){
@@ -123,6 +138,8 @@ let f_o_panel__project = function({
             el_name.focus();
             return false;
         }
+        let o_open = f_o_project__open();
+        if(o_open && s_name === o_open.s_name && f_o_design().s_kind !== o_open.s_kind && !await f_b_kind_replaced(o_open)){ return false; }
         try{
             let o_saved = await f_o_project__stored(s_name);
             await f_save_extra(o_saved.s_name);
@@ -228,6 +245,22 @@ let f_o_panel__project = function({
     };
 
     let f_render_tool = function(){
+        if(o_ask__kind){
+            let { s_name, s_kind__saved, s_kind, f_answer } = o_ask__kind;
+            let f_close = function(b_replace){
+                o_ask__kind = null;
+                f_render_tool();
+                f_answer(b_replace);
+            };
+            el_tool.replaceChildren(el('div', { className: 'question', role: 'alert' }, [
+                el('p', { textContent: `“${s_name}” is saved as ${f_s_kind(s_kind__saved)}. Saving it as ${f_s_kind(s_kind)} replaces the ${s_kind__saved}; another name keeps it and makes a new lamp.` }),
+                el('div', { className: 'tool_row' }, [
+                    f_el__button('Replace', function(){ f_close(true); }, 'small--danger'),
+                    f_el__button('Cancel', function(){ f_close(false); })
+                ])
+            ]));
+            return;
+        }
         if(o_question){
             let f_action = o_question.f_action;
             el_tool.replaceChildren(el('div', { className: 'question', role: 'alert' }, [
