@@ -21,6 +21,8 @@ declare const noise: {seed(n_seed: number): void, simplex2(x: number, y: number)
 ${Object.getOwnPropertyNames(Math).map(function(s_name){ return `declare const ${s_name}: typeof Math.${s_name};`; }).join('\n')}
 /** n - floor(n): fract(3.25) is 0.25 */
 declare function fract(n: number): number;
+/** n - m * floor(n / m), as in a shader and Desmos: mod(-0.5, 2) is 1.5, where % gives -0.5. */
+declare function mod(n: number, m: number): number;
 /** From a at n = 0 to b at n = 1. */
 declare function mix(a: number, b: number, n: number): number;
 /** n, but not below low and not above high. */

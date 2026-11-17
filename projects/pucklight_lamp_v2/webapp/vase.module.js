@@ -56,6 +56,7 @@ function neck_radius(z, a) {
 const script_functions = {
     ...Object.fromEntries(Object.getOwnPropertyNames(Math).map((name) => [name, Math[name]])),
     fract: (n) => n - Math.floor(n),
+    mod: (n, m) => n - m * Math.floor(n / m),
     mix: (a, b, n) => a + (b - a) * n,
     clamp: (n, low, high) => Math.min(Math.max(n, low), high),
     smoothstep: (low, high, n) => {

@@ -82,7 +82,7 @@ Deno.test('noise: from -1 to 1, the same for each run of a script, another with 
 Deno.test('the functions a script sees: Math\'s without Math, a shader\'s, and a script\'s own win', function(){
     assertEquals(run_script('return [sin(1), atan2(1, 2), max(1, 2), PI];'), [Math.sin(1), Math.atan2(1, 2), 2, Math.PI]);
     for(let [s_code, n_val] of [
-        ['fract(3.25)', 0.25], ['fract(-0.25)', 0.75], ['mix(10, 20, 0.25)', 12.5],
+        ['fract(3.25)', 0.25], ['fract(-0.25)', 0.75], ['mod(7, 2)', 1], ['mod(-0.5, 2)', 1.5], ['mix(10, 20, 0.25)', 12.5],
         ['clamp(5, 0, 1)', 1], ['clamp(-5, 0, 1)', 0], ['clamp(0.5, 0, 1)', 0.5],
         ['smoothstep(0, 10, -1)', 0], ['smoothstep(0, 10, 2.5)', 0.15625], ['smoothstep(0, 10, 5)', 0.5], ['smoothstep(0, 10, 11)', 1],
         ['length(vec2(3, 4))', 5], ['length(vec3(2, 3, 6))', 7], ['distance(vec3(1, 2, 3), vec3(3, 5, 9))', 7],

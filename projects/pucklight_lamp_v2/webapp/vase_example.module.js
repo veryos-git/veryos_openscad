@@ -20,6 +20,7 @@ const examples = {
 // "Math.": sin(), cos(), sqrt(), pow(), abs(), min(), max(),
 // floor(), PI and the others. And these:
 //   fract(n)             n - floor(n): fract(3.25) is 0.25
+//   mod(n, m)            n - m * floor(n / m): mod(-0.5, 2) is 1.5
 //   mix(a, b, n)         from a at n = 0 to b at n = 1
 //   clamp(n, a, b)       n, but not below a and not above b
 //   smoothstep(a, b, n)  0 up to a, 1 from b on, smooth between

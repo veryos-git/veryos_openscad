@@ -142,7 +142,7 @@ The editor holds the body of a function: it gets `o_thread`, sees `noise` and th
 | `n_height_dome`, `n_overhang_dome` | optional: closes the last layer with a dome this high, which leans up to 60 degrees, or as given |
 | `noise.simplex2`, `simplex3`, `perlin2`, `perlin3`, `noise.seed(n)` | noise from -1 to 1; a script starts on seed 0 |
 | `sin()`, `cos()`, `PI` and the others | `Math`'s, without their `Math.` |
-| `fract`, `mix`, `clamp`, `smoothstep`, `vec2`, `vec3`, `length`, `distance` | as in a shader |
+| `fract`, `mod`, `mix`, `clamp`, `smoothstep`, `vec2`, `vec3`, `length`, `distance` | as in a shader; `mod(-0.5, 2)` is 1.5, where `%` gives -0.5 |
 
 - Fixed, gold in the view: the thread, z 0 to 4.8, and a collar Ø67 up to 6.6. Every `n_z` must be 6.6 or more.
 - The last layer is closed flat, which vase mode leaves open, or with a dome.
