@@ -6,12 +6,21 @@ Printed table clamp (Tischklemme) for the Rode PSA-1: a C over the table edge wi
 
 | File | What |
 |---|---|
-| `mikrofonarm_tischklemmeV2.scad` | the generator, standalone, no libraries. `part`: both parts on the bed, assembly, each part in its print orientation |
-| `mikrofonarm_tischklemmeV2_clamp.stl`, `_screw.stl` | the parts at the defaults, as they print |
-| `archive/` | V1 script and STLs |
+| `mikrofonarm_tischklemmeV3.scad` | the generator, standalone, no libraries. `part`: both parts on the bed, assembly, each part in its print orientation |
+| `mikrofonarm_tischklemmeV3_clamp.stl`, `_screw.stl` | the parts at the defaults, as they print |
+| `archive/` | V1 and V2 scripts and STLs |
 | `rendered_parts/` | every part under its name |
 | `idee.jpeg` | the sketch |
 | `readme_hgc.md` | original goal |
+
+## V3 against V2
+
+| | V2 | V3 |
+|---|---|---|
+| clamp's outer edges | sharp | 45 degree chamfer of `clamp_chamfer` 1, asked by the user: corners of the side view cut, the two side faces stepped in one 0.2 layer at a time |
+| clamp's first layer | full side face | 0.9 in from the edge, so its squish does not bulge |
+| logo on the block | | 0.5 lower, in the middle of the face the chamfer leaves |
+| screw | | unchanged (mesh compared) |
 
 ## V2 against V1
 
@@ -31,7 +40,7 @@ At `pin_x` 14, V2's clamp has V1's vertices (mesh compared).
 | clamp | 1 | lying on its side, 40 high | the layers run around the C, so the screw's force pulls along them, not across (lessons_learned: softbox clamp). Pin hole and thread lie level with the bed |
 | screw | 1 | lying on its flat, the logo up | thread cut 2.4 flat on the bed side, as fdm_optimized_screws |
 
-No support: no face is steeper than 45 degrees, except the 1 mm deep ceilings in the engraved logo on the clamp's block (mesh check). More walls and infill make the C stiffer.
+No support: no face is steeper than 45 degrees, except the 1 mm deep ceilings in the engraved logo on the clamp's block and the 0.2 wide crests of the thread at its top; the side chamfers step out 0.2 per 0.2 layer, which is 45 degrees (mesh check). More walls and infill make the C stiffer.
 
 ## Sizes
 
@@ -44,6 +53,7 @@ No support: no face is steeper than 45 degrees, except the 1 mm deep ceilings in
 | `clamp_width`, `spine_thickness` | 40, 16 | my choice: about 17 MPa in the spine at 1 kN screw force and `pin_x` 18, estimate; more walls for a larger `pin_x` |
 | `pin_x` | 18 | pin and screw axis from the spine's inner face, the screw under the pin as sketched; the user's value |
 | `top_jaw_reach` | 13 | my choice, V1's 45 − 32 |
+| `clamp_chamfer` | 1 | "chamfer slightly", the user; 1 is my choice, as the screw's bar |
 
 ## Design rules in the model
 
