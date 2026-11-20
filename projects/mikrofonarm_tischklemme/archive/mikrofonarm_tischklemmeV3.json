@@ -1,0 +1,29 @@
+{
+    "fileFormatVersion": "1",
+    "parameterSets": {
+        "Printed": {
+            "pin_x": "24",
+            "table_max": "50",
+            "table_min": "10",
+            "table_shown": "30"
+        },
+        "Thin desk": {
+            "pin_x": "24",
+            "table_max": "30",
+            "table_min": "5",
+            "table_shown": "18"
+        },
+        "Thick desk": {
+            "pin_x": "24",
+            "table_max": "80",
+            "table_min": "40",
+            "table_shown": "60"
+        },
+        "Far from edge": {
+            "pin_x": "40",
+            "table_max": "50",
+            "table_min": "10",
+            "table_shown": "30"
+        }
+    }
+}

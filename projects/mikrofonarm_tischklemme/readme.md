@@ -11,6 +11,8 @@ Printed table clamp (Tischklemme) for the Rode PSA-1: a C over the table edge wi
 | `archive/` | V1 to V4 scripts and STLs |
 | `rendered_parts/` | every part under its name |
 | `real_images/` | photos of the PETG-CF V3 in use |
+| `v3_elegooPETGCF.3mf` | the user's ElegooSlicer project of the photographed print: V3 with `pin_x` 24, PETG-CF, 4 walls |
+| `publish/` | publishing pack for V3 as printed: images, listing, STLs; `archive/mikrofonarm_tischklemmeV3.json` holds its presets |
 | `problem_pla_crack.png` | the PLA V3's split lower jaw |
 | `idee.jpeg` | the sketch |
 | `readme_hgc.md` | original goal |
@@ -83,7 +85,7 @@ No support: no face is steeper than 45 degrees, except the 1 mm deep ceilings in
 | `lower_jaw_thickness`, `lower_jaw_wall` | 20, 13.75 | my choice: more layer area across the PLA split; the lower jaw reaches 40 from the table edge |
 | `table_max`, `table_min` | 50, 10 | my choice: tables from 10 to 50 thick |
 | `clamp_width`, `spine_thickness` | 40, 16 | my choice: about 17 MPa in the spine at 1 kN screw force and `pin_x` 18, estimate; more walls for a larger `pin_x` |
-| `pin_x` | 18 | pin and screw axis from the spine's inner face, the screw under the pin as sketched; the user's value |
+| `pin_x` | 18 | pin and screw axis from the spine's inner face, the screw under the pin as sketched; the user's value. The printed V3 has 24 (its 3mf, mesh compared) |
 | `top_jaw_reach` | 13 | my choice, V1's 45 − 32 |
 | `clamp_chamfer` | 1 | "chamfer slightly", the user; 1 is my choice, as the screw's bar |
 
