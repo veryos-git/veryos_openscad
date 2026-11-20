@@ -6,11 +6,23 @@ Printed table clamp (Tischklemme) for the Rode PSA-1: a C over the table edge wi
 
 | File | What |
 |---|---|
-| `mikrofonarm_tischklemmeV1.scad` | the generator, standalone, no libraries. `part`: both parts on the bed, assembly, each part in its print orientation |
-| `mikrofonarm_tischklemmeV1_clamp.stl`, `_screw.stl` | the parts at the defaults, as they print |
+| `mikrofonarm_tischklemmeV2.scad` | the generator, standalone, no libraries. `part`: both parts on the bed, assembly, each part in its print orientation |
+| `mikrofonarm_tischklemmeV2_clamp.stl`, `_screw.stl` | the parts at the defaults, as they print |
+| `archive/` | V1 script and STLs |
 | `rendered_parts/` | every part under its name |
 | `idee.jpeg` | the sketch |
 | `readme_hgc.md` | original goal |
+
+## V2 against V1
+
+| | V1 | V2 |
+|---|---|---|
+| `pin_x`, pin and screw from the spine | 14: the screw's axis 11 from a sharp table edge, its end 4 from it | 18, set by the user: 15 and 8 |
+| top jaw | `top_jaw_length` 45 from the spine; a `pin_x` of 28 or more stopped the render | `top_jaw_reach` 13 beyond the block, so any `pin_x` renders |
+| block with the pin far in | the outer slope would cut into the C's corner from `pin_x` 24 on | widens towards the spine; the slope meets it no lower than the top jaw's top |
+| screw | | unchanged |
+
+At `pin_x` 14, V2's clamp has V1's vertices (mesh compared).
 
 ## Parts
 
@@ -29,9 +41,9 @@ No support: no face is steeper than 45 degrees, except the 1 mm deep ceilings in
 | `thread_diameter`, `thread_pitch` | 16, 2, 45 degree flanks | sketch; pitch from fdm_optimized_screws |
 | `thread_clearance` | 0.25 per side | lessons_learned.md |
 | `table_max`, `table_min` | 50, 10 | my choice: tables from 10 to 50 thick |
-| `clamp_width`, `spine_thickness` | 40, 16 | my choice: about 14 MPa in the spine at 1 kN screw force, estimate |
-| `pin_x` | 14 | pin and screw axis from the spine's inner face, as sketched |
-| `top_jaw_length` | 45 | my choice |
+| `clamp_width`, `spine_thickness` | 40, 16 | my choice: about 17 MPa in the spine at 1 kN screw force and `pin_x` 18, estimate; more walls for a larger `pin_x` |
+| `pin_x` | 18 | pin and screw axis from the spine's inner face, the screw under the pin as sketched; the user's value |
+| `top_jaw_reach` | 13 | my choice, V1's 45 − 32 |
 
 ## Design rules in the model
 
