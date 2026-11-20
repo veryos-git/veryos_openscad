@@ -1,6 +1,6 @@
 # Table clamp for the Rode PSA-1 microphone arm
 
-Printed table clamp (Tischklemme) for the Rode PSA-1: a C over the table edge with a blind hole for the arm's pin, and a screw with a T bar. Built from the sketch `idee.jpeg` and `readme_hgc.md`. **V3 printed: the screw skips in the thread when tightened hard. V4's three test screws are not printed yet.**
+Printed table clamp (Tischklemme) for the Rode PSA-1: a C over the table edge with a blind hole for the arm's pin, and a screw with a T bar. Built from the sketch `idee.jpeg` and `readme_hgc.md`. **V3 printed in PLA (2 walls, 15 % infill): tightened hard, the lower jaw split along the layer through the thread, then the screw skipped (`problem_pla_crack.png`). A PETG-CF print with 4 walls is under way. V4's three test screws are not printed yet.**
 
 ![all parts](rendered_parts/overview.png)
 
@@ -18,7 +18,7 @@ Printed table clamp (Tischklemme) for the Rode PSA-1: a C over the table edge wi
 
 | | V3 | V4 |
 |---|---|---|
-| screw | Ø16, 0.25 per side from the clamp's thread: skips when tightened hard (print) | Ø16.5 − 2 × `screw_gap`: test 0.15, 0.1, 0.05 per side (Ø16.2, 16.3, 16.4), the gap engraved beside the bar's logo |
+| screw | Ø16, 0.25 per side from the clamp's thread: skips when tightened hard (print); more likely because the jaw split | Ø16.5 − 2 × `screw_gap`: test 0.15, 0.1, 0.05 per side (Ø16.2, 16.3, 16.4), the gap engraved beside the bar's logo |
 | clamp | | unchanged, its thread still 16.5: the printed V3 clamp takes the new screws |
 
 Print all three screws, use the tightest one that still turns in by hand; then set `screw_gap` to it.
@@ -88,6 +88,7 @@ No support: no face is steeper than 45 degrees, except the 1 mm deep ceilings in
 
 | Question | Note |
 |---|---|
-| which `screw_gap` holds and still turns? | print the three test screws |
+| does the lower jaw hold? | PLA, 2 walls, 15 % infill split through the thread: the 45 degree flanks wedge it open across the layers. PETG-CF, 4 walls under way |
+| which `screw_gap` holds and still turns? | print the three test screws, if the V3 screw is still loose in a jaw that holds |
 | does the 12.5 pin fit the 12.6 hole? | printed holes come out smaller; raise `pin_hole_diameter` if too tight |
 | table thickness range | 10 to 50 by default; change `table_max`, `table_min` |
