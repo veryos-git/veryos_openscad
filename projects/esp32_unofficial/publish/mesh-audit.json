@@ -1,0 +1,79 @@
+[
+  {
+    "file": "esp32_unofficial_enclosureV1_printed_base.stl",
+    "triangles": 12212,
+    "closed": true,
+    "volume_mm3": 10334.0,
+    "size_mm": [
+      56.6,
+      45.8,
+      18.0
+    ]
+  },
+  {
+    "file": "esp32_unofficial_enclosureV1_printed_lid.stl",
+    "triangles": 1822,
+    "closed": true,
+    "volume_mm3": 4136.0,
+    "size_mm": [
+      56.6,
+      45.8,
+      7.2
+    ]
+  },
+  {
+    "file": "esp32_unofficial_enclosureV1_m3_base.stl",
+    "triangles": 6238,
+    "closed": true,
+    "volume_mm3": 9691.1,
+    "size_mm": [
+      56.6,
+      41.5,
+      18.0
+    ]
+  },
+  {
+    "file": "esp32_unofficial_enclosureV1_m3_lid.stl",
+    "triangles": 2194,
+    "closed": true,
+    "volume_mm3": 4058.3,
+    "size_mm": [
+      56.6,
+      41.5,
+      7.2
+    ]
+  },
+  {
+    "file": "esp32_unofficial_enclosureV1_push_base.stl",
+    "triangles": 5456,
+    "closed": true,
+    "volume_mm3": 8871.1,
+    "size_mm": [
+      56.6,
+      33.2,
+      18.0
+    ]
+  },
+  {
+    "file": "esp32_unofficial_enclosureV1_push_lid.stl",
+    "triangles": 1220,
+    "closed": true,
+    "volume_mm3": 4051.9,
+    "size_mm": [
+      56.6,
+      33.2,
+      7.2
+    ]
+  },
+  {
+    "file": "esp32_unofficial_enclosureV1_printed_screw.stl",
+    "triangles": 4716,
+    "closed": true,
+    "volume_mm3": 274.5,
+    "size_mm": [
+      10.39,
+      13.0,
+      6.25
+    ]
+  }
+]

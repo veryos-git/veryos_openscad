@@ -1,0 +1,14 @@
+{
+    "parameterSets": {
+        "Printed screws": {
+            "lid_fix": "printed"
+        },
+        "M3 screws": {
+            "lid_fix": "m3"
+        },
+        "Push-in": {
+            "lid_fix": "push"
+        }
+    },
+    "fileFormatVersion": "1"
+}
