@@ -1,18 +1,33 @@
 # Table clamp for the Rode PSA-1 microphone arm
 
-Printed table clamp (Tischklemme) for the Rode PSA-1: a C over the table edge with a blind hole for the arm's pin, and a screw with a T bar. Built from the sketch `idee.jpeg` and `readme_hgc.md`. **V3 printed in PLA (2 walls, 15 % infill): tightened hard, the lower jaw split along the layer through the thread, then the screw skipped (`problem_pla_crack.png`). A PETG-CF print with 4 walls is under way. V4's three test screws are not printed yet.**
+Printed table clamp (Tischklemme) for the Rode PSA-1: a C over the table edge with a blind hole for the arm's pin, and a screw with a T bar. Built from the sketch `idee.jpeg` and `readme_hgc.md`. **V3 printed in PLA (2 walls, 15 % infill): tightened hard, the lower jaw split along the layer through the thread, then the screw skipped (`problem_pla_crack.png`). V3 printed in PETG-CF (4 walls): the 0.25 thread barely turns, the clamp holds the arm on a table (`real_images/`). V5, against the split, is not printed yet.**
 
 ![all parts](rendered_parts/overview.png)
 
 | File | What |
 |---|---|
-| `mikrofonarm_tischklemmeV4.scad` | the generator, standalone, no libraries. `part`: both parts on the bed, assembly, each part in its print orientation |
-| `mikrofonarm_tischklemmeV4_clamp.stl` | the clamp, as it prints; V3's (mesh compared) |
-| `mikrofonarm_tischklemmeV4_screw_0.15.stl`, `_0.1.stl`, `_0.05.stl` | the test screws, `screw_gap` 0.15, 0.1, 0.05 |
-| `archive/` | V1 to V3 scripts and STLs |
-| `rendered_parts/` | every part under its name; the screw at `screw_gap` 0.1 |
+| `mikrofonarm_tischklemmeV5.scad` | the generator, standalone, no libraries. `part`: both parts on the bed, assembly, each part in its print orientation |
+| `mikrofonarm_tischklemmeV5_clamp.stl`, `_screw.stl` | the parts at the defaults, as they print |
+| `archive/` | V1 to V4 scripts and STLs |
+| `rendered_parts/` | every part under its name |
+| `real_images/` | photos of the PETG-CF V3 in use |
+| `problem_pla_crack.png` | the PLA V3's split lower jaw |
 | `idee.jpeg` | the sketch |
 | `readme_hgc.md` | original goal |
+
+## V5 against V3 and V4
+
+| | V3 (V4 only changed the screw) | V5 |
+|---|---|---|
+| thread's flank towards the bar, which carries the clamping force | 45 degrees: wedges the lower jaw open as hard as the screw presses; the PLA jaw split along the layer through the thread | `load_flank` 10 off square to the axis: about a fifth of that (tan 10 = 0.18); the other flank stays 45 |
+| thread's depth | 0.8 | 1.19, so the clamp's thread keeps its 0.2 crest; the screw's core Ø13.6 instead of 14.4 |
+| gap, radius and along the axis at each flank | 0.25 (V4: 0.15 to 0.05) | 0.25: the PETG-CF V3 barely turns at 0.25, so not less |
+| `lower_jaw_thickness`, the thread's length | 16, 8 turns | 20, 10 turns; the screw 4 longer |
+| `lower_jaw_wall` beyond the thread, where the PLA jaw split | 7.75 | 13.75 |
+| layer area across the split, the wall beyond the thread | 124 mm² | 275 mm² |
+| test screws | V4: three, with the gap engraved | none, V3's gap |
+
+With `load_flank` 45, `lower_jaw_thickness` 16 and `lower_jaw_wall` 7.75, V5's parts are V3's (mesh compared). The screw sits in the clamp's thread without touching it, and touches it when shifted 0.3 along the axis (CGAL intersection).
 
 ## V4 against V3
 
@@ -48,18 +63,24 @@ At `pin_x` 14, V2's clamp has V1's vertices (mesh compared).
 | Part | Qty | Prints | Note |
 |---|---|---|---|
 | clamp | 1 | lying on its side, 40 high | the layers run around the C, so the screw's force pulls along them, not across (lessons_learned: softbox clamp). Pin hole and thread lie level with the bed |
-| screw | 1 (3 to test) | lying on its flat, the logo up | thread cut flat on the bed side, the axis 5.6 above it, as fdm_optimized_screws |
+| screw | 1 | lying on its flat, the logo up | thread cut flat on the bed side, the axis 5.6 above it, as fdm_optimized_screws |
 
-No support: no face is steeper than 45 degrees, except the 1 mm deep ceilings in the engraved logo on the clamp's block and the 0.2 wide crests of the thread at its top; the side chamfers step out 0.2 per 0.2 layer, which is 45 degrees (mesh check). More walls and infill make the C stiffer.
+No support: no face is steeper than 45 degrees, except the 1 mm deep ceilings in the engraved logo on the clamp's block, the 0.2 and 0.4 wide flats of the clamp's thread at its top, and on the screw thin strips of the thread's root within 0.8 of the bed; the side chamfers step out 0.2 per 0.2 layer, which is 45 degrees (mesh check). Both flanks of the thread lie at most 45 degrees off vertical when printed lying.
+
+| Slicer | Why |
+|---|---|
+| lower jaw 100 % infill (modifier or height range), or many walls | the split runs between layers through the thread: only solid plastic in that layer holds it |
+| PETG rather than PLA; hot nozzle, little fan | bonds the layers better; PETG bends before it cracks |
 
 ## Sizes
 
 | Parameter | Default | From |
 |---|---|---|
 | `pin_hole_diameter`, `pin_hole_depth` | 12.6, 32 | readme_hgc.md; the pin is 12.5 × 30, measured |
-| `thread_diameter`, `thread_pitch` | 16, 2, 45 degree flanks | sketch; pitch from fdm_optimized_screws |
-| `thread_clearance` | 0.25 per side, sets the clamp's thread (16.5) | lessons_learned.md; kept, so the printed clamp stays |
-| `screw_gap` | 0.1 per side, the screw 16.3 | test of 0.15, 0.1, 0.05: V3's 0.25 skips (print); the user wants a firmer fit that still screws in |
+| `thread_diameter`, `thread_pitch` | 16, 2 | sketch; pitch from fdm_optimized_screws |
+| `thread_clearance` | 0.25 in radius and along the axis at each flank | lessons_learned.md; the PETG-CF V3 barely turns at 0.25, the user: not less |
+| `load_flank` | 10 degrees off square to the axis, the other flank 45 | my choice, as a buttress thread of a vice: little wedging, still prints lying |
+| `lower_jaw_thickness`, `lower_jaw_wall` | 20, 13.75 | my choice: more layer area across the PLA split; the lower jaw reaches 40 from the table edge |
 | `table_max`, `table_min` | 50, 10 | my choice: tables from 10 to 50 thick |
 | `clamp_width`, `spine_thickness` | 40, 16 | my choice: about 17 MPa in the spine at 1 kN screw force and `pin_x` 18, estimate; more walls for a larger `pin_x` |
 | `pin_x` | 18 | pin and screw axis from the spine's inner face, the screw under the pin as sketched; the user's value |
@@ -88,7 +109,6 @@ No support: no face is steeper than 45 degrees, except the 1 mm deep ceilings in
 
 | Question | Note |
 |---|---|
-| does the lower jaw hold? | PLA, 2 walls, 15 % infill split through the thread: the 45 degree flanks wedge it open across the layers. PETG-CF, 4 walls under way |
-| which `screw_gap` holds and still turns? | print the three test screws, if the V3 screw is still loose in a jaw that holds |
-| does the 12.5 pin fit the 12.6 hole? | printed holes come out smaller; raise `pin_hole_diameter` if too tight |
+| does V5's lower jaw hold, and does its thread turn? | not printed; V3 split in PLA, the PETG-CF V3 holds the arm |
+| does the 12.5 pin fit the 12.6 hole? | the pin sits in the PETG-CF V3 (photos); raise `pin_hole_diameter` if too tight |
 | table thickness range | 10 to 50 by default; change `table_max`, `table_min` |
