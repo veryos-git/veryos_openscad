@@ -46,7 +46,7 @@ PROJECTS = {
     "lichterkette": [("lichterketteV3.scad", "assembly section bulb clip")],
     "logo_branding_stamp": [("logo_stampV1.scad", [
         ("stamp", "Stamp, the mirrored logo on its face")])],
-    "mikrofonarm_tischklemme": [("mikrofonarm_tischklemmeV3.scad", "assembly clamp screw")],
+    "mikrofonarm_tischklemme": [("mikrofonarm_tischklemmeV4.scad", "assembly clamp screw")],
     "OMM_open_microscope_motorization/enclosure": [("omm_enclosureV7.scad", "assembly base lid")],
     "OMM_open_microscope_motorization/xy_table": [("omm_xy_table_v3p0p2.scad",
         "assembly table y_slider x_slider slide_holder motor_shaft_adapter washer cutting_ruler")],

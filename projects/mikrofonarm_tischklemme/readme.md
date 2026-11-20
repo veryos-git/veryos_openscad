@@ -1,17 +1,27 @@
 # Table clamp for the Rode PSA-1 microphone arm
 
-Printed table clamp (Tischklemme) for the Rode PSA-1: a C over the table edge with a blind hole for the arm's pin, and a screw with a T bar. Built from the sketch `idee.jpeg` and `readme_hgc.md`. **Not printed yet.**
+Printed table clamp (Tischklemme) for the Rode PSA-1: a C over the table edge with a blind hole for the arm's pin, and a screw with a T bar. Built from the sketch `idee.jpeg` and `readme_hgc.md`. **V3 printed: the screw skips in the thread when tightened hard. V4's three test screws are not printed yet.**
 
 ![all parts](rendered_parts/overview.png)
 
 | File | What |
 |---|---|
-| `mikrofonarm_tischklemmeV3.scad` | the generator, standalone, no libraries. `part`: both parts on the bed, assembly, each part in its print orientation |
-| `mikrofonarm_tischklemmeV3_clamp.stl`, `_screw.stl` | the parts at the defaults, as they print |
-| `archive/` | V1 and V2 scripts and STLs |
-| `rendered_parts/` | every part under its name |
+| `mikrofonarm_tischklemmeV4.scad` | the generator, standalone, no libraries. `part`: both parts on the bed, assembly, each part in its print orientation |
+| `mikrofonarm_tischklemmeV4_clamp.stl` | the clamp, as it prints; V3's (mesh compared) |
+| `mikrofonarm_tischklemmeV4_screw_0.15.stl`, `_0.1.stl`, `_0.05.stl` | the test screws, `screw_gap` 0.15, 0.1, 0.05 |
+| `archive/` | V1 to V3 scripts and STLs |
+| `rendered_parts/` | every part under its name; the screw at `screw_gap` 0.1 |
 | `idee.jpeg` | the sketch |
 | `readme_hgc.md` | original goal |
+
+## V4 against V3
+
+| | V3 | V4 |
+|---|---|---|
+| screw | Ø16, 0.25 per side from the clamp's thread: skips when tightened hard (print) | Ø16.5 − 2 × `screw_gap`: test 0.15, 0.1, 0.05 per side (Ø16.2, 16.3, 16.4), the gap engraved beside the bar's logo |
+| clamp | | unchanged, its thread still 16.5: the printed V3 clamp takes the new screws |
+
+Print all three screws, use the tightest one that still turns in by hand; then set `screw_gap` to it.
 
 ## V3 against V2
 
@@ -38,7 +48,7 @@ At `pin_x` 14, V2's clamp has V1's vertices (mesh compared).
 | Part | Qty | Prints | Note |
 |---|---|---|---|
 | clamp | 1 | lying on its side, 40 high | the layers run around the C, so the screw's force pulls along them, not across (lessons_learned: softbox clamp). Pin hole and thread lie level with the bed |
-| screw | 1 | lying on its flat, the logo up | thread cut 2.4 flat on the bed side, as fdm_optimized_screws |
+| screw | 1 (3 to test) | lying on its flat, the logo up | thread cut flat on the bed side, the axis 5.6 above it, as fdm_optimized_screws |
 
 No support: no face is steeper than 45 degrees, except the 1 mm deep ceilings in the engraved logo on the clamp's block and the 0.2 wide crests of the thread at its top; the side chamfers step out 0.2 per 0.2 layer, which is 45 degrees (mesh check). More walls and infill make the C stiffer.
 
@@ -48,7 +58,8 @@ No support: no face is steeper than 45 degrees, except the 1 mm deep ceilings in
 |---|---|---|
 | `pin_hole_diameter`, `pin_hole_depth` | 12.6, 32 | readme_hgc.md; the pin is 12.5 × 30, measured |
 | `thread_diameter`, `thread_pitch` | 16, 2, 45 degree flanks | sketch; pitch from fdm_optimized_screws |
-| `thread_clearance` | 0.25 per side | lessons_learned.md |
+| `thread_clearance` | 0.25 per side, sets the clamp's thread (16.5) | lessons_learned.md; kept, so the printed clamp stays |
+| `screw_gap` | 0.1 per side, the screw 16.3 | test of 0.15, 0.1, 0.05: V3's 0.25 skips (print); the user wants a firmer fit that still screws in |
 | `table_max`, `table_min` | 50, 10 | my choice: tables from 10 to 50 thick |
 | `clamp_width`, `spine_thickness` | 40, 16 | my choice: about 17 MPa in the spine at 1 kN screw force and `pin_x` 18, estimate; more walls for a larger `pin_x` |
 | `pin_x` | 18 | pin and screw axis from the spine's inner face, the screw under the pin as sketched; the user's value |
@@ -77,5 +88,6 @@ No support: no face is steeper than 45 degrees, except the 1 mm deep ceilings in
 
 | Question | Note |
 |---|---|
+| which `screw_gap` holds and still turns? | print the three test screws |
 | does the 12.5 pin fit the 12.6 hole? | printed holes come out smaller; raise `pin_hole_diameter` if too tight |
 | table thickness range | 10 to 50 by default; change `table_max`, `table_min` |
