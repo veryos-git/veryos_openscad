@@ -39,13 +39,15 @@ PROJECTS = {
             ("body", "Solid body", {"part": "body"}),
             ("cutter", "Screw hole with its slots, as a solid", {"part": "cutter"}),
             ("section", "Knob cut in half", {"part": "section"})]),
-        ("door_knob_decorativeV2.scad", [
+        ("door_knob_decorativeV3.scad", [
             ("knob_decorative", "Finished knob with a decorated head", {"part": "knob"}),
             ("backplate", "Backplate: round flower rosette", {"part": "backplate"}),
             ("backplate_arch", "Backplate: tall plate with a fan arch",
              {"part": "backplate", "backplate": "arch"}),
             ("assembly", "Knob on its backplate", {"part": "assembly"}),
-            ("styles", "All looks side by side, each a preset", {"part": "styles"})])],
+            ("styles", "All looks side by side, each a preset", {"part": "styles"}),
+            ("print_all", "All looks and both backplates on the bed, one print",
+             {"part": "print_all"})])],
     "esp32_unofficial": [("esp32_unofficial_enclosureV1.scad", "assembly base lid screw")],
     "finger_claws": [("finger_clawsV3.scad", "assembly sleeve claw")],
     "lichterkette": [("lichterketteV3.scad", "assembly section bulb clip")],
@@ -86,13 +88,14 @@ PROJECTS = {
 }
 
 # These show several parts in the script's colours: OpenSCAD preview. Parts get a full render.
-PREVIEW = {"assembly", "assembled", "folded", "grid", "open", "styles"}
+PREVIEW = {"assembly", "assembled", "folded", "grid", "open", "styles", "print_all"}
 # OpenSCAD looks from the front right, 35 degrees down. Tiles that hide their shape from there
 # get another camera rotation x, y, z.
 CAMERA = {
     ("ball_and_socket_joint_ball_head", "ball"): "55,0,205",
     ("ball_and_socket_joint_ball_head", "socket"): "55,0,205",
     ("door_knob_generator", "styles"): "35,0,0",
+    ("door_knob_generator", "print_all"): "35,0,0",
     ("esp32_unofficial", "screw"): "55,0,115",
     ("papercut_fold_house2", "flat"): "0,0,0",
     ("paper_folding_haunted_house", "flat"): "0,0,0",
