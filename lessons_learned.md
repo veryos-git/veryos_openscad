@@ -63,6 +63,7 @@ Diameter clearance = added to the hole diameter, not per side.
 
 ## Rules
 
+- Two solids that only touch on a face stay two bodies in OpenSCAD 2021.01: the fan of the door knob's arch backplate, standing exactly on the plate's top, exported as a second closed shell from z = 2.4. Sink one 0.01 into the other. Count the bodies of every export: closed edges do not show it (door_knob decorative V3, 2026-11-21; mesh, not printed).
 - Where a screw's head (3) is higher than the room above a part (2.5 under the power-kit turntable's platform), a bracket over the part cannot be flat: its foot lies lower than the part's top. Step it up, foot, riser, arm, and print it on its side: no support, and the layers run along the spring (V6's motor bracket, sliced with the user's settings, supports on, 2026-11-13; not printed).
 - A spring arm between a part and a lid over it has a best press: its thickness is the room less the press, so its force goes with thickness³ × press and is highest at a quarter of the room, 0.45 of 1.8 (power-kit turntable V6, from the formula, 2026-11-13).
 - Press a part to the side its load pushes it anyway, and put a hard stop there: V6's pad lies on the motor's can 25 degrees from its top, towards the hoop, so it presses the motor down and away from the hoop, where the slot's edge stops the gearbox's boss at 0.1 (2026-11-13; untested).

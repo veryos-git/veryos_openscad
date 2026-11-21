@@ -131,7 +131,7 @@ function custom_relief(angle,t) =
 | columns around | `pattern_count` × at least 8, at least `radial_segments`; grooves lie on columns |
 | rows along the head | evenly spaced on a map of the head that keeps shapes (rows get closer as the head gets narrower), at least `profile_segments` |
 | diamonds, scales, dimples | every mesh quad is split along the diagonal that follows the relief |
-| checked | all 18 looks and 26 other variants export closed, every edge on two triangles (OpenSCAD 2021.01, CGAL) |
+| checked | all 18 looks and 26 other variants export closed, every edge on two triangles (OpenSCAD 2021.01, CGAL); knob and both backplates are one body each |
 | render time | 13 s for the default knob, 31 000 triangles; 72 ribs make 118 000 and take minutes |
 
 ## V3 against V2
@@ -139,7 +139,8 @@ function custom_relief(angle,t) =
 | | V2 | V3 |
 |---|---|---|
 | `part` = print_all | | the 18 looks as finished knobs and both backplates laid out for one print |
-| knob, backplates | | unchanged (meshes compared: the same triangles) |
+| knob, rosette | | unchanged (meshes compared: the same triangles) |
+| arch backplate | the fan stood exactly on the plate and exported as a second body | the fan is sunk 0.01 into the plate: one body |
 
 ## V2 against V1
 

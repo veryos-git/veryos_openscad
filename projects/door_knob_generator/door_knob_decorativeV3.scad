@@ -481,8 +481,8 @@ module arch_plate() {
             circle(r=rib_end(backplate_count, 180, fan_r), $fn=96);
             rib_fan_2d(backplate_count, 180, hub_r, fan_r);
         }
-        // no higher than round
-        translate([0,0,backplate_thickness])
+        // no higher than round; sunk into the plate a little, or the two stay separate bodies
+        translate([0,0,backplate_thickness-eps])
             rib_fan(backplate_count, 180, hub_r, fan_r,
                     min(relief_height, rib_end(backplate_count, 180, fan_r)*rib_k(backplate_count, 180)));
     }
