@@ -13,6 +13,7 @@
 | `door_knob_decorativeV3.scad` | the generator. `part`: knob, backplate, print_all, assembly, styles, section, body, cutter, hole_profile |
 | `door_knob_decorativeV3.json` | 18 Customizer presets, the looks of `part` = styles |
 | `door_knob_decorativeV3_knob.stl`, `_backplate_rosette.stl`, `_backplate_arch.stl` | the parts at the defaults, as they print |
+| `door_knob_decorativeV3_print_all.3mf` | `part` = print_all exported: the 18 looks and both backplates as one object of 20 bodies |
 | `rendered_parts/` | every part under its name |
 | `archive/` | V1 `door_knob_decorative.scad`, V2 with its presets |
 | `inspiration/` | the knobs and backplates this is modelled after |
@@ -133,6 +134,8 @@ function custom_relief(angle,t) =
 | diamonds, scales, dimples | every mesh quad is split along the diagonal that follows the relief |
 | checked | all 18 looks and 26 other variants export closed, every edge on two triangles (OpenSCAD 2021.01, CGAL); knob and both backplates are one body each |
 | render time | 13 s for the default knob, 31 000 triangles; 72 ribs make 118 000 and take minutes |
+| `print_all` | F5 preview at once; F6 or an export 13 minutes and over 4 GB of memory: use the 3MF |
+| the 3MF | 20 bodies, every edge on two triangles, 631 084 triangles, 231 × 160.2 × 32.6, 270 cm³ solid; not sliced, not opened in a slicer |
 
 ## V3 against V2
 
