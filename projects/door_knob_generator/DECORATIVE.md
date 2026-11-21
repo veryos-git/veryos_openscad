@@ -1,6 +1,6 @@
 # Decorative door knob and backplate
 
-`door_knob_decorativeV3.scad`: the door knob in 4 head shapes and 13 surface styles, and a backplate that takes its shaft. Standalone, no libraries. Screw hole and slots are those of `door_knob.scad`, see `USAGE.md`. **V3; nothing of it is printed yet.**
+`door_knob_decorativeV4.scad`: the door knob in 4 head shapes and 13 surface styles, and a backplate that takes its shaft. Standalone, no libraries. Screw hole and slots are those of `door_knob.scad`, see `USAGE.md`. **V4; nothing of it is printed yet.**
 
 ![all looks](rendered_parts/styles.png)
 
@@ -10,12 +10,12 @@
 
 | File | What |
 |---|---|
-| `door_knob_decorativeV3.scad` | the generator. `part`: knob, backplate, print_all, assembly, styles, section, body, cutter, hole_profile |
-| `door_knob_decorativeV3.json` | 18 Customizer presets, the looks of `part` = styles |
-| `door_knob_decorativeV3_knob.stl`, `_backplate_rosette.stl`, `_backplate_arch.stl` | the parts at the defaults, as they print |
-| `door_knob_decorativeV3_print_all.3mf` | `part` = print_all exported: the 18 looks and both backplates as one object of 20 bodies |
+| `door_knob_decorativeV4.scad` | the generator. `part`: knob, backplate, print_all, assembly, styles, section, body, cutter, hole_profile |
+| `door_knob_decorativeV4.json` | 18 Customizer presets, the looks of `part` = styles |
+| `door_knob_decorativeV4_knob.stl`, `_backplate_rosette.stl`, `_backplate_arch.stl` | the parts at the defaults, as they print |
+| `door_knob_decorativeV4_print_all.3mf` | `part` = print_all exported: the 18 looks and both backplates as one object of 20 bodies |
 | `rendered_parts/` | every part under its name |
-| `archive/` | V1 `door_knob_decorative.scad`, V2 with its presets |
+| `archive/` | V1 `door_knob_decorative.scad`, V2 and V3 with their presets |
 | `inspiration/` | the knobs and backplates this is modelled after |
 
 ## Parts
@@ -132,10 +132,21 @@ function custom_relief(angle,t) =
 | columns around | `pattern_count` × at least 8, at least `radial_segments`; grooves lie on columns |
 | rows along the head | evenly spaced on a map of the head that keeps shapes (rows get closer as the head gets narrower), at least `profile_segments` |
 | diamonds, scales, dimples | every mesh quad is split along the diagonal that follows the relief |
-| checked | all 18 looks and 26 other variants export closed, every edge on two triangles (OpenSCAD 2021.01, CGAL); knob and both backplates are one body each |
-| render time | 13 s for the default knob, 31 000 triangles; 72 ribs make 118 000 and take minutes |
-| `print_all` | F5 preview at once; F6 or an export 13 minutes and over 4 GB of memory: use the 3MF |
-| the 3MF | 20 bodies, every edge on two triangles, 631 084 triangles, 231 × 160.2 × 32.6, 270 cm³ solid; not sliced, not opened in a slicer |
+| checked | all 18 looks and 26 other knob variants export closed, every edge on two triangles (OpenSCAD 2021.01, CGAL); knob and both backplates are one body each |
+| two renderers | OpenSCAD 2021.01 with CGAL and OpenSCAD 2026.09.16 with lazy union and Manifold, as the online renderer runs: the same volumes to 0.01 cm³ for all 18 looks, both backplates and 6 backplate variants, all closed |
+| render time, CGAL | 13 s for the default knob, 31 000 triangles; 72 ribs make 118 000 and take minutes |
+| `print_all` | F5 preview at once. F6: 5 s with Manifold, 13 minutes and over 4 GB of memory with CGAL |
+| the 3MF | exported with OpenSCAD 2026.09.16, Manifold: 20 bodies, every edge on two triangles, 654 440 triangles, 231 × 160.2 × 32.6, 270 cm³ solid; not sliced, not opened in a slicer |
+
+## V4 against V3
+
+| | V3 | V4 |
+|---|---|---|
+| ribs of the rosette and of the fan | upper halves, made by a `for()` inside `difference()`: a renderer with lazy union subtracts every rib after the first. The online renderer gave a rosette with one raised petal on a flat flower and a fan with one flute | whole ribs, no `difference()`; what lies below is in the plate or cut off at the bed. The same in both renderers |
+| rosette's centre | a cylinder under the ring, sharing its wall: 166 zero-area triangles under Manifold | the ring reaches down through the petals; the bed is one cut |
+| arch's fan | sunk 0.01 into the plate | on the plate, its lower halves in it: `relief_height` must stay below `backplate_thickness` |
+| knob | | unchanged (same bytes) |
+| rosette, arch | | the same volume, 3.642 and 7.923 cm³ |
 
 ## V3 against V2
 

@@ -39,7 +39,7 @@ PROJECTS = {
             ("body", "Solid body", {"part": "body"}),
             ("cutter", "Screw hole with its slots, as a solid", {"part": "cutter"}),
             ("section", "Knob cut in half", {"part": "section"})]),
-        ("door_knob_decorativeV3.scad", [
+        ("door_knob_decorativeV4.scad", [
             ("knob_decorative", "Finished knob with a decorated head", {"part": "knob"}),
             ("backplate", "Backplate: round flower rosette", {"part": "backplate"}),
             ("backplate_arch", "Backplate: tall plate with a fan arch",

@@ -4,7 +4,7 @@ For a platform-ready project description and parameter table, see
 [PLATFORM_DESCRIPTION.md](PLATFORM_DESCRIPTION.md).
 
 For decorated heads in several shapes and styles and a fitting backplate, open
-`door_knob_decorativeV3.scad` and see [DECORATIVE.md](DECORATIVE.md) for shapes,
+`door_knob_decorativeV4.scad` and see [DECORATIVE.md](DECORATIVE.md) for shapes,
 styles, presets, and the editable relief function.
 
 Open `door_knob.scad` in OpenSCAD. Adjust the parameters at the top (or in
