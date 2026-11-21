@@ -1,6 +1,6 @@
 # Decorative door knob and backplate
 
-`door_knob_decorativeV6.scad`: the door knob in 4 head shapes and 13 surface styles, and a backplate that takes its shaft. Standalone, no libraries. Screw hole and slots are those of `door_knob.scad`, see `USAGE.md`. **V6; nothing of it is printed yet.**
+`door_knob_decorativeV7.scad`: the door knob in 4 head shapes and 13 surface styles, and a backplate that takes its shaft. Standalone, no libraries. Screw hole and slots are those of `door_knob.scad`, see `USAGE.md`. **V7; nothing of it is printed yet.**
 
 ![all looks](rendered_parts/styles.png)
 
@@ -10,19 +10,19 @@
 
 | File | What |
 |---|---|
-| `door_knob_decorativeV6.scad` | the generator. `part`: print_all (default), knob, backplate, assembly, styles, section, body, cutter, hole_profile |
-| `door_knob_decorativeV6.json` | 18 Customizer presets, the looks of `part` = styles; each sets `part` = knob and shows its knob alone |
-| `door_knob_decorativeV6_knob.stl`, `_backplate_rosette.stl`, `_backplate_arch.stl` | the parts at the defaults, as they print |
-| `door_knob_decorativeV6_print_all.3mf` | the default, `part` = print_all, exported: the 18 looks and both backplates as one object of 20 bodies |
+| `door_knob_decorativeV7.scad` | the generator. `part`: print_all (default), knob, backplate, assembly, styles, section, body, cutter, hole_profile |
+| `door_knob_decorativeV7.json` | 18 Customizer presets, the looks of `part` = styles; each sets `part` = knob and shows its knob alone |
+| `door_knob_decorativeV7_knob.stl`, `_backplate_rosette.stl`, `_backplate_arch.stl` | the parts at the defaults, as they print |
+| `door_knob_decorativeV7_print_all.3mf` | the default, `part` = print_all, exported: the 18 looks and both backplates as one object of 20 bodies |
 | `rendered_parts/` | every part under its name |
-| `archive/` | V1 `door_knob_decorative.scad`, V2 to V5 with their presets |
+| `archive/` | V1 `door_knob_decorative.scad`, V2 to V6 with their presets |
 | `inspiration/` | the knobs and backplates this is modelled after |
 
 ## Parts
 
 | `part` | What | Size at the defaults | Print |
 |---|---|---|---|
-| `knob` | head, shaft, blind screw hole with slots, logo in the shaft's side | Ø33.5 × 32.6 | standing on the mounting face |
+| `knob` | head, shaft, blind screw hole with slots, logo in the shaft's side | Ø33.5 × 32 | standing on the mounting face |
 | `backplate` | `backplate` = rosette or arch, a ring for the shaft's foot, logo in the back | rosette Ø42 × 4.4; arch 30 × 110 × 4.4 | on its back |
 | `print_all`, the default | every look as a finished knob, six in a row in the order of `styles`, and both backplates in front, the tall one lying across | 231 × 160.5 on the bed, 6 between the parts | as the parts: knobs standing, plates on their backs |
 | `assembly`, `styles`, `section`, `body`, `cutter`, `hole_profile` | views, not for printing | | |
@@ -55,10 +55,9 @@
 | `custom` | `custom_relief(angle, t)` in the file | | its negative |
 
 - The relief is cut into the head along the surface normal, `pattern_depth` deep: `head_diameter` stays the largest diameter.
-- It fades in over `shoulder_fade` of the outline above the shaft, is full from half the head's radius outwards and shrinks with the radius inside that, so the pattern runs into the button or the pole.
+- It fades in over `shoulder_fade` of the outline above the shaft, is full from half the head's radius outwards and gets shallower with the radius inside that, so the pattern's lines meet in the pole. `organic` and `custom` get shallower with its square and leave the pole smooth.
 - `twist_turns` turns every style; `reverse_twist` the other way.
 - `diamond`, `scales`, `dimples`, `waves`, `chevron`: the cells shrink with the head's radius, towards shaft and crown; `pattern_stretch` is their height against their width.
-- `button_diameter` 0: no button, the pattern meets in the pole.
 - Keep `pattern_depth` below the rounding of the edge it crosses: `edge_radius` (checked), the mushroom's rim, 3 at the default size (not checked).
 
 ## Looks
@@ -137,7 +136,16 @@ function custom_relief(angle,t) =
 | two renderers | OpenSCAD 2021.01 with CGAL and OpenSCAD 2026.09.16 with lazy union and Manifold, as the online renderer runs: the same volumes to 0.01 cm³ for all 18 looks, both backplates and 6 backplate variants, all closed |
 | render time, CGAL | 13 s for the default knob, 31 000 triangles; 72 ribs make 118 000 and take minutes |
 | `print_all` | F5 preview at once. F6: 5 s with Manifold, 13 minutes and over 4 GB of memory with CGAL |
-| the 3MF | exported with OpenSCAD 2026.09.16, Manifold: 20 bodies, every edge on two triangles, 659 802 triangles, 231 × 160.2 × 32.6, 270 cm³ solid; not sliced, not opened in a slicer |
+| the 3MF | exported with OpenSCAD 2026.09.16, Manifold: 20 bodies, every edge on two triangles, 706 210 triangles, 231 × 160.1 × 32, 269 cm³ solid; not sliced, not opened in a slicer |
+
+## V7 against V6
+
+| | V6 | V7 |
+|---|---|---|
+| crown | a flat button, Ø10, 0.6 high, left from the logo's time on top | no button, with `button_diameter` and `button_rise`: not needed without the logo (the user, 2026-11-21). The pattern runs into the pole |
+| knob's height | 32.6 | 32 |
+| `organic`, `custom` towards the pole | as shallow as the radius is small: a star of folds in the pole, hidden by the button | as shallow as its square: a smooth pole |
+| backplates | | unchanged (same triangles) |
 
 ## V6 against V5
 
