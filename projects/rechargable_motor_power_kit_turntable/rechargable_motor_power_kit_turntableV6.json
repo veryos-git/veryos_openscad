@@ -1,0 +1,21 @@
+{
+    "parameterSets": {
+        "Printed": {
+            "rpm": "6",
+            "turntable_d": "150"
+        },
+        "Compact": {
+            "rpm": "12",
+            "turntable_d": "120"
+        },
+        "Large": {
+            "rpm": "4",
+            "turntable_d": "180"
+        },
+        "Extra large": {
+            "rpm": "3",
+            "turntable_d": "210"
+        }
+    },
+    "fileFormatVersion": "1"
+}

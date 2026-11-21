@@ -1,0 +1,1175 @@
+[
+  {
+    "id": "closed_compact",
+    "meshes": {
+      "base": "compact_base",
+      "platform": "compact_platform",
+      "board": "compact_board",
+      "cap": "compact_cap"
+    },
+    "camera_rotation": [
+      0.18560819327831268,
+      0.09792262315750122,
+      -0.4562290906906128,
+      -0.8647634387016296
+    ],
+    "orthographic_width_mm": 299.87,
+    "px_per_mm": 6.0025,
+    "resolution": [
+      1800,
+      1500
+    ],
+    "marks": {
+      "worm": [
+        1027.42,
+        757.76
+      ],
+      "motor_pad": [
+        963.31,
+        818.98
+      ],
+      "pad_battery": [
+        666.17,
+        747.44
+      ],
+      "pad_socket": [
+        814.52,
+        832.79
+      ],
+      "screw_bracket": [
+        664.44,
+        817.43
+      ],
+      "screw_motor": [
+        1066.54,
+        844.83
+      ],
+      "cap": [
+        797.86,
+        964.18
+      ],
+      "rail": [
+        1225.13,
+        685.65
+      ],
+      "tube": [
+        900.81,
+        737.83
+      ],
+      "platform_l": [
+        540.66,
+        705.62
+      ],
+      "platform_r": [
+        1260.97,
+        705.62
+      ],
+      "base_l": [
+        564.67,
+        805.71
+      ],
+      "base_r": [
+        1236.96,
+        805.71
+      ],
+      "hoop_l": [
+        800.51,
+        720.49
+      ],
+      "hoop_r": [
+        1001.12,
+        720.49
+      ],
+      "rim_l": [
+        564.67,
+        720.49
+      ],
+      "rim_r": [
+        1236.96,
+        720.49
+      ]
+    }
+  },
+  {
+    "id": "closed_printed",
+    "meshes": {
+      "base": "printed_base",
+      "platform": "printed_platform",
+      "board": "printed_board",
+      "cap": "printed_cap"
+    },
+    "camera_rotation": [
+      0.18560819327831268,
+      0.09792262315750122,
+      -0.4562290906906128,
+      -0.8647634387016296
+    ],
+    "orthographic_width_mm": 299.87,
+    "px_per_mm": 6.0025,
+    "resolution": [
+      1800,
+      1500
+    ],
+    "marks": {
+      "worm": [
+        1058.64,
+        826.77
+      ],
+      "motor_pad": [
+        952.7,
+        867.33
+      ],
+      "pad_battery": [
+        604.29,
+        820.33
+      ],
+      "pad_socket": [
+        776.25,
+        880.68
+      ],
+      "screw_bracket": [
+        637.02,
+        878.31
+      ],
+      "screw_motor": [
+        1026.87,
+        914.73
+      ],
+      "cap": [
+        759.59,
+        1012.08
+      ],
+      "rail": [
+        1313.36,
+        676.32
+      ],
+      "tube": [
+        900.59,
+        738.0
+      ],
+      "platform_l": [
+        450.4,
+        705.79
+      ],
+      "platform_r": [
+        1350.77,
+        705.79
+      ],
+      "base_l": [
+        474.41,
+        805.88
+      ],
+      "base_r": [
+        1326.76,
+        805.88
+      ],
+      "hoop_l": [
+        702.36,
+        720.66
+      ],
+      "hoop_r": [
+        1098.82,
+        720.66
+      ],
+      "rim_l": [
+        474.41,
+        720.66
+      ],
+      "rim_r": [
+        1326.76,
+        720.66
+      ]
+    }
+  },
+  {
+    "id": "closed_large",
+    "meshes": {
+      "base": "large_base",
+      "platform": "large_platform",
+      "board": "large_board",
+      "cap": "large_cap"
+    },
+    "camera_rotation": [
+      0.18560819327831268,
+      0.09792262315750122,
+      -0.4562290906906128,
+      -0.8647634387016296
+    ],
+    "orthographic_width_mm": 299.87,
+    "px_per_mm": 6.0025,
+    "resolution": [
+      1800,
+      1500
+    ],
+    "marks": {
+      "worm": [
+        1045.86,
+        899.28
+      ],
+      "motor_pad": [
+        922.22,
+        921.52
+      ],
+      "pad_battery": [
+        552.77,
+        879.78
+      ],
+      "pad_socket": [
+        735.89,
+        931.12
+      ],
+      "screw_bracket": [
+        599.83,
+        932.54
+      ],
+      "screw_motor": [
+        969.48,
+        978.62
+      ],
+      "cap": [
+        719.22,
+        1062.52
+      ],
+      "rail": [
+        1407.49,
+        666.27
+      ],
+      "tube": [
+        900.37,
+        738.07
+      ],
+      "platform_l": [
+        360.15,
+        705.87
+      ],
+      "platform_r": [
+        1440.6,
+        705.87
+      ],
+      "base_l": [
+        378.15,
+        805.95
+      ],
+      "base_r": [
+        1422.59,
+        805.95
+      ],
+      "hoop_l": [
+        601.83,
+        720.73
+      ],
+      "hoop_r": [
+        1198.91,
+        720.73
+      ],
+      "rim_l": [
+        378.15,
+        720.73
+      ],
+      "rim_r": [
+        1422.59,
+        720.73
+      ]
+    }
+  },
+  {
+    "id": "closed_xlarge",
+    "meshes": {
+      "base": "xlarge_base",
+      "platform": "xlarge_platform",
+      "board": "xlarge_board",
+      "cap": "xlarge_cap"
+    },
+    "camera_rotation": [
+      0.18560819327831268,
+      0.09792262315750122,
+      -0.4562290906906128,
+      -0.8647634387016296
+    ],
+    "orthographic_width_mm": 299.87,
+    "px_per_mm": 6.0025,
+    "resolution": [
+      1800,
+      1500
+    ],
+    "marks": {
+      "worm": [
+        1014.24,
+        964.34
+      ],
+      "motor_pad": [
+        884.31,
+        973.71
+      ],
+      "pad_battery": [
+        501.04,
+        935.16
+      ],
+      "pad_socket": [
+        693.33,
+        982.56
+      ],
+      "screw_bracket": [
+        557.45,
+        985.29
+      ],
+      "screw_motor": [
+        912.3,
+        1034.62
+      ],
+      "cap": [
+        676.67,
+        1113.96
+      ],
+      "rail": [
+        1507.58,
+        653.74
+      ],
+      "tube": [
+        900.22,
+        736.31
+      ],
+      "platform_l": [
+        269.96,
+        704.11
+      ],
+      "platform_r": [
+        1530.48,
+        704.11
+      ],
+      "base_l": [
+        275.96,
+        804.19
+      ],
+      "base_r": [
+        1524.48,
+        804.19
+      ],
+      "hoop_l": [
+        501.37,
+        718.97
+      ],
+      "hoop_r": [
+        1299.07,
+        718.97
+      ],
+      "rim_l": [
+        275.96,
+        718.97
+      ],
+      "rim_r": [
+        1524.48,
+        718.97
+      ]
+    }
+  },
+  {
+    "id": "gear_compact",
+    "meshes": {
+      "base": "compact_base",
+      "worm": "compact_worm",
+      "motor": "compact_motor",
+      "board": "compact_board",
+      "battery": "compact_battery",
+      "bracket": "compact_bracket",
+      "motor_bracket": "compact_motor_bracket",
+      "screws": "compact_screws",
+      "cap": "compact_cap",
+      "hoop": "compact_hoop"
+    },
+    "camera_rotation": [
+      -4.371138828673793e-08,
+      -0.0,
+      0.0,
+      1.0
+    ],
+    "orthographic_width_mm": 275.16,
+    "px_per_mm": 6.5417,
+    "resolution": [
+      1800,
+      1500
+    ],
+    "marks": {
+      "worm": [
+        1048.68,
+        733.2
+      ],
+      "motor_pad": [
+        1036.6,
+        876.62
+      ],
+      "pad_battery": [
+        670.88,
+        853.05
+      ],
+      "pad_socket": [
+        885.94,
+        936.94
+      ],
+      "screw_bracket": [
+        736.39,
+        1003.2
+      ],
+      "screw_motor": [
+        1160.85,
+        878.59
+      ],
+      "cap": [
+        951.68,
+        1127.31
+      ],
+      "rail": [
+        1194.73,
+        532.66
+      ],
+      "tube": [
+        900.0,
+        739.03
+      ],
+      "platform_l": [
+        507.5,
+        739.03
+      ],
+      "platform_r": [
+        1292.5,
+        739.03
+      ],
+      "base_l": [
+        533.66,
+        739.03
+      ],
+      "base_r": [
+        1266.34,
+        739.03
+      ],
+      "hoop_l": [
+        790.68,
+        739.03
+      ],
+      "hoop_r": [
+        1009.32,
+        739.03
+      ],
+      "rim_l": [
+        533.66,
+        739.03
+      ],
+      "rim_r": [
+        1266.34,
+        739.03
+      ]
+    }
+  },
+  {
+    "id": "gear_printed",
+    "meshes": {
+      "base": "printed_base",
+      "worm": "printed_worm",
+      "motor": "printed_motor",
+      "board": "printed_board",
+      "battery": "printed_battery",
+      "bracket": "printed_bracket",
+      "motor_bracket": "printed_motor_bracket",
+      "screws": "printed_screws",
+      "cap": "printed_cap",
+      "hoop": "printed_hoop"
+    },
+    "camera_rotation": [
+      -4.371138828673793e-08,
+      -0.0,
+      0.0,
+      1.0
+    ],
+    "orthographic_width_mm": 275.16,
+    "px_per_mm": 6.5417,
+    "resolution": [
+      1800,
+      1500
+    ],
+    "marks": {
+      "worm": [
+        1134.47,
+        838.88
+      ],
+      "motor_pad": [
+        1064.46,
+        964.62
+      ],
+      "pad_battery": [
+        667.23,
+        1007.19
+      ],
+      "pad_socket": [
+        885.94,
+        1036.52
+      ],
+      "screw_bracket": [
+        757.46,
+        1120.79
+      ],
+      "screw_motor": [
+        1176.9,
+        1017.53
+      ],
+      "cap": [
+        951.68,
+        1226.88
+      ],
+      "rail": [
+        1275.11,
+        474.93
+      ],
+      "tube": [
+        900.0,
+        737.58
+      ],
+      "platform_l": [
+        409.37,
+        737.58
+      ],
+      "platform_r": [
+        1390.63,
+        737.58
+      ],
+      "base_l": [
+        435.54,
+        737.58
+      ],
+      "base_r": [
+        1364.46,
+        737.58
+      ],
+      "hoop_l": [
+        683.96,
+        737.58
+      ],
+      "hoop_r": [
+        1116.04,
+        737.58
+      ],
+      "rim_l": [
+        435.54,
+        737.58
+      ],
+      "rim_r": [
+        1364.46,
+        737.58
+      ]
+    }
+  },
+  {
+    "id": "gear_xlarge",
+    "meshes": {
+      "base": "xlarge_base",
+      "worm": "xlarge_worm",
+      "motor": "xlarge_motor",
+      "board": "xlarge_board",
+      "battery": "xlarge_battery",
+      "bracket": "xlarge_bracket",
+      "motor_bracket": "xlarge_motor_bracket",
+      "screws": "xlarge_screws",
+      "cap": "xlarge_cap",
+      "hoop": "xlarge_hoop"
+    },
+    "camera_rotation": [
+      -4.371138828673793e-08,
+      -0.0,
+      0.0,
+      1.0
+    ],
+    "orthographic_width_mm": 275.16,
+    "px_per_mm": 6.5417,
+    "resolution": [
+      1800,
+      1500
+    ],
+    "marks": {
+      "worm": [
+        1201.03,
+        1102.03
+      ],
+      "motor_pad": [
+        1082.46,
+        1183.61
+      ],
+      "pad_battery": [
+        657.27,
+        1256.63
+      ],
+      "pad_socket": [
+        885.94,
+        1254.08
+      ],
+      "screw_bracket": [
+        764.83,
+        1345.83
+      ],
+      "screw_motor": [
+        1159.71,
+        1280.95
+      ],
+      "cap": [
+        951.68,
+        1444.45
+      ],
+      "rail": [
+        1451.94,
+        349.42
+      ],
+      "tube": [
+        900.0,
+        735.89
+      ],
+      "platform_l": [
+        213.12,
+        735.89
+      ],
+      "platform_r": [
+        1586.88,
+        735.89
+      ],
+      "base_l": [
+        219.66,
+        735.89
+      ],
+      "base_r": [
+        1580.34,
+        735.89
+      ],
+      "hoop_l": [
+        465.32,
+        735.89
+      ],
+      "hoop_r": [
+        1334.68,
+        735.89
+      ],
+      "rim_l": [
+        219.66,
+        735.89
+      ],
+      "rim_r": [
+        1580.34,
+        735.89
+      ]
+    }
+  },
+  {
+    "id": "wide_printed",
+    "meshes": {
+      "base": "printed_base",
+      "platform": "printed_platform",
+      "board": "printed_board",
+      "cap": "printed_cap"
+    },
+    "camera_rotation": [
+      0.17194581031799316,
+      0.12030748277902603,
+      -0.5605220794677734,
+      -0.8011091947555542
+    ],
+    "orthographic_width_mm": 285.61,
+    "px_per_mm": 6.3022,
+    "resolution": [
+      1800,
+      1500
+    ],
+    "marks": {
+      "worm": [
+        1066.56,
+        787.05
+      ],
+      "motor_pad": [
+        955.34,
+        810.69
+      ],
+      "pad_battery": [
+        589.53,
+        790.41
+      ],
+      "pad_socket": [
+        770.08,
+        828.87
+      ],
+      "screw_bracket": [
+        623.89,
+        819.07
+      ],
+      "screw_motor": [
+        1033.2,
+        840.07
+      ],
+      "cap": [
+        752.58,
+        927.94
+      ],
+      "rail": [
+        1334.0,
+        686.47
+      ],
+      "tube": [
+        900.61,
+        735.44
+      ],
+      "platform_l": [
+        427.95,
+        696.96
+      ],
+      "platform_r": [
+        1373.28,
+        696.96
+      ],
+      "base_l": [
+        453.16,
+        816.56
+      ],
+      "base_r": [
+        1348.07,
+        816.56
+      ],
+      "hoop_l": [
+        692.49,
+        714.72
+      ],
+      "hoop_r": [
+        1108.74,
+        714.72
+      ],
+      "rim_l": [
+        453.16,
+        714.72
+      ],
+      "rim_r": [
+        1348.07,
+        714.72
+      ]
+    }
+  },
+  {
+    "id": "wide_wide180",
+    "meshes": {
+      "base": "printed_base",
+      "platform": "wide180_platform",
+      "board": "printed_board",
+      "cap": "printed_cap"
+    },
+    "camera_rotation": [
+      0.17194581031799316,
+      0.12030748277902603,
+      -0.5605220794677734,
+      -0.8011091947555542
+    ],
+    "orthographic_width_mm": 285.61,
+    "px_per_mm": 6.3022,
+    "resolution": [
+      1800,
+      1500
+    ],
+    "marks": {
+      "worm": [
+        1066.56,
+        787.05
+      ],
+      "motor_pad": [
+        955.34,
+        810.69
+      ],
+      "pad_battery": [
+        589.53,
+        790.41
+      ],
+      "pad_socket": [
+        770.08,
+        828.87
+      ],
+      "screw_bracket": [
+        623.89,
+        819.07
+      ],
+      "screw_motor": [
+        1033.2,
+        840.07
+      ],
+      "cap": [
+        752.58,
+        927.94
+      ],
+      "rail": [
+        1334.0,
+        686.47
+      ],
+      "tube": [
+        900.62,
+        735.44
+      ],
+      "platform_l": [
+        333.41,
+        696.96
+      ],
+      "platform_r": [
+        1467.82,
+        696.96
+      ],
+      "base_l": [
+        453.16,
+        816.56
+      ],
+      "base_r": [
+        1348.07,
+        816.56
+      ],
+      "hoop_l": [
+        692.49,
+        714.72
+      ],
+      "hoop_r": [
+        1108.74,
+        714.72
+      ],
+      "rim_l": [
+        453.16,
+        714.72
+      ],
+      "rim_r": [
+        1348.07,
+        714.72
+      ]
+    }
+  },
+  {
+    "id": "wide_wide200",
+    "meshes": {
+      "base": "printed_base",
+      "platform": "wide200_platform",
+      "board": "printed_board",
+      "cap": "printed_cap"
+    },
+    "camera_rotation": [
+      0.17194581031799316,
+      0.12030748277902603,
+      -0.5605220794677734,
+      -0.8011091947555542
+    ],
+    "orthographic_width_mm": 285.61,
+    "px_per_mm": 6.3022,
+    "resolution": [
+      1800,
+      1500
+    ],
+    "marks": {
+      "worm": [
+        1066.56,
+        787.05
+      ],
+      "motor_pad": [
+        955.34,
+        810.69
+      ],
+      "pad_battery": [
+        589.53,
+        790.41
+      ],
+      "pad_socket": [
+        770.08,
+        828.87
+      ],
+      "screw_bracket": [
+        623.89,
+        819.07
+      ],
+      "screw_motor": [
+        1033.2,
+        840.07
+      ],
+      "cap": [
+        752.58,
+        927.94
+      ],
+      "rail": [
+        1334.0,
+        686.47
+      ],
+      "tube": [
+        900.62,
+        735.44
+      ],
+      "platform_l": [
+        270.39,
+        696.96
+      ],
+      "platform_r": [
+        1530.84,
+        696.96
+      ],
+      "base_l": [
+        453.16,
+        816.56
+      ],
+      "base_r": [
+        1348.07,
+        816.56
+      ],
+      "hoop_l": [
+        692.49,
+        714.72
+      ],
+      "hoop_r": [
+        1108.74,
+        714.72
+      ],
+      "rim_l": [
+        453.16,
+        714.72
+      ],
+      "rim_r": [
+        1348.07,
+        714.72
+      ]
+    }
+  },
+  {
+    "id": "open",
+    "meshes": {
+      "base": "printed_base",
+      "worm": "printed_worm",
+      "motor": "printed_motor",
+      "board": "printed_board",
+      "battery": "printed_battery",
+      "bracket": "printed_bracket",
+      "motor_bracket": "printed_motor_bracket",
+      "screws": "printed_screws",
+      "cap": "printed_cap"
+    },
+    "camera_rotation": [
+      0.2128782868385315,
+      0.08642474561929703,
+      -0.3661010265350342,
+      -0.9017668962478638
+    ],
+    "orthographic_width_mm": 204.98,
+    "px_per_mm": 8.7813,
+    "resolution": [
+      1800,
+      1500
+    ],
+    "marks": {
+      "worm": [
+        1117.56,
+        900.41
+      ],
+      "motor_pad": [
+        958.01,
+        973.62
+      ],
+      "pad_battery": [
+        455.52,
+        860.71
+      ],
+      "pad_socket": [
+        700.51,
+        980.1
+      ],
+      "screw_bracket": [
+        495.67,
+        978.98
+      ],
+      "screw_motor": [
+        1061.24,
+        1065.73
+      ],
+      "cap": [
+        665.16,
+        1206.25
+      ],
+      "rail": [
+        1504.9,
+        637.22
+      ],
+      "tube": [
+        896.85,
+        723.3
+      ],
+      "platform_l": [
+        238.25,
+        683.51
+      ],
+      "platform_r": [
+        1555.45,
+        683.51
+      ],
+      "base_l": [
+        273.38,
+        807.16
+      ],
+      "base_r": [
+        1520.33,
+        807.16
+      ],
+      "hoop_l": [
+        606.85,
+        701.87
+      ],
+      "hoop_r": [
+        1186.85,
+        701.87
+      ],
+      "rim_l": [
+        273.38,
+        701.87
+      ],
+      "rim_r": [
+        1520.33,
+        701.87
+      ]
+    }
+  },
+  {
+    "id": "section",
+    "meshes": {
+      "cut_base": "printed_cut_base",
+      "cut_platform": "printed_cut_platform",
+      "cut_worm": "printed_cut_worm",
+      "cut_motor": "printed_cut_motor"
+    },
+    "camera_rotation": [
+      0.4999999701976776,
+      0.4999999701976776,
+      0.4999999701976776,
+      0.4999999701976776
+    ],
+    "orthographic_width_mm": 161.98,
+    "px_per_mm": 11.1125,
+    "resolution": [
+      1800,
+      1500
+    ],
+    "marks": {
+      "worm": [
+        464.69,
+        765.56
+      ],
+      "mesh": [
+        531.37,
+        765.56
+      ],
+      "pin": [
+        898.35,
+        837.79
+      ],
+      "rail_l": [
+        120.48,
+        671.1
+      ],
+      "rail_r": [
+        1676.23,
+        671.1
+      ],
+      "top": [
+        898.35,
+        637.76
+      ],
+      "bottom": [
+        898.35,
+        862.24
+      ],
+      "hoop_r": [
+        1265.34,
+        765.56
+      ]
+    }
+  },
+  {
+    "id": "layout",
+    "meshes": {
+      "base": "printed_base",
+      "lay_platform": "printed_lay_platform",
+      "lay_worm": "printed_lay_worm",
+      "lay_screws": "printed_lay_screws",
+      "lay_cap": "printed_lay_cap",
+      "lay_motor_bracket": "printed_lay_motor_bracket",
+      "lay_bracket": "printed_lay_bracket"
+    },
+    "camera_rotation": [
+      0.9549069404602051,
+      0.29084551334381104,
+      0.0173883568495512,
+      0.05708962678909302
+    ],
+    "orthographic_width_mm": 348.2,
+    "px_per_mm": 5.1695,
+    "resolution": [
+      1800,
+      1500
+    ],
+    "marks": {
+      "worm": [
+        352.73,
+        537.39
+      ],
+      "motor_pad": [
+        419.51,
+        458.65
+      ],
+      "pad_battery": [
+        735.18,
+        472.06
+      ],
+      "pad_socket": [
+        566.35,
+        435.86
+      ],
+      "screw_bracket": [
+        675.08,
+        382.37
+      ],
+      "screw_motor": [
+        336.27,
+        414.53
+      ],
+      "cap": [
+        532.69,
+        322.71
+      ],
+      "rail": [
+        208.13,
+        758.57
+      ],
+      "tube": [
+        527.16,
+        626.89
+      ],
+      "platform_l": [
+        139.46,
+        608.16
+      ],
+      "platform_r": [
+        914.87,
+        608.16
+      ],
+      "base_l": [
+        160.13,
+        666.37
+      ],
+      "base_r": [
+        894.2,
+        666.37
+      ],
+      "hoop_l": [
+        356.45,
+        616.81
+      ],
+      "hoop_r": [
+        697.88,
+        616.81
+      ],
+      "rim_l": [
+        160.13,
+        616.81
+      ],
+      "rim_r": [
+        894.2,
+        616.81
+      ]
+    }
+  }
+]

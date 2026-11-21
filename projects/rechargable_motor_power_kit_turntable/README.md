@@ -1,6 +1,6 @@
 # Rechargeable Power Kit turntable
 
-Turntable for Bambu Lab's Rechargeable Power Kit (ZC003): an N20 gear motor, a 500 mAh LiPo battery and a board with a USB-C socket and a push switch. A printed worm on the motor turns a hoop of teeth under the platform; the number of teeth sets the speed. Seven printed parts, the screw twice, and the kit, nothing else. V6: V5 is printed and tested, its bracket locks board and battery, the motor lies a bit loose under its hook; the motor bracket and the base of V6 are not printed yet.
+Turntable for Bambu Lab's Rechargeable Power Kit (ZC003): an N20 gear motor, a 500 mAh LiPo battery and a board with a USB-C socket and a push switch. A printed worm on the motor turns a hoop of teeth under the platform; the number of teeth sets the speed. Seven printed parts, the screw twice, and the kit, nothing else. V6 is printed and tested (2026-11-21): the motor bracket holds the motor firmly, the teeth do not skip with the load tried, the cap switches. Speed, direction, load and run time are not measured.
 
 ![assembly](preview.png)
 
@@ -8,6 +8,10 @@ Turntable for Bambu Lab's Rechargeable Power Kit (ZC003): an N20 gear motor, a 5
 |---|---|
 | `rechargable_motor_power_kit_turntableV6.scad` | the generator, standalone, no libraries. `part`: all parts on the bed, assembly, assembly without the platform, section, base, platform, worm, bracket, motor_bracket, screw, cap |
 | `rechargable_motor_power_kit_turntableV6_base.stl`, `_platform.stl`, `_worm.stl`, `_bracket.stl`, `_motor_bracket.stl`, `_screw.stl`, `_cap.stl` | exported at the defaults, as they print; platform, worm, bracket, screw and cap are the shapes of V5, triangle for triangle |
+| `rechargable_motor_power_kit_turntableV6.json` | Customizer presets: Printed (`rpm` 6, `turntable_d` 150), Compact (12, 120), Large (4, 180), Extra large (3, 210); only Printed is printed |
+| `v6_elegoo.3mf`, `v6_bambu_veryos.3mf` | the plate of the photographed print (Elegoo Centauri Carbon 2, PLA), and the same plate for the Bambu Lab A1, not printed |
+| `real_images/` | photos of the printed V6 |
+| `publish/` | publishing material: thumbnails, images, `listing.md`, STL files, `source/build.py` |
 | `rendered_parts/` | every part under its name |
 | `archive/` | V1 to V5 |
 | `readme_hgc.md` | original goal |
@@ -29,7 +33,7 @@ Turntable for Bambu Lab's Rechargeable Power Kit (ZC003): an N20 gear motor, a 5
 
 | | V5 | V6 |
 |---|---|---|
-| print | printed and tested 2026-11-13: the bracket locks board and battery; the motor lies a bit loose | unprinted |
+| print | printed and tested 2026-11-13: the bracket locks board and battery; the motor lies a bit loose | printed and tested 2026-11-21 (Elegoo Centauri Carbon 2, PLA, `v6_elegoo.3mf`): the motor is held firmly, the teeth do not skip with the load tried |
 | motor's hold | a hook 0.2 above the gearbox, walls 0.1 beside it | a motor bracket, held by a second screw, presses it down and away from the hoop |
 | motor bracket | | new: a foot on a block beside the can, an arm 1.4 thick and 10 wide across the can, a pad on the can's shoulder 25° from its top, towards the hoop. The pad reaches 0.4 (`motor_press`) into the can, so the arm bends up by that |
 | force on the motor | | about 3 to 4 N down and half of that away from the hoop, by estimate |
@@ -200,6 +204,8 @@ The rail's last layer is one line wide, which a slicer only prints with thin wal
 | classic, `Detect thin wall` on | one line all round, 0.46 wide | one line, 0.66 | as with it off, to 0.1 |
 | Arachne | one line all round, 0.42 wide | one line, 0.62 | a fifth of the walls' plastic lies more than 0.1 from classic's; the fits of V1's print are untested with it |
 
+V6's print was made with `Detect thin wall` off (`v6_elegoo.3mf`): by its G-code 20 of 440 mm of the rail's last layer are printed, so the platform lies on the 0.62 wide layer below, 0.2 lower, and it works. With it on: sliced, not printed.
+
 ## Tuning
 
 | Problem | Change |
@@ -267,8 +273,8 @@ The rail's last layer is one line wide, which a slicer only prints with thin wal
 | motor speed | 500 rpm is Bambu Lab's number for the kit; at which voltage is not stated, and the board feeds the motor from the battery, 3.7 V. Expect to correct `motor_rpm` |
 | direction | set by the plugs; unknown which way the platform turns |
 | torque | a worm with 45° flanks loses most of the motor's power to friction, about 85 to 90 % by estimate. V3 turns the platform; how much load before the motor stalls is unknown, the teeth skip first |
-| skipping | whether V4's larger worm ended it is not reported. V6's base adds the stop beside the gearbox's boss. If the teeth still skip: the worm closer by the pin's play; not built, needs a new base |
-| motor bracket | unprinted. Its force is an estimate from the arm's size, about 3 to 4 N; the motor's real height above the block decides. More than 0.4 makes the arm thinner, so it hardly presses harder |
+| skipping | V6, with V4's larger worm and the stop beside the gearbox's boss, does not skip with the load tried (print, 2026-11-21); the load is not measured. If the teeth skip again: the worm closer by the pin's play; not built, needs a new base |
+| motor bracket | holds the motor firmly (print, 2026-11-21). Its force is an estimate from the arm's size, about 3 to 4 N; the motor's real height above the block decides. More than 0.4 makes the arm thinner, so it hardly presses harder |
 | run time | unknown |
 | shaft | 2.7 across the flat by the CAD model; N20 shafts usually have 2.5. The bore follows the CAD model, which fits both |
 | charging light | its place on the board is read from the photo, not from the CAD model |
@@ -277,5 +283,5 @@ The rail's last layer is one line wide, which a slicer only prints with thin wal
 | rail | works well in V3's print. The load brakes at r 70: about 14 mN·m for each 100 g at a friction of 0.2, by estimate (on the pin's end: 0.4). Unmeasured how much the motor still turns, and how graphite, the ridge's seam and the lines of the platform's underside run on each other |
 | bracket | V5's pressing arms lock board and battery (print, 2026-11-13). Their force is an estimate from the arms' size, 4 to 9 N at 0.4. PLA gives way under a lasting bend: the force drops with time, the pads stay on |
 | screw | the printed 5 mm screw in its block holds the bracket (print, 2026-11-13) |
-| cap | its hold on the tip is unprinted; the tip's size is from the CAD model, the plunger's travel a guess from its 2.5 long collar |
+| cap | stays on the tip and switches (print, 2026-11-21); the tip's size is from the CAD model, the plunger's travel a guess from its 2.5 long collar |
 | board's play | the board still slides up to 0.6 in its seat, 0.3 before and 0.3 behind it; the cap makes that harmless. The stops could come closer once the cap is tested |

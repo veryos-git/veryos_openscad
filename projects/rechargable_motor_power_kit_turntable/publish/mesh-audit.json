@@ -1,0 +1,79 @@
+[
+  {
+    "file": "rechargable_motor_power_kit_turntableV6_base.stl",
+    "triangles": 16088,
+    "closed": true,
+    "volume_mm3": 46019.3,
+    "size_mm": [
+      142.0,
+      140.4,
+      17.2
+    ]
+  },
+  {
+    "file": "rechargable_motor_power_kit_turntableV6_platform.stl",
+    "triangles": 40936,
+    "closed": true,
+    "volume_mm3": 58695.2,
+    "size_mm": [
+      150.0,
+      150.0,
+      18.0
+    ]
+  },
+  {
+    "file": "rechargable_motor_power_kit_turntableV6_worm.stl",
+    "triangles": 15102,
+    "closed": true,
+    "volume_mm3": 1227.5,
+    "size_mm": [
+      13.6,
+      13.6,
+      10.5
+    ]
+  },
+  {
+    "file": "rechargable_motor_power_kit_turntableV6_bracket.stl",
+    "triangles": 6776,
+    "closed": true,
+    "volume_mm3": 1273.9,
+    "size_mm": [
+      28.92,
+      42.9,
+      5.0
+    ]
+  },
+  {
+    "file": "rechargable_motor_power_kit_turntableV6_motor_bracket.stl",
+    "triangles": 2076,
+    "closed": true,
+    "volume_mm3": 544.8,
+    "size_mm": [
+      6.7,
+      27.0,
+      10.0
+    ]
+  },
+  {
+    "file": "rechargable_motor_power_kit_turntableV6_screw.stl",
+    "triangles": 7492,
+    "closed": true,
+    "volume_mm3": 244.7,
+    "size_mm": [
+      10.39,
+      11.0,
+      6.25
+    ]
+  },
+  {
+    "file": "rechargable_motor_power_kit_turntableV6_cap.stl",
+    "triangles": 3008,
+    "closed": true,
+    "volume_mm3": 175.8,
+    "size_mm": [
+      9.0,
+      7.0,
+      5.6
+    ]
+  }
+]
