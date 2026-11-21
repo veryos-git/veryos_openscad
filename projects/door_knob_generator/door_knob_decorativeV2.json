@@ -1,0 +1,167 @@
+{
+    "fileFormatVersion": "1",
+    "parameterSets": {
+        "01 - Melon": {
+            "head_shape": "ball",
+            "style": "melon",
+            "pattern_count": "16",
+            "pattern_depth": "1.2",
+            "twist_turns": "0",
+            "pattern_stretch": "1",
+            "invert_pattern": "false"
+        },
+        "02 - Fine melon": {
+            "head_shape": "ball",
+            "style": "melon",
+            "pattern_count": "26",
+            "pattern_depth": "0.8",
+            "twist_turns": "0",
+            "pattern_stretch": "1",
+            "invert_pattern": "false"
+        },
+        "03 - Turban": {
+            "head_shape": "ball",
+            "style": "melon",
+            "pattern_count": "12",
+            "pattern_depth": "1.4",
+            "twist_turns": "0.3",
+            "pattern_stretch": "1",
+            "invert_pattern": "false"
+        },
+        "04 - Flower": {
+            "head_shape": "mushroom",
+            "style": "melon",
+            "pattern_count": "12",
+            "pattern_depth": "1.6",
+            "twist_turns": "0",
+            "pattern_stretch": "1",
+            "invert_pattern": "false"
+        },
+        "05 - Twisted flutes": {
+            "head_shape": "mushroom",
+            "style": "flutes",
+            "pattern_count": "12",
+            "pattern_depth": "2",
+            "twist_turns": "0.2",
+            "pattern_stretch": "1",
+            "invert_pattern": "false"
+        },
+        "06 - Scoops": {
+            "head_shape": "drum",
+            "style": "melon",
+            "pattern_count": "14",
+            "pattern_depth": "1.2",
+            "twist_turns": "0",
+            "pattern_stretch": "1",
+            "invert_pattern": "true"
+        },
+        "07 - Sunburst": {
+            "head_shape": "mushroom",
+            "style": "ribs",
+            "pattern_count": "48",
+            "pattern_depth": "0.6",
+            "twist_turns": "0",
+            "pattern_stretch": "1",
+            "invert_pattern": "false"
+        },
+        "08 - Octagon": {
+            "head_shape": "cone",
+            "style": "facets",
+            "pattern_count": "8",
+            "pattern_depth": "0",
+            "twist_turns": "0",
+            "pattern_stretch": "1",
+            "invert_pattern": "false"
+        },
+        "09 - Twisted decagon": {
+            "head_shape": "drum",
+            "style": "facets",
+            "pattern_count": "10",
+            "pattern_depth": "0",
+            "twist_turns": "0.1",
+            "pattern_stretch": "1",
+            "invert_pattern": "false"
+        },
+        "10 - Knurl": {
+            "head_shape": "drum",
+            "style": "diamond",
+            "pattern_count": "24",
+            "pattern_depth": "0.8",
+            "twist_turns": "0",
+            "pattern_stretch": "1",
+            "invert_pattern": "false"
+        },
+        "11 - Pinecone": {
+            "head_shape": "ball",
+            "style": "scales",
+            "pattern_count": "12",
+            "pattern_depth": "1.2",
+            "twist_turns": "0",
+            "pattern_stretch": "1",
+            "invert_pattern": "false"
+        },
+        "12 - Dimples": {
+            "head_shape": "ball",
+            "style": "dimples",
+            "pattern_count": "14",
+            "pattern_depth": "0.8",
+            "twist_turns": "0",
+            "pattern_stretch": "1",
+            "invert_pattern": "false"
+        },
+        "13 - Hobnail": {
+            "head_shape": "mushroom",
+            "style": "dimples",
+            "pattern_count": "12",
+            "pattern_depth": "1",
+            "twist_turns": "0",
+            "pattern_stretch": "1",
+            "invert_pattern": "true"
+        },
+        "14 - Wavy ribs": {
+            "head_shape": "drum",
+            "style": "waves",
+            "pattern_count": "24",
+            "pattern_depth": "0.8",
+            "twist_turns": "0",
+            "pattern_stretch": "1",
+            "invert_pattern": "false"
+        },
+        "15 - Chevron": {
+            "head_shape": "drum",
+            "style": "chevron",
+            "pattern_count": "24",
+            "pattern_depth": "0.8",
+            "twist_turns": "0",
+            "pattern_stretch": "1",
+            "invert_pattern": "false"
+        },
+        "16 - Beehive": {
+            "head_shape": "ball",
+            "style": "rings",
+            "pattern_count": "10",
+            "pattern_depth": "0.8",
+            "twist_turns": "0",
+            "pattern_stretch": "1",
+            "invert_pattern": "false"
+        },
+        "17 - Organic": {
+            "head_shape": "mushroom",
+            "style": "organic",
+            "pattern_count": "16",
+            "pattern_depth": "1.6",
+            "twist_turns": "0",
+            "pattern_stretch": "1",
+            "invert_pattern": "false"
+        },
+        "18 - Smooth original": {
+            "head_shape": "mushroom",
+            "style": "smooth",
+            "pattern_count": "16",
+            "pattern_depth": "0",
+            "twist_turns": "0",
+            "pattern_stretch": "1",
+            "invert_pattern": "false"
+        }
+    }
+}

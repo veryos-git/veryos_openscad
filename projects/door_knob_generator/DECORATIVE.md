@@ -1,92 +1,148 @@
-# Programmable decorative knob
+# Decorative door knob and backplate
 
-Open `door_knob_decorative.scad`. This standalone variant preserves the independent
-head and shaft dimensions, triangular blind screw hole, and branching slots.
-Its default head has twelve twisting flutes. Render with F6 and export `part="knob"`.
+`door_knob_decorativeV2.scad`: the door knob in 4 head shapes and 13 surface styles, and a backplate that takes its shaft. Standalone, no libraries. Screw hole and slots are those of `door_knob.scad`, see `USAGE.md`. **V2; nothing of it is printed yet.**
 
-## Customize without coding
+![all looks](rendered_parts/styles.png)
 
-Open OpenSCAD's **Customizer** panel and expand **1 - Start here - pattern and twist**. Choose
-**Spiral grooves**, **Wavy grooves**, **Organic bumps**, or **Smooth** from the
-Decoration menu. You do not need to edit any formulas.
+![knob on its backplate](rendered_parts/assembly.png)
 
-- **Decoration depth:** move toward 0 for subtle detail or toward 3 for bold grooves.
-- **Wave count:** choose fewer wide grooves or more narrow grooves (3–24).
-- **Twist turns:** 0 makes straight grooves, 0.25 gives a quarter turn, and 1 gives a full turn.
-- **Reverse twist:** check this to spiral the other way.
-- **Vertical waves:** adds ripples up the head in Wavy grooves mode (1–8).
-- **Noise seed:** changes the pattern in Organic bumps mode; try any number from 1 to 100.
+| File | What |
+|---|---|
+| `door_knob_decorativeV2.scad` | the generator. `part`: knob, backplate, assembly, styles, section, body, cutter, hole_profile |
+| `door_knob_decorativeV2.json` | 18 Customizer presets, the looks of `part` = styles |
+| `door_knob_decorativeV2_knob.stl`, `_backplate_rosette.stl`, `_backplate_arch.stl` | the parts at the defaults, as they print |
+| `rendered_parts/` | every part under its name |
+| `archive/door_knob_decorative.scad` | V1 |
+| `inspiration/` | the knobs and backplates this is modelled after |
 
-Start with Spiral grooves, depth **1.5**, wave count **8**, and twist turns **0.25**.
-For a flower-like shape, try wave count **6** and twist turns **0**. For ripples,
-choose Wavy grooves and set vertical waves to **4**. Press F5 to preview changes;
-use F6 before exporting. Head and shaft sizes come next, followed by pattern variations and screw fit.
-Advanced settings and inspection views are grouped at the bottom.
+## Parts
 
-Mesh resolution automatically increases for more grooves, twists, and ripples.
-Detailed patterns can take longer to render. Organic bumps uses its own fixed
-frequencies, so Wave count and Vertical waves do not affect that style.
+| `part` | What | Size at the defaults | Print |
+|---|---|---|---|
+| `knob` | head, shaft, blind screw hole with slots, logo in the crown button | Ø33.5 × 32.6 | standing on the mounting face |
+| `backplate` | `backplate` = rosette or arch, a ring for the shaft's foot, logo in the back | rosette Ø42 × 4.4; arch 30 × 110 × 4.4 | on its back |
+| `assembly`, `styles`, `section`, `body`, `cutter`, `hole_profile` | views, not for printing | | |
 
-Like `complex.js`, the script evaluates a function around a series of horizontal
-rings and joins neighbouring samples into a surface. OpenSCAD functions and list
-comprehensions replace the JavaScript callback and mutable arrays. A triangulated
-polyhedron closes the bottom, sides, and crown before subtracting the screw cutter.
+## Head shapes
 
-| Parameter | Default | Effect |
-| --- | --- | --- |
-| `decoration` | `"twisted_flutes"` | Choose `twisted_flutes`, `waves`, `organic`, `plain`, or your `custom` function. |
-| `decoration_depth` | `1.5` mm | Radial displacement amplitude, faded near the shaft and crown. Larger values produce deeper relief. |
-| `wave_count` | `12` | Integer number of flutes around the head for the fluted and wave presets. |
-| `twist_turns` | `0.208333333333` | Pattern turns across the head height (the default preserves the original 75-degree twist). Zero gives straight grooves. |
-| `reverse_twist` | `false` | Reverses the spiral direction. |
-| `vertical_waves` | `3` | Number of vertical amplitude cycles for the `waves` preset. |
-| `noise_seed` | `7` | Changes the repeatable organic texture. The same value generates the same shape. |
-| `shoulder_fade` | `0.25` | Fraction of head height used to introduce the decoration smoothly above the shaft. Must be greater than 0 and at most 1. |
-| `radial_segments` | `144` | Samples around each ring. Automatically increased to at least eight samples per wave for flutes and waves. |
-| `profile_segments` | `64` | Number of rings along the head. Automatically increased for stronger twists and more ripples; raise this minimum for finer detail. |
+| `head_shape` | Outline | Own parameters |
+|---|---|---|
+| `mushroom` | the original's arcs (neck R8.04, R20, rim R3, R20), scaled to `head_diameter` and `head_height` | |
+| `ball` (default) | an ellipsoid on a cone that leaves the shaft at `overhang_angle`; `head_height` 30 makes it nearly round | `overhang_angle` 40 |
+| `drum` | cone at `overhang_angle`, straight wall, flat top | `overhang_angle`, `edge_radius` 4 |
+| `cone` | cone from the shaft up to the rounded top edge, flat top | `edge_radius` |
 
-`head_diameter` is the **undecorated** head diameter. Texture may add up to twice
-`decoration_depth` to its width for the built-in presets. `head_height` includes
-the curved shoulder. `shaft_height` and `shaft_diameter` remain independently
-adjustable. Total height remains `shaft_height + head_height`; adjust `hole_depth`
-when shortening it. See `PLATFORM_DESCRIPTION.md` for the shared fit and slot controls.
+## Styles
 
-## Write your own surface function
+| `style` | Relief | `pattern_count` counts | `invert_pattern` gives |
+|---|---|---|---|
+| `smooth` | none | | |
+| `melon` (default) | round lobes, sharp grooves between them | lobes | scoops with sharp ridges |
+| `flutes` | a sine wave around the head | waves | the same, shifted |
+| `ribs` | narrow ribs, flat valleys | ribs | narrow grooves |
+| `facets` | flat sides: every level cut is a polygon | sides | nothing; `pattern_depth` is not used either |
+| `diamond` | pyramids, a knurl | pyramids around | pits |
+| `scales` | scales pointing up, as on a pinecone | scales around | pockets |
+| `dimples` | round dimples in staggered rows | dimples around | hobnail bumps |
+| `waves` | ribs swinging left and right | ribs | grooves |
+| `chevron` | ribs in a zigzag | ribs | grooves |
+| `rings` | round rings, sharp grooves, a beehive | rings from shaft to crown | grooved rings |
+| `organic` | a sum of sines, changed by `noise_seed` | | its negative |
+| `custom` | `custom_relief(angle, t)` in the file | | its negative |
 
-Select `decoration="custom"` and edit this function in the file:
+- The relief is cut into the head along the surface normal, `pattern_depth` deep: `head_diameter` stays the largest diameter.
+- It fades in over `shoulder_fade` of the outline above the shaft, is full from half the head's radius outwards and shrinks with the radius inside that, so the pattern runs into the button or the pole.
+- `twist_turns` turns every style; `reverse_twist` the other way.
+- `diamond`, `scales`, `dimples`, `waves`, `chevron`: the cells shrink with the head's radius, towards shaft and crown; `pattern_stretch` is their height against their width.
+- `button_diameter` 0: no button, the pattern meets in the pole.
+- Keep `pattern_depth` below the rounding of the edge it crosses: `edge_radius` (checked), the mushroom's rim, 3 at the default size (not checked).
+
+## Looks
+
+The presets of the JSON, in the order of `part` = styles. All at the default sizes.
+
+| Preset | `head_shape` | `style` | `pattern_count` | `pattern_depth` | `twist_turns` | `invert_pattern` |
+|---|---|---|---|---|---|---|
+| 01 - Melon (the defaults) | ball | melon | 16 | 1.2 | 0 | |
+| 02 - Fine melon | ball | melon | 26 | 0.8 | 0 | |
+| 03 - Turban | ball | melon | 12 | 1.4 | 0.3 | |
+| 04 - Flower | mushroom | melon | 12 | 1.6 | 0 | |
+| 05 - Twisted flutes | mushroom | flutes | 12 | 2 | 0.2 | |
+| 06 - Scoops | drum | melon | 14 | 1.2 | 0 | yes |
+| 07 - Sunburst | mushroom | ribs | 48 | 0.6 | 0 | |
+| 08 - Octagon | cone | facets | 8 | | 0 | |
+| 09 - Twisted decagon | drum | facets | 10 | | 0.1 | |
+| 10 - Knurl | drum | diamond | 24 | 0.8 | 0 | |
+| 11 - Pinecone | ball | scales | 12 | 1.2 | 0 | |
+| 12 - Dimples | ball | dimples | 14 | 0.8 | 0 | |
+| 13 - Hobnail | mushroom | dimples | 12 | 1 | 0 | yes |
+| 14 - Wavy ribs | drum | waves | 24 | 0.8 | 0 | |
+| 15 - Chevron | drum | chevron | 24 | 0.8 | 0 | |
+| 16 - Beehive | ball | rings | 10 | 0.8 | 0 | |
+| 17 - Organic | mushroom | organic | | 1.6 | 0 | |
+| 18 - Smooth original | mushroom | smooth | | | 0 | |
+
+## Backplates
+
+| `backplate` | What | After | Held by |
+|---|---|---|---|
+| `rosette` (default) | `backplate_count` 16 petals around the ring, lying on the door, 4 high at their ends | `inspiration/image.png` | the knob's screw |
+| `arch` | tall plate, a fan of 16 flutes on its round top, `keyhole` cut through | `inspiration/inspo.png` | the knob's screw and two countersunk `plate_screw_diameter` 3 wood screws, in the fan and at the bottom |
+
+| Fit | Value | Result |
+|---|---|---|
+| shaft Ø16 in the ring, `shaft_clearance` per side | 0.3: Ø16.6, 2 deep, 0.4 lead-in | untested |
+| knob's 2.8 screw through the plate | Ø3.4 | untested |
+| screw length | 2.4 more than without a backplate: the plate's thickness | |
+| logo | button: 7 wide; back of the plate: 11.4 wide, inside the ring; both 0.6 deep | |
+
+- Not built: the pierced scrollwork plate of `inspiration/image copy 2.png`. It needs a drawing of the scrolls (SVG or DXF) to extrude.
+
+## Printing
+
+- Not printed. Layer 0.2, no support intended.
+- Under the head: `ball` and `drum` start as a cone 40 degrees from flat (`overhang_angle`), `cone` at 64, `mushroom` at 35 as the original.
+- A relief under the head makes the overhang locally flatter than that; raise `shoulder_fade` to keep it away from there.
+- Check the slots around the screw hole in the slicer, as for `door_knob.scad`.
+
+## Custom formula
+
+`style` = custom, then edit in the file:
 
 ```scad
-function custom_displacement(angle,t) =
-    decoration_depth * sin(5*angle + 360*t) * cos(720*t);
+function custom_relief(angle,t) =
+    (1 + sin(5*angle + 360*t)*cos(720*t))/2;
 ```
 
-- `angle` runs around the head from 0 to 360 **degrees**. OpenSCAD trigonometry uses degrees, unlike JavaScript's radians.
-- `t` is normalized head height: 0 at the shaft joint and 1 at the crown.
-- Return a radial displacement in millimetres. Positive values push outward; negative values carve inward.
+| | |
+|---|---|
+| `angle` | around the head, 0 to 360 degrees; OpenSCAD's trigonometry takes degrees |
+| `t` | 0 at the shaft, 1 at the crown, along the outline |
+| result | 1: on the head's surface, 0: `pattern_depth` deep |
+| seam | whole numbers of repeats in `angle` |
 
-The enclosing `decorative_radius(angle,t,base_radius)` function applies a smooth
-fade at the joint and crown. For deeper customization, edit that function directly;
-it must return a positive radius. Preserve the end fades to keep the joint smooth
-and the crown closed neatly. Angular expressions should repeat at 360 degrees;
-integer angular frequencies avoid a visible seam.
+## Mesh
 
-The surface has one radius per angle and height. It supports lobes, ribs, twists,
-and organic relief, but cannot describe arbitrary overhangs that fold back through
-the same ring, handles, or surfaces with holes. Custom functions are source edits,
-not JavaScript callbacks pasted into Customizer. The organic preset uses a sum of
-periodic trigonometric functions, not the example's simplex-noise implementation.
-The example's varying top-edge height is replaced by a closed rounded crown.
+| Rule | Value |
+|---|---|
+| columns around | `pattern_count` × at least 8, at least `radial_segments`; grooves lie on columns |
+| rows along the head | evenly spaced on a map of the head that keeps shapes (rows get closer as the head gets narrower), at least `profile_segments` |
+| diamonds, scales, dimples | every mesh quad is split along the diagonal that follows the relief |
+| checked | all 18 looks and 26 other variants export closed, every edge on two triangles (OpenSCAD 2021.01, CGAL) |
+| render time | 13 s for the default knob, 31 000 triangles; 72 ribs make 118 000 and take minutes |
 
-Large inward displacements may expose the screw cavity. Inspect `part="section"`
-and your sliced model after changing formulas. Mesh validity does not guarantee
-wall thickness, printability, or strength. Higher angular and vertical frequencies
-need more samples; increase both resolution parameters until details are resolved.
+## V2 against V1
 
-```sh
-openscad -o decorative.stl door_knob_decorative.scad
-openscad -o organic.stl -D 'decoration="organic"' door_knob_decorative.scad
-openscad -o custom.stl -D 'decoration="custom"' door_knob_decorative.scad
-```
-
-The visible `twist_turns` and `reverse_twist` controls replace the previous
-`twist_degrees` input. `twist_degrees` is now calculated internally.
+| | V1 `door_knob_decorative.scad` | V2 |
+|---|---|---|
+| head shapes | mushroom | mushroom, ball, drum, cone |
+| styles | 5: twisted_flutes, waves, organic, plain, custom | 13, each also inverted and twisted |
+| relief | pushed out and in around the surface, level, by ± `decoration_depth`; faded out before the crown | cut in along the normal by `pattern_depth`; runs into the crown |
+| largest diameter | `head_diameter` + 2 × depth | `head_diameter` |
+| crown | plain | button with the logo, or the pattern meeting in the pole |
+| backplate | none | rosette or tall plate with fan and keyhole |
+| presets, overview | none | 18 in the JSON, `part` = styles |
+| `decoration`, `wave_count`, `decoration_depth` | | renamed `style`, `pattern_count`, `pattern_depth` |
+| `vertical_waves` | ripples of V1's waves | gone; `waves` now means wavy ribs, `pattern_stretch` sets their length |
+| `custom_displacement(angle,t)`, mm in and out | | `custom_relief(angle,t)`, 0 to 1 |
+| mesh rows | level, evenly spaced in height: coarse on the crown | along the outline, see Mesh |
