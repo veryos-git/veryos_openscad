@@ -1,6 +1,6 @@
 # Decorative door knob and backplate
 
-`door_knob_decorativeV5.scad`: the door knob in 4 head shapes and 13 surface styles, and a backplate that takes its shaft. Standalone, no libraries. Screw hole and slots are those of `door_knob.scad`, see `USAGE.md`. **V5; nothing of it is printed yet.**
+`door_knob_decorativeV6.scad`: the door knob in 4 head shapes and 13 surface styles, and a backplate that takes its shaft. Standalone, no libraries. Screw hole and slots are those of `door_knob.scad`, see `USAGE.md`. **V6; nothing of it is printed yet.**
 
 ![all looks](rendered_parts/styles.png)
 
@@ -10,12 +10,12 @@
 
 | File | What |
 |---|---|
-| `door_knob_decorativeV5.scad` | the generator. `part`: knob, backplate, print_all, assembly, styles, section, body, cutter, hole_profile |
-| `door_knob_decorativeV5.json` | 18 Customizer presets, the looks of `part` = styles |
-| `door_knob_decorativeV5_knob.stl`, `_backplate_rosette.stl`, `_backplate_arch.stl` | the parts at the defaults, as they print |
-| `door_knob_decorativeV5_print_all.3mf` | `part` = print_all exported: the 18 looks and both backplates as one object of 20 bodies |
+| `door_knob_decorativeV6.scad` | the generator. `part`: print_all (default), knob, backplate, assembly, styles, section, body, cutter, hole_profile |
+| `door_knob_decorativeV6.json` | 18 Customizer presets, the looks of `part` = styles; each sets `part` = knob and shows its knob alone |
+| `door_knob_decorativeV6_knob.stl`, `_backplate_rosette.stl`, `_backplate_arch.stl` | the parts at the defaults, as they print |
+| `door_knob_decorativeV6_print_all.3mf` | the default, `part` = print_all, exported: the 18 looks and both backplates as one object of 20 bodies |
 | `rendered_parts/` | every part under its name |
-| `archive/` | V1 `door_knob_decorative.scad`, V2 to V4 with their presets |
+| `archive/` | V1 `door_knob_decorative.scad`, V2 to V5 with their presets |
 | `inspiration/` | the knobs and backplates this is modelled after |
 
 ## Parts
@@ -24,7 +24,7 @@
 |---|---|---|---|
 | `knob` | head, shaft, blind screw hole with slots, logo in the shaft's side | Ø33.5 × 32.6 | standing on the mounting face |
 | `backplate` | `backplate` = rosette or arch, a ring for the shaft's foot, logo in the back | rosette Ø42 × 4.4; arch 30 × 110 × 4.4 | on its back |
-| `print_all` | every look as a finished knob, six in a row in the order of `styles`, and both backplates in front, the tall one lying across | 231 × 160.5 on the bed, 6 between the parts | as the parts: knobs standing, plates on their backs |
+| `print_all`, the default | every look as a finished knob, six in a row in the order of `styles`, and both backplates in front, the tall one lying across | 231 × 160.5 on the bed, 6 between the parts | as the parts: knobs standing, plates on their backs |
 | `assembly`, `styles`, `section`, `body`, `cutter`, `hole_profile` | views, not for printing | | |
 
 ## Head shapes
@@ -138,6 +138,14 @@ function custom_relief(angle,t) =
 | render time, CGAL | 13 s for the default knob, 31 000 triangles; 72 ribs make 118 000 and take minutes |
 | `print_all` | F5 preview at once. F6: 5 s with Manifold, 13 minutes and over 4 GB of memory with CGAL |
 | the 3MF | exported with OpenSCAD 2026.09.16, Manifold: 20 bodies, every edge on two triangles, 659 802 triangles, 231 × 160.2 × 32.6, 270 cm³ solid; not sliced, not opened in a slicer |
+
+## V6 against V5
+
+| | V5 | V6 |
+|---|---|---|
+| default `part` | knob: one knob | print_all: all looks and both backplates on one plate, asked by the user |
+| presets | change the knob's look; `part` as it is | also set `part` = knob, or they would change nothing on the default view |
+| knob, backplates, print_all | | unchanged (meshes compared: the same triangles) |
 
 ## V5 against V4
 
