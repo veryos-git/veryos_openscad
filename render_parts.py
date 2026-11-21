@@ -56,6 +56,8 @@ PROJECTS = {
     "published_christmas_star": [("star.scad", [
         ("star", "One star (grid_count = 1)", {"grid_count": 1})])],
     "pucklight_lamp_v2": [("pucklight_lamp_v2V5.scad", "assembly lampshade toppart screwin slide_test")],
+    "puppentheater_magnet": [("puppentheater_magnet.scad",
+        "assembly section stage arm_grip arm_tip puppet_base")],
     "pucklight_sphere": [("pucklight_sphereV3.scad",
         "assembly sphere vase_sphere sockel screwin clickbase")],
     "rechargable_motor_power_kit_turntable": [
@@ -94,6 +96,7 @@ CAMERA = {
     ("softbox_smallrig_40W", "screw"): "55,0,115",
     ("softbox_smallrig_40W", "thumb_screw"): "55,0,115",
     ("veryos_logo_cube", "cube"): "75,0,45",
+    ("puppentheater_magnet", "section"): "90,0,90",
 }
 IVORY, GRAPHITE, GREY, LINE = "#F4EFE3", "#151B1D", "#5C6163", "#D8D0BC"
 
