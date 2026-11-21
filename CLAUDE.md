@@ -80,6 +80,8 @@ projects:projects are stored and worked on in the 'projects' folder. each projec
 
  if a project is a scad script , please also create a folder 'rendered_parts' with simple rendered images of each part and a rendered image with an overview of all parts and clearly labeled so that when talking about a part like for example , 'the "top lid" in project x is to small"' it is clear what part is meant.  
 
+ scad file names: in a new project every .scad file has the suffix `veryos_[version].scad`, for example `door_knob_veryos_V1.scad`. projects that already exist keep their file names.
+
 ---
 lessons learned: lessons_learned.md in the workspace root collects findings from real prints (clearances, fits). check it before choosing clearances. add new findings there as compact table rows or one-line rules, no floating text.
 
