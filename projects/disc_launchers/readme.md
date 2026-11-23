@@ -1,6 +1,6 @@
 # Disc launcher
 
-A small disc and a one-piece launcher that shoots it when its two rails are squeezed, as OpenSCAD script. Goal and inspiration: `readme_hgc.md`, `inspiration/`. **V2 is not printed. Every force, speed and friction range below comes from the script's model, not from a print.** V1 was printed, see below.
+A small disc and a one-piece launcher that shoots it when its two rails are squeezed, as OpenSCAD script. Goal and inspiration: `readme_hgc.md`, `inspiration/`. **V2's `c34 t1.7` is printed and works fine. Every force, speed and friction range below comes from the script's model, none is measured.** Both prints: see below.
 
 ![all parts](rendered_parts/overview.png)
 
@@ -57,6 +57,35 @@ Engraved 0.4 deep, read from the rear. The plate's launchers are named by the fi
 
 By V2's model F has the most fling of the six, which fits the print, and all six hold the disc with less than 0.03 N.
 
+## V2's print
+
+2026-11-23, the same printer and settings, Elegoo PLA Silk, by the user probably a bit less friction than plain PLA; the slicer file (`disc_launcher_veryos_V2_plate_elegoo_test.3mf`, the user's, not committed) has one launcher on its second plate.
+
+| Launcher | Result |
+|---|---|
+| `c34 t1.7` | the mechanism works fine |
+| its size, 43.4 × 36.9 × 7 | still a bit big |
+| the other five | not reported |
+
+## Size, by the model
+
+Only the first row is printed. Cam 34, friction 0.35, one try for each row, not tuned further. For scale: the original's disc is Ø40 and its launcher 71 × 50 × 9.5 by the Printables copy, 1.8 × 1.25 discs; V2's is 2.4 × 2.05 discs.
+
+| Change | Launcher | Squeeze per finger | Speed m/s | Strain lip / bar % | Hold, × disc's weight |
+|---|---|---|---|---|---|
+| none, as printed: Ø18 of 0.91 g, lip 30 × 1.7 | 43.4 × 36.9 | 16.4 N | 3.7 | 0.90 / 0.91 | 14 × |
+| lip 26 × 1.4 | 39.4 × 36.6 | 16.6 N | 3.7 | 1.13 / 1.04 | 16 × |
+| lip 24 × 1.2 | 37.4 × 36.4 | 15.6 N | 3.5 | 1.27 / 1.11: above `strain_max` | 16 × |
+| `rail_reach` 0.3 | 43.4 × 35.4 | 18.3 N | 3.7 | 0.90 / 0.97 | 15 × |
+| Ø20 of 1.1 g | 43.4 × 39.0 | 17.5 N | 3.4 | 0.92 / 0.89 | 11 × |
+| Ø25 of 1.8 g, lip 36 × 2.0 | 49.4 × 44.5 | 17.0 N | 2.6 | 0.76 / 0.74 | 4.9 × |
+| Ø30 of 2.6 g, lip 40 × 2.2 | 53.4 × 49.9 | 17.6 N | 2.3 | 0.72 / 0.69 | 2.6 × |
+| Ø40 of 4.6 g, lip 50 × 2.6 | 63.4 × 60.5 | 16.7 N | 1.7 | 0.63 / 0.60 | 0.9 ×: too little, needs more `hold` |
+
+- The width follows the disc 1 : 1, the length is the lips'.
+- A shorter lip has to be thinner: 4 shorter costs the strain's margin, not force or speed.
+- A disc's mass goes with its diameter squared: at the same finger force its speed falls with 1 / diameter.
+
 ## V2 against V1
 
 | | V1, F | V2, `c38 t1.7` |
@@ -85,6 +114,8 @@ V1's numbers here are V2's model applied to V1, its hinge taken as a pivot in th
 | [Printed PLA at 18 N, by infill](https://www.emerald.com/insight/content/doi/10.1108/RPJ-03-2022-0081/full/html) | sliding friction 0.57 falling to 0.38 within an hour | search summary |
 | Snap-fit design: [Fictiv](https://www.fictiv.com/articles/how-to-design-snap-fit-components), [guide at MIT](https://fab.cba.mit.edu/classes/S62.12/people/vernelle.noel/Plastic_Snap_fit_design.pdf) | force to push a part past a spring's ramp: `P (μ + tan α) / (1 − μ tan α)`; strain of a beam bent by `y`: `1.5 t y / L²` | search summary |
 | [Kanoka disk launcher](https://en.brickimedia.org/wiki/Kanoka_disk_launcher) | fired by squeezing its two sides together | search summary |
+| [LDraw part 32533](https://library.ldraw.org/library/official/parts/32533.dat), "Technic Disc 5 x 5 Projectile", keywords Kanoka, Slizer, Throwbot | the original disc: 40.0 across (5 studs), 6.8 high, a domed shell, not a flat plate | the file's points, measured; a fan-made model |
+| [Brick Owl, 32171 / 32533](https://brickowl.com/catalog/lego-transparent-red-technic-bionicle-weapon-throwing-disc-32533) | the element is named "Disc Ø39,84", 5 × 5 × 0.67 studs; the Kanoka discs are prints on this part | search summary |
 | `inspiration/bionicle/Lego_Disk_Singer_v4.stl` | 71 × 50 × 9.5 measured; by eye from its top view: arms 10 apart, claws opening like a V of about 45 degrees | mesh |
 | `inspiration/printables_disc_launcher/` | U spring, the disc in two slots at its ends; comments: shoots for some, not for others, "squeezing hard launched it", two broke | all |
 
@@ -177,18 +208,19 @@ Not in the model: the arms' own bending (about 0.3 mm at 4 N on a cam), the fing
 |---|---|
 | orientation | as exported, flat, no support; the grooves' roofs are 60 degrees from the bed |
 | layers | 0.2: the band, the grooves and the disc's faces lie on multiples of it |
-| walls | lips 1.4 to 2.0 at the block, 0.8 at the nose; bar 1.8; slots 1.0 and 1.2; not sliced yet |
+| walls | lips 1.4 to 2.0 at the block, 0.8 at the nose; bar 1.8; slots 1.0 and 1.2; the user's print: 2 walls, 15 % infill |
 | disc | solid, or enough top and bottom layers to fill its 3 mm |
 | engravings | 0.4 deep: settings on top 3.0 high, version and logo below |
 | mesh | each part closed, one body, the same volume from OpenSCAD 2021.01 and from 2026.09.16 with lazy union and Manifold; 29 other settings too |
 
-## To find out with the print
+## Still open after V2's print
 
 | Question | Look at |
 |---|---|
-| which launcher has the right squeeze and flight | the three lips: 12, 17, 23 N by the model |
+| the other five launchers against `c34 t1.7`: squeeze and flight | the three lips: 12, 17, 23 N by the model |
+| how far and how fast the disc flies | 3.7 m/s for `c34 t1.7` is the model's, unchecked |
 | does the disc stay in when the launcher is shaken | `hold`, 0.10 to 0.15 N by the model |
 | do lips and bar survive many full squeezes, also without a disc | `c38 t2` bends most |
-| does the disc go in, sit without rattle and slide in the grooves | `preload`, `z_clearance` |
+| does the disc sit without rattle and slide in the grooves | `preload`, `z_clearance` |
 | a disc stuck between the noses after a full squeeze | the arms touched first: friction above the launcher's range, lower `cam_angle` or `hold` |
-| is 37 too wide | `rail_reach` 0.3 is 35 wide and 12 % more squeeze |
+| plain PLA instead of Silk | more friction: a harder squeeze by the model, 28 N at 0.45 |
