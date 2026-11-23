@@ -33,7 +33,7 @@ PROJECTS = {
          {"view": "single", "shaft": shaft, "order": order})
         for shaft, order in zip("plain fluted reeded twisted lattice".split(),
                                 "tuscan ionic corinthian egyptian romanesque".split())])],
-    "disc_launchers": [("disc_launcher_veryos_V1.scad", "plate launcher disc assembly")],
+    "disc_launchers": [("disc_launcher_veryos_V2.scad", "plate launcher disc assembly")],
     "door_knob_generator": [
         ("door_knob.scad", [
             ("knob", "Finished knob: body minus cutter", {"part": "knob"}),
