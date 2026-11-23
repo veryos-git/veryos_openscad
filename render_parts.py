@@ -33,6 +33,7 @@ PROJECTS = {
          {"view": "single", "shaft": shaft, "order": order})
         for shaft, order in zip("plain fluted reeded twisted lattice".split(),
                                 "tuscan ionic corinthian egyptian romanesque".split())])],
+    "disc_launchers": [("disc_launcher_veryos_V1.scad", "plate launcher disc assembly")],
     "door_knob_generator": [
         ("door_knob.scad", [
             ("knob", "Finished knob: body minus cutter", {"part": "knob"}),
@@ -94,6 +95,7 @@ PREVIEW = {"assembly", "assembled", "folded", "grid", "open", "styles", "print_a
 CAMERA = {
     ("ball_and_socket_joint_ball_head", "ball"): "55,0,205",
     ("ball_and_socket_joint_ball_head", "socket"): "55,0,205",
+    ("disc_launchers", "plate"): "30,0,0",
     ("door_knob_generator", "styles"): "35,0,0",
     ("door_knob_generator", "print_all"): "35,0,0",
     ("esp32_unofficial", "screw"): "55,0,115",

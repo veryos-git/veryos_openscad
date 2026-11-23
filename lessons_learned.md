@@ -8,6 +8,8 @@ Diameter clearance = added to the hole diameter, not per side.
 
 | Date | Fit | Part | Hole | Result | Printer / material |
 |---|---|---|---|---|---|
+| 2026-11-23 | Printed disc Ø18 × 3, its edge a 1.0 high band between 60 degree slopes, in the grooves of a launcher's two cams and two noses: play to the noses, and room above and below the band, axial | disc_launchers V1, launcher and disc | play 0.1; band 1.0 in a groove 1.4 (+0.2 each side) | untested | ? |
+| 2026-11-23 | Two noses on lips 1.0 thick, 32 long, 5 high, holding a Ø18 disc of 0.9 g: each nose's reach over the disc's edge, not a diameter | disc_launchers V1, launcher | −0.5: 0.05 N to pull the disc out, 6 × its weight, by the model | untested | ? |
 | 2026-11-21 | Printed knob's Ø16 shaft standing in a ring on a printed backplate, 2 deep, 0.4 lead-in; the shaft's end is its first layer | door_knob_generator decorative V2, backplate | 16.6 (+0.6), as the bracket's rim dropped on a block | untested | ? |
 | 2026-11-21 | Wood screw of 2.8 through the backplate into the knob's blind hole | door_knob_generator decorative V2, backplate | 3.4 (+0.6) | untested | ? |
 | 2026-11-20 | Rode PSA-1 arm's metal pin, Ø12.5 measured, 30 long, turning in a blind hole 32 deep; the hole printed lying, a teardrop pointing up, its lowest line on a layer boundary | mikrofonarm_tischklemme V3, clamp | 12.6 (+0.1), the user's value | the pin sits in it and the arm turns (photos) | Elegoo Centauri Carbon 2, 0.2 mm, Elegoo PETG-CF, 4 walls, per v3_elegooPETGCF.3mf |
@@ -63,6 +65,8 @@ Diameter clearance = added to the hole diameter, not per side.
 
 ## Rules
 
+- A wedge squeezed onto a round part pushes it out only where the contact lies more than the friction angle atan(μ) behind the part's widest point; in front of it, or nearer than that, it holds, however hard the squeeze. Hold with a shape in front, push with a cam steeper than atan(μ): 19 degrees at a friction of 0.35, 27 at 0.5. *From the model (disc_launchers V1, 2026-11-23), not yet confirmed by a print.*
+- `rotate_extrude` and `circle` with the same `$fn` put their corners in the same directions: a groove cut around a round post leaves slivers 0.00002 wide along its rim, 272 zero-area triangles under Manifold and edges with four triangles at four digits. Turn the cutter half a facet, `rotate(180 / $fn)` (disc_launchers V1, 2026-11-23; mesh, not printed).
 - Render every script with lazy union too before handing it over: door_knob decorative V3 had a bare `for()` in a `difference()`, and the user's export from the online renderer came with one raised petal on the rosette instead of 16 (2026-11-21). `.gitignored/tools/OpenSCAD-nightly.AppImage` (2026.09.16), extracted, with `--enable=lazy-union --backend=manifold`: compare each part's volume and bodies with OpenSCAD 2021.01's export.
 - Solids of one union that share a wall, or that each end on the bed plane, give zero-area triangles under Manifold: the rosette's cylinder under a ring of the same radius, 166 of them. Let them overlap and cut the bed in one cut (door_knob decorative V4, 2026-11-21; mesh, not printed).
 - Two solids that only touch on a face stay two bodies in OpenSCAD 2021.01: the fan of the door knob's arch backplate, standing exactly on the plate's top, exported as a second closed shell from z = 2.4. Sink one 0.01 into the other. Count the bodies of every export: closed edges do not show it (door_knob decorative V3, 2026-11-21; mesh, not printed).
