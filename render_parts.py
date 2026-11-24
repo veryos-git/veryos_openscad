@@ -56,6 +56,8 @@ PROJECTS = {
         ("stamp", "Stamp, the mirrored logo on its face")])],
     "matchbox": [("matchbox_veryos_V2.scad", "sizes print_all assembly print tray sleeve")],
     "mikrofonarm_tischklemme": [("mikrofonarm_tischklemmeV5.scad", "assembly clamp screw")],
+    "multimaterial_tpu_pla_ball_joints": [("tpu_pla_ball_joint_veryos_V1.scad",
+        "types print test socket ball strip assembly")],
     "OMM_open_microscope_motorization/enclosure": [("omm_enclosureV7.scad", "assembly base lid")],
     "OMM_open_microscope_motorization/xy_table": [("omm_xy_table_v3p0p2.scad",
         "assembly table y_slider x_slider slide_holder motor_shaft_adapter washer cutting_ruler")],
@@ -91,6 +93,8 @@ PROJECTS = {
 
 # These show several parts in the script's colours: OpenSCAD preview. Parts get a full render.
 PREVIEW = {"assembly", "assembled", "folded", "grid", "open", "sizes", "styles", "print_all"}
+# A project's own tiles in preview: multi-material parts show PLA and TPU in their colours.
+PREVIEW |= {("multimaterial_tpu_pla_ball_joints", name) for name in "types print test socket ball strip".split()}
 # OpenSCAD looks from the front right, 35 degrees down. Tiles that hide their shape from there
 # get another camera rotation x, y, z.
 CAMERA = {
@@ -102,6 +106,7 @@ CAMERA = {
     ("esp32_unofficial", "screw"): "55,0,115",
     ("matchbox", "print_all"): "20,0,0",
     ("matchbox", "sizes"): "40,0,0",
+    ("multimaterial_tpu_pla_ball_joints", "types"): "75,0,0",
     ("papercut_fold_house2", "flat"): "0,0,0",
     ("paper_folding_haunted_house", "flat"): "0,0,0",
     ("paper_folding_lantern", "flat"): "0,0,0",
@@ -137,7 +142,7 @@ def render(project, path, name, how, folder):
     camera = CAMERA.get((project, name), "55,0,25")
     args = ["openscad", "--autocenter", "--viewall", "--imgsize=2400,1800", f"--camera=0,0,0,{camera},0"]
     # before -o: --render would take a file name after it as its value
-    args += ["-o", png] if name in PREVIEW else ["--render", "-o", png]
+    args += ["-o", png] if name in PREVIEW or (project, name) in PREVIEW else ["--render", "-o", png]
     if isinstance(how, str):
         wrapper = png.with_suffix(".scad")
         wrapper.write_text(f"use <{path}>\n{how}\n")
