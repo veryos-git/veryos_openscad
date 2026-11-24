@@ -1,0 +1,155 @@
+<!-- Copyright (C) [Jonas Immanuel Frey] - Licensed under GPL -->
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>VeryOS flextangle</title>
+<link rel="icon" href="data:,">
+<style>
+/* The VeryOS colours of the lichterkette and pucklight apps. */
+:root{
+    --s_col__black: #101517;
+    --s_col__panel: #192222;
+    --s_col__raised: #243030;
+    --s_col__line: #344040;
+    --s_col__text: #f7f2e6;
+    --s_col__muted: #b9bcb0;
+    --s_col__gold: #f0b750;
+    --s_col__warn: #ff9d3c;
+    color-scheme: dark;
+}
+*{ box-sizing: border-box; }
+html, body{ height: 100%; margin: 0; }
+body{
+    background: var(--s_col__black);
+    color: var(--s_col__text);
+    font: 14px/1.4 system-ui, -apple-system, "Segoe UI", Roboto, Ubuntu, sans-serif;
+}
+#el_app{ display: grid; grid-template-columns: 300px minmax(0, 1fr); min-height: 100vh; }
+#el_panel{ background: var(--s_col__panel); border-right: 1px solid var(--s_col__line); padding: 14px; }
+header{ display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+h1{ margin: 0; font-size: 18px; font-weight: 650; color: var(--s_col__gold); }
+#el_logo{ width: 34px; color: var(--s_col__text); }
+h2{ margin: 18px 0 8px; font-size: 11px; font-weight: 650; text-transform: uppercase; letter-spacing: .08em; color: var(--s_col__muted); }
+label.row{ display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 8px; }
+label.row input[type=number]{
+    width: 90px;
+    padding: 5px 7px;
+    border: 1px solid var(--s_col__line);
+    border-radius: 4px;
+    background: var(--s_col__raised);
+    color: var(--s_col__text);
+    font: inherit;
+}
+input:invalid{ border-color: var(--s_col__warn); }
+input[type=checkbox]{ accent-color: var(--s_col__gold); }
+#el_download{
+    width: 100%;
+    margin-top: 18px;
+    padding: 9px;
+    border: 0;
+    border-radius: 4px;
+    background: var(--s_col__gold);
+    color: var(--s_col__black);
+    font: inherit;
+    font-weight: 650;
+    cursor: pointer;
+}
+#el_download:disabled{ opacity: .4; cursor: default; }
+#el_size, #el_status{ margin: 8px 0 0; color: var(--s_col__muted); font-size: 12px; }
+#el_status{ color: var(--s_col__warn); }
+#el_legend{ margin: 0; padding: 0; list-style: none; font-size: 12px; color: var(--s_col__muted); }
+#el_legend li{ display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
+#el_legend svg{ width: 28px; height: 8px; flex: none; }
+#el_stage{ padding: 24px; display: flex; align-items: center; justify-content: center; overflow: auto; }
+#el_sheet{ width: 100%; max-width: 1400px; background: #ffffff; box-shadow: 0 10px 40px #00000080; }
+#el_sheet svg{ display: block; width: 100%; height: auto; }
+@media (max-width: 700px){
+    #el_app{ grid-template-columns: 1fr; align-content: start; }
+    #el_panel{ border-right: 0; border-bottom: 1px solid var(--s_col__line); }
+    #el_stage{ padding: 16px; }
+}
+</style>
+</head>
+<body>
+<main id="el_app">
+    <form id="el_panel" aria-label="Settings">
+        <header>
+            <h1>Flextangle</h1>
+            <svg id="el_logo" viewBox="0 0 43.9095293518 31.2528266758" role="img" aria-label="VeryOS logo"><path fill="currentColor" fill-rule="evenodd" d="M 7.7528133542 9.1080260785 L 4.6193976626 1.5432914191 L 0 3.4567085809 L 11.5135290962 31.2528266758 L 32.3960002556 31.2528266758 L 43.9095293518 3.4567085809 L 39.2901316892 1.5432914191 L 36.1567159975 9.1080260785 A 15.6264133379 15.6264133379 0 0 0 7.7528133542 9.1080260785 Z M 30.9694268093 21.2528266758 A 10.6264133379 10.6264133379 0 0 0 21.9547646759 5 A 4.0632066689 4.0632066689 0 0 0 21.9547646759 13.1264133379 A 9.0632066689 9.0632066689 0 0 1 30.9694268093 21.2528266758 Z M 12.9401025425 10 A 9.0632066689 9.0632066689 0 0 0 21.9547646759 18.1264133379 A 4.0632066689 4.0632066689 0 0 1 21.9547646759 26.2528266758 A 10.6264133379 10.6264133379 0 0 1 12.9401025425 10 Z"/></svg>
+        </header>
+
+        <h2>Shape</h2>
+        <label class="row" title="The triangles' base: the hinges between the six tetrahedra">Triangle base, mm <input type="number" name="n_mm__base" min="10" max="300" step="0.5" required></label>
+        <label class="row" title="1 is the smallest that turns all the way round: the middle closes to a point">Triangle height, × base <input type="number" name="n_ratio__height" min="1" max="3" step="0.05" required></label>
+        <label class="row" title="How far the two end tabs reach into the triangles they are glued to; half the base at most">End tab, mm <input type="number" name="n_mm__tab" min="1" step="0.5" required></label>
+
+        <h2>Lines</h2>
+        <label class="row" title="Length of each dash of a fold">Dash, mm <input type="number" name="n_mm__dash" min="0.2" max="50" step="0.1" required></label>
+        <label class="row" title="Distance between the dashes of a fold, and from its ends">Gap between dashes, mm <input type="number" name="n_mm__gap" min="0.2" max="50" step="0.1" required></label>
+        <label class="row" title="Stroke width of all lines">Line width, mm <input type="number" name="n_mm__line" min="0.01" max="2" step="0.01" required></label>
+        <label class="row" title="On the first glue tab, hidden once the flextangle is glued">VeryOS logo on a glue tab <input type="checkbox" name="b_logo"></label>
+
+        <h2>Legend</h2>
+        <ul id="el_legend">
+            <li><svg viewBox="0 0 28 8"><line x1="0" y1="4" x2="28" y2="4" stroke="#ffffff" stroke-width="2"/></svg>outline: cut</li>
+            <li><svg viewBox="0 0 28 8"><line x1="0" y1="4" x2="28" y2="4" stroke="#6b8cff" stroke-width="2" stroke-dasharray="5 3"/></svg>valley fold: face to face</li>
+            <li><svg viewBox="0 0 28 8"><line x1="0" y1="4" x2="28" y2="4" stroke="#ff5a5a" stroke-width="2" stroke-dasharray="5 3"/></svg>mountain fold: back to back</li>
+            <li><svg viewBox="0 0 28 8"><rect x="8" y="0" width="12" height="8" fill="#808080"/></svg>logo: print or engrave, not cut</li>
+        </ul>
+
+        <button type="button" id="el_download">Download SVG</button>
+        <p id="el_size"></p>
+        <p id="el_status" role="status"></p>
+    </form>
+    <section id="el_stage" aria-label="Preview"><div id="el_sheet"></div></section>
+</main>
+<script type="module">
+import { o_setting__default, n_mm__margin, f_o_net, f_s_svg } from './flextangle.module.js';
+
+let el_panel = document.getElementById('el_panel');
+let el_tab = el_panel.elements.n_mm__tab;
+let s_svg = '';
+
+for(let [s_name, v] of Object.entries(o_setting__default)){
+    let el = el_panel.elements[s_name];
+    if(el.type === 'checkbox'){ el.checked = v; } else { el.value = v; }
+}
+
+let f_o_setting = function(){
+    return Object.fromEntries(Object.keys(o_setting__default).map(function(s_name){
+        let el = el_panel.elements[s_name];
+        return [s_name, el.type === 'checkbox' ? el.checked : el.valueAsNumber];
+    }));
+};
+
+let f_update = function(){
+    el_tab.max = el_panel.elements.n_mm__base.valueAsNumber / 2;
+    let el_bad = [...el_panel.elements].find(function(el){ return el.name && !el.checkValidity(); });
+    document.getElementById('el_download').disabled = Boolean(el_bad);
+    if(el_bad){
+        document.getElementById('el_status').textContent = `${el_bad.parentElement.textContent.trim()}: ${el_bad.validationMessage}`;
+        return;
+    }
+    document.getElementById('el_status').textContent = '';
+    let o_setting = f_o_setting();
+    let o_net = f_o_net(o_setting);
+    s_svg = f_s_svg(o_setting);
+    document.getElementById('el_sheet').innerHTML = s_svg;
+    let f_s = function(n){ return n.toFixed(1); };
+    document.getElementById('el_size').textContent = `Net ${f_s(o_net.n_mm__x)} × ${f_s(o_net.n_mm__y)} mm, the SVG ${f_s(o_net.n_mm__x + 2 * n_mm__margin)} × ${f_s(o_net.n_mm__y + 2 * n_mm__margin)} mm.`;
+};
+
+el_panel.addEventListener('input', f_update);
+document.getElementById('el_download').addEventListener('click', function(){
+    let el_a = document.createElement('a');
+    el_a.href = URL.createObjectURL(new Blob([s_svg], { type: 'image/svg+xml' }));
+    el_a.download = `flextangle_${el_panel.elements.n_mm__base.value}mm_veryos.svg`;
+    el_a.click();
+    setTimeout(function(){ URL.revokeObjectURL(el_a.href); }, 1000);
+});
+f_update();
+</script>
+</body>
+</html>
