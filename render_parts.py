@@ -54,7 +54,7 @@ PROJECTS = {
     "lichterkette": [("lichterketteV3.scad", "assembly section bulb clip")],
     "logo_branding_stamp": [("logo_stampV1.scad", [
         ("stamp", "Stamp, the mirrored logo on its face")])],
-    "matchbox": [("matchbox_veryos_V1.scad", "sizes assembly print tray sleeve")],
+    "matchbox": [("matchbox_veryos_V2.scad", "sizes print_all assembly print tray sleeve")],
     "mikrofonarm_tischklemme": [("mikrofonarm_tischklemmeV5.scad", "assembly clamp screw")],
     "OMM_open_microscope_motorization/enclosure": [("omm_enclosureV7.scad", "assembly base lid")],
     "OMM_open_microscope_motorization/xy_table": [("omm_xy_table_v3p0p2.scad",
@@ -100,6 +100,7 @@ CAMERA = {
     ("door_knob_generator", "styles"): "35,0,0",
     ("door_knob_generator", "print_all"): "35,0,0",
     ("esp32_unofficial", "screw"): "55,0,115",
+    ("matchbox", "print_all"): "20,0,0",
     ("matchbox", "sizes"): "40,0,0",
     ("papercut_fold_house2", "flat"): "0,0,0",
     ("paper_folding_haunted_house", "flat"): "0,0,0",

@@ -6,11 +6,21 @@ A tray and a sleeve for matches as OpenSCAD script, in any size, reverse enginee
 
 | File | What |
 |---|---|
-| `matchbox_veryos_V1.scad` | the generator, standalone, no libraries. `part`: `print` (default), `tray`, `sleeve`, `assembly`, `sizes` |
-| `matchbox_veryos_V1_pocket.3mf` | `print` of the default format `pocket`: tray and sleeve, 2 bodies, 9.8 cm³ |
-| `matchbox_veryos_V1_reference.3mf` | `print` of the format `reference`, the MakerWorld box's size, 23.3 cm³ |
-| `rendered_parts/` | every part under its name; `sizes.png` is the view with all formats |
+| `matchbox_veryos_V2.scad` | the generator, standalone, no libraries. `part`: `print` (default), `tray`, `sleeve`, `assembly`, `sizes`, `print_all` |
+| `matchbox_veryos_V2_pocket.3mf` | `print` of the default format `pocket`: tray and sleeve, 2 bodies, 9.8 cm³ |
+| `matchbox_veryos_V2_reference.3mf` | `print` of the format `reference`, the MakerWorld box's size, 23.3 cm³ |
+| `matchbox_veryos_V2_print_all_bed1.3mf`, `..._bed2.3mf` | `print_all`, one file a bed: 8 and 12 bodies, exported with OpenSCAD 2026.09.16 and Manifold |
+| `rendered_parts/` | every part under its name; `sizes.png` is the view with all formats, `print_all.png` the one for printing them |
+| `archive/` | V1: script and its two exports |
 | `Match+Box_stls (1)/` | the original's two meshes, not committed |
+
+## V2 against V1
+
+| | V1 | V2 |
+|---|---|---|
+| `part` | | `print_all`: all formats laid out for printing |
+| settings | | `bed`, `bed_margin`, `print_bed` |
+| parts | engraved `V1` | engraved `V2`, else the same |
 
 ## Names
 
@@ -129,6 +139,24 @@ Changed against the original, all else within 0.2 of its mesh:
 | after the print | push each bump in once: the tab breaks free of the slits |
 | `pocket`, sliced | tray 5.4 g, 14 min; sleeve 7.8 g, 42 min |
 
+## Print all formats
+
+`part = "print_all"`: every format's tray as it lies, then every format's sleeve standing, the biggest first. Rows fill the bed's free width, beds its free depth. The grey beds and the names show in the preview only.
+
+| Setting | Default | |
+|---|---|---|
+| `bed` | 256 | side of the square bed |
+| `bed_margin` | 10 | border left free, for a brim and the corners a printer keeps for itself |
+| `print_bed` | 0 | 0: all beds side by side. 1, 2: that bed alone, to export it |
+
+| Bed | Parts | Size | Sliced |
+|---|---|---|---|
+| 1 | trays of `kitchen_us`, `kitchen`, `long`, `reference`, `flat`, `japan`, `nordic`, `india` | 201.7 × 184.7 × 35.2 | 117 g, 2 h 48 min |
+| 2 | trays of `gost`, `pocket`; all 10 sleeves | 221 × 98.9 × 120.7 | 189 g, 6 h 13 min |
+
+- A bed is one object of several bodies. To move single parts in the slicer: split to objects.
+- Other beds: 180 gives 4 beds, a margin of 0 puts 18 parts on the first.
+
 ## Model
 
 | | |
@@ -148,6 +176,8 @@ Changed against the original, all else within 0.2 of its mesh:
 | tray in the sleeve, closed and open, `reference` and `pocket` | no overlap (CGAL) |
 | `reference` against the original's meshes, 16 and 15 sections | within 0.2 but for the changes above |
 | `pocket` tray and sleeve, `reference` and `flat` tray, sliced with the 0.2 mm settings of the disc launcher's Elegoo project (2 walls, classic) | the slit layers stay empty, the tab's first layer is an overhang wall, the upright slit stays open; rails, lips and pockets come out |
+| V2, `print_all`: both beds, and beds of 180 and margins of 0, 5, 21, 40 | 20 closed bodies; both beds have the same volume in both OpenSCAD builds, the sum of their parts; both slice on the Elegoo's 256 bed with its brim |
+| V2, the beds' 3MF files | OpenSCAD 2021.01's bed 1 has 31 sliver triangles, an edge of 0.000001 or next to no area, where a slit meets the floor's fillet and where a bump meets a slit's mouth; Manifold's has none, so the files are Manifold's |
 
 ## Open
 

@@ -69,6 +69,8 @@ Diameter clearance = added to the hole diameter, not per side.
 
 ## Rules
 
+- OpenSCAD 2021.01's 3MF keeps slivers that its STL drops: the bed of eight matchbox trays has 31 triangles with an edge of 0.000001 or next to no area, where a slit's middle line lies as high as a ring of the floor's fillet and where a bump meets a slit's rounded mouth. No open edges; the same bed from Manifold has none. Check the 3MF itself, not only an STL (matchbox V2, 2026-11-24; mesh).
+- All formats of a script do not fit one bed by themselves: matchbox V2's ten boxes are 20 parts of 457 cm², 70 % of a 256 bed. Fill rows to the bed's free width and start a new bed when the depth is used up; with a border of 10 they take two beds, sliced 117 g in 2 h 48 min and 189 g in 6 h 13 min (2026-11-24; sliced, not printed).
 - A slit one layer high has to lie on the layers: the MakerWorld matchbox's level slits are at 4.3 to 4.5 and 12.5 to 12.7, so a 0.2 print's slicing planes at 4.3 and 4.5 fall on their faces. matchbox V1 puts the tab's edges on multiples of the layer; sliced, the slit is one empty layer (2026-11-24; mesh and slicer, not printed).
 - A snap tab's strain is 1.5 × thickness × bend / length², its force goes with thickness³ × bend / length³. The MakerWorld matchbox, tab 2.0 thick, 12.5 to the bump, 8 high, bent 0.8: 1.54 % and 21.6 N a tab, about 66 N to open with four. The same tab 1.2 thick, bent 0.48: 0.55 %, 2.8 N, about 8 N. From the formulas (matchbox V1, 2026-11-24), not printed.
 - Two parts that only touch, a bump in its pocket at zero clearance, intersect to nothing in OpenSCAD 2021.01 (CGAL) but to sliver bodies of 0.2 to 1.5 mm³ under Manifold. Test an assembly for overlap with the exact build (matchbox V1, 2026-11-24).
