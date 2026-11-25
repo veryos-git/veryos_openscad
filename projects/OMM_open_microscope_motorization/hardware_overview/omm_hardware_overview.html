@@ -1,0 +1,378 @@
+<!-- Copyright (C) Jonas Immanuel Frey - Licensed under GPL -->
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>OMM hardware overview</title>
+<!-- One A4 page. PDF: google-chrome --headless=new --no-pdf-header-footer
+     --print-to-pdf=omm_hardware_overview.pdf omm_hardware_overview.html
+     PNG: pdftoppm -png -r 150 -singlefile omm_hardware_overview.pdf omm_hardware_overview -->
+
+<style>
+  :root {
+    --graphite: #151B1D;
+    --ivory: #F4EFE3;
+    --card: #FBF8F1;
+    --gold: #F0B750;
+    --ochre: #B77B1E;
+    --amber-light: #F6E2B0;
+    --grey: #5A6366;
+    --line: #D8D0BE;
+  }
+  @page { size: A4; margin: 0; }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; background: var(--ivory); }
+  body {
+    font-family: "DejaVu Sans Mono", monospace;
+    font-size: 7.4pt;
+    line-height: 1.38;
+    color: var(--graphite);
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+  .page {
+    width: 210mm;
+    height: 297mm;
+    padding: 9mm 12mm 0;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    background: var(--ivory);
+  }
+  header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-bottom: 3mm;
+    border-bottom: 0.3mm solid var(--line);
+  }
+  .brand { display: flex; align-items: center; gap: 2.4mm; font-weight: bold; font-size: 12pt; }
+  .brand img { height: 6.4mm; }
+  .brand .os { color: var(--ochre); }
+  .doc-tag { display: flex; align-items: center; gap: 2.4mm; color: var(--grey); letter-spacing: 0.06em; }
+  .doc-tag img { height: 5.6mm; }
+  .kicker { color: var(--ochre); font-weight: bold; letter-spacing: 0.08em; margin-top: 3.4mm; }
+  h1 { font-size: 19pt; line-height: 1.1; margin: 1.2mm 0 1.6mm; letter-spacing: -0.01em; }
+  .lead { font-size: 8.6pt; color: #333B3E; margin: 0; max-width: 178mm; }
+  h2 {
+    font-size: 9.6pt;
+    margin: 0 0 1.6mm;
+    display: flex;
+    align-items: baseline;
+    gap: 2.4mm;
+  }
+  h2 .no { color: var(--ochre); font-size: 7.4pt; }
+  h2 .what { color: var(--grey); font-weight: normal; font-size: 7.4pt; }
+  section { margin-top: 3.6mm; }
+  .card {
+    background: var(--card);
+    border: 0.3mm solid var(--line);
+    border-radius: 2.4mm;
+    padding: 3.2mm 3.6mm;
+  }
+  svg { display: block; }
+  svg.pic { margin: 0 auto; }
+  svg text { font-family: "DejaVu Sans Mono", monospace; }
+  .legend { display: flex; gap: 6mm; margin-top: 1.8mm; color: var(--grey); font-size: 6.6pt; }
+  .legend span { display: inline-flex; align-items: center; gap: 1.6mm; }
+  .key { display: inline-block; width: 6mm; height: 2.6mm; border-radius: 0.6mm; }
+  .key.printed { background: var(--amber-light); border: 0.3mm solid var(--ochre); }
+  .key.own { border: 0.35mm dashed var(--ochre); background: #fff; }
+  .key.signal { height: 0; border-top: 0.5mm solid var(--graphite); }
+  .key.power { height: 0; border-top: 0.5mm solid var(--ochre); }
+  .xy { display: grid; grid-template-columns: 50mm 1fr; gap: 5mm; align-items: center; }
+  ol.parts { list-style: none; padding: 0; margin: 0 0 2.4mm; }
+  ol.parts li { display: grid; grid-template-columns: 4.6mm 1fr; gap: 1.8mm; margin-bottom: 1.3mm; }
+  ol.parts .n {
+    width: 4.2mm; height: 4.2mm; border-radius: 50%;
+    background: var(--graphite); color: var(--ivory);
+    font-weight: bold; font-size: 6.6pt;
+    display: flex; align-items: center; justify-content: center;
+  }
+  b.name { font-weight: bold; }
+  .note {
+    border-left: 0.8mm solid var(--gold);
+    padding: 1.2mm 0 1.2mm 2.4mm;
+    margin: 0;
+  }
+  .pair { display: grid; grid-template-columns: 1fr 1fr; gap: 4.2mm; }
+  .pair > div { display: flex; flex-direction: column; }
+  .pair .card { flex: 1; display: flex; flex-direction: column; }
+  .nw { white-space: nowrap; }
+  .pair p { margin: 1.8mm 0 0; }
+  .need { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 4.2mm; font-size: 7pt; }
+  .need h3 { font-size: 7.4pt; margin: 0 0 1mm; color: var(--ochre); letter-spacing: 0.06em; }
+  .need ul { margin: 0; padding-left: 3.2mm; }
+  .need li { margin-bottom: 0.5mm; }
+  .status { margin: 2.6mm 0 2.6mm; color: var(--grey); font-size: 6.3pt; }
+  footer {
+    margin: auto -12mm 0;
+    background: var(--graphite);
+    color: var(--ivory);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 2.8mm 12mm;
+    font-size: 6.8pt;
+  }
+  footer .slogan { font-weight: bold; color: var(--gold); font-size: 8pt; }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <header>
+    <div class="brand">
+      <img src="../../../branding/logo/veryos_logo_black_filled_transparent_tight.svg" alt="VeryOS logo">
+      <span>Very<span class="os">OS</span></span>
+    </div>
+    <div class="doc-tag">
+      <span>OMM / HARDWARE OVERVIEW</span>
+      <img src="../../01_published_or_archived/fdm_optimized_screws/publish/source/assets/openscad.png" alt="OpenSCAD logo">
+    </div>
+  </header>
+
+  <div class="kicker">OPEN MICROSCOPE MOTORIZATION</div>
+  <h1>Three motors move a microscope.</h1>
+  <p class="lead">Two stepper motors on a printed XY table move the glass slide; a third moves the microscope's own Z axis. One printed box holds the electronics: an ESP32-S3 and three ULN2003 drivers.</p>
+
+  <section>
+    <h2><span class="no">01</span>How it connects</h2>
+    <div class="card">
+      <svg viewBox="0 0 1860 480" width="100%" role="img" aria-label="Wiring: 5 V supply and ESP32-S3 to three ULN2003 drivers in the enclosure, each driving a 28BYJ-48 motor for X, Y and Z">
+        <defs>
+          <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path d="M0 0 L10 5 L0 10 z" fill="#151B1D"/>
+          </marker>
+        </defs>
+
+        <!-- supply -->
+        <rect x="2" y="385" width="196" height="90" rx="10" fill="#fff" stroke="#B77B1E" stroke-width="3"/>
+        <text x="100" y="439" text-anchor="middle" font-size="26" font-weight="bold">5 V SUPPLY</text>
+
+        <!-- enclosure -->
+        <rect x="250" y="8" width="880" height="462" rx="22" fill="#F6E2B0" fill-opacity="0.35" stroke="#B77B1E" stroke-width="3"/>
+        <text x="280" y="50" font-size="28" font-weight="bold">ENCLOSURE</text>
+        <text x="460" y="50" font-size="22" fill="#5A6366">printed</text>
+
+        <!-- power: supply into the rail, the rail to each driver -->
+        <path d="M198 430 H700 V144 M700 144 H760 M700 274 H760 M700 404 H760" fill="none" stroke="#B77B1E" stroke-width="5"/>
+        <text x="300" y="418" font-size="22" fill="#B77B1E">5 V power rail</text>
+
+        <!-- ESP32 -->
+        <rect x="290" y="150" width="230" height="150" rx="10" fill="#151B1D"/>
+        <text x="405" y="220" text-anchor="middle" font-size="30" font-weight="bold" fill="#F4EFE3">ESP32-S3</text>
+        <text x="405" y="256" text-anchor="middle" font-size="22" fill="#F4EFE3">WROOM-1</text>
+
+        <!-- signals: 4 wires per driver, hopping over the rail -->
+        <g fill="none" stroke="#151B1D" stroke-width="5">
+          <path d="M520 190 H600 V104 H760"/>
+          <path d="M520 234 H688 a12 12 0 0 1 24 0 H760"/>
+          <path d="M520 278 H600 V364 H688 a12 12 0 0 1 24 0 H760"/>
+        </g>
+        <text x="612" y="90" font-size="22" fill="#5A6366">IN1–IN4</text>
+
+        <!-- drivers -->
+        <g font-size="22" text-anchor="middle">
+          <rect x="760" y="64" width="260" height="100" rx="10" fill="#fff" stroke="#151B1D" stroke-width="3"/>
+          <text x="890" y="108" font-size="28" font-weight="bold">ULN2003</text>
+          <text x="890" y="142" fill="#5A6366">driver X</text>
+          <rect x="760" y="194" width="260" height="100" rx="10" fill="#fff" stroke="#151B1D" stroke-width="3"/>
+          <text x="890" y="238" font-size="28" font-weight="bold">ULN2003</text>
+          <text x="890" y="272" fill="#5A6366">driver Y</text>
+          <rect x="760" y="324" width="260" height="100" rx="10" fill="#fff" stroke="#151B1D" stroke-width="3"/>
+          <text x="890" y="368" font-size="28" font-weight="bold">ULN2003</text>
+          <text x="890" y="402" fill="#5A6366">driver Z</text>
+        </g>
+
+        <!-- motor cables out through the back wall -->
+        <g fill="none" stroke="#151B1D" stroke-width="7" stroke-linecap="round">
+          <path d="M1020 114 H1190"/>
+          <path d="M1020 244 H1190"/>
+          <path d="M1020 374 H1190"/>
+        </g>
+        <text x="1140" y="466" font-size="20" fill="#5A6366">motor cables</text>
+
+        <!-- motors -->
+        <g text-anchor="middle">
+          <rect x="1190" y="64" width="220" height="100" rx="50" fill="#D9DDE1" stroke="#151B1D" stroke-width="3"/>
+          <text x="1300" y="108" font-size="26" font-weight="bold">28BYJ-48</text>
+          <text x="1300" y="140" font-size="21" fill="#5A6366">on the Y slider</text>
+          <rect x="1190" y="194" width="220" height="100" rx="50" fill="#D9DDE1" stroke="#151B1D" stroke-width="3"/>
+          <text x="1300" y="238" font-size="26" font-weight="bold">28BYJ-48</text>
+          <text x="1300" y="270" font-size="21" fill="#5A6366">on the table</text>
+          <rect x="1190" y="324" width="220" height="100" rx="50" fill="#D9DDE1" stroke="#151B1D" stroke-width="3"/>
+          <text x="1300" y="368" font-size="26" font-weight="bold">28BYJ-48</text>
+          <text x="1300" y="400" font-size="21" fill="#5A6366">on own bracket</text>
+        </g>
+
+        <!-- what each motor moves -->
+        <g stroke="#151B1D" stroke-width="4" marker-end="url(#arrow)">
+          <line x1="1414" y1="114" x2="1478" y2="114"/>
+          <line x1="1414" y1="244" x2="1478" y2="244"/>
+          <line x1="1414" y1="374" x2="1478" y2="374"/>
+        </g>
+        <rect x="1486" y="64" width="370" height="100" rx="10" fill="#F6E2B0" stroke="#B77B1E" stroke-width="3"/>
+        <text x="1508" y="106" font-size="28" font-weight="bold">X slider</text>
+        <text x="1508" y="140" font-size="21" fill="#5A6366">XY table, printed</text>
+        <rect x="1486" y="194" width="370" height="100" rx="10" fill="#F6E2B0" stroke="#B77B1E" stroke-width="3"/>
+        <text x="1508" y="236" font-size="28" font-weight="bold">Y slider</text>
+        <text x="1508" y="270" font-size="21" fill="#5A6366">XY table, printed</text>
+        <rect x="1486" y="324" width="370" height="100" rx="10" fill="#fff" stroke="#B77B1E" stroke-width="3" stroke-dasharray="14 9"/>
+        <text x="1508" y="366" font-size="28" font-weight="bold">Z axis</text>
+        <text x="1508" y="400" font-size="21" fill="#5A6366">the microscope's own</text>
+      </svg>
+      <div class="legend">
+        <span><i class="key printed"></i>printed, in this project</span>
+        <span><i class="key own"></i>your microscope, your own bracket</span>
+        <span><i class="key signal"></i>4 signal wires per driver</span>
+        <span><i class="key power"></i>5 V</span>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="no">02</span>XY table<span class="what">moves the slide · xy_table/</span></h2>
+    <div class="card xy">
+      <svg viewBox="230 40 1570 1410" width="100%" role="img" aria-label="XY table, its layers lifted apart, with numbered parts">
+        <image href="../xy_table/publish/renders/stack.png" x="0" y="0" width="1800" height="1500"/>
+        <g stroke="#B77B1E" stroke-width="5" fill="#B77B1E">
+          <line x1="1654" y1="170" x2="1514" y2="169"/><circle cx="1514" cy="169" r="11"/>
+          <line x1="1654" y1="412" x2="1238" y2="412"/><circle cx="1238" cy="412" r="11"/>
+          <line x1="1654" y1="627" x2="1179" y2="627"/><circle cx="1179" cy="627" r="11"/>
+          <line x1="1654" y1="1260" x2="1420" y2="1262"/><circle cx="1420" cy="1262" r="11"/>
+          <line x1="356" y1="560" x2="814" y2="528"/><circle cx="814" cy="528" r="11"/>
+          <line x1="1654" y1="1040" x2="1197" y2="1031"/><circle cx="1197" cy="1031" r="11"/>
+        </g>
+        <g font-size="54" font-weight="bold" text-anchor="middle" fill="#F4EFE3">
+          <circle cx="1700" cy="170" r="46" fill="#151B1D"/><text x="1700" y="189">1</text>
+          <circle cx="1700" cy="412" r="46" fill="#151B1D"/><text x="1700" y="431">2</text>
+          <circle cx="1700" cy="627" r="46" fill="#151B1D"/><text x="1700" y="646">3</text>
+          <circle cx="1700" cy="1260" r="46" fill="#151B1D"/><text x="1700" y="1279">4</text>
+          <circle cx="310" cy="560" r="46" fill="#151B1D"/><text x="310" y="579">5</text>
+          <circle cx="1700" cy="1040" r="46" fill="#151B1D"/><text x="1700" y="1059">6</text>
+        </g>
+      </svg>
+      <div>
+        <ol class="parts">
+          <li><span class="n">1</span><span><b class="name">slide holder</b> carries a 76 × 25 mm glass slide, lifts off to change it</span></li>
+          <li><span class="n">2</span><span><b class="name">X slider</b> moves in X on the rail of the Y slider</span></li>
+          <li><span class="n">3</span><span><b class="name">Y slider</b> moves in Y on the two rails of the table</span></li>
+          <li><span class="n">4</span><span><b class="name">table</b> stays put, its window over the light path</span></li>
+          <li><span class="n">5</span><span><b class="name">X motor</b> on the Y slider, drives the X slider</span></li>
+          <li><span class="n">6</span><span><b class="name">Y motor</b> on the table, drives the Y slider</span></li>
+        </ol>
+        <p class="note"><b>Drive:</b> no gears, no lead screw. A printed sleeve with three O-rings sits on each motor shaft and rolls on a strip of sanding paper on the top of the rail it drives.</p>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="pair">
+      <div>
+        <h2><span class="no">03</span>Z axis<span class="what">focus · your own bracket</span></h2>
+        <div class="card">
+          <svg viewBox="0 0 720 440" class="pic" style="width: 62mm" role="img" aria-label="Illustrative side view of a microscope: printed XY table on the stage, the microscope's own Z stage, and a 28BYJ-48 on a custom bracket">
+            <g transform="translate(50 0)">
+              <!-- light from the lamp through the condenser -->
+              <line x1="210" y1="392" x2="210" y2="292" stroke="#F0B750" stroke-width="4" stroke-dasharray="8 7"/>
+              <!-- base, arm, head -->
+              <rect x="90" y="392" width="340" height="40" rx="10" fill="#2B3336"/>
+              <rect x="190" y="384" width="40" height="10" rx="3" fill="#F0B750"/>
+              <rect x="370" y="60" width="50" height="340" rx="8" fill="#2B3336"/>
+              <rect x="150" y="58" width="270" height="48" rx="12" fill="#2B3336"/>
+              <polygon points="182,62 226,62 168,6 130,24" fill="#2B3336"/>
+              <rect x="178" y="104" width="64" height="18" rx="4" fill="#3D474B"/>
+              <polygon points="194,122 226,122 220,176 200,176" fill="#8A9599"/>
+              <!-- the microscope's own Z stage, moves up and down on the arm -->
+              <rect x="326" y="214" width="46" height="88" rx="5" fill="#556266"/>
+              <rect x="104" y="238" width="270" height="16" rx="3" fill="#556266"/>
+              <rect x="194" y="254" width="32" height="38" rx="3" fill="#8A9599"/>
+              <!-- printed XY table on the stage, with the slide -->
+              <rect x="122" y="224" width="210" height="14" rx="3" fill="#E9B04C"/>
+              <rect x="140" y="216" width="170" height="8" rx="2" fill="#F1C877"/>
+              <rect x="156" y="210" width="138" height="6" rx="2" fill="#FBF8F1" stroke="#B9AE96" stroke-width="1.5"/>
+              <rect x="182" y="206" width="76" height="4" fill="#9FD3EC"/>
+              <!-- focus knob -->
+              <circle cx="395" cy="330" r="24" fill="#556266" stroke="#151B1D" stroke-width="3"/>
+              <circle cx="395" cy="330" r="10" fill="#2B3336"/>
+              <!-- motor on a custom bracket -->
+              <rect x="432" y="284" width="116" height="92" rx="12" fill="#fff" stroke="#B77B1E" stroke-width="3" stroke-dasharray="12 8"/>
+              <circle cx="494" cy="330" r="32" fill="#D9DDE1" stroke="#151B1D" stroke-width="3"/>
+              <circle cx="494" cy="330" r="7" fill="#151B1D"/>
+              <!-- Z arrow -->
+              <g stroke="#151B1D" stroke-width="4" fill="#151B1D">
+                <line x1="62" y1="216" x2="62" y2="290"/>
+                <polygon points="62,200 52,220 72,220" stroke="none"/>
+                <polygon points="62,306 52,286 72,286" stroke="none"/>
+              </g>
+              <text x="32" y="262" font-size="30" font-weight="bold" text-anchor="middle">Z</text>
+            </g>
+            <!-- labels -->
+            <g font-size="24" fill="#151B1D">
+              <line x1="150" y1="166" x2="196" y2="220" stroke="#B77B1E" stroke-width="2.5"/>
+              <text x="6" y="150" font-weight="bold">printed XY table</text>
+              <line x1="486" y1="196" x2="422" y2="226" stroke="#B77B1E" stroke-width="2.5"/>
+              <text x="488" y="180" font-weight="bold">Z stage</text>
+              <text x="488" y="208">microscope's own</text>
+              <text x="488" y="404" font-weight="bold">28BYJ-48 Z</text>
+              <text x="488" y="432">custom bracket</text>
+            </g>
+          </svg>
+          <p>The microscope keeps its own Z stage. A third <span class="nw">28BYJ-48</span> moves it. Its 3D printed bracket is not part of this project: every microscope is different, so design one for yours.</p>
+        </div>
+      </div>
+      <div>
+        <h2><span class="no">04</span>Enclosure<span class="what">the electronics · enclosure/</span></h2>
+        <div class="card">
+          <svg viewBox="176 200 848 545" class="pic" style="width: 58mm; filter: brightness(1.0282); mix-blend-mode: multiply" role="img" aria-label="Enclosure base, open, with the ESP32-S3 board on the left and three ULN2003 driver boards in a row">
+            <image href="../enclosure/open.png" x="0" y="0" width="1200" height="900"/>
+          </svg>
+          <p>One printed box holds the ESP32-S3 board, the three ULN2003 drivers for X, Y and Z and a 5 V power rail. The motor cables leave at the back, the 5 V cable comes in at the front.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="no">05</span>What you need</h2>
+    <div class="need">
+      <div>
+        <h3>PRINTED</h3>
+        <ul>
+          <li>XY table: 4 stacked parts, 2 shaft sleeves, 4 washers, cutting ruler</li>
+          <li>enclosure: base and lid</li>
+          <li>Z bracket: your own design</li>
+        </ul>
+      </div>
+      <div>
+        <h3>ELECTRONICS</h3>
+        <ul>
+          <li>1 × ESP32-S3 WROOM-1 board</li>
+          <li>3 × ULN2003 driver board</li>
+          <li>3 × 28BYJ-48 stepper motor</li>
+          <li>5 V supply, rail, jumper wires</li>
+        </ul>
+      </div>
+      <div>
+        <h3>SMALL PARTS</h3>
+        <ul>
+          <li>O-rings, 2 mm cord, 3 per XY motor</li>
+          <li>sanding paper strips</li>
+          <li>M3 screws and nuts</li>
+          <li>a 76 × 25 mm glass slide</li>
+        </ul>
+      </div>
+    </div>
+    <p class="status">CAD renders, a drawn microscope, illustrative colours. Not printed yet: XY table v3.0.4, enclosure V7. Z bracket: not designed.</p>
+  </section>
+
+  <footer>
+    <span class="slogan">Very Open Source.</span>
+    <span>veryos_openscad / projects / OMM_open_microscope_motorization</span>
+    <span>OpenSCAD source · GPL</span>
+  </footer>
+
+</div>
+</body>
+</html>
