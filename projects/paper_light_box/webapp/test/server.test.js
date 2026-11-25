@@ -58,10 +58,10 @@ Deno.test({ name: 'server renders the box and a sheet', sanitizeResources: false
         // the script's own five sheets: the volume OpenSCAD 2021.01 and 2026.09.16 both give
         let o_board = await f_o_post('/api/mesh', { o_setting: {}, s_part: 'box' });
         assertEquals(o_board.n_status, 200);
-        assert(Math.abs(f_n_volume(f_o_mesh(o_board.o.s_stl)) - 96984.6) < 0.5, `box ${f_n_volume(f_o_mesh(o_board.o.s_stl))}`);
-        assertEquals(f_a_n__size(f_o_mesh(o_board.o.s_stl)), [124.5, 51.8, 156.6]);
+        assert(Math.abs(f_n_volume(f_o_mesh(o_board.o.s_stl)) - 118437.4) < 0.5, `box ${f_n_volume(f_o_mesh(o_board.o.s_stl))}`);
+        assertEquals(f_a_n__size(f_o_mesh(o_board.o.s_stl)), [125.5, 66.9, 156.6]);
         let o_print = await f_o_post('/api/mesh', { o_setting: {}, s_part: 'print' });
-        assert(Math.abs(f_n_volume(f_o_mesh(o_print.o.s_stl)) - 96984.6) < 0.5, 'the same box upside down');
+        assert(Math.abs(f_n_volume(f_o_mesh(o_print.o.s_stl)) - 118437.4) < 0.5, 'the same box upside down');
         // the puck's plate with its holder's cup, lying on its front and standing in the box
         let o_plate = await f_o_post('/api/mesh', { o_setting: { light: 'puck' }, s_part: 'puck_plate' });
         assert(Math.abs(f_n_volume(f_o_mesh(o_plate.o.s_stl)) - 47801.0) < 0.5, `plate ${f_n_volume(f_o_mesh(o_plate.o.s_stl))}`);
@@ -80,8 +80,10 @@ Deno.test({ name: 'server renders the box and a sheet', sanitizeResources: false
             assertEquals(o.n_status, 200, JSON.stringify(o.o));
             let o_box = f_o_box({ ...o_v, ...o_change }, o_change.sheet_thicknesses);
             let a_n_size = f_a_n__size(f_o_mesh(o.o.s_stl));
-            for(let [n_idx, n] of [o_box.n_mm__width, o_box.n_mm__depth, o_box.n_mm__height].entries()){
-                assert(Math.abs(n - a_n_size[n_idx]) < 0.002, `${JSON.stringify(o_change)}: size ${a_n_size}, reckoned ${[o_box.n_mm__width, o_box.n_mm__depth, o_box.n_mm__height]}`);
+            // behind the puck's box its feet, which the preview leaves out
+            let a_n_reckoned = [o_box.n_mm__width, o_box.n_mm__depth + (o_change.light === 'puck' ? o_v.foot : 0), o_box.n_mm__height];
+            for(let [n_idx, n] of a_n_reckoned.entries()){
+                assert(Math.abs(n - a_n_size[n_idx]) < 0.002, `${JSON.stringify(o_change)}: size ${a_n_size}, reckoned ${a_n_reckoned}`);
             }
             let s_slits = o.o.a_s_echo.find(function(s){ return s.startsWith('slits'); }).split(': ')[1];
             assertEquals(s_slits.split(', ').map(function(s){ return s.split(' / ').map(Number); }),
@@ -110,7 +112,7 @@ Deno.test({ name: 'server renders the box and a sheet', sanitizeResources: false
             ['/api/mesh', { o_setting: {}, s_part: 'lid' }, 'one of'],
             ['/api/mesh', { o_setting: { 'x=1;y': 2 }, s_part: 'box' }, 'no setting'],
             // the script's own word on settings that do not go together
-            ['/api/mesh', { o_setting: { sheet_distance: 3, chamfer: 1 }, s_part: 'box' }, 'sheet_distance or light_distance too small'],
+            ['/api/mesh', { o_setting: { sheet_distance: 4, chamfer: 1, slot_min: 1.5 }, s_part: 'box' }, 'sheet_distance or light_distance too small'],
             ['/api/mesh', { o_setting: { light: 'puck', sheet_x: 70 }, s_part: 'box' }, 'sheet_x too small for the puck'],
             ['/api/sheet', { s_svg: '<svg xmlns="http://www.w3.org/2000/svg"><image href="/etc/passwd"/></svg>', n_mm__thickness: 0.4 }, 'as the page writes it'],
             ['/api/sheet', { s_svg: f_s_svg__sheet(a_a_n, 30, 20), n_mm__thickness: 0 }, 'from 0.05 to 10'],
@@ -121,7 +123,7 @@ Deno.test({ name: 'server renders the box and a sheet', sanitizeResources: false
             assert(o.o.s_message.includes(s_message), `${o.o.s_message} has no ${s_message}`);
         }
         // only files of webapp/ by name: the script beside it is not served
-        assertEquals((await (await fetch(`${s_url}/%2e%2e/paper_light_box_veryos_V2.scad`)).text()), 'not found');
+        assertEquals((await (await fetch(`${s_url}/%2e%2e/paper_light_box_veryos_V3.scad`)).text()), 'not found');
         assertEquals((await fetch(`${s_url}/index.html`)).status, 200);
     } finally{
         o_process.kill();

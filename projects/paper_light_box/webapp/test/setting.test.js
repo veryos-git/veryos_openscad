@@ -3,7 +3,7 @@
 import { assertEquals, assertThrows } from './check.js';
 import { f_a_o_group__from_scad, f_a_s_define } from '../setting.module.js';
 
-let s_scad = await Deno.readTextFile(new URL('../../paper_light_box_veryos_V2.scad', import.meta.url));
+let s_scad = await Deno.readTextFile(new URL('../../paper_light_box_veryos_V3.scad', import.meta.url));
 let a_o_group = f_a_o_group__from_scad(s_scad);
 let o_setting__by_name = Object.fromEntries(a_o_group.flatMap(function(o_group){
     return o_group.a_o_setting.map(function(o_setting){ return [o_setting.s_name, o_setting]; });

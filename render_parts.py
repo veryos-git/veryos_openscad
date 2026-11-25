@@ -64,7 +64,7 @@ PROJECTS = {
     "papercut_fold_house2": [("papercut_fold_house2_windows_V3.scad", "folded flat", "output")],
     "paper_folding_haunted_house": [("paper_folding_haunted_house.scad", "assembled flat", "output")],
     "paper_folding_lantern": [("paper_folding_lantern.scad", "folded flat", "output")],
-    "paper_light_box": [("paper_light_box_veryos_V2.scad", [
+    "paper_light_box": [("paper_light_box_veryos_V3.scad", [
         ("assembly", "Box with its sheets and the backlight board", {"part": "assembly"}),
         ("section", "Assembly cut in half", {"part": "section"}),
         ("box", "Box as it stands, for the backlight board", {"part": "box"}),
@@ -73,8 +73,10 @@ PROJECTS = {
         ("assembly_puck", "Box with its sheets, the puck plate, the puck and a ring for the holder's screwin",
          {"part": "assembly", "light": "puck"}),
         ("section_puck", "Puck light box cut in half", {"part": "section", "light": "puck"}),
-        ("box_puck", "Box for the puck light, from behind: the slot for the holder's cup",
+        ("box_puck", "Box for the puck light, from behind: the slot for the holder's cup, the two feet",
          {"part": "box", "light": "puck"}),
+        ("print_puck", "Box for the puck light as it is printed: the feet's slopes are overhangs of 45 degrees",
+         {"part": "print", "light": "puck"}),
         ("puck_plate", "Puck plate as it is printed: its front on the bed, the holder's thread upright",
          {"part": "puck_plate", "light": "puck"}),
         ("placed", "Puck plate where it sits in the box, from behind", {"part": "placed", "light": "puck"})])],

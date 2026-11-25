@@ -1,6 +1,6 @@
 # Paper light box
 
-A printed box with slits in its top; a sheet with a picture cut out slides into each, paper or a thin print, and a light behind the last one shines through them all. A webapp places the pictures, shows the box lit, keeps the projects, and gives a file for every sheet and for the box. Goal: `readme_hgc.md`. **Not printed, nothing cut. The board's fit is from a drawing, not from the part; the puck's thread is the printed holder's, the plate around it is new.**
+A printed box with slits in its top; a sheet with a picture cut out slides into each, paper or a thin print, and a light behind the last one shines through them all. A webapp places the pictures, shows the box lit, keeps the projects, and gives a file for every sheet and for the box. Goal: `readme_hgc.md`. **V2 printed once, 88 × 111 with the puck: it tipped over, paper did not go into its slits, the light was a dot. V3 answers that and is not printed. The board's fit is from a drawing, not from the part.**
 
 ![the webapp](preview.png)
 
@@ -9,8 +9,9 @@ A printed box with slits in its top; a sheet with a picture cut out slides into 
 | File | What |
 |---|---|
 | `webapp/`, `deno.json` | the app, see below; `webapp/project/` holds the saved projects |
-| `paper_light_box_veryos_V2.scad` | the box and the puck plate, standalone, no libraries. `part`: `print` (default), `box`, `puck_plate`, `placed`, `assembly`, `section`. `light`: `board`, `puck` |
-| `archive/paper_light_box_veryos_V1.scad` | V1: the puck dropped into a pocket, see below |
+| `paper_light_box_veryos_V3.scad` | the box and the puck plate, standalone, no libraries. `part`: `print` (default), `box`, `puck_plate`, `placed`, `assembly`, `section`. `light`: `board`, `puck` |
+| `archive/` | V2: the box of the first print; V1: the puck dropped into a pocket; see below |
+| `results_v1/`, `v1test.3mf` | the user's photos and Bambu Studio project of the first print, not committed |
 | `rendered_parts/` | the box for both lights and the puck plate, under the names used here |
 | `inspiration/`, `LEDoptions/` | the user's pictures and links, not committed: third-party pictures |
 
@@ -57,7 +58,7 @@ A printed box with slits in its top; a sheet with a picture cut out slides into 
 | Colour | each sheet passed takes green to 0.88 and blue to 0.7: warmer towards the front |
 | Board | 99 LEDs, 9 × 11, in a field 12 smaller than the board |
 | Puck | a disc as wide as the window's edge on the lens, 36, sending as much in all as the board |
-| Left out | light thrown back between the sheets; the holder behind the box in the lit picture |
+| Left out | light thrown back between the sheets; the holder and the feet behind the box in the lit picture |
 
 ## Box
 
@@ -67,17 +68,19 @@ A printed box with slits in its top; a sheet with a picture cut out slides into 
 |---|---|
 | Print | upside down, the top wall with the slits on the bed; walls and grooves upright; no support |
 | Bottom | open. Stops 0.6 high under the grooves carry the sheets; to take one out, lift the box and push it up from below |
-| Slit | sheet + 0.4, at least 0.8, mouth chamfered 0.4; through the top wall into grooves 2.5 deep in both side walls |
+| Slit | sheet + 0.4, at least 1.0, mouth chamfered 0.8; through the top wall into grooves 3.5 deep in both side walls |
+| Beside a sheet | 0.75 per side: the side walls are sheet width + 1.5 apart. A sheet in the middle reaches 2.75 into each groove, one pushed to a side 2.0 into the other |
 | Between slits | solid; from 7.2 wide hollow between two 1.6 ribs |
-| Window | sheet width + 0.5 − 2 × 2.5 wide; a bar hides the sheets' top 2.5; the bottom is open to the table |
+| Window | sheet width + 1.5 − 2 × 3.5 wide; a bar hides the sheets' top 3.5; the bottom is open to the table |
 | Sheets | flush with the top; a light taller than the sheets makes the box taller and the bar deeper |
-| Logo | in the back of the box and of the puck plate, 0.6 deep; none on the sheets: no room beside the picture |
-| Six sheets 120 × 156, distance 5 | board 124.5 × 57.2 × 156.6; puck 124.5 × 50.6 × 156.6, the holder 25.9 more behind it |
+| Feet | with the puck: the two side walls carried on 30 behind the box, 2 thick, their upper edge climbing at 45° to the back wall, their end 1.2 high. `foot`: their length, 0 for none |
+| Logo | in the back of the box and of the puck plate, 0.6 deep; in the side of a foot where the puck's slot leaves the back no room (88 × 111); none on the sheets: no room beside the picture |
+| Six sheets 120 × 156, distance 5 | board 125.5 × 72.3 × 156.6; puck 125.5 × 65.7 × 156.6, behind it the feet 30 and the holder 25.9 |
 
 | `light` | Held | Open questions |
 |---|---|---|
 | `board`: Bambu CMYK backlight board 120 × 156, lit 108 × 144, USB-C, 99 LEDs, 5 W | slides into a slit 3 wide behind the last sheet, LEDs to the front; 6 room and a back wall with vents behind it; upright behind upright sheets, lying behind wide ones | thickness unmeasured. USB socket taken to be on the back at the middle of a short edge (two small marks in the store's picture): notch 14 wide in the top wall, or a window in the right side wall for a lying board. A retailer lists 70 °C in operation: PETG is safer than PLA |
-| `puck`: RGBW puck light KC007 in the threaded holder of `../RGBW_pucklight_holder_ringclick` | the holder's top part is a plate as large as a sheet, `puck_plate`, in a slit 2.4 wide behind the last sheet; its cup reaches back through a slot in the back wall. The holder's screwin, the puck on it, screws into the cup from behind; its plunger is the button | the plate and its slit are untested; the cup's inside is the holder's, which prints and clicks (V6). A small light: `light_distance` 30 or more, or a bright middle |
+| `puck`: RGBW puck light KC007 in the threaded holder of `../RGBW_pucklight_holder_ringclick` | the holder's top part is a plate as large as a sheet, `puck_plate`, in a slit 2.4 wide behind the last sheet; its cup reaches back through a slot in the back wall. The holder's screwin, the puck on it, screws into the cup from behind; its plunger is the button | first print: the plate sits in its slit with holder and puck (photo), not reported on its own. At `light_distance` 15 the puck was a bright dot: 30 since V3 |
 
 ![puck plate](rendered_parts/puck_plate.png)
 
@@ -88,21 +91,38 @@ A printed box with slits in its top; a sheet with a picture cut out slides into 
 | Plate | 2 thick, as large as a sheet, the cup's middle behind the sheets' middle; the lens stands up to 2.4 in front of the plate |
 | Print | front on the bed, as the holder's top part: the thread upright, nothing over 45° |
 | Box's back wall | a slot 72.7 wide for the cup, open to the top, its lower end a V: a roof in the print. Logo under the V, or beside the slot where the V leaves no room |
-| Limits | sheets at least 76.2 wide and 94.2 high: 4 of back wall beside the slot, the cup within the plate |
+| Limits | sheets at least 75.2 wide and 94.2 high: 4 of back wall beside the slot, the cup within the plate |
+| Since V2 | the same but for its logo, 1 further from the edge: a printed V2 plate fits the V3 box of its size |
 
 - Sheets and light of different sizes: both stand on the stops and are centred sideways; the light's wall opens as wide as the narrower of the two.
 - Board's data: retailers' listings found by web search 2026-11-25 ([Bambu store](https://asia.store.bambulab.com/products/bambu-cmyk-backlight-board), [MatterHackers](https://www.matterhackers.com/store/l/bambu-lab-cmyk-led-backlight-board), [3D Universe](https://shop3duniverse.com/collections/all/products/bambu-lab-cmyk-led-backlight-board), [3DJake](https://www.3djake.com/bambu-lab/cmyk-led-backlight-board-kit)); the EU store's page in `LEDoptions/` refused to be read.
+
+## First print
+
+| 2026-11-25 | |
+|---|---|
+| Printed | V2: box 88 × 111 for the puck, six sheets 0.4, distance 5, light 15 behind, and its plate. Bambu Lab A2L, 0.2 mm, 2 walls, 15 %, no support, per `v1test.3mf` |
+| Sheets | the app's six pictures cut from paper by a cutter |
+| Stands | no: the puck in its holder hangs behind the back wall and tips the box backwards |
+| Sheets in the slits | did not go in. The slits were 0.8 wide, the side walls 88.5 apart: 0.25 beside a sheet per side, grooves 2.5 |
+| Light | a round bright dot. With more room between the light and the first sheet it spreads: about 30 wanted |
+| Not known yet | where the paper stuck, its weight, a cut sheet's real width: V3's fit is reasoned, not measured |
+| To try before a reprint | one sheet cut 1 narrower, 87 × 111, in the printed box: if it slides, the width was it |
 
 ## Checked
 
 | What | Result |
 |---|---|
-| Box, both lights, upright, wide (156 × 120), large (150 × 200), small (100 × 100), sheets of 0.15 to 1.2 at distance 12, puck 80 × 96 and 200 × 120 | one closed body each, no zero-area triangles, in OpenSCAD 2021.01 and in 2026.09.16 with lazy union and Manifold; volumes equal within 2 ppm (2021.01's STL is that much small) |
-| Puck plate 120 × 156, 80 × 96, 200 × 120 × 3, without logo | one closed body, the same volume in both builds. 2021.01's STL has 272 edges that meet at four digits where the thread runs out at the cavity's shoulder, exactly as the holder's own top part has; Manifold's has none |
-| Sliced, six sheets, the disc launcher's Elegoo Centauri Carbon 2 settings (0.2 mm, 2 walls, 15 %, classic) | board 123 g in 5 h 41 min; puck 104 g in 4 h 26 min and its plate 56 g in 1 h 15 min; no support; bridges 0.4 m per box, none in the plate; slits free 1.6 in the first layer, 1.0 in the second, 0.8 above |
+| V3 box: board with the script's five and with six sheets, as printed, wide (156 × 120), sheets of 0.15 to 1.2 at distance 12; puck 120 × 156, 88 × 111 as it stands, as printed, without feet, without logo, 76 × 96 with sheets of 0.1 and 0.2 at distance 4, 200 × 120, feet of 12 | one closed body each, no triangle without area, in OpenSCAD 2021.01 and in 2026.09.16 with lazy union and Manifold; volumes equal within 2 ppm |
+| V3 puck plate 120 × 156 and 88 × 111 | one closed body, the same volume in both builds and as V2's: 47801.0 and 29897.0 mm³ |
+| V3 sliced: the 88 × 111 puck box in a copy of the first print's Bambu Studio project (A2L, 0.2 mm, 2 walls, 15 %, no support) | 84.6 g in 4 h 15 min; the feet's slopes are 29 mm of overhang wall. With supports allowed the slicer puts 5 g under the stops and none under the feet |
+| V3 in the page, headless Chrome | the 88 × 111 puck box: `foot` in the form, the feet and the plate in the 3D view, the script's echo; 17 tests |
+| V2 box, both lights, upright, wide (156 × 120), large (150 × 200), small (100 × 100), sheets of 0.15 to 1.2 at distance 12, puck 80 × 96 and 200 × 120 | one closed body each, no zero-area triangles, in OpenSCAD 2021.01 and in 2026.09.16 with lazy union and Manifold; volumes equal within 2 ppm (2021.01's STL is that much small) |
+| V2 puck plate 120 × 156, 80 × 96, 200 × 120 × 3, without logo | one closed body, the same volume in both builds. 2021.01's STL has 272 edges that meet at four digits where the thread runs out at the cavity's shoulder, exactly as the holder's own top part has; Manifold's has none |
+| V2 sliced, six sheets, the disc launcher's Elegoo Centauri Carbon 2 settings (0.2 mm, 2 walls, 15 %, classic) | board 123 g in 5 h 41 min; puck 104 g in 4 h 26 min and its plate 56 g in 1 h 15 min; no support; bridges 0.4 m per box, none in the plate; slits free 1.6 in the first layer, 1.0 in the second, 0.8 above |
 | Sheets from the app | the six it opens with: no loose piece, the frame and one hole each (the plain one no hole), 8 to 135 points; STL one closed body, volume = the SVG's area × 0.4 in both OpenSCAD builds. Before them a forest of bare trees, its front sheet 347 outlines and 4596 points, the same result |
 | Page in headless Chrome | load, drag, corner, wheel, fit, order, add, remove, three loaded files (no viewBox, white background, not an SVG), both lights, wide and large sheets, all downloads, the plate in the 3D view. Projects: save, reload, change and save again, another name, a taken name, a name the server refuses, `New`, open, the question with all three answers, delete and keep, delete the open one and save it back, Ctrl+S, Enter, leaving with unsaved changes, a picture of one's own kept over a reload, the page on a server from before |
-| Not checked | a print; a cut sheet; a real board in the box; a printed screwin in the plate; the lit preview against a real box; a touch screen; Firefox |
+| Not checked | a print of V3; paper in its slits; a real board in the box; the lit preview against the printed box; a touch screen; Firefox |
 
 ## My choices, not in the brief
 
@@ -120,7 +140,28 @@ A printed box with slits in its top; a sheet with a picture cut out slides into 
 | The holder's thread on a plate of its own that slides in | the thread in the box's back wall: it would lie in the print |
 | The top part of the ringclick holder, V8 | `../RGBW_pucklight_holder` V4, whose ribs cross the light; its bottom screw has the same thread |
 | The screwin left in its own project | a copy of it here |
-| Light distance 15, slit 0.8, grooves 2.5, walls 2, plate 2 | |
+| Feet as part of the box, the side walls carried on | a stand of its own under the holder: one more loose part |
+| Feet 30 long: 4 past the holder's end | |
+| Light distance 30 for the board too | 15 for the board: its 99 LEDs are 12 to 13 apart, which 15 hardly blurs |
+| V3's fit for paper: slit 1.0, 0.75 beside a sheet, grooves 3.5, mouths 0.8 | measured values: none yet |
+| Walls 2, plate 2 | |
+
+## V3 against V2
+
+| | V2 | V3 |
+|---|---|---|
+| stands | on its four walls | with the puck: on two feet more, 30 behind the box |
+| `light_distance` | 15 | 30 |
+| slit, at least | 0.8 | 1.0 |
+| side walls apart | sheet + 0.5 | sheet + 1.5 |
+| grooves | 2.5 | 3.5 |
+| slits' mouths | chamfered 0.4 | 0.8 |
+| window | sheet − 4.5 wide | sheet − 5.5 |
+| `sheet_distance` | from 2.5 | from 4: below that the script refuses thin sheets |
+| logo, puck box 88 × 111 | none: no room in the back | in a foot's side |
+| puck plate | | the same but for its logo's place |
+| box 88 × 111, puck, six sheets | 92.5 × 50.6 × 111.6 | 93.5 × 65.7 × 111.6, and 30 of feet |
+| box for the board, six sheets | 124.5 × 57.2 × 156.6 | 125.5 × 72.3 × 156.6 |
 
 ## V2 against V1
 

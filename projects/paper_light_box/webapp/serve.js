@@ -21,7 +21,7 @@ import { o_regex__svg_sheet } from './layer.module.js';
 
 let n_port = Number(Deno.args[0] ?? 8776);
 let s_path__root = resolve(decodeURI(new URL('.', import.meta.url).pathname));
-let s_path__scad = join(s_path__root, '..', 'paper_light_box_veryos_V2.scad');
+let s_path__scad = join(s_path__root, '..', 'paper_light_box_veryos_V3.scad');
 let s_path__render = join(s_path__root, '.render');
 let s_path__project = resolve(Deno.args[1] ?? join(s_path__root, 'project'));
 // A project's name is its folder's name, so it must not be able to leave project/.
