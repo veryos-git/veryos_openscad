@@ -1,0 +1,7 @@
+{
+  "lock": false,
+  "tasks": {
+    "start": "deno run --allow-net=127.0.0.1 --allow-read=webapp webapp/serve.js",
+    "test": "deno test --allow-all --no-check webapp/test/"
+  }
+}
