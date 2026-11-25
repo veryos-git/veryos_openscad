@@ -3,7 +3,7 @@
 // picture, the box in 3D, and a file for each thing: every sheet as SVG and as STL,
 // the box as STL, and for the puck light the plate with its holder's thread. The
 // sheets and the preview are made here; the box, the plate and the sheets' STL come
-// from the server, which runs OpenSCAD.
+// from the server, which runs OpenSCAD and keeps the saved projects.
 
 import { el } from './dom.module.js';
 import { f_o_stage } from './stage.module.js';
@@ -15,6 +15,7 @@ import { f_a_n__material, f_n_cnt__piece, f_a_a_n__sheet, f_s_svg__sheet } from 
 import { f_o_lit, f_a_n__source } from './light.module.js';
 import { f_o_box, f_o_light } from './box.module.js';
 import { f_a_o_sheet__demo } from './demo.module.js';
+import { f_o_panel__project } from './project.module.js';
 
 // The script's settings that the list of sheets sets.
 let a_s_name__from_sheets = ['part', 'sheet_count', 'sheet_thickness', 'sheet_thicknesses'];
@@ -31,13 +32,16 @@ let n_ms__sharp = 200;
 let n_mm__thickness = 0.4;
 // Blur of the light on its way to the next sheet, as a share of the way.
 let n_sigma__per_distance = 0.55;
+// What a project keeps of the page's own values, and of a sheet.
+let a_s_name__own = ['n_mm__frame', 'n_transmission', 's_colour', 'n_brightness', 'n_room'];
+let a_s_name__sheet = ['s_name', 's_mode', 'n_mm__thickness', 's_svg', 'n_mm__x', 'n_mm__y', 'n_mm__width'];
 let a_n_colour__box = [0.93, 0.91, 0.86];
 let a_n_colour__plate = [0.6, 0.76, 0.9];
 
 let o_state = {
     a_o_group: [],
     o_v__by_name: {},
-    // from the front to the back: { s_name, s_mode, n_mm__thickness, o_art, n_mm__x, n_mm__y, n_mm__width }
+    // from the front to the back: { s_name, s_mode, n_mm__thickness, s_svg, o_art, n_mm__x, n_mm__y, n_mm__width }
     a_o_sheet: [],
     o_sheet__selected: null,
     // kept all around every sheet
@@ -58,7 +62,9 @@ let el_canvas__editor = el('canvas', { className: 'editor' });
 let el_canvas__view = el('canvas', { className: 'view', hidden: true });
 let el_canvas__work = el('canvas');
 let el_canvas__material = el('canvas');
-let o_stage = null, o_editor = null, o_viewer = null;
+let o_stage = null, o_editor = null, o_viewer = null, o_panel = null;
+// Every control's way to show its value again, for when a project is opened.
+let a_f_show_value = [];
 
 let f_set_status = function(s, b_error = false){
     el_status.textContent = s;
@@ -194,7 +200,10 @@ let b_update_asked = false;
 let n_timeout__sharp = 0;
 let f_update_soon = function(){
     clearTimeout(n_timeout__sharp);
-    n_timeout__sharp = setTimeout(function(){ f_update_shown(n_cnt__pixel_preview); }, n_ms__sharp);
+    n_timeout__sharp = setTimeout(function(){
+        f_update_shown(n_cnt__pixel_preview);
+        o_panel?.f_changed();
+    }, n_ms__sharp);
     if(b_update_asked){ return; }
     b_update_asked = true;
     requestAnimationFrame(function(){
@@ -307,7 +316,9 @@ let f_select = function(o_sheet){
 
 let f_load = async function(o_sheet, o_file){
     try{
-        o_sheet.o_art = await f_o_art(await o_file.text());
+        let s_svg = await o_file.text();
+        o_sheet.o_art = await f_o_art(s_svg);
+        o_sheet.s_svg = s_svg;
         o_sheet.s_name = o_file.name.replace(/\.svg$/i, '');
         f_fit(o_sheet);
         o_state.o_sheet__selected = o_sheet;
@@ -337,7 +348,10 @@ let f_el__sheet = function(o_sheet, n_idx){
         a_o_sheet.splice(n_to, 0, o_sheet);
     };
     let el_name = el('input', { type: 'text', className: 'name', value: o_sheet.s_name, title: 'Name of the sheet, in its files\' names' });
-    el_name.addEventListener('input', function(){ o_sheet.s_name = el_name.value; });
+    el_name.addEventListener('input', function(){
+        o_sheet.s_name = el_name.value;
+        o_panel.f_changed();
+    });
     el_name.addEventListener('click', function(o_event){ o_event.stopPropagation(); });
     let el_file = el('input', { type: 'file', accept: '.svg,image/svg+xml', hidden: true });
     el_file.addEventListener('change', function(){
@@ -430,9 +444,11 @@ let f_el__setting = function(o_setting){
         el_input.addEventListener('change', function(){
             f_set(o_setting.a_o_option.find(function(o_option){ return String(o_option.v) === el_input.value; }).v);
         });
+        a_f_show_value.push(function(){ el_input.value = String(o_state.o_v__by_name[o_setting.s_name]); });
     } else if(o_setting.s_kind === 'bool'){
         el_input = el('input', { type: 'checkbox', checked: o_setting.v_default });
         el_input.addEventListener('change', function(){ f_set(el_input.checked); });
+        a_f_show_value.push(function(){ el_input.checked = o_state.o_v__by_name[o_setting.s_name]; });
     } else{
         let el_range = el('input', { type: 'range', min: o_setting.n_min, max: o_setting.n_max, step: o_setting.n_step, value: o_setting.v_default });
         let el_number = el('input', { type: 'number', min: o_setting.n_min, max: o_setting.n_max, step: o_setting.n_step, value: o_setting.v_default });
@@ -445,6 +461,11 @@ let f_el__setting = function(o_setting){
         };
         el_range.addEventListener('input', function(){ f_take(el_range, el_number); });
         el_number.addEventListener('change', function(){ f_take(el_number, el_range); });
+        a_f_show_value.push(function(){
+            el_range.value = el_number.value = o_state.o_v__by_name[o_setting.s_name];
+            el_range.classList.remove('error');
+            el_number.classList.remove('error');
+        });
         el_input = el('span', { className: 'number' }, [el_range, el_number]);
     }
     return el('label', { className: 'setting', title: o_setting.s_help }, [
@@ -463,11 +484,50 @@ let f_el__own = function(s_label, s_help, s_name, n_min, n_max, n_step){
         el_value.textContent = el_range.value;
         f_update_soon();
     });
+    a_f_show_value.push(function(){
+        el_range.value = o_state[s_name];
+        el_value.textContent = String(o_state[s_name]);
+    });
     return el('label', { className: 'setting', title: s_help }, [
         el('span', { className: 'name', textContent: s_label }),
         el('span', { className: 'number' }, [el_range, el_value]),
         el('small', { textContent: s_help })
     ]);
+};
+
+// ---- projects ----
+
+// What is on screen as a project: the script's settings, the page's own, the sheets.
+let f_o_project = function(){
+    return {
+        o_setting: { ...o_state.o_v__by_name },
+        ...Object.fromEntries(a_s_name__own.map(function(s_name){ return [s_name, o_state[s_name]]; })),
+        a_o_sheet: o_state.a_o_sheet.map(function(o_sheet){
+            return Object.fromEntries(a_s_name__sheet.map(function(s_name){ return [s_name, o_sheet[s_name]]; }));
+        })
+    };
+};
+
+// The project the app opens with, and a new one.
+let o_project__new = null;
+
+// Puts a project on screen. What the script or the page got to set since it was saved
+// is as in a new project, what the script lost is left out.
+let f_show_project = async function(o_project){
+    // the pictures first: a project with one that cannot be drawn leaves the screen as it is
+    let a_o_sheet = await Promise.all(o_project.a_o_sheet.map(async function(o_sheet){
+        return { ...o_sheet, o_art: o_sheet.s_svg ? await f_o_art(o_sheet.s_svg) : null };
+    }));
+    for(let s_name of Object.keys(o_state.o_v__by_name)){
+        o_state.o_v__by_name[s_name] = o_project.o_setting[s_name] ?? o_project__new.o_setting[s_name];
+    }
+    for(let s_name of a_s_name__own){ o_state[s_name] = o_project[s_name] ?? o_project__new[s_name]; }
+    o_state.a_o_sheet = a_o_sheet;
+    o_state.o_sheet__selected = a_o_sheet[0];
+    for(let f_show_value of a_f_show_value){ f_show_value(); }
+    f_build_list();
+    f_update_soon();
+    f_render_box_soon(true);
 };
 
 // ---- the page ----
@@ -502,9 +562,10 @@ let f_start = async function(){
         o_state.s_colour = el_colour.value;
         f_update_soon();
     });
+    a_f_show_value.push(function(){ el_colour.value = o_state.s_colour; });
     let el_add = el('button', { textContent: 'Add a sheet', title: 'A new sheet behind the others' });
     el_add.addEventListener('click', function(){
-        let o_sheet = { s_name: 'sheet', s_mode: 'solid', n_mm__thickness, o_art: null, n_mm__x: 0, n_mm__y: 0, n_mm__width: 0 };
+        let o_sheet = { s_name: 'sheet', s_mode: 'solid', n_mm__thickness, s_svg: '', o_art: null, n_mm__x: 0, n_mm__y: 0, n_mm__width: 0 };
         o_state.a_o_sheet.push(o_sheet);
         o_state.o_sheet__selected = o_sheet;
         f_build_list();
@@ -515,10 +576,12 @@ let f_start = async function(){
         o_el__tab[s_tab] = el('button', { className: 'tab', textContent: s_text });
         o_el__tab[s_tab].addEventListener('click', function(){ f_show(s_tab); });
     }
+    let el_project = el('div');
     document.body.append(
         el('aside', {}, [
             el('h1', { textContent: 'Paper light box' }),
             el('p', { className: 'lead', textContent: 'Sheets with a picture cut out, one behind the other in a printed box, and a light behind them.' }),
+            el('details', { open: true }, [el('summary', { textContent: 'Project' }), el_project]),
             el('details', { open: true }, [
                 el('summary', { textContent: 'Sheets, from the front to the back' }),
                 el_list,
@@ -553,8 +616,29 @@ let f_start = async function(){
     o_viewer = f_o_viewer(el_canvas__view);
     f_build_list();
     f_show('sheet');
-    f_update_soon();
-    f_render_box(true);
+    o_project__new = f_o_project();
+    o_panel = f_o_panel__project({
+        el_root: el_project,
+        f_o_design: f_o_project,
+        f_show_design: f_show_project,
+        o_design__new: o_project__new,
+        // The address names the open project, so a reload opens it again.
+        f_opened: function(s_name){
+            history.replaceState(null, '', s_name === null ? location.pathname : `#${encodeURIComponent(s_name)}`);
+        }
+    });
+    let s_name__wanted = null;
+    try{
+        s_name__wanted = decodeURIComponent(location.hash.slice(1)) || null;
+    } catch(o_error){ /* not a name: a new project */ }
+    if(!await o_panel.f_b_started(s_name__wanted)){
+        f_update_soon();
+        f_render_box(true);
+    }
+    // Closing the page with unsaved changes asks first.
+    window.addEventListener('beforeunload', function(o_event){
+        if(o_panel.f_b_dirty()){ o_event.preventDefault(); }
+    });
 };
 
 f_start().catch(function(o_error){ document.body.append(el('pre', { className: 'error', textContent: o_error.stack })); });

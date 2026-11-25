@@ -27,6 +27,26 @@ button.small { padding: 3px 8px; }
 .report:empty { display: none; }
 footer { margin-top: 12px; color: var(--muted); font-size: 12px; }
 
+/* the saved projects */
+.project_name { width: 100%; padding: 4px 6px; font: inherit; }
+.project_state { margin: 4px 0 6px; font-size: 12px; color: var(--muted); }
+.project_state[data-state=dirty] { color: var(--accent); }
+.project_state[data-state=note] { color: #c00; }
+.tool_row { display: flex; flex-wrap: wrap; gap: 6px; }
+button.plain { background: #e9e6df; color: var(--ink); }
+button.danger { background: #c00; }
+.question, .project.deleting { padding: 6px 8px; border: 1px solid #c00; border-radius: 4px; }
+.question p, .project.deleting p { margin: 0 0 6px; }
+.project_list { list-style: none; max-height: 200px; margin: 8px 0 0; padding: 0; overflow-y: auto; }
+.project_empty { color: var(--muted); font-size: 12px; }
+.project { display: flex; margin-bottom: 4px; border: 1px solid var(--line); border-radius: 4px; overflow: hidden; }
+.project.deleting { display: block; }
+.project[aria-current=true] { border-color: var(--accent); background: #fff8ee; }
+.project .open, .project .delete { background: none; color: var(--ink); font-weight: 400; border-radius: 0; padding: 4px 8px; }
+.project .open { flex: 1; min-width: 0; text-align: left; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.project .delete { color: var(--muted); border-left: 1px solid var(--line); }
+.project .delete:hover { background: #c00; color: #fff; }
+
 /* the list of sheets */
 .sheet { border: 1px solid var(--line); border-left: 4px solid var(--line); border-radius: 4px; padding: 6px 8px; margin: 6px 0; cursor: pointer; background: #fff; }
 .sheet.selected { border-left-color: var(--accent); background: #fff8ee; }

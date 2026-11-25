@@ -1,6 +1,6 @@
 # Paper light box
 
-A printed box with slits in its top; a sheet with a picture cut out slides into each, paper or a thin print, and a light behind the last one shines through them all. A webapp places the pictures, shows the box lit, and gives a file for every sheet and for the box. Goal: `readme_hgc.md`. **Not printed, nothing cut. The board's fit is from a drawing, not from the part; the puck's thread is the printed holder's, the plate around it is new.**
+A printed box with slits in its top; a sheet with a picture cut out slides into each, paper or a thin print, and a light behind the last one shines through them all. A webapp places the pictures, shows the box lit, keeps the projects, and gives a file for every sheet and for the box. Goal: `readme_hgc.md`. **Not printed, nothing cut. The board's fit is from a drawing, not from the part; the puck's thread is the printed holder's, the plate around it is new.**
 
 ![the webapp](preview.png)
 
@@ -8,7 +8,7 @@ A printed box with slits in its top; a sheet with a picture cut out slides into 
 
 | File | What |
 |---|---|
-| `webapp/`, `deno.json` | the app, see below |
+| `webapp/`, `deno.json` | the app, see below; `webapp/project/` holds the saved projects |
 | `paper_light_box_veryos_V2.scad` | the box and the puck plate, standalone, no libraries. `part`: `print` (default), `box`, `puck_plate`, `placed`, `assembly`, `section`. `light`: `board`, `puck` |
 | `archive/paper_light_box_veryos_V1.scad` | V1: the puck dropped into a pocket, see below |
 | `rendered_parts/` | the box for both lights and the puck plate, under the names used here |
@@ -20,12 +20,15 @@ A printed box with slits in its top; a sheet with a picture cut out slides into 
 |---|---|
 | Start | `deno task start` in this folder, then http://127.0.0.1:8776 (another port: `deno task start 8777`) |
 | Needs | Deno; OpenSCAD: `$OPENSCAD`, else `.gitignored/tools/OpenSCAD-nightly.AppImage`, else `openscad` on the PATH |
-| Tests | `deno task test`: 16, of the outline tracing, the light model, the settings, and the server with OpenSCAD |
+| Tests | `deno task test`: 17, of the outline tracing, the light model, the settings, the server with OpenSCAD, and the saved projects |
 | Opens with | six sheets drawn by the app, to have something lit: three firs on a hill, hills, a mesa, mountains, a sun cut out, a plain sheet; load own pictures over it |
-| Not kept | the sheets live in the page: a reload starts again with the mountains |
+| Projects | all that is on screen under a name, kept by the server as `webapp/project/<name>/project.json`, for git to track: the script's settings, the frame, the preview's light, and per sheet its name, kind, thickness, picture (the SVG's text) and the picture's place |
+| Reload | the address names the open project (`#name`) and a reload opens it again; without one the app opens with the mountains. Leaving with unsaved changes asks first |
+| After an update | `serve.js` keeps the projects: stop the server and `deno task start` again, or the page says the server is an older one |
 
 | Part of the page | Does |
 |---|---|
+| Project | the name, and under it `All changes saved`, `Unsaved changes`, `Not saved yet` or what went wrong. `Save` (also Ctrl+S, or Enter in the name): the open project under its own name; under another name a new project, and the open one stays as saved. `New`: the mountains again. The list: a click opens a project, `✕` deletes it with its folder, both after asking. A deleted project stays on screen: `Save` brings it back |
 | Sheets | the list from the front to the back. Per sheet: name, `↑` `↓` order, `✕` remove, `Load SVG`, what the picture is, thickness (0.4), the picture's x, y and width in mm, `Fit`, files `SVG` and `STL` |
 | `Add a sheet` | a new sheet behind the others; the number of sheets is the list's length |
 | `frame` | kept all around every sheet, 6 mm: holds the sheet together and sits in the box's grooves |
@@ -98,7 +101,7 @@ A printed box with slits in its top; a sheet with a picture cut out slides into 
 | Puck plate 120 × 156, 80 × 96, 200 × 120 × 3, without logo | one closed body, the same volume in both builds. 2021.01's STL has 272 edges that meet at four digits where the thread runs out at the cavity's shoulder, exactly as the holder's own top part has; Manifold's has none |
 | Sliced, six sheets, the disc launcher's Elegoo Centauri Carbon 2 settings (0.2 mm, 2 walls, 15 %, classic) | board 123 g in 5 h 41 min; puck 104 g in 4 h 26 min and its plate 56 g in 1 h 15 min; no support; bridges 0.4 m per box, none in the plate; slits free 1.6 in the first layer, 1.0 in the second, 0.8 above |
 | Sheets from the app | the six it opens with: no loose piece, the frame and one hole each (the plain one no hole), 8 to 135 points; STL one closed body, volume = the SVG's area × 0.4 in both OpenSCAD builds. Before them a forest of bare trees, its front sheet 347 outlines and 4596 points, the same result |
-| Page in headless Chrome | load, drag, corner, wheel, fit, order, add, remove, three loaded files (no viewBox, white background, not an SVG), both lights, wide and large sheets, all downloads, the plate in the 3D view |
+| Page in headless Chrome | load, drag, corner, wheel, fit, order, add, remove, three loaded files (no viewBox, white background, not an SVG), both lights, wide and large sheets, all downloads, the plate in the 3D view. Projects: save, reload, change and save again, another name, a taken name, a name the server refuses, `New`, open, the question with all three answers, delete and keep, delete the open one and save it back, Ctrl+S, Enter, leaving with unsaved changes, a picture of one's own kept over a reload, the page on a server from before |
 | Not checked | a print; a cut sheet; a real board in the box; a printed screwin in the plate; the lit preview against a real box; a touch screen; Firefox |
 
 ## My choices, not in the brief
@@ -110,6 +113,9 @@ A printed box with slits in its top; a sheet with a picture cut out slides into 
 | The picture's ink by darkness, two ways to use it per sheet, a frame of 6 | cutting along the SVG's own paths |
 | Sheets traced from pixels | the SVG's curves: a cutter gets short straight lines, 0.03 mm from them |
 | The box and the sheets' STL from OpenSCAD on the server | geometry made in the page |
+| Projects as files kept by the server, the panel as in `../pucklight_lamp_v2/webapp` | the browser's own storage, which git does not see and another browser does not have |
+| A project is one `project.json`, the pictures in it as text; 12 MB at most | the pictures as files beside it |
+| The preview's light is part of a project | only what the box and the sheets are made from |
 | Board held in a slit | screws |
 | The holder's thread on a plate of its own that slides in | the thread in the box's back wall: it would lie in the print |
 | The top part of the ringclick holder, V8 | `../RGBW_pucklight_holder` V4, whose ribs cross the light; its bottom screw has the same thread |
