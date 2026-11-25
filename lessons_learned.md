@@ -8,6 +8,7 @@ Diameter clearance = added to the hole diameter, not per side.
 
 | Date | Fit | Part | Hole | Result | Printer / material |
 |---|---|---|---|---|---|
+| 2026-11-25 | Sanding paper strip traced with a pencil around a bar of the cutting ruler, for a 7.5 wide rail top | OMM XY table v3.0.4, cutting ruler | bar 6.5 × 99: the strip less 0.5 all around, for the pencil's line outside the edge | untested; expected a line 0.25 to 0.5 outside the bar, a strip 7.0 to 7.5 wide | ? |
 | 2026-11-25 | Glass slide 76 × 25 in the slide holder's recess, total; the ledge under the slide | OMM XY table v3.0.3 | 77.5 × 26.5 (+1.5); ledge 1.7, 0.2 more than the clearance, so a slide pushed to one side still lies on the other | untested | ? |
 | 2026-11-25 | Glass slide 76 × 25 in the slide holder's recess, total | OMM XY table v2.4 to v3.0.2, the same recess | 77 × 26 (+1), ledge 1.2, Onshape's values | some slides do not fit in; which slides and in which direction not known | ? |
 | 2026-11-25 | Sheet 0.4 thick, paper or a print, 120 × 156, in a slit through the top wall (on the bed in the print) and in grooves 2.5 deep in both side walls: the slit's width, total; between the side walls, total | paper_light_box V1, box | slit 0.8 (+0.4), never below 0.8, its mouth chamfered 0.4; side walls +0.5 | untested; sliced with the disc launcher's Elegoo project settings (0.2 mm, 2 walls, classic, elephant foot 0.1): the slits are free 1.6 wide in the first layer, 1.0 in the second, 0.8 above | ? |
@@ -56,7 +57,7 @@ Diameter clearance = added to the hole diameter, not per side.
 | 2026-11-11 | Printed pegs in the 28BYJ-48's Ø4.2 ear holes, motor dropped on | 28byj_minimal_turntable V1, base | pegs 3.8 (−0.4) | untested | ? |
 | 2026-11-11 | 6 mm airsoft BBs (5.95) between two printed 90° V-grooves, faces 2 apart | 28byj_minimal_turntable V1, base's rim and platform's ring | grooves 3.21 deep; the balls touch the flanks 1.1 below the edges | untested | ? |
 | 2026-11-10 | O-rings with a 2 cord in three grooves on the 28BYJ-48 shaft adapter, Ø6.3 sleeve | OMM XY table v3.0.1 | grooves R1, 0.05 deep, 2 apart, as in Onshape | untested in a print of the script; the user runs O-rings on the Onshape print's adapters | ? |
-| 2026-11-10 | Sanding paper strip cut with a knife inside a window of the cutting ruler, for a 7.5 wide rail top | OMM XY table v3.0.0, cutting ruler | window 7.5 × 100, no allowance | untested; expected strip about 0.5 smaller, half the blade's thickness per side | ? |
+| 2026-11-10 | Sanding paper strip cut with a knife inside a window of the cutting ruler, for a 7.5 wide rail top | OMM XY table v3.0.0, cutting ruler | window 7.5 × 100, no allowance | knife untested; a pencil can hardly trace inside the window, it is too thick (2026-11-25) | ? |
 | 2026-11-10 | Y slider's two slots on the table's two rails, 15 apart, total | OMM XY table v2.6 | 2.2 on 2.0 (+0.2) each | untested | ? |
 | 2026-11-10 | Y slider's slot on the table's one rail, total, guided 69 long | OMM XY table, Onshape print with round windows (as OMM_v2p2.3mf) | 2.2 on 2.0 (+0.2) | slides; the Y slider wiggles sideways at the X motor when pushed by hand | ? |
 | 2026-11-10 | A script's shape above the ribs in the sockel's cup, axial gap, not a diameter | pucklight_vase, collar | 0.4: starts at z = 6.6, the ribs end at 6.19 | untested | ? |
@@ -77,6 +78,7 @@ Diameter clearance = added to the hole diameter, not per side.
 
 ## Rules
 
+- A template to trace with a pencil is a positive shape, the size of the piece less the pencil's line: a pencil hardly follows the inside of a 7.5 wide window in a 3 thick plate. A window is for a knife (OMM XY table cutting ruler: v3.0.0's windows tried by the user, v3.0.4's bars not yet; 2026-11-25).
 - A thread stands upright in the print. Where a part's own position would lay it down, as in the back wall of a box printed on its top, give the thread a plate of its own that slides in like the box's other loose parts and prints flat: paper_light_box V2 takes the puck holder's top part that way, V1's untested pocket is gone (2026-11-25; sliced, not printed).
 - An OpenSCAD variable used in an assignment above its own is undef there, with a warning only: `logo_h = ... logo_r / logo_w` above the logo's block silently dropped the logo. Functions and modules may use it; put such a value below what it needs (paper_light_box V2, 2026-11-25).
 - A box that takes loose parts from above prints upside down: the top wall with its slits lies on the bed, the grooves stand upright, the bottom stays open, and stops under the grooves bridge no more than a slit's width. As it stands, its top wall would be a bridge as wide as the box; on its back, every slit a bridge as long as a sheet (paper_light_box V1, 2026-11-25; the box for six sheets sliced 123 g, 5 h 41 min, 0.4 m of bridges, no support; not printed).

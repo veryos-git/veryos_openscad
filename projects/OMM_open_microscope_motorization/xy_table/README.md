@@ -1,6 +1,6 @@
 # OMM XY table
 
-Motorised XY stage of the open microscope motorization: moves a standard 76 × 25 × 1 mm glass slide in X and Y with two 28BYJ-48 steppers. `omm_xy_table_v3p0p3.scad` rebuilds the Onshape document OMM_v2 (engraved label v2.3) in OpenSCAD, with the same parts and Onshape's variable names; where a value differs from Onshape, the tables below say so. v2.4 is printed, the later versions not yet. The Y slider's second guide rail, since v2.6, is experimental.
+Motorised XY stage of the open microscope motorization: moves a standard 76 × 25 × 1 mm glass slide in X and Y with two 28BYJ-48 steppers. `omm_xy_table_v3p0p4.scad` rebuilds the Onshape document OMM_v2 (engraved label v2.3) in OpenSCAD, with the same parts and Onshape's variable names; where a value differs from Onshape, the tables below say so. v2.4 is printed, the later versions not yet. The Y slider's second guide rail, since v2.6, is experimental.
 
 ![assembly](preview.png)
 
@@ -8,9 +8,9 @@ Motorised XY stage of the open microscope motorization: moves a standard 76 × 2
 
 | File | What |
 |---|---|
-| `omm_xy_table_v3p0p3.scad` | the generator, standalone, no libraries. `part` picks the assembly, the print layout or one part. `version` is engraved in the table; bump it with the file name |
-| `omm_xy_table_v3p0p3_<part>.stl` | every printed part and the cutting ruler, exported from the generator in print orientation with the brand font |
-| `archive/` | v2.4 to v3.0.2, script and STLs. Each change to the generator makes a new version file; the old one stays |
+| `omm_xy_table_v3p0p4.scad` | the generator, standalone, no libraries. `part` picks the assembly, the print layout or one part. `version` is engraved in the table; bump it with the file name |
+| `omm_xy_table_v3p0p4_<part>.stl` | every printed part and the cutting ruler, exported from the generator in print orientation with the brand font |
+| `archive/` | v2.4 to v3.0.3, script and STLs. Each change to the generator makes a new version file; the old one stays |
 | `OMM_v2_rebuild_kit.zip` | Onshape export, source of every dimension: feature trees, sketches, variables, STEP, STL, DXF, renders and the kit's own README |
 | `omm_params.scad` | the Onshape Variable Studio, 1:1 from the kit |
 | `Onshape_online_CAD_version/` | Onshape print files OMM_v2p2.3mf and OMM_v2p3.3mf |
@@ -20,6 +20,23 @@ Motorised XY stage of the open microscope motorization: moves a standard 76 × 2
 | small | the third number: v3.0.1, v3.0.2 |
 | bigger | the second: v3.1.0, v3.2.0 |
 | substantial | the first: v4.0.0 |
+
+## v3.0.4 against v3.0.3
+
+Only the cutting ruler, the print layout and the table's label changed; the other parts print as in v3.0.3.
+
+| Asked for | v3.0.3 | v3.0.4 |
+|---|---|---|
+| The cutting ruler's references as positive shapes, to trace along their outlines with a pencil: inside the windows a pencil hardly can | a 55 × 124 × 3 plate with a 7.5 wide window per strip, for a knife | one bar per strip, 3 high, to trace around: X 99 × 6.5, Y 65.25 × 6.5, see sanding paper strips below |
+| – | windows of the strips' size, without allowance | `ruler_pencil` = 0.5: the bars are 0.5 smaller than the strips all around, because a pencil's line runs outside the edge it follows. 0 gives bars of the strips' size |
+| The cutting ruler in the print layout | not in it | both bars in front of the slide holder, 6.75 from it: x 5 to 104, y 14 to 33 |
+
+| Checked | Result |
+|---|---|
+| mesh | two closed bodies, 99 × 6.5 × 3 and 65.25 × 6.5 × 3, letter and logo 0.4 deep in each top |
+| print layout, mesh | all parts within 4.75 to 250 of the 256 bed; the bars 6 apart and 6.75 from the slide holder, no other part near them |
+| OpenSCAD 2021.01 against 2026.09.16 with lazy union and Manifold | all seven parts the same volume within 2 ppm; the table as two bodies in Manifold, as before |
+| against v3.0.3 | Y slider, X slider, slide holder, shaft adapter and washer: the same volume and triangle count; the table differs by its label |
 
 ## v3.0.3 against v3.0.2
 
@@ -153,20 +170,21 @@ Travel in the model: Y from −13, where the fillet at the first arm's root meet
 
 ![cutting ruler](cutting_ruler.png)
 
-`part = "cutting_ruler"`: a 55 × 124 × 3 plate with one window per strip. The windows are the tops of the driven rails, without allowance.
+`part = "cutting_ruler"`: one bar per strip, 3 high, to trace around with a pencil. A bar is its strip, the top of a driven rail, less `ruler_pencil` = 0.5 all around: a pencil's line runs outside the edge it follows.
 
-| Window | Size | Strip for |
-|---|---|---|
-| X, left | 7.5 × 100 | the top of the X slider's rail |
-| Y, right | 7.5 × 66.25 | the top of the Y slider's first arm, from the frame to the arm's rounded end; the second arm is not driven |
+| Bar | Size | Strip | Strip for |
+|---|---|---|---|
+| X, the long one | 99 × 6.5 | 100 × 7.5 | the top of the X slider's rail |
+| Y, the short one | 65.25 × 6.5 | 66.25 × 7.5 | the top of the Y slider's first arm, from the frame to the arm's rounded end; the second arm is not driven |
 
 | Step | What |
 |---|---|
-| 1 | sanding paper grit down on a cutting mat |
-| 2 | ruler on the paper's back, pressed down with the flat hand |
-| 3 | knife along all four walls of a window, the blade flat against the wall |
+| 1 | sanding paper grit down on the table |
+| 2 | bar on the paper's back, held down with two fingers |
+| 3 | pencil around the bar, its tip against the bar's foot |
+| 4 | cut along the line, with scissors or with a knife along a steel ruler |
 
-Expected, not tried yet: a strip about 0.5 smaller than its window, half the blade's thickness per side, so it stays inside the rail's top.
+Expected, not tried yet: a line 0.25 to 0.5 outside the bar, so a strip 7.0 to 7.5 wide that stays inside the rail's top. A pencil whose line lies elsewhere: set `ruler_pencil` to the line's distance from the bar.
 
 ## Print
 
@@ -178,7 +196,7 @@ Expected, not tried yet: a strip about 0.5 smaller than its window, half the bla
 | slide holder | 1 | as is, grooves open to the bed |
 | motor shaft adapter | 2 | closed end down |
 | washer | 4 | flat |
-| cutting ruler | 1 | flat; a tool, not in the print layout |
+| cutting ruler | 1 | flat, its two bars; a tool |
 
 `part = "print_layout"` puts all parts on a 256 × 256 bed (Bambu A1, as `OMM_v2p3.3mf`). 0.2 mm layers, no supports. The table's 1 mm top chamfer is built in 0.2 steps, one per layer.
 
@@ -200,4 +218,4 @@ Onshape's values, except the slide's recess since v3.0.3. Printed: the slide hol
 
 ## Customize
 
-Every Onshape variable is a Customizer parameter with its Onshape name, grouped by part, except `scl_y_table`, which follows the Y motor. The slide's size sets the slide holder; `scl_y_slide` also sets the X slider's ring and the distance of the rails from the axis, as in Onshape. `thickness_y_slider_frame` and `thickness_table_frame` set the windows, the `[Rails]` group all rails and their clearance, `[Motor bracket]` the uprights. `y_rail2_x` places the Y slider's second arm and its table rail: keep it clear of the first arm and of the label. `table_motor_y` places the Y motor: 1 further from the window is 1 more Y travel toward the motor and 1 less away from it. The table's front edge follows; the print layout fits the 256 bed down to −68. `x_rail_end` is a measured position, not derived: check it after changing sizes. The cutting ruler's windows follow `scl_x_rail_outer`, `scl_z_rail` and `y_arm_len`.
+Every Onshape variable is a Customizer parameter with its Onshape name, grouped by part, except `scl_y_table`, which follows the Y motor. The slide's size sets the slide holder; `scl_y_slide` also sets the X slider's ring and the distance of the rails from the axis, as in Onshape. `thickness_y_slider_frame` and `thickness_table_frame` set the windows, the `[Rails]` group all rails and their clearance, `[Motor bracket]` the uprights. `y_rail2_x` places the Y slider's second arm and its table rail: keep it clear of the first arm and of the label. `table_motor_y` places the Y motor: 1 further from the window is 1 more Y travel toward the motor and 1 less away from it. The table's front edge follows; the print layout fits the 256 bed down to −68. `x_rail_end` is a measured position, not derived: check it after changing sizes. The cutting ruler's bars follow `scl_x_rail_outer`, `scl_z_rail` and `y_arm_len`, less `ruler_pencil`.
