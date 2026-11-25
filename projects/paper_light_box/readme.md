@@ -21,8 +21,8 @@ A printed box with slits in its top; a sheet with a picture cut out slides into 
 | Start | `deno task start` in this folder, then http://127.0.0.1:8776 (another port: `deno task start 8777`) |
 | Needs | Deno; OpenSCAD: `$OPENSCAD`, else `.gitignored/tools/OpenSCAD-nightly.AppImage`, else `openscad` on the PATH |
 | Tests | `deno task test`: 16, of the outline tracing, the light model, the settings, and the server with OpenSCAD |
-| Opens with | a forest of six sheets drawn by the app, to have something lit; load own pictures over it |
-| Not kept | the sheets live in the page: a reload starts again with the forest |
+| Opens with | six sheets drawn by the app, to have something lit: three firs on a hill, hills, a mesa, mountains, a sun cut out, a plain sheet; load own pictures over it |
+| Not kept | the sheets live in the page: a reload starts again with the mountains |
 
 | Part of the page | Does |
 |---|---|
@@ -97,7 +97,7 @@ A printed box with slits in its top; a sheet with a picture cut out slides into 
 | Box, both lights, upright, wide (156 × 120), large (150 × 200), small (100 × 100), sheets of 0.15 to 1.2 at distance 12, puck 80 × 96 and 200 × 120 | one closed body each, no zero-area triangles, in OpenSCAD 2021.01 and in 2026.09.16 with lazy union and Manifold; volumes equal within 2 ppm (2021.01's STL is that much small) |
 | Puck plate 120 × 156, 80 × 96, 200 × 120 × 3, without logo | one closed body, the same volume in both builds. 2021.01's STL has 272 edges that meet at four digits where the thread runs out at the cavity's shoulder, exactly as the holder's own top part has; Manifold's has none |
 | Sliced, six sheets, the disc launcher's Elegoo Centauri Carbon 2 settings (0.2 mm, 2 walls, 15 %, classic) | board 123 g in 5 h 41 min; puck 104 g in 4 h 26 min and its plate 56 g in 1 h 15 min; no support; bridges 0.4 m per box, none in the plate; slits free 1.6 in the first layer, 1.0 in the second, 0.8 above |
-| Sheets from the app | the forest's front sheet: 347 outlines, 4596 points, STL one closed body, volume = the SVG's area × 0.4 in both OpenSCAD builds |
+| Sheets from the app | the six it opens with: no loose piece, the frame and one hole each (the plain one no hole), 8 to 135 points; STL one closed body, volume = the SVG's area × 0.4 in both OpenSCAD builds. Before them a forest of bare trees, its front sheet 347 outlines and 4596 points, the same result |
 | Page in headless Chrome | load, drag, corner, wheel, fit, order, add, remove, three loaded files (no viewBox, white background, not an SVG), both lights, wide and large sheets, all downloads, the plate in the 3D view |
 | Not checked | a print; a cut sheet; a real board in the box; a printed screwin in the plate; the lit preview against a real box; a touch screen; Firefox |
 
