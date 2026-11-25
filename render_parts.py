@@ -64,6 +64,16 @@ PROJECTS = {
     "papercut_fold_house2": [("papercut_fold_house2_windows_V3.scad", "folded flat", "output")],
     "paper_folding_haunted_house": [("paper_folding_haunted_house.scad", "assembled flat", "output")],
     "paper_folding_lantern": [("paper_folding_lantern.scad", "folded flat", "output")],
+    "paper_light_box": [("paper_light_box_veryos_V1.scad", [
+        ("assembly", "Box with its sheets and the backlight board", {"part": "assembly"}),
+        ("section", "Assembly cut in half", {"part": "section"}),
+        ("box", "Box as it stands, for the backlight board", {"part": "box"}),
+        ("box_back", "The same from behind: vents, logo, the plug's notch", {"part": "box"}),
+        ("print", "Box as it is printed: the top wall on the bed", {"part": "print"}),
+        ("assembly_puck", "Box with its sheets and the puck light, from behind",
+         {"part": "assembly", "light": "puck"}),
+        ("section_puck", "Puck light box cut in half", {"part": "section", "light": "puck"}),
+        ("box_puck", "Box for the puck light, from behind", {"part": "box", "light": "puck"})])],
     "published_christmas_star": [("star.scad", [
         ("star", "One star (grid_count = 1)", {"grid_count": 1})])],
     "pucklight_lamp_v2": [("pucklight_lamp_v2V5.scad", "assembly lampshade toppart screwin slide_test")],
@@ -95,6 +105,7 @@ PROJECTS = {
 PREVIEW = {"assembly", "assembled", "folded", "grid", "open", "sizes", "styles", "print_all"}
 # A project's own tiles in preview: multi-material parts show PLA and TPU in their colours.
 PREVIEW |= {("multimaterial_tpu_pla_ball_joints", name) for name in "types print test socket ball strip".split()}
+PREVIEW |= {("paper_light_box", name) for name in "section assembly_puck section_puck".split()}
 # OpenSCAD looks from the front right, 35 degrees down. Tiles that hide their shape from there
 # get another camera rotation x, y, z.
 CAMERA = {
@@ -107,6 +118,11 @@ CAMERA = {
     ("matchbox", "print_all"): "20,0,0",
     ("matchbox", "sizes"): "40,0,0",
     ("multimaterial_tpu_pla_ball_joints", "types"): "75,0,0",
+    ("paper_light_box", "section"): "65,0,60",
+    ("paper_light_box", "box_back"): "65,0,150",
+    ("paper_light_box", "assembly_puck"): "65,0,150",
+    ("paper_light_box", "section_puck"): "65,0,60",
+    ("paper_light_box", "box_puck"): "65,0,150",
     ("papercut_fold_house2", "flat"): "0,0,0",
     ("paper_folding_haunted_house", "flat"): "0,0,0",
     ("paper_folding_lantern", "flat"): "0,0,0",

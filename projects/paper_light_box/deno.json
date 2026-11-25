@@ -1,0 +1,7 @@
+{
+  "lock": false,
+  "tasks": {
+    "start": "deno run --allow-net=127.0.0.1 --allow-read=.,../../.gitignored/tools --allow-write=webapp/.render --allow-run --allow-env=OPENSCAD webapp/serve.js",
+    "test": "deno test --allow-all --no-check webapp/test/"
+  }
+}
