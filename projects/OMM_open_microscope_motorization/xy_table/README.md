@@ -1,6 +1,6 @@
 # OMM XY table
 
-Motorised XY stage of the open microscope motorization: moves a standard 76 × 25 × 1 mm glass slide in X and Y with two 28BYJ-48 steppers. `omm_xy_table_v3p0p2.scad` rebuilds the Onshape document OMM_v2 (engraved label v2.3) in OpenSCAD, with the same parts and Onshape's variable names; where a value differs from Onshape, the tables below say so. v2.4 is printed, the later versions not yet. The Y slider's second guide rail, since v2.6, is experimental.
+Motorised XY stage of the open microscope motorization: moves a standard 76 × 25 × 1 mm glass slide in X and Y with two 28BYJ-48 steppers. `omm_xy_table_v3p0p3.scad` rebuilds the Onshape document OMM_v2 (engraved label v2.3) in OpenSCAD, with the same parts and Onshape's variable names; where a value differs from Onshape, the tables below say so. v2.4 is printed, the later versions not yet. The Y slider's second guide rail, since v2.6, is experimental.
 
 ![assembly](preview.png)
 
@@ -8,9 +8,9 @@ Motorised XY stage of the open microscope motorization: moves a standard 76 × 2
 
 | File | What |
 |---|---|
-| `omm_xy_table_v3p0p2.scad` | the generator, standalone, no libraries. `part` picks the assembly, the print layout or one part. `version` is engraved in the table; bump it with the file name |
-| `omm_xy_table_v3p0p2_<part>.stl` | every printed part and the cutting ruler, exported from the generator in print orientation with the brand font |
-| `archive/` | v2.4 to v3.0.1, script and STLs. Each change to the generator makes a new version file; the old one stays |
+| `omm_xy_table_v3p0p3.scad` | the generator, standalone, no libraries. `part` picks the assembly, the print layout or one part. `version` is engraved in the table; bump it with the file name |
+| `omm_xy_table_v3p0p3_<part>.stl` | every printed part and the cutting ruler, exported from the generator in print orientation with the brand font |
+| `archive/` | v2.4 to v3.0.2, script and STLs. Each change to the generator makes a new version file; the old one stays |
 | `OMM_v2_rebuild_kit.zip` | Onshape export, source of every dimension: feature trees, sketches, variables, STEP, STL, DXF, renders and the kit's own README |
 | `omm_params.scad` | the Onshape Variable Studio, 1:1 from the kit |
 | `Onshape_online_CAD_version/` | Onshape print files OMM_v2p2.3mf and OMM_v2p3.3mf |
@@ -20,6 +20,22 @@ Motorised XY stage of the open microscope motorization: moves a standard 76 × 2
 | small | the third number: v3.0.1, v3.0.2 |
 | bigger | the second: v3.1.0, v3.2.0 |
 | substantial | the first: v4.0.0 |
+
+## v3.0.3 against v3.0.2
+
+Only the slide holder and the table's label changed; the other parts print as in v3.0.2.
+
+| Asked for | v3.0.2 | v3.0.3 |
+|---|---|---|
+| The slide holder about 0.5 bigger: some slides do not fit in | `tol_slide_holder` = 1, Onshape's value: recess 77 × 26 | 1.5: recess 77.5 × 26.5, 0.25 more on every side. The holder grows with it, as in Onshape's variables: 163.5 × 32.5 outside, 163 × 32 before |
+| – | `wall_inset_slide_holder` = 1.2, Onshape's value: a 76 × 25 slide pushed to one side still lies 0.2 on the other side's ledge. Window 74.6 × 23.6 | 1.7, so that it still does; with 1.2 it would end 0.3 before that ledge. Window 74.1 × 23.1 |
+
+| Checked | Result |
+|---|---|
+| mesh | recess 77.5 × 26.5, window 74.1 × 23.1; grooves 4.8 wide and 86 apart as before; one closed body |
+| seated on the X slider in the model | no overlap; 0.4 clear at the grooves and their mouths, as before; 0.85 per side between the ring's long walls, 1.1 before |
+| OpenSCAD 2021.01 against 2026.09.16 with lazy union and Manifold | all seven parts the same volume within 2 ppm. Manifold gives the table as two closed bodies lying on each other at z 2.4, a step of its chamfer, as it does for v3.0.2 |
+| against v3.0.2 | Y slider, X slider, shaft adapter, washer and cutting ruler: the same volume and size; the table differs by its label |
 
 ## v3.0.2 against v3.0.1
 
@@ -114,6 +130,7 @@ Only the slide holder and the table's label changed; the other parts print as in
 | VeryOS logo | none | table (16 wide) and Y slider (12 wide); no room on the X slider, slide holder, adapter and washer |
 | 0.2–0.6 edge chamfers on the rails | yes | left out up to v3.0.1, in since v3.0.2 |
 | three 0.05 deep grooves on the adapter | yes | left out up to v3.0.0, in since v3.0.1 |
+| slide's recess | 77 × 26 on a 1.2 ledge | the same up to v3.0.2; 77.5 × 26.5 on a 1.7 ledge since v3.0.3, some slides did not fit in |
 
 Volumes against Onshape: Y slider −0.3 %, X slider +0.1 %, slide holder +0.7 %, adapter and washer equal, table +0.2 % with its rail.
 
@@ -169,13 +186,13 @@ Not printed: 2 × 28BYJ-48 with their ULN2003 drivers (in the enclosure, `../enc
 
 ## Check before printing
 
-Onshape's values. Printed in v2.4: the slide holder on the X slider, see `lessons_learned.md`. No results yet for the other fits.
+Onshape's values, except the slide's recess since v3.0.3. Printed: the slide holder on the X slider (v2.4) and slides in the recess of up to v3.0.2, see `lessons_learned.md`. No results yet for the other fits.
 
 | What | Set to | Note |
 |---|---|---|
 | `tol_rail` | 0.2 | slot 2.2 on the 2.0 rail; for the first `rail_mouth_h` = 0.2 the mouth is only 2.02 wide (`workaround_no_space`), as in the Onshape sketch, and it prints on the bed. An Onshape print with one rail slides, but its Y slider wiggles sideways. v2.6: both arms have to go onto their rails at once, untested |
 | `tol_slideh_x_slider` | 0.8 | slide holder's grooves 4.8 on the ring's 4 wall. v2.4 barely went on, because of the grooves' square mouths, not this width; v2.5's rounded mouths are untested |
-| `tol_slide_holder` | 1 | recess 77 × 26 for the 76 × 25 slide, on a 1.2 ledge |
+| `tol_slide_holder`, `wall_inset_slide_holder` | 1.5, 1.7 | recess 77.5 × 26.5 for the 76 × 25 slide, on a 1.7 ledge. Onshape's 1 and 1.2 gave 77 × 26: some slides did not fit in. Keep the ledge 0.2 above the clearance. Untested |
 | `mshaft_tol`, `rib_protrude` | 0.1, 0.4 | adapter's bore 5.2 on the Ø5 shaft, flats 4.0 apart with crush ribs 3.2 apart on its 3.0 flats |
 | `dia_oring_cord`, `oring_groove` | 2, 0.05 | the adapter's three grooves for O-rings with a 2 cord, bottom Ø6.2. 0.05 is a quarter of a layer; untested in a print of this script |
 | `bracket_gap` | 0.45 | between the moving female rail and the uprights |
