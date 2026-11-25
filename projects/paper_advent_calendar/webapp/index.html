@@ -1,0 +1,393 @@
+<!-- Copyright (C) [Jonas Immanuel Frey] - Licensed under GPL -->
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>VeryOS advent calendar</title>
+<link rel="icon" href="data:,">
+<style>
+/* The VeryOS colours of the lichterkette and pucklight apps. */
+:root{
+    --s_col__black: #101517;
+    --s_col__panel: #192222;
+    --s_col__raised: #243030;
+    --s_col__line: #344040;
+    --s_col__text: #f7f2e6;
+    --s_col__muted: #b9bcb0;
+    --s_col__gold: #f0b750;
+    --s_col__warn: #ff9d3c;
+    color-scheme: dark;
+}
+*{ box-sizing: border-box; }
+html, body{ height: 100%; margin: 0; }
+body{
+    background: var(--s_col__black);
+    color: var(--s_col__text);
+    font: 14px/1.4 system-ui, -apple-system, "Segoe UI", Roboto, Ubuntu, sans-serif;
+}
+#el_app{ display: grid; grid-template-columns: 320px minmax(0, 1fr); min-height: 100vh; }
+#el_panel{ background: var(--s_col__panel); border-right: 1px solid var(--s_col__line); padding: 14px; }
+header{ display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+h1{ margin: 0; font-size: 18px; font-weight: 650; color: var(--s_col__gold); }
+#el_logo{ width: 34px; color: var(--s_col__text); }
+h2{ margin: 18px 0 8px; font-size: 11px; font-weight: 650; text-transform: uppercase; letter-spacing: .08em; color: var(--s_col__muted); }
+label.row{ display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 8px; }
+label.row input[type=number], label.row select{
+    width: 100px;
+    padding: 5px 7px;
+    border: 1px solid var(--s_col__line);
+    border-radius: 4px;
+    background: var(--s_col__raised);
+    color: var(--s_col__text);
+    font: inherit;
+}
+input:invalid{ border-color: var(--s_col__warn); }
+input[type=checkbox]{ accent-color: var(--s_col__gold); }
+fieldset{ margin: 0 0 8px; padding: 0; border: 0; }
+fieldset.choice{ display: flex; flex-wrap: wrap; gap: 4px 12px; }
+fieldset.choice legend{ padding: 0; margin-bottom: 4px; }
+fieldset.choice label{ display: flex; align-items: center; gap: 5px; }
+button{
+    padding: 7px 10px;
+    border: 1px solid var(--s_col__line);
+    border-radius: 4px;
+    background: var(--s_col__raised);
+    color: var(--s_col__text);
+    font: inherit;
+    cursor: pointer;
+}
+button.main{ border: 0; background: var(--s_col__gold); color: var(--s_col__black); font-weight: 650; }
+button:disabled{ opacity: .4; cursor: default; }
+#el_action{ display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 18px; }
+#el_action .wide{ grid-column: 1 / -1; }
+.hint, #el_size, #el_status{ margin: 8px 0 0; color: var(--s_col__muted); font-size: 12px; }
+#el_status{ color: var(--s_col__warn); white-space: pre-line; }
+#el_detail{ display: block; width: 100%; margin-bottom: 10px; background: #ffffff; border-radius: 4px; }
+#el_legend{ margin: 0; padding: 0; list-style: none; font-size: 12px; color: var(--s_col__muted); }
+#el_legend li{ display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
+#el_legend svg{ width: 30px; height: 10px; flex: none; background: #ffffff; }
+#el_stage{ padding: 8px 24px 24px; }
+.sheet{ background: #ffffff; }
+.sheet svg{ display: block; }
+@media screen{
+    /* a sheet fits the window's height; lines one pixel wide whatever the scale */
+    .sheet{ width: 100%; max-width: calc((100vh - 60px) * var(--n_ratio__sheet, 1.414)); box-shadow: 0 10px 40px #00000080; }
+    .sheet svg{ width: 100%; height: auto; }
+    .sheet path{ vector-effect: non-scaling-stroke; stroke-width: 1px; }
+    .sheet path.hit{ fill: transparent; stroke: none; cursor: move; pointer-events: all; touch-action: none; }
+    .sheet path.hit.selected{ stroke: var(--s_col__gold); stroke-width: 3px; fill: #f0b75030; }
+}
+@media (max-width: 700px){
+    #el_app{ grid-template-columns: 1fr; align-content: start; }
+    #el_panel{ border-right: 0; border-bottom: 1px solid var(--s_col__line); }
+    #el_stage{ padding: 8px 16px 16px; }
+}
+/* Print: each sheet on a page of its own, in its real size; the page's size is set with
+   the calendar's, see f_update. */
+@media print{
+    body{ background: #ffffff; }
+    #el_panel, #el_stage h2, .hit{ display: none; }
+    #el_app, #el_stage{ display: block; min-height: 0; padding: 0; }
+    .sheet{ display: flex; align-items: center; justify-content: center; overflow: hidden; break-after: page; }
+    .sheet svg{ flex: none; }
+}
+</style>
+<style id="el_style__page"></style>
+</head>
+<body>
+<main id="el_app">
+    <form id="el_panel" aria-label="Settings">
+        <header>
+            <h1>Advent calendar</h1>
+            <svg id="el_logo" viewBox="0 0 43.9095293518 31.2528266758" role="img" aria-label="VeryOS logo"><path fill="currentColor" fill-rule="evenodd" d="M 7.7528133542 9.1080260785 L 4.6193976626 1.5432914191 L 0 3.4567085809 L 11.5135290962 31.2528266758 L 32.3960002556 31.2528266758 L 43.9095293518 3.4567085809 L 39.2901316892 1.5432914191 L 36.1567159975 9.1080260785 A 15.6264133379 15.6264133379 0 0 0 7.7528133542 9.1080260785 Z M 30.9694268093 21.2528266758 A 10.6264133379 10.6264133379 0 0 0 21.9547646759 5 A 4.0632066689 4.0632066689 0 0 0 21.9547646759 13.1264133379 A 9.0632066689 9.0632066689 0 0 1 30.9694268093 21.2528266758 Z M 12.9401025425 10 A 9.0632066689 9.0632066689 0 0 0 21.9547646759 18.1264133379 A 4.0632066689 4.0632066689 0 0 1 21.9547646759 26.2528266758 A 10.6264133379 10.6264133379 0 0 1 12.9401025425 10 Z"/></svg>
+        </header>
+
+        <h2>Calendar</h2>
+        <label class="row" title="Both sheets have this size">Width, mm <input type="number" name="n_mm__calendar_x" min="50" max="1000" step="0.5" required></label>
+        <label class="row">Height, mm <input type="number" name="n_mm__calendar_y" min="50" max="1000" step="0.5" required></label>
+        <label class="row" title="A red rectangle of the calendar's size in both files. Cut it where the calendar is smaller than the sheet; else it shows the cutter's software where the cuts lie on the sheet">Calendar's edge in the files <input type="checkbox" name="b_outline"></label>
+
+        <h2>Windows</h2>
+        <label class="row">Number <input type="number" name="n_window" min="1" max="100" step="1" required></label>
+        <label class="row" title="Windows in a row; the rows follow from the number">Columns <input type="number" name="n_column" min="1" max="20" step="1" required></label>
+        <label class="row" title="From the calendar's edge to the field the windows are spread over">Margin, mm <input type="number" name="n_mm__margin" min="0" step="0.5" required></label>
+        <label class="row">Width, mm <input type="number" name="n_mm__window_x" min="5" max="300" step="0.5" required></label>
+        <label class="row">Height, mm <input type="number" name="n_mm__window_y" min="5" max="300" step="0.5" required></label>
+        <label class="row" title="Of a rectangle's corners and an arch's foot; a corner a hinge ends in stays sharp">Corner radius, mm <input type="number" name="n_mm__corner" min="0" max="50" step="0.5" required></label>
+        <fieldset class="choice" title="The windows get the ticked shapes, each about as often as the others. Round is a circle where width and height are equal">
+            <legend>Shapes</legend>
+            <label><input type="checkbox" name="a_s_shape" value="rect">Rectangle</label>
+            <label><input type="checkbox" name="a_s_shape" value="arch">Arch</label>
+            <label><input type="checkbox" name="a_s_shape" value="round">Round</label>
+        </fieldset>
+        <fieldset class="choice" title="The side a door turns on. Double: two leaves, hinged left and right, cut apart down the middle">
+            <legend>Doors, hinge on the</legend>
+            <label><input type="checkbox" name="a_s_door" value="left">Left</label>
+            <label><input type="checkbox" name="a_s_door" value="right">Right</label>
+            <label><input type="checkbox" name="a_s_door" value="top">Top</label>
+            <label><input type="checkbox" name="a_s_door" value="bottom">Bottom</label>
+            <label><input type="checkbox" name="a_s_door" value="double">Double</label>
+        </fieldset>
+        <button type="button" id="el_shuffle" title="Deals the ticked shapes and doors out anew">Shuffle shapes and doors</button>
+
+        <h2 id="el_own_title">One window</h2>
+        <p class="hint" id="el_own_hint">Click a window on the front sheet to change it alone, drag it to move it.</p>
+        <fieldset id="el_own" hidden>
+            <svg id="el_detail" role="img" aria-label="The window close up"></svg>
+            <!-- step any: a window's place in the grid is no multiple of a step -->
+            <label class="row" title="The window's middle, from the calendar's left edge">Middle x, mm <input type="number" name="own__n_mm__x" step="any"></label>
+            <label class="row" title="The window's middle, from the calendar's top edge">Middle y, mm <input type="number" name="own__n_mm__y" step="any"></label>
+            <label class="row">Width, mm <input type="number" name="own__n_mm__size_x" min="5" max="300" step="0.5"></label>
+            <label class="row">Height, mm <input type="number" name="own__n_mm__size_y" min="5" max="300" step="0.5"></label>
+            <label class="row">Shape <select name="own__s_shape">
+                <option value="rect">Rectangle</option>
+                <option value="arch">Arch</option>
+                <option value="round">Round</option>
+            </select></label>
+            <label class="row">Door, hinge <select name="own__s_door">
+                <option value="left">Left</option>
+                <option value="right">Right</option>
+                <option value="top">Top</option>
+                <option value="bottom">Bottom</option>
+                <option value="double">Double</option>
+            </select></label>
+            <button type="button" id="el_own_reset" title="Drops what this window has of its own: place, size, shape and door as the settings above give them">Back to the grid</button>
+        </fieldset>
+
+        <h2>Cuts</h2>
+        <label class="row" title="Width of the uncut places that hold a door shut; 0: none">Bridge, mm <input type="number" name="n_mm__bridge" min="0" max="5" step="0.05" required></label>
+        <label class="row" title="Along a door's free edge: one bridge per this length of every stretch between two corners, and one at least">A bridge every, mm <input type="number" name="n_mm__bridge_distance" min="2" max="500" step="1" required></label>
+        <label class="row" title="Length of the cut dashes of the fold a door turns on; they are fitted to the fold's length">Fold dash, mm <input type="number" name="n_mm__dash" min="0.2" max="50" step="0.1" required></label>
+        <label class="row" title="Uncut between the dashes of a fold, and at both its ends">Fold gap, mm <input type="number" name="n_mm__gap" min="0.2" max="50" step="0.1" required></label>
+        <label class="row" title="Back sheet: how far a mark runs from a window's corner along both edges, and the length of the dashes along a curve">Mark on the back, mm <input type="number" name="n_mm__mark" min="0.5" max="20" step="0.5" required></label>
+        <label class="row" title="Back sheet, bottom right as seen from the front: dotted and mirrored, to be read from behind">VeryOS logo on the back <input type="checkbox" name="b_logo"></label>
+
+        <h2>Legend</h2>
+        <ul id="el_legend">
+            <li><svg viewBox="0 0 30 10"><path d="M 0 5 H 13 M 15 5 H 30" stroke="#000000" stroke-width="1.5"/></svg>front: cut, the gaps are bridges</li>
+            <li><svg viewBox="0 0 30 10"><path d="M 2 5 H 30" stroke="#0000ff" stroke-width="1.5" stroke-dasharray="6 4"/></svg>front: cut, the dashes of a fold</li>
+            <li><svg viewBox="0 0 30 10"><path d="M 5 9 V 3 H 11 M 19 3 H 25 V 9" fill="none" stroke="#000000" stroke-width="1.5"/></svg>back: cut, marks at the windows</li>
+            <li><svg viewBox="0 0 30 10"><path d="M 2 5 H 30" stroke="#808080" stroke-width="1.5" stroke-dasharray="2 2"/></svg>back: cut, the logo in dots</li>
+            <li><svg viewBox="0 0 30 10"><path d="M 0 5 H 30" stroke="#ff0000" stroke-width="1.5"/></svg>the calendar's edge</li>
+        </ul>
+
+        <div id="el_action">
+            <button type="button" class="main wide" id="el_print" title="Front and back on a page each, in their real size: choose A4, scale 100 % and no margins in the print dialog">Print front and back</button>
+            <button type="button" class="main" id="el_download__front">Front SVG</button>
+            <button type="button" class="main" id="el_download__back">Back SVG</button>
+            <button type="button" class="wide" id="el_reset" title="All settings as at the first start; windows moved or changed alone go back to the grid">Start over</button>
+        </div>
+        <p id="el_size"></p>
+        <p id="el_status" role="status"></p>
+    </form>
+    <section id="el_stage" aria-label="Preview">
+        <h2>Front</h2>
+        <div class="sheet" id="el_sheet__front"></div>
+        <h2>Back, as seen from the front</h2>
+        <div class="sheet" id="el_sheet__back"></div>
+    </section>
+</main>
+<script type="module">
+import { o_setting__default, n_mm__line, f_a_o_window, f_o_door, f_a_s_problem, f_s_d, f_s_svg } from './calendar.module.js';
+
+let s_key__storage = 'paper_advent_calendar';
+let a_s_name__own = ['n_mm__x', 'n_mm__y', 'n_mm__size_x', 'n_mm__size_y', 's_shape', 's_door'];
+let el_panel = document.getElementById('el_panel');
+let el_sheet__front = document.getElementById('el_sheet__front');
+let el_sheet__back = document.getElementById('el_sheet__back');
+
+// The settings as the page last left them; they stay in this browser.
+let o_setting = structuredClone(o_setting__default);
+try{
+    let o_stored = JSON.parse(localStorage.getItem(s_key__storage)) ?? {};
+    for(let s_name of Object.keys(o_setting__default)){
+        if(s_name in o_stored){ o_setting[s_name] = o_stored[s_name]; }
+    }
+} catch(o_error){
+    console.warn(o_error);
+}
+let n_idx__selected = null;
+// the window being dragged: where the pointer took it, in mm
+let o_drag = null;
+let o_s_svg = { front: '', back: '' };
+
+// The form's fields are the settings but for n_seed and a_o_window__own.
+let f_a_el__field = function(s_name){
+    let v = el_panel.elements[s_name];
+    return v instanceof RadioNodeList ? [...v] : v ? [v] : [];
+};
+let f_fill_form = function(){
+    for(let [s_name, v] of Object.entries(o_setting)){
+        for(let el of f_a_el__field(s_name)){
+            if(Array.isArray(v)){ el.checked = v.includes(el.value); }
+            else if(el.type === 'checkbox'){ el.checked = v; }
+            else { el.value = v; }
+        }
+    }
+};
+let f_o_setting__form = function(){
+    let o = {};
+    for(let [s_name, v] of Object.entries(o_setting__default)){
+        let a_el = f_a_el__field(s_name);
+        if(!a_el.length){ continue; }
+        if(Array.isArray(v)){ o[s_name] = a_el.filter(function(el){ return el.checked; }).map(function(el){ return el.value; }); }
+        else if(a_el[0].type === 'checkbox'){ o[s_name] = a_el[0].checked; }
+        else { o[s_name] = a_el[0].valueAsNumber; }
+    }
+    return o;
+};
+
+let f_update = function(){
+    let o_form = f_o_setting__form();
+    el_panel.elements.n_mm__margin.max = Math.floor(Math.min(o_form.n_mm__calendar_x, o_form.n_mm__calendar_y) / 2 - 1);
+    let el_bad = [...el_panel.elements].find(function(el){ return el.name && !el.checkValidity(); });
+    let s_bad = el_bad ? `${el_bad.closest('label').textContent.trim()}: ${el_bad.validationMessage}` : '';
+    if(!s_bad && !o_form.a_s_shape.length){ s_bad = 'Shapes: tick one at least'; }
+    if(!s_bad && !o_form.a_s_door.length){ s_bad = 'Doors: tick one at least'; }
+    for(let s_id of ['el_print', 'el_download__front', 'el_download__back']){
+        document.getElementById(s_id).disabled = Boolean(s_bad);
+    }
+    if(s_bad){
+        document.getElementById('el_status').textContent = s_bad;
+        return;
+    }
+    Object.assign(o_setting, o_form);
+    try{ localStorage.setItem(s_key__storage, JSON.stringify(o_setting)); } catch(o_error){ console.warn(o_error); }
+    if(n_idx__selected !== null && n_idx__selected >= o_setting.n_window){ n_idx__selected = null; }
+
+    let a_o_window = f_a_o_window(o_setting);
+    let a_o_door = a_o_window.map(function(o_window){ return f_o_door(o_window, o_setting); });
+    o_s_svg.front = f_s_svg(o_setting, 'front');
+    o_s_svg.back = f_s_svg(o_setting, 'back');
+    el_sheet__front.innerHTML = o_s_svg.front;
+    el_sheet__back.innerHTML = o_s_svg.back;
+    // on the front sheet every window's opening takes the pointer
+    el_sheet__front.querySelector('svg').insertAdjacentHTML('beforeend', a_o_door.map(function(o_door, n_idx){
+        return `<path class="hit${n_idx === n_idx__selected ? ' selected' : ''}" data-idx="${n_idx}" d="${f_s_d(o_door.a_o_seg__opening)} Z"/>`;
+    }).join(''));
+
+    let b_selected = n_idx__selected !== null;
+    document.getElementById('el_own').hidden = !b_selected;
+    document.getElementById('el_own_hint').hidden = b_selected;
+    document.getElementById('el_own_title').textContent = b_selected ? `Window ${n_idx__selected + 1} of ${o_setting.n_window}` : 'One window';
+    if(b_selected){
+        let o_window = a_o_window[n_idx__selected];
+        let o_door = a_o_door[n_idx__selected];
+        for(let s_name of a_s_name__own){
+            let el = el_panel.elements[`own__${s_name}`];
+            if(el !== document.activeElement){ el.value = o_window[s_name]; }
+        }
+        document.getElementById('el_own_reset').disabled = !o_setting.a_o_window__own[n_idx__selected];
+        // the window close up, in the lines' real width
+        let n_mm__around = 3;
+        let el_detail = document.getElementById('el_detail');
+        el_detail.setAttribute('viewBox', [
+            o_window.n_mm__x - o_window.n_mm__size_x / 2 - n_mm__around, o_window.n_mm__y - o_window.n_mm__size_y / 2 - n_mm__around,
+            o_window.n_mm__size_x + 2 * n_mm__around, o_window.n_mm__size_y + 2 * n_mm__around
+        ].join(' '));
+        el_detail.innerHTML = `<g fill="none" stroke-width="${n_mm__line}">`
+            + `<path stroke="#000000" d="${o_door.a_a_o_seg__cut.map(f_s_d).join(' ')}"/>`
+            + `<path stroke="#0000ff" d="${o_door.a_a_o_seg__fold.map(f_s_d).join(' ')}"/></g>`;
+    }
+
+    // print: A4 the way the calendar lies, the sheet in the page's middle
+    let b_wide = o_setting.n_mm__calendar_x >= o_setting.n_mm__calendar_y;
+    let n_mm__page_x = b_wide ? 297 : 210;
+    let n_mm__page_y = b_wide ? 210 : 297;
+    document.getElementById('el_style__page').textContent = `@page{ size: A4 ${b_wide ? 'landscape' : 'portrait'}; margin: 0; }`
+        + `@media print{ .sheet{ width: ${n_mm__page_x}mm; height: ${n_mm__page_y - 0.5}mm; } }`;
+    document.getElementById('el_stage').style.setProperty('--n_ratio__sheet', o_setting.n_mm__calendar_x / o_setting.n_mm__calendar_y);
+
+    let n_row = Math.ceil(o_setting.n_window / o_setting.n_column);
+    let f_s = function(n){ return String(+n.toFixed(1)); };
+    document.getElementById('el_size').textContent = `${o_setting.n_window} windows in ${n_row} ${n_row === 1 ? 'row' : 'rows'}, `
+        + `${f_s((o_setting.n_mm__calendar_x - 2 * o_setting.n_mm__margin) / o_setting.n_column)} × ${f_s((o_setting.n_mm__calendar_y - 2 * o_setting.n_mm__margin) / n_row)} mm from one to the next. `
+        + `${a_o_door.reduce(function(n, o_door){ return n + o_door.a_a_o_seg__cut.length - o_door.a_a_o_seg__chain.length; }, 0)} bridges.`;
+    let a_s_problem = f_a_s_problem(o_setting);
+    if(o_setting.n_mm__calendar_x > n_mm__page_x || o_setting.n_mm__calendar_y > n_mm__page_y){
+        a_s_problem.push('The calendar is larger than A4: a print shows its middle only');
+    }
+    document.getElementById('el_status').textContent = a_s_problem.slice(0, 4).join('\n')
+        + (a_s_problem.length > 4 ? `\nand ${a_s_problem.length - 4} more` : '');
+};
+
+// What the chosen window has of its own, kept beside the grid's settings.
+let f_set_own = function(o_own){
+    o_setting.a_o_window__own[n_idx__selected] = { ...o_setting.a_o_window__own[n_idx__selected], ...o_own };
+};
+
+el_panel.addEventListener('input', function(o_event){
+    let el = o_event.target;
+    if(el.name.startsWith('own__') && el.checkValidity()){
+        let v = el.tagName === 'SELECT' ? el.value : el.valueAsNumber;
+        if(v === v){ f_set_own({ [el.name.slice(5)]: v }); }
+    }
+    f_update();
+});
+document.getElementById('el_shuffle').addEventListener('click', function(){
+    o_setting.n_seed++;
+    f_update();
+});
+document.getElementById('el_own_reset').addEventListener('click', function(){
+    delete o_setting.a_o_window__own[n_idx__selected];
+    f_update();
+});
+document.getElementById('el_reset').addEventListener('click', function(){
+    if(!confirm('Start over with the settings of the first start? Windows moved or changed alone go back to the grid.')){ return; }
+    o_setting = structuredClone(o_setting__default);
+    n_idx__selected = null;
+    f_fill_form();
+    f_update();
+});
+
+// A click on a window chooses it, a drag moves it in steps of 0.5 mm.
+let f_a_n__mm = function(o_event){
+    let o_rect = el_sheet__front.querySelector('svg').getBoundingClientRect();
+    let n_mm__per_px = o_setting.n_mm__calendar_x / o_rect.width;
+    return [(o_event.clientX - o_rect.left) * n_mm__per_px, (o_event.clientY - o_rect.top) * n_mm__per_px];
+};
+el_sheet__front.addEventListener('pointerdown', function(o_event){
+    let el_hit = o_event.target.closest('.hit');
+    n_idx__selected = el_hit ? Number(el_hit.dataset.idx) : null;
+    if(el_hit){
+        let o_window = f_a_o_window(o_setting)[n_idx__selected];
+        o_drag = { a_n__pointer: f_a_n__mm(o_event), a_n__window: [o_window.n_mm__x, o_window.n_mm__y] };
+        o_event.preventDefault();
+    }
+    f_update();
+});
+window.addEventListener('pointermove', function(o_event){
+    if(!o_drag){ return; }
+    let a_n = f_a_n__mm(o_event);
+    let [n_mm__x, n_mm__y] = [0, 1].map(function(n_idx){
+        return Math.round((o_drag.a_n__window[n_idx] + a_n[n_idx] - o_drag.a_n__pointer[n_idx]) * 2) / 2;
+    });
+    let o_window = f_a_o_window(o_setting)[n_idx__selected];
+    if(n_mm__x === o_window.n_mm__x && n_mm__y === o_window.n_mm__y){ return; }
+    // a window is not moved by a click: the pointer has to move it half a millimetre first
+    if(!o_drag.b_moved && Math.hypot(a_n[0] - o_drag.a_n__pointer[0], a_n[1] - o_drag.a_n__pointer[1]) < 0.5){ return; }
+    o_drag.b_moved = true;
+    f_set_own({ n_mm__x, n_mm__y });
+    f_update();
+});
+for(let s_event of ['pointerup', 'pointercancel']){
+    window.addEventListener(s_event, function(){ o_drag = null; });
+}
+
+document.getElementById('el_print').addEventListener('click', function(){ window.print(); });
+for(let s_sheet of ['front', 'back']){
+    document.getElementById(`el_download__${s_sheet}`).addEventListener('click', function(){
+        let el_a = document.createElement('a');
+        el_a.href = URL.createObjectURL(new Blob([o_s_svg[s_sheet]], { type: 'image/svg+xml' }));
+        el_a.download = `advent_calendar_${s_sheet}_veryos.svg`;
+        el_a.click();
+        setTimeout(function(){ URL.revokeObjectURL(el_a.href); }, 1000);
+    });
+}
+
+f_fill_form();
+f_update();
+</script>
+</body>
+</html>
