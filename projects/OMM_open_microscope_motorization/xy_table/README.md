@@ -1,6 +1,6 @@
 # OMM XY table
 
-Motorised XY stage of the open microscope motorization: moves a standard 76 × 25 × 1 mm glass slide in X and Y with two 28BYJ-48 steppers. `omm_xy_table_v3p0p4.scad` rebuilds the Onshape document OMM_v2 (engraved label v2.3) in OpenSCAD, with the same parts and Onshape's variable names; where a value differs from Onshape, the tables below say so. v2.4 is printed, the later versions not yet. The Y slider's second guide rail, since v2.6, is experimental.
+Motorised XY stage of the open microscope motorization: moves a standard 76 × 25 × 1 mm glass slide in X and Y with two 28BYJ-48 steppers. `omm_xy_table_v3p1p0.scad` rebuilds the Onshape document OMM_v2 (engraved label v2.3) in OpenSCAD, with the same parts and Onshape's variable names; where a value differs from Onshape, the tables below say so. v2.4 is printed, the later versions not yet. The Y slider's second guide rail, since v2.6, is experimental; since v3.1.0 a bar joins the two arms' tips.
 
 ![assembly](preview.png)
 
@@ -8,11 +8,11 @@ Motorised XY stage of the open microscope motorization: moves a standard 76 × 2
 
 | File | What |
 |---|---|
-| `omm_xy_table_v3p0p4.scad` | the generator, standalone, no libraries. `part` picks the assembly, the print layout or one part. `version` is engraved in the table; bump it with the file name |
-| `omm_xy_table_v3p0p4_<part>.stl` | every printed part and the cutting ruler, exported from the generator in print orientation with the brand font |
-| `omm_xy_table_v3p0p4.json` | four Customizer presets, one per slide format: Standard 76 x 25 (the defaults), Petrographic 46 x 27, Wide 75 x 38, Large 75 x 50. Not printed; `print_layout` fits the 256 bed for the first two only. A new version file takes this file along under its name |
-| `publish/` | publishing material for v3.0.4: six images (how it works, slide formats, `tol_rail`, print), `listing.md`, the STLs, `source/build.py`. Not ready to upload: no photo and no 3mf of a v3.0.4 print |
-| `archive/` | v2.4 to v3.0.3, script and STLs. Each change to the generator makes a new version file; the old one stays |
+| `omm_xy_table_v3p1p0.scad` | the generator, standalone, no libraries. `part` picks the assembly, the print layout or one part. `version` is engraved in the table; bump it with the file name |
+| `omm_xy_table_v3p1p0_<part>.stl` | every printed part and the cutting ruler, exported from the generator in print orientation with the brand font |
+| `omm_xy_table_v3p1p0.json` | four Customizer presets, one per slide format: Standard 76 x 25 (the defaults), Petrographic 46 x 27, Wide 75 x 38, Large 75 x 50. Not printed; `print_layout` fits the 256 bed for the first two only. A new version file takes this file along under its name |
+| `publish/` | publishing material for v3.1.0: six images (how it works, slide formats, `tol_rail`, print), `listing.md`, the STLs, `source/build.py`. Not ready to upload: no photo and no 3mf of a v3.1.0 print |
+| `archive/` | v2.4 to v3.0.4, script and STLs. Each change to the generator makes a new version file; the old one stays |
 | `OMM_v2_rebuild_kit.zip` | Onshape export, source of every dimension: feature trees, sketches, variables, STEP, STL, DXF, renders and the kit's own README |
 | `omm_params.scad` | the Onshape Variable Studio, 1:1 from the kit |
 | `Onshape_online_CAD_version/` | Onshape print files OMM_v2p2.3mf and OMM_v2p3.3mf |
@@ -22,6 +22,26 @@ Motorised XY stage of the open microscope motorization: moves a standard 76 × 2
 | small | the third number: v3.0.1, v3.0.2 |
 | bigger | the second: v3.1.0, v3.2.0 |
 | substantial | the first: v4.0.0 |
+
+## v3.1.0 against v3.0.4
+
+Only the Y slider and the table's label changed; the other parts print as in v3.0.4.
+
+| Asked for | v3.0.4 | v3.1.0 |
+|---|---|---|
+| Connect the Y slider's two parallel arms at their tips: unconnected they are not stable (`improvements/y_slider_connection/`) | two arms, each a 70 long cantilever with a rounded tip | a bar across both tips, of the arms' section: 7.5 wide, 4 high, from the second arm's outer side to the first arm's outer side (x −18.75 to 3.75), rounded at both ends. The arms' slots run through it and stay open at its end: within the travel the table's rails come out there |
+| – | 15 notches along the first arm's inner side | 14: the last one would cut into the bar. The second arm's outer side keeps its 15 |
+| – | – | the bar ends at the first arm's outer side, not past it as in the sketch: the table's bracket stands 0.45 beside that side. It is as high as the arms: the Y motor's roller runs on the first arm's top |
+
+The bar makes the arms and the frame one closed frame, so the arms cannot bend apart on their own. It does not change the play in the slots: ±0.17° yaw at Y 0 from `tol_rail` 0.2, as since v2.7. At Y 0 the bar hangs 4.7 over the table's front edge, as the arms' tips did; from Y +4.7 it lies wholly on the table.
+
+| Checked | Result |
+|---|---|
+| mesh | one closed body, 14687.7 mm³: 253 more than v3.0.4: 62.3 mm² between the arms, their inner tip roundings included, × 4 high, and the notch the bar replaces. Slots open through the bar's end face |
+| seated, mesh stage of `publish/source/build.py` | the four presets and `tol_rail` 0.1 and 0.4, the carriages at Y −13, 0, +25, +28 with X 0, at X +35 with Y 0, and at X ±45 with Y −13 and +28: no two parts share a volume. Travel unchanged, Y −13 to +28 |
+| OpenSCAD 2021.01 against 2026.09.16 with lazy union and Manifold | all seven parts the same volume within 5 ppm; the table as two bodies in Manifold and 10 doubled edges at the Y slider's X bracket, both as in v3.0.4 |
+| against v3.0.4 | X slider, slide holder, shaft adapter, washer and cutting ruler: identical facets; the table differs by its label |
+| print layout | unchanged: the bar lies inside the Y slider's outline |
 
 ## v3.0.4 against v3.0.3
 
@@ -160,7 +180,7 @@ All parts share one optical axis. Each carriage slides on the part below on a pr
 | Part | Moves | Rides on |
 |---|---|---|
 | table | – | the bench; carries the Y motor's bracket |
-| Y slider | Y | the table's two rails, with its two arms: 7.5 × 4 female rails, 70 long, 15 apart, the motor drives the first; carries a male rail along X and the X motor's bracket |
+| Y slider | Y | the table's two rails, with its two arms: 7.5 × 4 female rails, 70 long, 15 apart, joined at their tips by a bar of the same section, the motor drives the first; carries a male rail along X and the X motor's bracket |
 | X slider | X | the Y slider's rail, with its 100 long female rail |
 | slide holder | with the X slider | the ring's two short walls, in its 4.8 wide grooves; lifts off to change the slide |
 

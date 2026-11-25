@@ -1,5 +1,5 @@
 # Copyright (C) Jonas Immanuel Frey - Licensed under GPL
-"""Rebuild the OMM XY table v3.0.4 publishing images and STL files with OpenSCAD, Blender and Pillow.
+"""Rebuild the OMM XY table v3.1.0 publishing images and STL files with OpenSCAD, Blender and Pillow.
 
 Stages: --stage=mesh, --stage=render, --stage=compose; all three without one.
 --draft renders at half size with fewer samples, for checking only.
@@ -12,7 +12,7 @@ HERE = Path(__file__).resolve().parent
 OUT = HERE.parent
 PROJECT = OUT.parent
 ROOT = PROJECT.parents[2]
-NAME = 'omm_xy_table_v3p0p4'
+NAME = 'omm_xy_table_v3p1p0'
 CACHE = ROOT/'.gitignored/omm_xy_table_publish'
 MODEL = PROJECT/(NAME+'.scad')
 PRESETS = PROJECT/(NAME+'.json')

@@ -59,7 +59,7 @@ PROJECTS = {
     "multimaterial_tpu_pla_ball_joints": [("tpu_pla_ball_joint_veryos_V1.scad",
         "types print test socket ball strip assembly")],
     "OMM_open_microscope_motorization/enclosure": [("omm_enclosureV7.scad", "assembly base lid")],
-    "OMM_open_microscope_motorization/xy_table": [("omm_xy_table_v3p0p4.scad",
+    "OMM_open_microscope_motorization/xy_table": [("omm_xy_table_v3p1p0.scad",
         "assembly table y_slider x_slider slide_holder motor_shaft_adapter washer cutting_ruler")],
     "papercut_fold_house2": [("papercut_fold_house2_windows_V3.scad", "folded flat", "output")],
     "paper_folding_haunted_house": [("paper_folding_haunted_house.scad", "assembled flat", "output")],

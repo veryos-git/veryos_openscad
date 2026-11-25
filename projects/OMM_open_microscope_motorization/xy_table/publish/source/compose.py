@@ -280,7 +280,7 @@ for (k, name), (left, top, right, at) in zip(FORMATS, row(['format_'+k for k, _ 
     badge(left, 1390, 'DEFAULT' if k == 'standard' else 'DIGITAL ONLY', k == 'standard')
 footer(['Each preset also sets scl_x_x_slider, table_motor_y and the label\'s place, so the travel stays the same.',
         'For another format: scl_x_x_slider = slide length + 10; move table_motor_y and the label by half the change in width.'],
-       'SAME SCALE  /  CAD RENDERS  /  ILLUSTRATIVE COLORS  /  v3.0.4 IS NOT PRINTED YET, NO PRESET IS  /  SLIDES AND MOTORS NOT INCLUDED  /  MM')
+       'SAME SCALE  /  CAD RENDERS  /  ILLUSTRATIVE COLORS  /  v3.1.0 IS NOT PRINTED YET, NO PRESET IS  /  SLIDES AND MOTORS NOT INCLUDED  /  MM')
 save('images/04_slide_formats.png')
 
 new('05 / TOL_RAIL')
@@ -299,7 +299,7 @@ for k, (left, top, right, at) in zip(RAILS, row(['rail_'+k for k in RAILS], (100
     badge(left, 1380, 'DEFAULT' if k == 'standard' else 'DIGITAL ONLY', k == 'standard')
 footer([f'Slot = rail + tol_rail. Yaw play of the Y slider = tol_rail / guided length, here {guided:.0f} mm.',
         f'The rail is {S["scl_x_rail"]:g} × {S["scl_y_rail"]:g} with 45° flanks and a top one line wide: {v("extr_width")}. Tight binds, loose wiggles.'],
-       'SAME SCALE  /  CAD RENDERS, CUT  /  ILLUSTRATIVE COLORS  /  PLAY FROM THE GEOMETRY, NOT MEASURED  /  v3.0.4 IS NOT PRINTED YET  /  MM')
+       'SAME SCALE  /  CAD RENDERS, CUT  /  ILLUSTRATIVE COLORS  /  PLAY FROM THE GEOMETRY, NOT MEASURED  /  v3.1.0 IS NOT PRINTED YET  /  MM')
 save('images/05_tol_rail.png')
 
 new('06 / PRINT')
@@ -326,7 +326,7 @@ for j, s in enumerate(['2 × 28BYJ-48 with ULN2003 driver', '4 × M3 screw and n
     text(1590, y+44+j*36, s, 25, MUTE, maxwidth=710)
 footer(['Seven STL files. Print the shaft adapter twice and the washer four times.',
         'The cutting ruler\'s bars are 0.5 mm smaller than the strips all around: the pencil\'s line makes up for it.'],
-       'CAD RENDER OF THE PRINT LAYOUT, SEEN FROM BEHIND  /  ILLUSTRATIVE COLORS  /  v3.0.4 IS NOT PRINTED YET  /  MM')
+       'CAD RENDER OF THE PRINT LAYOUT, SEEN FROM BEHIND  /  ILLUSTRATIVE COLORS  /  v3.1.0 IS NOT PRINTED YET  /  MM')
 save('images/06_print.png')
 
 # A review sheet of everything to upload, in upload order.

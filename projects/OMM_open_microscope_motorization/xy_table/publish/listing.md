@@ -1,13 +1,13 @@
-# OMM XY table v3.0.4: listing for MakerWorld and Printables
+# OMM XY table v3.1.0: listing for MakerWorld and Printables
 
 Copy the parts below into the upload forms. Images are 2400 × 1800 (4:3).
 
-**Not ready to upload.** Missing, both from a print of v3.0.4:
+**Not ready to upload.** Missing, both from a print of v3.1.0:
 
 | missing | needs |
 | --- | --- |
-| `thumbnail_4x3.png`, `thumbnail_3x4.png`, photos | a photo of the printed and assembled v3.0.4 |
-| `.3mf` | the slicer project of that print: `../xy_table_v3p0p4_veryos.3mf` (Elegoo Centauri Carbon 2) once its print is the photographed one; a Bambu `.3mf` for MakerWorld |
+| `thumbnail_4x3.png`, `thumbnail_3x4.png`, photos | a photo of the printed and assembled v3.1.0 |
+| `.3mf` | the slicer project of that print; `../xy_table_v3p0p4_veryos.3mf` (Elegoo Centauri Carbon 2) holds v3.0.4, whose Y slider has no bar between the arms; a Bambu `.3mf` for MakerWorld |
 
 ## title
 
@@ -33,8 +33,8 @@ that stays on the optical axis.
   slider, the X slider and the slide holder with the glass slide.
 - Every layer slides on a printed rail of the layer below: a 2 × 2 mm rail
   with 45° flanks in a slot 0.2 mm wider. The Y slider runs with two arms on
-  two rails of the table, 15 mm apart; the X slider on one rail of the Y
-  slider. The rails' ends are chamfered, so a slot finds its rail again.
+  two rails of the table, 15 mm apart, joined at their tips by a bar; the X
+  slider on one rail of the Y slider. The rails' ends are chamfered, so a slot finds its rail again.
 - Y carries X: the Y motor stands on the table and moves the Y slider with
   everything on it, the X motor included. The X motor rides on the Y slider
   and moves the X slider with the slide holder.
@@ -67,7 +67,7 @@ that stays on the optical axis.
 | `mshaft_tol`, `rib_protrude` | 0.1, 0.4 mm | the shaft adapter's bore on the Ø5 shaft with its flats |
 | `dia_oring_cord`, `oring_groove` | 2, 0.05 mm | the adapter's grooves for the O-rings |
 | `upright_slot` | 3.4 mm | the uprights' slots for the M3 screws |
-| `version` | v3.0.4 | engraved in the table |
+| `version` | v3.1.0 | engraved in the table |
 
 Every other dimension is a parameter too, under the name it has in the
 Onshape original.
@@ -90,19 +90,20 @@ In the model no two parts share a volume at the corners of that travel.
 
 **Files**
 
-- `omm_xy_table_v3p0p4_table.stl`, `_y_slider.stl`, `_x_slider.stl`,
+- `omm_xy_table_v3p1p0_table.stl`, `_y_slider.stl`, `_x_slider.stl`,
   `_slide_holder.stl`, `_motor_shaft_adapter.stl` (print two), `_washer.stl`
   (print four), `_cutting_ruler.stl` (two bars in one file): every part of
   the Standard preset in print orientation.
-- `omm_xy_table_v3p0p4.scad` and `omm_xy_table_v3p0p4.json`: the OpenSCAD
+- `omm_xy_table_v3p1p0.scad` and `omm_xy_table_v3p1p0.json`: the OpenSCAD
   source and its four presets.
 
 **Printing**
 
 Made for 0.2 mm layers, without support. `part = "print_layout"` puts all
 parts of the Standard preset on a 256 × 256 mm bed. `xy_table_v3p0p4_veryos.3mf`
-holds that plate for the Elegoo Centauri Carbon 2: PLA, 0.4 mm nozzle, 0.2 mm
-layers, 2 walls, 15 % infill, support off.
+holds v3.0.4's plate for the Elegoo Centauri Carbon 2: PLA, 0.4 mm nozzle,
+0.2 mm layers, 2 walls, 15 % infill, support off; its Y slider has no bar
+between the arms.
 
 - Table: plate down, rails and bracket up.
 - Y slider: plate down; the arms' slots are open to the bed.
@@ -149,7 +150,7 @@ Which parameter belongs to which problem. None of these changes is printed.
 
 **Make your own format**
 
-Open `omm_xy_table_v3p0p4.scad` in OpenSCAD and pick a preset in the
+Open `omm_xy_table_v3p1p0.scad` in OpenSCAD and pick a preset in the
 Customizer. For another slide set `scl_x_slide` and `scl_y_slide`, then
 `scl_x_x_slider` to the slide's length + 10, and move `table_motor_y`,
 `table_text_at` and `table_logo_at` by half the change in the slide's width.
@@ -159,19 +160,19 @@ Customizer. For another slide set `scl_x_slide` and `scl_y_slide`, then
 carriages. The script needs no libraries.
 
 ```sh
-openscad -p omm_xy_table_v3p0p4.json -P "Large 75 x 50" -D 'part="table"' -o table.stl omm_xy_table_v3p0p4.scad
+openscad -p omm_xy_table_v3p1p0.json -P "Large 75 x 50" -D 'part="table"' -o table.stl omm_xy_table_v3p1p0.scad
 ```
 
 **Status**
 
-v3.0.4 is not printed yet. The images are CAD renders.
+v3.1.0 is not printed yet. The images are CAD renders.
 
 | what | status |
 | --- | --- |
 | the Onshape original with one Y rail | printed and motorised; it slides, its Y slider wiggles sideways |
 | v2.4 of this script | printed; its slide holder barely went onto the X slider, changed in v2.5 |
 | recess of 77 × 26, up to v3.0.2 | some slides did not fit in; 77.5 × 26.5 since v3.0.3 |
-| two Y rails, the rails' chamfered ends, the O-ring grooves, the wider recess, the cutting ruler's bars | no print result yet |
+| two Y rails, the bar joining the Y slider's arms, the rails' chamfered ends, the O-ring grooves, the wider recess, the cutting ruler's bars | no print result yet |
 | presets Petrographic, Wide and Large | digital only |
 | travel, step size, yaw play | from the geometry, not measured |
 
@@ -188,8 +189,8 @@ parametric, customizable, OpenSCAD, FDM, VeryOS
 
 - MakerWorld: a Bambu `.3mf` as the print profile (missing). Model files: the
   seven STL files, the `.scad` and the `.json`.
-- Printables: the seven STL files, `xy_table_v3p0p4_veryos.3mf` once printed,
-  the `.scad` and the `.json`.
+- Printables: the seven STL files, the `.3mf` of a printed v3.1.0, the
+  `.scad` and the `.json`.
 
 The STL files are in this folder; the `.3mf`, the `.scad` and the `.json` are
 in the project folder, one level up.
