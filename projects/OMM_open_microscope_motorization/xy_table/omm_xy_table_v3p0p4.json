@@ -1,0 +1,37 @@
+{
+    "parameterSets": {
+        "Standard 76 x 25": {
+            "scl_x_slide": "76",
+            "scl_y_slide": "25",
+            "scl_x_x_slider": "86",
+            "table_motor_y": "-62.2",
+            "table_text_at": "[-35.2, -76.15]",
+            "table_logo_at": "[37.5, -58]"
+        },
+        "Petrographic 46 x 27": {
+            "scl_x_slide": "46",
+            "scl_y_slide": "27",
+            "scl_x_x_slider": "56",
+            "table_motor_y": "-63.2",
+            "table_text_at": "[-35.2, -77.15]",
+            "table_logo_at": "[37.5, -59]"
+        },
+        "Wide 75 x 38": {
+            "scl_x_slide": "75",
+            "scl_y_slide": "38",
+            "scl_x_x_slider": "85",
+            "table_motor_y": "-68.7",
+            "table_text_at": "[-35.2, -82.65]",
+            "table_logo_at": "[37.5, -64.5]"
+        },
+        "Large 75 x 50": {
+            "scl_x_slide": "75",
+            "scl_y_slide": "50",
+            "scl_x_x_slider": "85",
+            "table_motor_y": "-74.7",
+            "table_text_at": "[-35.2, -88.65]",
+            "table_logo_at": "[37.5, -70.5]"
+        }
+    },
+    "fileFormatVersion": "1"
+}

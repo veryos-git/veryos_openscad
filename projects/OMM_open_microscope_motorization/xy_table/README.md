@@ -10,6 +10,8 @@ Motorised XY stage of the open microscope motorization: moves a standard 76 × 2
 |---|---|
 | `omm_xy_table_v3p0p4.scad` | the generator, standalone, no libraries. `part` picks the assembly, the print layout or one part. `version` is engraved in the table; bump it with the file name |
 | `omm_xy_table_v3p0p4_<part>.stl` | every printed part and the cutting ruler, exported from the generator in print orientation with the brand font |
+| `omm_xy_table_v3p0p4.json` | four Customizer presets, one per slide format: Standard 76 x 25 (the defaults), Petrographic 46 x 27, Wide 75 x 38, Large 75 x 50. Not printed; `print_layout` fits the 256 bed for the first two only. A new version file takes this file along under its name |
+| `publish/` | publishing material for v3.0.4: six images (how it works, slide formats, `tol_rail`, print), `listing.md`, the STLs, `source/build.py`. Not ready to upload: no photo and no 3mf of a v3.0.4 print |
 | `archive/` | v2.4 to v3.0.3, script and STLs. Each change to the generator makes a new version file; the old one stays |
 | `OMM_v2_rebuild_kit.zip` | Onshape export, source of every dimension: feature trees, sketches, variables, STEP, STL, DXF, renders and the kit's own README |
 | `omm_params.scad` | the Onshape Variable Studio, 1:1 from the kit |

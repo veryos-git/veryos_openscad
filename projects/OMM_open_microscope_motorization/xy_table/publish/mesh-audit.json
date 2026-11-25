@@ -1,0 +1,79 @@
+[
+  {
+    "file": "omm_xy_table_v3p0p4_table.stl",
+    "triangles": 45734,
+    "closed": true,
+    "volume_mm3": 32912.1,
+    "size_mm": [
+      100.0,
+      135.0,
+      32.6
+    ]
+  },
+  {
+    "file": "omm_xy_table_v3p0p4_y_slider.stl",
+    "triangles": 9596,
+    "closed": true,
+    "volume_mm3": 14434.8,
+    "size_mm": [
+      100.0,
+      135.5,
+      29.7
+    ]
+  },
+  {
+    "file": "omm_xy_table_v3p0p4_x_slider.stl",
+    "triangles": 3200,
+    "closed": true,
+    "volume_mm3": 5483.5,
+    "size_mm": [
+      100.0,
+      49.7,
+      4.0
+    ]
+  },
+  {
+    "file": "omm_xy_table_v3p0p4_slide_holder.stl",
+    "triangles": 5104,
+    "closed": true,
+    "volume_mm3": 8368.9,
+    "size_mm": [
+      163.5,
+      32.5,
+      4.0
+    ]
+  },
+  {
+    "file": "omm_xy_table_v3p0p4_motor_shaft_adapter.stl",
+    "triangles": 9770,
+    "closed": true,
+    "volume_mm3": 110.1,
+    "size_mm": [
+      6.7,
+      6.7,
+      6.77
+    ]
+  },
+  {
+    "file": "omm_xy_table_v3p0p4_washer.stl",
+    "triangles": 528,
+    "closed": true,
+    "volume_mm3": 23.1,
+    "size_mm": [
+      7.0,
+      7.0,
+      0.8
+    ]
+  },
+  {
+    "file": "omm_xy_table_v3p0p4_cutting_ruler.stl",
+    "triangles": 2564,
+    "closed": true,
+    "volume_mm3": 3183.2,
+    "size_mm": [
+      99.0,
+      19.0,
+      3.0
+    ]
+  }
+]

@@ -1,0 +1,1000 @@
+[
+  {
+    "id": "stack",
+    "meshes": {
+      "table": "standard_apart_table",
+      "y_slider": "standard_apart_y_slider",
+      "x_slider": "standard_apart_x_slider",
+      "slide_holder": "standard_apart_slide_holder",
+      "slide": "standard_apart_slide",
+      "motor_y": "standard_apart_motor_y",
+      "adapter_y": "standard_apart_adapter_y",
+      "orings_y": "standard_apart_orings_y",
+      "paper_y": "standard_apart_paper_y",
+      "motor_x": "standard_apart_motor_x",
+      "adapter_x": "standard_apart_adapter_x",
+      "orings_x": "standard_apart_orings_x",
+      "paper_x": "standard_apart_paper_x"
+    },
+    "camera_rotation": [
+      0.8326879739761353,
+      0.5277877449989319,
+      -0.08969525992870331,
+      -0.14151175320148468
+    ],
+    "orthographic_width_mm": 226.02,
+    "px_per_mm": 7.9639,
+    "resolution": [
+      1800,
+      1500
+    ],
+    "marks": {
+      "axis": [
+        900.0,
+        138.32
+      ],
+      "axis_top": [
+        900.0,
+        30.29
+      ],
+      "axis_bottom": [
+        900.0,
+        1293.55
+      ],
+      "slide": [
+        900.0,
+        138.32
+      ],
+      "table": [
+        1189.41,
+        915.96
+      ],
+      "y_slider": [
+        1179.42,
+        627.2
+      ],
+      "arm": [
+        1128.49,
+        1068.02
+      ],
+      "x_slider": [
+        1238.26,
+        411.89
+      ],
+      "holder": [
+        1514.5,
+        168.97
+      ],
+      "glass": [
+        1140.54,
+        102.39
+      ],
+      "motor_y": [
+        1197.44,
+        1030.89
+      ],
+      "motor_x": [
+        814.1,
+        527.65
+      ],
+      "drive": [
+        1084.69,
+        1206.18
+      ]
+    }
+  },
+  {
+    "id": "move_home",
+    "meshes": {
+      "table": "standard_home_table",
+      "y_slider": "standard_home_y_slider",
+      "x_slider": "standard_home_x_slider",
+      "slide_holder": "standard_home_slide_holder",
+      "slide": "standard_home_slide",
+      "motor_y": "standard_home_motor_y",
+      "adapter_y": "standard_home_adapter_y",
+      "orings_y": "standard_home_orings_y",
+      "paper_y": "standard_home_paper_y",
+      "motor_x": "standard_home_motor_x",
+      "adapter_x": "standard_home_adapter_x",
+      "orings_x": "standard_home_orings_x",
+      "paper_x": "standard_home_paper_x"
+    },
+    "camera_rotation": [
+      1.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "orthographic_width_mm": 216.17,
+    "px_per_mm": 8.3267,
+    "resolution": [
+      1800,
+      1500
+    ],
+    "marks": {
+      "axis": [
+        900.0,
+        570.15
+      ],
+      "axis_top": [
+        900.0,
+        570.15
+      ],
+      "axis_bottom": [
+        900.0,
+        570.15
+      ],
+      "slide": [
+        900.0,
+        570.15
+      ],
+      "table": [
+        1316.33,
+        296.61
+      ],
+      "y_slider": [
+        1316.33,
+        264.97
+      ],
+      "arm": [
+        900.0,
+        1293.32
+      ],
+      "x_slider": [
+        1274.7,
+        570.15
+      ],
+      "holder": [
+        1580.71,
+        570.15
+      ],
+      "glass": [
+        1166.45,
+        570.15
+      ],
+      "motor_y": [
+        1048.21,
+        1088.06
+      ],
+      "motor_x": [
+        900.0,
+        298.28
+      ],
+      "drive": [
+        923.31,
+        1088.06
+      ]
+    }
+  },
+  {
+    "id": "move_y",
+    "meshes": {
+      "table": "standard_y_table",
+      "y_slider": "standard_y_y_slider",
+      "x_slider": "standard_y_x_slider",
+      "slide_holder": "standard_y_slide_holder",
+      "slide": "standard_y_slide",
+      "motor_y": "standard_y_motor_y",
+      "adapter_y": "standard_y_adapter_y",
+      "orings_y": "standard_y_orings_y",
+      "paper_y": "standard_y_paper_y",
+      "motor_x": "standard_y_motor_x",
+      "adapter_x": "standard_y_adapter_x",
+      "orings_x": "standard_y_orings_x",
+      "paper_x": "standard_y_paper_x"
+    },
+    "camera_rotation": [
+      1.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "orthographic_width_mm": 216.17,
+    "px_per_mm": 8.3267,
+    "resolution": [
+      1800,
+      1500
+    ],
+    "marks": {
+      "axis": [
+        900.0,
+        693.79
+      ],
+      "axis_top": [
+        900.0,
+        693.79
+      ],
+      "axis_bottom": [
+        900.0,
+        693.79
+      ],
+      "slide": [
+        900.0,
+        485.63
+      ],
+      "table": [
+        1316.33,
+        420.26
+      ],
+      "y_slider": [
+        1316.33,
+        180.46
+      ],
+      "arm": [
+        900.0,
+        1208.8
+      ],
+      "x_slider": [
+        1274.7,
+        485.63
+      ],
+      "holder": [
+        1580.71,
+        485.63
+      ],
+      "glass": [
+        1166.45,
+        485.63
+      ],
+      "motor_y": [
+        1048.21,
+        1211.71
+      ],
+      "motor_x": [
+        900.0,
+        213.76
+      ],
+      "drive": [
+        923.31,
+        1211.71
+      ]
+    }
+  },
+  {
+    "id": "move_x",
+    "meshes": {
+      "table": "standard_x_table",
+      "y_slider": "standard_x_y_slider",
+      "x_slider": "standard_x_x_slider",
+      "slide_holder": "standard_x_slide_holder",
+      "slide": "standard_x_slide",
+      "motor_y": "standard_x_motor_y",
+      "adapter_y": "standard_x_adapter_y",
+      "orings_y": "standard_x_orings_y",
+      "paper_y": "standard_x_paper_y",
+      "motor_x": "standard_x_motor_x",
+      "adapter_x": "standard_x_adapter_x",
+      "orings_x": "standard_x_orings_x",
+      "paper_x": "standard_x_paper_x"
+    },
+    "camera_rotation": [
+      1.0,
+      0.0,
+      0.0,
+      0.0
+    ],
+    "orthographic_width_mm": 216.17,
+    "px_per_mm": 8.3267,
+    "resolution": [
+      1800,
+      1500
+    ],
+    "marks": {
+      "axis": [
+        622.1,
+        570.15
+      ],
+      "axis_top": [
+        622.1,
+        570.15
+      ],
+      "axis_bottom": [
+        622.1,
+        570.15
+      ],
+      "slide": [
+        913.53,
+        570.15
+      ],
+      "table": [
+        1038.43,
+        296.61
+      ],
+      "y_slider": [
+        1038.43,
+        264.97
+      ],
+      "arm": [
+        622.1,
+        1293.32
+      ],
+      "x_slider": [
+        1288.23,
+        570.15
+      ],
+      "holder": [
+        1594.24,
+        570.15
+      ],
+      "glass": [
+        1179.98,
+        570.15
+      ],
+      "motor_y": [
+        770.31,
+        1088.06
+      ],
+      "motor_x": [
+        622.1,
+        298.28
+      ],
+      "drive": [
+        645.41,
+        1088.06
+      ]
+    }
+  },
+  {
+    "id": "drive_view",
+    "meshes": {
+      "table": "standard_home_table",
+      "y_slider": "standard_home_y_slider",
+      "x_slider": "standard_home_x_slider",
+      "slide_holder": "standard_home_slide_holder",
+      "slide": "standard_home_slide",
+      "motor_y": "standard_home_motor_y",
+      "adapter_y": "standard_home_adapter_y",
+      "orings_y": "standard_home_orings_y",
+      "paper_y": "standard_home_paper_y",
+      "motor_x": "standard_home_motor_x",
+      "adapter_x": "standard_home_adapter_x",
+      "orings_x": "standard_home_orings_x",
+      "paper_x": "standard_home_paper_x"
+    },
+    "camera_rotation": [
+      0.8803529739379883,
+      0.45154374837875366,
+      -0.0662725418806076,
+      -0.12920838594436646
+    ],
+    "orthographic_width_mm": 74,
+    "px_per_mm": 24.3243,
+    "resolution": [
+      1800,
+      1500
+    ],
+    "marks": {
+      "axis": [
+        400.01,
+        -24.79
+      ],
+      "axis_top": [
+        400.01,
+        -321.12
+      ],
+      "axis_bottom": [
+        400.01,
+        694.3
+      ],
+      "slide": [
+        400.01,
+        -24.79
+      ],
+      "table": [
+        1335.33,
+        -548.78
+      ],
+      "y_slider": [
+        1308.77,
+        -647.85
+      ],
+      "arm": [
+        1007.05,
+        1203.18
+      ],
+      "x_slider": [
+        1448.44,
+        -188.54
+      ],
+      "holder": [
+        2304.66,
+        -377.91
+      ],
+      "glass": [
+        1145.56,
+        -155.28
+      ],
+      "motor_y": [
+        1249.47,
+        254.23
+      ],
+      "motor_x": [
+        171.8,
+        -851.85
+      ],
+      "drive": [
+        900.0,
+        750.02
+      ]
+    }
+  },
+  {
+    "id": "drive",
+    "meshes": {
+      "table": "standard_drive_table",
+      "y_slider": "standard_drive_y_slider",
+      "motor_y": "standard_drive_motor_y",
+      "adapter_y": "standard_drive_adapter_y",
+      "orings_y": "standard_drive_orings_y",
+      "paper_y": "standard_drive_paper_y"
+    },
+    "camera_rotation": [
+      0.7071067690849304,
+      0.7071067690849304,
+      0.0,
+      0.0
+    ],
+    "orthographic_width_mm": 60.48,
+    "px_per_mm": 29.7619,
+    "resolution": [
+      1800,
+      1500
+    ],
+    "marks": {
+      "motor": [
+        1459.52,
+        535.73
+      ],
+      "adapter": [
+        733.33,
+        892.88
+      ],
+      "oring": [
+        834.52,
+        770.85
+      ],
+      "paper": [
+        724.4,
+        1049.13
+      ],
+      "arm": [
+        882.14,
+        1125.02
+      ],
+      "rail": [
+        810.71,
+        1142.88
+      ],
+      "arm2": [
+        435.71,
+        1125.02
+      ],
+      "upright": [
+        989.29,
+        470.26
+      ]
+    }
+  },
+  {
+    "id": "rail_rail010",
+    "meshes": {
+      "table": "rail010_rail_table",
+      "y_slider": "rail010_rail_y_slider"
+    },
+    "camera_rotation": [
+      0.7071067690849304,
+      0.7071067690849304,
+      0.0,
+      0.0
+    ],
+    "orthographic_width_mm": 9.94,
+    "px_per_mm": 181.1594,
+    "resolution": [
+      1800,
+      1500
+    ],
+    "marks": {
+      "rail_l": [
+        718.84,
+        876.93
+      ],
+      "rail_r": [
+        1081.16,
+        876.93
+      ],
+      "slot_l": [
+        709.78,
+        804.47
+      ],
+      "slot_r": [
+        1090.22,
+        804.47
+      ],
+      "arm": [
+        1371.01,
+        424.04
+      ],
+      "table": [
+        356.52,
+        1112.44
+      ]
+    }
+  },
+  {
+    "id": "rail_standard",
+    "meshes": {
+      "table": "standard_rail_table",
+      "y_slider": "standard_rail_y_slider"
+    },
+    "camera_rotation": [
+      0.7071067690849304,
+      0.7071067690849304,
+      0.0,
+      0.0
+    ],
+    "orthographic_width_mm": 9.94,
+    "px_per_mm": 181.1594,
+    "resolution": [
+      1800,
+      1500
+    ],
+    "marks": {
+      "rail_l": [
+        718.84,
+        876.93
+      ],
+      "rail_r": [
+        1081.16,
+        876.93
+      ],
+      "slot_l": [
+        700.72,
+        804.47
+      ],
+      "slot_r": [
+        1099.28,
+        804.47
+      ],
+      "arm": [
+        1371.01,
+        424.04
+      ],
+      "table": [
+        356.52,
+        1112.44
+      ]
+    }
+  },
+  {
+    "id": "rail_rail040",
+    "meshes": {
+      "table": "rail040_rail_table",
+      "y_slider": "rail040_rail_y_slider"
+    },
+    "camera_rotation": [
+      0.7071067690849304,
+      0.7071067690849304,
+      0.0,
+      0.0
+    ],
+    "orthographic_width_mm": 9.94,
+    "px_per_mm": 181.1594,
+    "resolution": [
+      1800,
+      1500
+    ],
+    "marks": {
+      "rail_l": [
+        718.84,
+        876.93
+      ],
+      "rail_r": [
+        1081.16,
+        876.93
+      ],
+      "slot_l": [
+        682.61,
+        804.47
+      ],
+      "slot_r": [
+        1117.39,
+        804.47
+      ],
+      "arm": [
+        1371.01,
+        424.04
+      ],
+      "table": [
+        356.52,
+        1112.44
+      ]
+    }
+  },
+  {
+    "id": "format_standard",
+    "meshes": {
+      "table": "standard_home_table",
+      "y_slider": "standard_home_y_slider",
+      "x_slider": "standard_home_x_slider",
+      "slide_holder": "standard_home_slide_holder",
+      "slide": "standard_home_slide",
+      "motor_y": "standard_home_motor_y",
+      "adapter_y": "standard_home_adapter_y",
+      "orings_y": "standard_home_orings_y",
+      "paper_y": "standard_home_paper_y",
+      "motor_x": "standard_home_motor_x",
+      "adapter_x": "standard_home_adapter_x",
+      "orings_x": "standard_home_orings_x",
+      "paper_x": "standard_home_paper_x"
+    },
+    "camera_rotation": [
+      0.8888593316078186,
+      0.4264485538005829,
+      -0.07247310876846313,
+      -0.15105780959129333
+    ],
+    "orthographic_width_mm": 186.16,
+    "px_per_mm": 9.669,
+    "resolution": [
+      1800,
+      1500
+    ],
+    "marks": {
+      "axis": [
+        900.0,
+        676.85
+      ],
+      "axis_top": [
+        900.0,
+        563.73
+      ],
+      "axis_bottom": [
+        900.0,
+        951.38
+      ],
+      "slide": [
+        900.0,
+        676.85
+      ],
+      "table": [
+        1251.38,
+        437.58
+      ],
+      "y_slider": [
+        1239.24,
+        397.77
+      ],
+      "arm": [
+        1177.41,
+        1190.95
+      ],
+      "x_slider": [
+        1310.68,
+        594.45
+      ],
+      "holder": [
+        1646.06,
+        505.91
+      ],
+      "glass": [
+        1192.04,
+        612.89
+      ],
+      "motor_y": [
+        1261.12,
+        807.95
+      ],
+      "motor_x": [
+        795.71,
+        344.08
+      ],
+      "drive": [
+        1124.23,
+        1003.85
+      ]
+    }
+  },
+  {
+    "id": "format_petro",
+    "meshes": {
+      "table": "petro_home_table",
+      "y_slider": "petro_home_y_slider",
+      "x_slider": "petro_home_x_slider",
+      "slide_holder": "petro_home_slide_holder",
+      "slide": "petro_home_slide",
+      "motor_y": "petro_home_motor_y",
+      "adapter_y": "petro_home_adapter_y",
+      "orings_y": "petro_home_orings_y",
+      "paper_y": "petro_home_paper_y",
+      "motor_x": "petro_home_motor_x",
+      "adapter_x": "petro_home_adapter_x",
+      "orings_x": "petro_home_orings_x",
+      "paper_x": "petro_home_paper_x"
+    },
+    "camera_rotation": [
+      0.8888593316078186,
+      0.4264485538005829,
+      -0.07247310876846313,
+      -0.15105780959129333
+    ],
+    "orthographic_width_mm": 186.16,
+    "px_per_mm": 9.669,
+    "resolution": [
+      1800,
+      1500
+    ],
+    "marks": {
+      "axis": [
+        850.9,
+        676.85
+      ],
+      "axis_top": [
+        850.9,
+        563.73
+      ],
+      "axis_bottom": [
+        850.9,
+        951.38
+      ],
+      "slide": [
+        850.9,
+        676.85
+      ],
+      "table": [
+        1199.09,
+        431.86
+      ],
+      "y_slider": [
+        1186.95,
+        392.06
+      ],
+      "arm": [
+        1131.51,
+        1196.66
+      ],
+      "x_slider": [
+        1124.69,
+        624.43
+      ],
+      "holder": [
+        1460.07,
+        535.89
+      ],
+      "glass": [
+        1006.05,
+        642.87
+      ],
+      "motor_y": [
+        1215.22,
+        813.66
+      ],
+      "motor_x": [
+        743.42,
+        338.37
+      ],
+      "drive": [
+        1078.33,
+        1009.56
+      ]
+    }
+  },
+  {
+    "id": "format_wide",
+    "meshes": {
+      "table": "wide_home_table",
+      "y_slider": "wide_home_y_slider",
+      "x_slider": "wide_home_x_slider",
+      "slide_holder": "wide_home_slide_holder",
+      "slide": "wide_home_slide",
+      "motor_y": "wide_home_motor_y",
+      "adapter_y": "wide_home_adapter_y",
+      "orings_y": "wide_home_orings_y",
+      "paper_y": "wide_home_paper_y",
+      "motor_x": "wide_home_motor_x",
+      "adapter_x": "wide_home_adapter_x",
+      "orings_x": "wide_home_orings_x",
+      "paper_x": "wide_home_paper_x"
+    },
+    "camera_rotation": [
+      0.8888593316078186,
+      0.4264485538005829,
+      -0.07247310876846313,
+      -0.15105780959129333
+    ],
+    "orthographic_width_mm": 186.16,
+    "px_per_mm": 9.669,
+    "resolution": [
+      1800,
+      1500
+    ],
+    "marks": {
+      "axis": [
+        900.0,
+        676.85
+      ],
+      "axis_top": [
+        900.0,
+        563.73
+      ],
+      "axis_bottom": [
+        900.0,
+        951.38
+      ],
+      "slide": [
+        900.0,
+        676.85
+      ],
+      "table": [
+        1230.62,
+        400.45
+      ],
+      "y_slider": [
+        1218.48,
+        360.65
+      ],
+      "arm": [
+        1198.17,
+        1228.07
+      ],
+      "x_slider": [
+        1306.11,
+        595.45
+      ],
+      "holder": [
+        1641.5,
+        506.91
+      ],
+      "glass": [
+        1187.47,
+        613.89
+      ],
+      "motor_y": [
+        1281.88,
+        845.07
+      ],
+      "motor_x": [
+        774.95,
+        306.96
+      ],
+      "drive": [
+        1144.99,
+        1040.98
+      ]
+    }
+  },
+  {
+    "id": "format_large",
+    "meshes": {
+      "table": "large_home_table",
+      "y_slider": "large_home_y_slider",
+      "x_slider": "large_home_x_slider",
+      "slide_holder": "large_home_slide_holder",
+      "slide": "large_home_slide",
+      "motor_y": "large_home_motor_y",
+      "adapter_y": "large_home_adapter_y",
+      "orings_y": "large_home_orings_y",
+      "paper_y": "large_home_paper_y",
+      "motor_x": "large_home_motor_x",
+      "adapter_x": "large_home_adapter_x",
+      "orings_x": "large_home_orings_x",
+      "paper_x": "large_home_paper_x"
+    },
+    "camera_rotation": [
+      0.8888593316078186,
+      0.4264485538005829,
+      -0.07247310876846313,
+      -0.15105780959129333
+    ],
+    "orthographic_width_mm": 186.16,
+    "px_per_mm": 9.669,
+    "resolution": [
+      1800,
+      1500
+    ],
+    "marks": {
+      "axis": [
+        900.0,
+        676.85
+      ],
+      "axis_top": [
+        900.0,
+        563.73
+      ],
+      "axis_bottom": [
+        900.0,
+        951.38
+      ],
+      "slide": [
+        900.0,
+        676.85
+      ],
+      "table": [
+        1211.45,
+        366.19
+      ],
+      "y_slider": [
+        1199.31,
+        326.39
+      ],
+      "arm": [
+        1217.34,
+        1262.34
+      ],
+      "x_slider": [
+        1306.11,
+        595.45
+      ],
+      "holder": [
+        1641.5,
+        506.91
+      ],
+      "glass": [
+        1187.47,
+        613.89
+      ],
+      "motor_y": [
+        1301.05,
+        879.34
+      ],
+      "motor_x": [
+        755.78,
+        272.69
+      ],
+      "drive": [
+        1164.16,
+        1075.24
+      ]
+    }
+  },
+  {
+    "id": "layout",
+    "meshes": {
+      "lay_table": "standard_home_lay_table",
+      "lay_y_slider": "standard_home_lay_y_slider",
+      "lay_x_slider": "standard_home_lay_x_slider",
+      "lay_slide_holder": "standard_home_lay_slide_holder",
+      "lay_adapters": "standard_home_lay_adapters",
+      "lay_washers": "standard_home_lay_washers",
+      "lay_ruler": "standard_home_lay_ruler"
+    },
+    "camera_rotation": [
+      0.057089678943157196,
+      0.017388347536325455,
+      -0.29084551334381104,
+      -0.9549070000648499
+    ],
+    "orthographic_width_mm": 292.76,
+    "px_per_mm": 6.1484,
+    "resolution": [
+      1800,
+      1500
+    ],
+    "marks": {
+      "table": [
+        1185.02,
+        1078.54
+      ],
+      "y_slider": [
+        404.68,
+        1017.0
+      ],
+      "x_slider": [
+        1339.21,
+        720.06
+      ],
+      "slide_holder": [
+        1643.05,
+        380.43
+      ],
+      "adapters": [
+        508.03,
+        458.36
+      ],
+      "ruler": [
+        1428.78,
+        163.3
+      ]
+    }
+  }
+]
