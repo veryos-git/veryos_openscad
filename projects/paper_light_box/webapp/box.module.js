@@ -17,10 +17,10 @@ let f_o_box = function(o_v, a_n_mm__thickness){
     let b_landscape = o_v.sheet_x > o_v.sheet_y;
     let a_n_mm__board = b_landscape ? [o_v.board_y, o_v.board_x] : [o_v.board_x, o_v.board_y];
     let n_mm__light = a_n_mm__centre[n_cnt - 1] + a_n_mm__thickness[n_cnt - 1] / 2 + o_v.light_distance;
-    let n_mm__pocket_r = o_v.puck_d / 2 + o_v.puck_clearance;
-    let n_mm__dome_r = o_v.puck_dome_d / 2, n_mm__dome_h = o_v.puck_height - o_v.puck_edge_height;
-    let n_mm__dome_R = (n_mm__dome_r * n_mm__dome_r + n_mm__dome_h * n_mm__dome_h) / (2 * n_mm__dome_h);
-    let n_mm__lens = Math.sqrt(n_mm__dome_R * n_mm__dome_R - o_v.contact_d * o_v.contact_d / 4) - (n_mm__dome_R - n_mm__dome_h);
+    // the light's slit: the board's, or the one of the plate that carries the puck's holder
+    let n_mm__light_slot = b_board ? o_v.board_slot : Math.max(o_v.plate_thickness + o_v.slot_clearance, o_v.slot_min);
+    // half the slot in the back wall for the holder's cup: the shell around its thread and 1
+    let n_mm__slot_r = o_v.puck_d / 2 + o_v.puck_clearance + o_v.screw_wall + 0.4 * o_v.thread_pitch + o_v.thread_clearance + o_v.holder_wall + 1;
     let n_mm__pocket = o_v.sheet_x + o_v.side_clearance;
     let n_mm__width__sheets = n_mm__pocket + 2 * o_v.wall;
     return {
@@ -31,9 +31,7 @@ let f_o_box = function(o_v, a_n_mm__thickness){
         a_n_mm__board,
         // the light's wall behind the front face, and the box's outside
         n_mm__light,
-        n_mm__depth: b_board
-            ? n_mm__light + o_v.rib + o_v.board_slot + o_v.board_back + o_v.wall
-            : n_mm__light + o_v.wall + n_mm__lens + o_v.puck_edge_height + o_v.puck_play + o_v.wall,
+        n_mm__depth: n_mm__light + o_v.rib + n_mm__light_slot + (b_board ? o_v.board_back : 0) + o_v.wall,
         n_mm__width: b_board ? Math.max(n_mm__width__sheets, a_n_mm__board[0] + o_v.side_clearance + 2 * o_v.wall) : n_mm__width__sheets,
         n_mm__width__sheets,
         n_mm__height: o_v.stop_height + Math.max(o_v.sheet_y, b_board ? a_n_mm__board[1] : 0),
@@ -41,8 +39,9 @@ let f_o_box = function(o_v, a_n_mm__thickness){
         n_mm__window_x: n_mm__pocket - 2 * o_v.groove_depth,
         n_mm__hidden_side: o_v.groove_depth - o_v.side_clearance / 2,
         n_mm__hidden_top: o_v.groove_depth,
-        // the puck's middle above the sheets' lower edge
-        n_mm__puck_z: Math.max(o_v.stop_height + o_v.sheet_y / 2, (n_mm__pocket_r + o_v.wall) * Math.SQRT2) - o_v.stop_height
+        // the puck's middle above the sheets' lower edge: behind their middle, if the V the
+        // slot ends in has 6 of wall below it
+        n_mm__puck_z: Math.max(o_v.stop_height + o_v.sheet_y / 2, n_mm__slot_r * Math.SQRT2 + 6) - o_v.stop_height
     };
 };
 

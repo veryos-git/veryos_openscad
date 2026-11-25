@@ -1,8 +1,9 @@
 // Copyright (C) [Jonas Immanuel Frey] - Licensed under GPL
 // The page: the sheets with their pictures, the lit box, one sheet flat to place its
 // picture, the box in 3D, and a file for each thing: every sheet as SVG and as STL,
-// the box as STL. The sheets and the preview are made here; the box and the sheets'
-// STL come from the server, which runs OpenSCAD.
+// the box as STL, and for the puck light the plate with its holder's thread. The
+// sheets and the preview are made here; the box, the plate and the sheets' STL come
+// from the server, which runs OpenSCAD.
 
 import { el } from './dom.module.js';
 import { f_o_stage } from './stage.module.js';
@@ -17,6 +18,9 @@ import { f_a_o_sheet__demo } from './demo.module.js';
 
 // The script's settings that the list of sheets sets.
 let a_s_name__from_sheets = ['part', 'sheet_count', 'sheet_thickness', 'sheet_thicknesses'];
+// A group of the script that the form leaves out: the puck holder's own values, which
+// have to stay those of the holder's script for its screwin to fit.
+let s_title__not_shown = 'Holder';
 let n_ms__wait = 400;
 // Pixels of a sheet: in the lit preview, in the quick one drawn first while something is
 // dragged, and traced for its files (10 per mm at most).
@@ -28,6 +32,7 @@ let n_mm__thickness = 0.4;
 // Blur of the light on its way to the next sheet, as a share of the way.
 let n_sigma__per_distance = 0.55;
 let a_n_colour__box = [0.93, 0.91, 0.86];
+let a_n_colour__plate = [0.6, 0.76, 0.9];
 
 let o_state = {
     a_o_group: [],
@@ -148,6 +153,7 @@ let f_update = function(n_cnt__pixel){
         n_room: o_state.n_room,
         a_n_colour
     });
+    el_download__plate.hidden = el_note__puck.hidden = o_v.light !== 'puck';
     let o_sheet = o_state.o_sheet__selected;
     o_el__tab.sheet.textContent = `Sheet ${a_o_sheet.indexOf(o_sheet) + 1}`;
     // the selected sheet for the editor: material light, holes see-through
@@ -203,10 +209,14 @@ let f_render_box = async function(b_frame){
     let n_render = ++o_state.n_cnt__render;
     f_set_status('OpenSCAD renders the box …');
     try{
-        let o = await f_o_posted('/api/mesh', { o_setting: f_o_setting(), s_part: 'box' });
+        // with the puck light also its plate, where it sits in the box
+        let a_s_part = o_state.o_v__by_name.light === 'puck' ? ['box', 'placed'] : ['box'];
+        let a_o = await Promise.all(a_s_part.map(function(s_part){ return f_o_posted('/api/mesh', { o_setting: f_o_setting(), s_part }); }));
         if(n_render !== o_state.n_cnt__render){ return; }
-        o_viewer.f_set_mesh([{ ...f_o_mesh__from_stl(f_a_n_u8__from_base64(o.s_stl).buffer), a_n_colour: a_n_colour__box, n_x: 0, n_y: 0 }], b_frame);
-        el_report.textContent = o.a_s_echo.join('\n');
+        o_viewer.f_set_mesh(a_o.map(function(o, n_idx){
+            return { ...f_o_mesh__from_stl(f_a_n_u8__from_base64(o.s_stl).buffer), a_n_colour: n_idx ? a_n_colour__plate : a_n_colour__box, n_x: 0, n_y: 0 };
+        }), b_frame);
+        el_report.textContent = a_o[0].a_s_echo.join('\n');
         f_set_status('');
     } catch(o_error){
         if(n_render === o_state.n_cnt__render){ f_set_status(o_error.message, true); }
@@ -264,6 +274,13 @@ let el_download__box = f_el__download('Box STL', 'The box as it is printed: upsi
     let o = await f_o_posted('/api/mesh', { o_setting: f_o_setting(), s_part: 'print' });
     f_save(new Blob([f_a_n_u8__from_base64(o.s_stl)], { type: 'model/stl' }), `paper_light_box_${o_state.o_v__by_name.light}_${o_state.a_o_sheet.length}_sheets.stl`);
 });
+// For the puck light only.
+let el_download__plate = f_el__download('Puck plate STL', 'The plate with the thread for the puck\'s holder, as it is printed: its front on the bed', async function(){
+    f_set_status('OpenSCAD renders the puck plate …');
+    let o = await f_o_posted('/api/mesh', { o_setting: f_o_setting(), s_part: 'puck_plate' });
+    f_save(new Blob([f_a_n_u8__from_base64(o.s_stl)], { type: 'model/stl' }), `paper_light_box_puck_plate_${o_state.o_v__by_name.sheet_x}x${o_state.o_v__by_name.sheet_y}.stl`);
+});
+let el_note__puck = el('p', { className: 'lead', textContent: 'The puck lies on the screwin of RGBW_pucklight_holder_ringclick (or of pucklight_lamp_v2), which screws into the plate from behind: print it from that project. Its plunger is the button.' });
 
 // ---- the list of sheets ----
 
@@ -471,6 +488,7 @@ let f_start = async function(){
     a_o_group.forEach(function(o_group, n_idx){
         let a_o_setting = o_group.a_o_setting.filter(function(o_setting){ return !a_s_name__from_sheets.includes(o_setting.s_name); });
         for(let o_setting of a_o_setting){ o_state.o_v__by_name[o_setting.s_name] = o_setting.v_default; }
+        if(o_group.s_title.startsWith(s_title__not_shown)){ return; }
         el_form.append(el('details', { open: n_idx === 0 }, [el('summary', { textContent: o_group.s_title }), ...a_o_setting.map(f_el__setting)]));
     });
     for(let o_demo of f_a_o_sheet__demo()){
@@ -515,7 +533,8 @@ let f_start = async function(){
                 f_el__own('room', 'The room\'s own light on the sheets: 0 is a dark room.', 'n_room', 0, 1, 0.01),
                 f_el__own('lets through', 'How much light a 0.4 thick sheet lets through: about 0.45 for white paper and white PLA, less for thick card.', 'n_transmission', 0.05, 0.9, 0.05)
             ]),
-            el('div', { className: 'actions' }, [el_download__box]),
+            el('div', { className: 'actions' }, [el_download__box, el_download__plate]),
+            el_note__puck,
             el_status,
             el_report,
             el('footer', { textContent: `VeryOS - very open source. ${s_openscad}` })

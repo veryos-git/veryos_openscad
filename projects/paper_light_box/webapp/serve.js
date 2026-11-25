@@ -2,8 +2,9 @@
 // deno task start
 //
 // Serves this folder and runs OpenSCAD for what the page does not make itself:
-//   POST /api/mesh  { o_setting, s_part }        the box from the script beside the webapp,
-//                                                so that the app makes what the script makes
+//   POST /api/mesh  { o_setting, s_part }        the box, or the puck's plate, from the script
+//                                                beside the webapp, so that the app makes what
+//                                                the script makes
 //   POST /api/sheet { s_svg, n_mm__thickness }   a sheet: its SVG made n_mm__thickness thick
 // Both give a binary STL in base64, the box also the script's echo lines.
 // OpenSCAD: $OPENSCAD, else the nightly AppImage in the repo's .gitignored/tools (fast,
@@ -16,7 +17,7 @@ import { o_regex__svg_sheet } from './layer.module.js';
 
 let n_port = Number(Deno.args[0] ?? 8776);
 let s_path__root = resolve(decodeURI(new URL('.', import.meta.url).pathname));
-let s_path__scad = join(s_path__root, '..', 'paper_light_box_veryos_V1.scad');
+let s_path__scad = join(s_path__root, '..', 'paper_light_box_veryos_V2.scad');
 let s_path__render = join(s_path__root, '.render');
 let n_cnt__render_max = 4;
 let n_cnt__cache_max = 32;

@@ -3,7 +3,7 @@
 import { assertEquals, assertThrows } from './check.js';
 import { f_a_o_group__from_scad, f_a_s_define } from '../setting.module.js';
 
-let s_scad = await Deno.readTextFile(new URL('../../paper_light_box_veryos_V1.scad', import.meta.url));
+let s_scad = await Deno.readTextFile(new URL('../../paper_light_box_veryos_V2.scad', import.meta.url));
 let a_o_group = f_a_o_group__from_scad(s_scad);
 let o_setting__by_name = Object.fromEntries(a_o_group.flatMap(function(o_group){
     return o_group.a_o_setting.map(function(o_setting){ return [o_setting.s_name, o_setting]; });
@@ -11,7 +11,7 @@ let o_setting__by_name = Object.fromEntries(a_o_group.flatMap(function(o_group){
 
 Deno.test('groups and settings of the script, nothing from Hidden', function(){
     assertEquals(a_o_group.map(function(o_group){ return o_group.s_title; }),
-        ['Start here', 'Fit', 'Box', 'Backlight board', 'Puck light', 'Logo']);
+        ['Start here', 'Fit', 'Box', 'Backlight board', 'Puck light', 'Logo', 'Holder as in RGBW_pucklight_holder_ringclick V8']);
     assertEquals(o_setting__by_name.eps, undefined);
     assertEquals(o_setting__by_name.logo_r, undefined);
 });

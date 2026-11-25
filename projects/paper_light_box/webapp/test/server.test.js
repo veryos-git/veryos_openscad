@@ -62,6 +62,12 @@ Deno.test({ name: 'server renders the box and a sheet', sanitizeResources: false
         assertEquals(f_a_n__size(f_o_mesh(o_board.o.s_stl)), [124.5, 51.8, 156.6]);
         let o_print = await f_o_post('/api/mesh', { o_setting: {}, s_part: 'print' });
         assert(Math.abs(f_n_volume(f_o_mesh(o_print.o.s_stl)) - 96984.6) < 0.5, 'the same box upside down');
+        // the puck's plate with its holder's cup, lying on its front and standing in the box
+        let o_plate = await f_o_post('/api/mesh', { o_setting: { light: 'puck' }, s_part: 'puck_plate' });
+        assert(Math.abs(f_n_volume(f_o_mesh(o_plate.o.s_stl)) - 47801.0) < 0.5, `plate ${f_n_volume(f_o_mesh(o_plate.o.s_stl))}`);
+        assertEquals(f_a_n__size(f_o_mesh(o_plate.o.s_stl)), [120, 156, 30.1]);
+        let o_placed = await f_o_post('/api/mesh', { o_setting: { light: 'puck' }, s_part: 'placed' });
+        assertEquals(f_a_n__size(f_o_mesh(o_placed.o.s_stl)), [120, 30.1, 156]);
 
         // what the page reckons for its preview is what the script builds, for both lights
         for(let o_change of [
@@ -105,7 +111,7 @@ Deno.test({ name: 'server renders the box and a sheet', sanitizeResources: false
             ['/api/mesh', { o_setting: { 'x=1;y': 2 }, s_part: 'box' }, 'no setting'],
             // the script's own word on settings that do not go together
             ['/api/mesh', { o_setting: { sheet_distance: 3, chamfer: 1 }, s_part: 'box' }, 'sheet_distance or light_distance too small'],
-            ['/api/mesh', { o_setting: { light: 'puck', sheet_x: 70, puck_d: 90 }, s_part: 'box' }, 'sheet_x too small for the puck'],
+            ['/api/mesh', { o_setting: { light: 'puck', sheet_x: 70 }, s_part: 'box' }, 'sheet_x too small for the puck'],
             ['/api/sheet', { s_svg: '<svg xmlns="http://www.w3.org/2000/svg"><image href="/etc/passwd"/></svg>', n_mm__thickness: 0.4 }, 'as the page writes it'],
             ['/api/sheet', { s_svg: f_s_svg__sheet(a_a_n, 30, 20), n_mm__thickness: 0 }, 'from 0.05 to 10'],
             ['/api/sheet', { s_svg: f_s_svg__sheet(a_a_n, 30, 20), n_mm__thickness: '1) cube(9); translate(0' }, 'from 0.05 to 10']
@@ -115,7 +121,7 @@ Deno.test({ name: 'server renders the box and a sheet', sanitizeResources: false
             assert(o.o.s_message.includes(s_message), `${o.o.s_message} has no ${s_message}`);
         }
         // only files of webapp/ by name: the script beside it is not served
-        assertEquals((await (await fetch(`${s_url}/%2e%2e/paper_light_box_veryos_V1.scad`)).text()), 'not found');
+        assertEquals((await (await fetch(`${s_url}/%2e%2e/paper_light_box_veryos_V2.scad`)).text()), 'not found');
         assertEquals((await fetch(`${s_url}/index.html`)).status, 200);
     } finally{
         o_process.kill();
