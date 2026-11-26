@@ -1,0 +1,130 @@
+// Copyright (C) [Jonas Immanuel Frey] - Licensed under GPL
+// The sheet of paper: the calendar's place on it from the bottom left corner, the same
+// for the print and for the cutting file; crop marks and ruler line outside the
+// calendar; what is said when the place or a picture does not fit; the print's SVG.
+
+import { o_setting__default, f_a_s_path, f_a_n__box__file } from '../calendar.module.js';
+import { f_o_picture, f_o_picture__fitted, f_s_picture } from '../picture.module.js';
+import {
+    n_mm__crop, n_mm__crop_gap, f_a_n__calendar, f_a_n__distance, f_a_n__bleed, f_a_a_a_n__crop, f_o_ruler,
+    f_a_s_problem__sheet, f_s_picture__sheet, f_s_line__sheet
+} from '../sheet.module.js';
+
+let assert = function(b, s_message = 'assertion failed'){
+    if(!b){ throw new Error(s_message); }
+};
+let assertAlmostEquals = function(n_a, n_b, n_tolerance, s_message = ''){
+    if(!(Math.abs(n_a - n_b) <= n_tolerance)){ throw new Error(`${s_message} ${n_a} is not ${n_b} within ${n_tolerance}`); }
+};
+
+// A calendar standing upright on A4, off the middle.
+let o_setting__upright = { ...o_setting__default, n_mm__sheet_x: 210, n_mm__sheet_y: 297, n_mm__calendar_x: 150, n_mm__calendar_y: 200, n_mm__left: 12.5, n_mm__bottom: 30, n_mm__bleed: 3 };
+
+Deno.test('the calendar\'s place: from the sheet\'s bottom left corner, drawn from its top left', function(){
+    assert(String(f_a_n__calendar(o_setting__default)) === '10,10' && String(f_a_n__distance(o_setting__default)) === '10,10,10,10', 'A4 lying, 277 x 190 in its middle');
+    assert(String(f_a_n__calendar(o_setting__upright)) === '12.5,67', String(f_a_n__calendar(o_setting__upright)));
+    assert(String(f_a_n__distance(o_setting__upright)) === '12.5,30,47.5,67', String(f_a_n__distance(o_setting__upright)));
+    // a box of the calendar: left, top, right, bottom in its mm
+    assert(String(f_a_n__distance(o_setting__upright, [20, 10, 140, 180])) === '32.5,50,57.5,77', String(f_a_n__distance(o_setting__upright, [20, 10, 140, 180])));
+    assert(String(f_a_n__bleed(o_setting__upright)) === '-3,-3,153,203', 'bleed');
+});
+
+Deno.test('print and cutting file meet: the file\'s box lies on the sheet where the print draws the calendar', function(){
+    for(let o_setting of [o_setting__default, o_setting__upright, { ...o_setting__upright, b_outline: false }]){
+        for(let s_sheet of ['front', 'back']){
+            // the print: the file's own paths, moved by the calendar's corner
+            let [n_x, n_y] = f_a_n__calendar(o_setting);
+            let s_line = f_s_line__sheet(o_setting, s_sheet);
+            assert(s_line.includes(`<g class="cut" transform="translate(${n_x} ${n_y})">${f_a_s_path(o_setting, s_sheet).join('')}</g>`), `${s_sheet}: the print's lines are not the file's`);
+            // the cutter's software: the file's box, as far from the sheet's left and bottom
+            let a_n__box = f_a_n__box__file(o_setting, s_sheet);
+            let a_n = f_a_n__distance(o_setting, a_n__box);
+            assertAlmostEquals(a_n[0], n_x + a_n__box[0], 1e-9, 'left');
+            assertAlmostEquals(a_n[1], o_setting.n_mm__sheet_y - (n_y + a_n__box[3]), 1e-9, 'bottom');
+            if(o_setting.b_outline){ assert(a_n[0] === o_setting.n_mm__left && a_n[1] === o_setting.n_mm__bottom, 'with the edge: the settings\' own numbers'); }
+        }
+    }
+});
+
+Deno.test('crop marks: two at every corner, on the edges\' lines, outside the bleed', function(){
+    for(let o_setting of [o_setting__default, o_setting__upright]){
+        let [n_x, n_y] = f_a_n__calendar(o_setting);
+        let a_n__edge = [n_x, n_y, n_x + o_setting.n_mm__calendar_x, n_y + o_setting.n_mm__calendar_y];
+        let a_a_a_n = f_a_a_a_n__crop(o_setting);
+        assert(a_a_a_n.length === 8, 'marks');
+        let o_n__by_corner = {};
+        for(let [a_n_p, a_n_q] of a_a_a_n){
+            assertAlmostEquals(Math.hypot(a_n_q[0] - a_n_p[0], a_n_q[1] - a_n_p[1]), n_mm__crop, 1e-9, 'length');
+            // level on the top or bottom edge's line, or upright on the left or right edge's
+            let n_axis = a_n_p[1] === a_n_q[1] ? 0 : 1;
+            assert(a_n_p[1 - n_axis] === a_n_q[1 - n_axis] && [a_n__edge[1 - n_axis], a_n__edge[3 - n_axis]].includes(a_n_p[1 - n_axis]), `a mark off the edges' lines: ${a_n_p} ${a_n_q}`);
+            // beyond the calendar's end by bleed and gap, running outwards
+            let n_out = Math.min(...[a_n_p, a_n_q].map(function(a_n){ return Math.max(a_n__edge[n_axis] - a_n[n_axis], a_n[n_axis] - a_n__edge[n_axis + 2]); }));
+            assertAlmostEquals(n_out, o_setting.n_mm__bleed + n_mm__crop_gap, 1e-9, 'distance from the corner');
+            let s_corner = `${a_n_p[0] < (a_n__edge[0] + a_n__edge[2]) / 2},${a_n_p[1] < (a_n__edge[1] + a_n__edge[3]) / 2}`;
+            o_n__by_corner[s_corner] = (o_n__by_corner[s_corner] ?? 0) + 1;
+        }
+        assert(Object.values(o_n__by_corner).join() === '2,2,2,2', 'two at every corner');
+    }
+});
+
+Deno.test('the ruler line: under the calendar, the longest round length between the corners\' marks', function(){
+    for(let [n_mm__calendar_x, n_mm] of [[277, 200], [220, 200], [219.5, 100], [120, 100], [119.5, 50], [70, 50], [69.5, 20], [50, 20]]){
+        let o_setting = { ...o_setting__default, n_mm__calendar_x };
+        let o_ruler = f_o_ruler(o_setting);
+        assert(o_ruler.n_mm === n_mm, `calendar ${n_mm__calendar_x} wide: ${o_ruler.n_mm}`);
+        assert(o_ruler.a_n[0] === 20 && o_ruler.a_n[1] === 204, `at ${o_ruler.a_n}`);
+        assert(o_ruler.a_n[0] + o_ruler.n_mm <= 10 + n_mm__calendar_x - 10, 'ends before the corner');
+    }
+    assert(String(f_o_ruler(o_setting__upright).a_n) === '22.5,272', String(f_o_ruler(o_setting__upright).a_n));
+});
+
+Deno.test('what is wrong is said: over the sheet\'s edge, in the printer\'s margin, a picture too small, marks in a picture', function(){
+    let f_a_s = function(o_more){ return f_a_s_problem__sheet({ ...o_setting__default, ...o_more }); };
+    assert(f_a_s({}).length === 0, f_a_s({}).join());
+    assert(f_a_s({ n_mm__left: 5, n_mm__bottom: 5 }).length === 0, 'at the margin');
+    assert(f_a_s({ n_mm__left: 4.9 }).join() === 'The calendar lies in the printer\'s margin, where a print stays blank: left', f_a_s({ n_mm__left: 4.9 }).join());
+    assert(f_a_s({ n_mm__left: 15.5, n_mm__bottom: 16 }).join() === 'The calendar lies in the printer\'s margin, where a print stays blank: right, top', f_a_s({ n_mm__left: 15.5, n_mm__bottom: 16 }).join());
+    assert(f_a_s({ n_mm__left: 21, n_mm__bottom: 3 }).join('|') === 'The calendar reaches over the sheet\'s edge: right|The calendar lies in the printer\'s margin, where a print stays blank: bottom', f_a_s({ n_mm__left: 21, n_mm__bottom: 3 }).join('|'));
+    assert(f_a_s({ n_mm__calendar_x: 300, n_mm__calendar_y: 211 }).join() === 'The calendar reaches over the sheet\'s edge: right, top', f_a_s({ n_mm__calendar_x: 300, n_mm__calendar_y: 211 }).join());
+    assert(f_a_s({ n_mm__printer_margin: 0, n_mm__left: 0, n_mm__bottom: 0, n_mm__calendar_x: 297, n_mm__calendar_y: 210 }).length === 0, 'a printer without a margin, the calendar the sheet');
+
+    let o_picture = f_o_picture(3000, 2000);
+    let o_cover = f_o_picture__fitted(o_picture, f_a_n__bleed(o_setting__default), true);
+    assert(f_a_s({ o_picture__front: o_cover, o_picture__back: o_cover, b_mark: false }).length === 0, 'pictures that cover calendar and bleed');
+    // marks are for pictures drawn by hand: under a printed one they are cuts in it
+    assert(f_a_s({ o_picture__front: o_cover, o_picture__back: o_cover }).join() === 'The marks on the back are cut into its picture: leave them out, under Cuts', f_a_s({ o_picture__back: o_cover }).join());
+    assert(f_a_s({ o_picture__front: o_cover }).length === 0, 'marks without a picture on the back');
+    // 3000 x 2000 over the calendar alone: 285 x 190, 4 over at left and right, nothing at top and bottom
+    let o_edge = f_o_picture__fitted(o_picture, [0, 0, 277, 190], true);
+    assert(f_a_s({ o_picture__back: o_edge, b_mark: false }).join() === 'The back picture does not reach 2 mm over the calendar\'s edge all around: a cut beside the edge shows white', f_a_s({ o_picture__back: o_edge, b_mark: false }).join());
+    assert(f_a_s({ o_picture__back: o_edge, b_mark: false, n_mm__bleed: 0 }).length === 0, 'without bleed');
+    let o_inside = f_o_picture__fitted(o_picture, [0, 0, 277, 190], false);
+    assert(f_a_s({ o_picture__front: o_inside, o_picture__back: o_edge, b_mark: false }).join('|').startsWith('The front picture leaves a part of the calendar blank|The back picture does not reach'), 'both sheets');
+    assert(f_a_s({ o_picture__front: { ...o_cover, n_deg: 3 } }).join() === 'The front picture leaves a part of the calendar blank', 'turned a little');
+});
+
+Deno.test('the print\'s picture: at the calendar\'s place, cut off bleed beyond its edge', function(){
+    let o_picture = { ...f_o_picture(3000, 2000), n_mm__x: 70, n_mm__y: 110, n_mm__size_x: 400, n_deg: 30 };
+    let o_setting = { ...o_setting__upright, o_picture__back: o_picture };
+    assert(f_s_picture__sheet(o_setting, 'front', 'blob:a') === '', 'a sheet without a picture');
+    assert(f_s_picture__sheet(o_setting, 'back', '') === '', 'a picture whose file is not there');
+    assert(
+        f_s_picture__sheet(o_setting, 'back', 'blob:a') === '<clipPath id="back_clip"><rect x="9.5" y="64" width="156" height="206"/></clipPath>'
+            + `<g clip-path="url(#back_clip)"><g transform="translate(12.5 67)">${f_s_picture(o_picture, 'blob:a')}</g></g>`,
+        f_s_picture__sheet(o_setting, 'back', 'blob:a')
+    );
+});
+
+Deno.test('the print\'s lines: guides when asked for, with the ruler\'s length and the sheet\'s name', function(){
+    for(let s_sheet of ['front', 'back']){
+        let s_line = f_s_line__sheet(o_setting__default, s_sheet);
+        assert(!/NaN|undefined|Infinity/.test(s_line), 'a number is missing');
+        let [, s_d, s_text] = s_line.match(/^<g class="guide"><path fill="none" stroke="#000000" stroke-width="0.2" d="([^"]*)"\/><text x="222" y="205" font-family="sans-serif" font-size="3" fill="#000000">([^<]*)<\/text><\/g><g class="cut" /);
+        assert(s_text === `200 mm, ${s_sheet}`, s_text);
+        // eight crop marks, the ruler line and its two end marks
+        assert((s_d.match(/M/g) || []).length === 11 && s_d.includes('M 20 204 L 220 204') && s_d.includes('M 20 203 L 20 205') && s_d.includes('M 220 203 L 220 205'), s_d);
+        for(let [a_n_p, a_n_q] of f_a_a_a_n__crop(o_setting__default)){ assert(s_d.includes(`M ${a_n_p.join(' ')} L ${a_n_q.join(' ')}`), `crop mark ${a_n_p}`); }
+        assert(f_s_line__sheet({ ...o_setting__default, b_print_guide: false }, s_sheet).startsWith('<g class="cut" transform="translate(10 10)"><path id="'), 'without guides');
+    }
+});

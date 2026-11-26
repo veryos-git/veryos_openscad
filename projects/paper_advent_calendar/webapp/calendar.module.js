@@ -4,9 +4,13 @@
 // The front sheet carries the windows. Each one is a door: its free edge is cut but for
 // bridges, tiny uncut places that hold it shut until it is torn open, and the side it
 // turns on is a fold, a row of cut dashes. The back sheet is glued behind the front one
-// and carries the pictures, drawn by hand; it gets short cuts only, marks that show where
-// each window opens. Both sheets are drawn as seen from the front, so one lies on the
-// other as cut.
+// and carries the pictures, printed or drawn by hand; it gets short cuts only, marks
+// that show where each window opens. Both sheets are drawn as seen from the front, so
+// one lies on the other as cut.
+//
+// This module is the calendar itself and its cutting files, in mm from the calendar's
+// top left corner. The sheet of paper it lies on is sheet.module.js, a picture printed
+// on it picture.module.js.
 //
 // Every dash and every piece of a cut between two bridges is a line of its own, so that
 // a cutter cuts them as they are drawn.
@@ -18,9 +22,17 @@ let a_s_shape = ['rect', 'arch', 'round'];
 let a_s_door = ['left', 'right', 'top', 'bottom', 'double'];
 
 let o_setting__default = {
-    // the brief's size: 7 shorter than a sheet of A4, 297 x 210
-    n_mm__calendar_x: 290,
-    n_mm__calendar_y: 210,
+    // the sheet of paper a calendar's sheet is printed on and cut from, A4 lying
+    n_mm__sheet_x: 297,
+    n_mm__sheet_y: 210,
+    // the border of it a printer leaves blank
+    n_mm__printer_margin: 5,
+    // the calendar: smaller than what a printer prints of the sheet, and where it lies
+    // on the sheet, measured from the sheet's bottom left corner
+    n_mm__calendar_x: 277,
+    n_mm__calendar_y: 190,
+    n_mm__left: 10,
+    n_mm__bottom: 10,
     b_outline: true,
     n_window: 24,
     n_column: 6,
@@ -36,8 +48,22 @@ let o_setting__default = {
     n_mm__bridge_distance: 25,
     n_mm__dash: 3,
     n_mm__gap: 2,
+    b_mark: true,
     n_mm__mark: 3,
     b_logo: true,
+    // a sheet's picture, see picture.module.js; null: none
+    o_picture__front: null,
+    o_picture__back: null,
+    // what a print shows where a sheet has a picture: 'picture', 'both' with the cut
+    // lines on it, 'cut' the lines alone; a sheet without one shows its cut lines
+    s_print: 'picture',
+    // how far the picture is printed beyond the calendar's edge
+    n_mm__bleed: 2,
+    // guides outside the calendar: crop marks and a line of a known length
+    b_print_guide: true,
+    // moves the print on its page, to the right and up
+    n_mm__print_x: 0,
+    n_mm__print_y: 0,
     // what a window has of its own instead of the grid's: a_o_window__own[n_idx] with any
     // of n_mm__x, n_mm__y, n_mm__size_x, n_mm__size_y, s_shape, s_door
     a_o_window__own: []
@@ -479,6 +505,24 @@ let f_a_a_o_seg__logo_dot = function(o_setting){
     });
 };
 
+// The box around paths: left, top, right, bottom; null around none.
+let f_a_n__box = function(a_a_o_seg){
+    let a_a_n = a_a_o_seg.flat().flatMap(function(o_seg){
+        let a_a_n__seg = [f_a_n__at(o_seg, 0), f_a_n__at(o_seg, f_n_len(o_seg))];
+        if('n_r' in o_seg){
+            // an arc reaches furthest where it runs level or upright
+            let n_quarter__to = Math.max(o_seg.n_rad__from, o_seg.n_rad__to) / (Math.PI / 2);
+            for(let n_quarter = Math.ceil(Math.min(o_seg.n_rad__from, o_seg.n_rad__to) / (Math.PI / 2)); n_quarter <= n_quarter__to; n_quarter++){
+                a_a_n__seg.push([o_seg.a_n_c[0] + o_seg.n_r * [1, 0, -1, 0].at(n_quarter % 4), o_seg.a_n_c[1] + o_seg.n_r * [0, 1, 0, -1].at(n_quarter % 4)]);
+            }
+        }
+        return a_a_n__seg;
+    });
+    if(!a_a_n.length){ return null; }
+    return [0, 1].map(function(n_axis){ return Math.min(...a_a_n.map(function(a_n){ return a_n[n_axis]; })); })
+        .concat([0, 1].map(function(n_axis){ return Math.max(...a_a_n.map(function(a_n){ return a_n[n_axis]; })); }));
+};
+
 // What is wrong with the windows' places, in words.
 let f_a_s_problem = function(o_setting){
     let a_a_n = f_a_o_window(o_setting).map(function(o_window){
@@ -505,44 +549,68 @@ let f_a_s_problem = function(o_setting){
     return a_s_problem;
 };
 
-// One sheet as an SVG in mm, s_sheet 'front' or 'back'.
-let f_s_svg = function(o_setting, s_sheet){
+// The lines of one sheet's cutting file, s_sheet 'front' or 'back', kind by kind in the
+// file's order: s_name, s_colour and the paths a_a_o_seg; b_closed where a path ends
+// where it starts.
+let f_a_o_line = function(o_setting, s_sheet){
     let n_x = o_setting.n_mm__calendar_x;
     let n_y = o_setting.n_mm__calendar_y;
     let a_o_door = f_a_o_window(o_setting).map(function(o_window){ return f_o_door(o_window, o_setting); });
-    // every path says itself that it is a line and no area: not every cutter's software
-    // reads that from a group around it
-    let f_s_path = function(s_name, s_colour, s_d){
-        return `<path id="${s_sheet}_${s_name}" fill="none" stroke="${s_colour}" stroke-width="${n_mm__line}" d="${s_d}"/>`;
-    };
-    let f_s_path__all = function(s_name, s_colour, a_a_o_seg){ return f_s_path(s_name, s_colour, a_a_o_seg.map(f_s_d).join(' ')); };
+    let f_a_a_o_seg = function(s_name){ return a_o_door.flatMap(function(o_door){ return o_door[s_name]; }); };
+    let a_o_line = [];
+    if(s_sheet === 'front'){
+        a_o_line.push({ s_name: 'cut', s_colour: '#000000', a_a_o_seg: f_a_a_o_seg('a_a_o_seg__cut') });
+        a_o_line.push({ s_name: 'fold', s_colour: '#0000ff', a_a_o_seg: f_a_a_o_seg('a_a_o_seg__fold') });
+    } else {
+        if(o_setting.b_mark){ a_o_line.push({ s_name: 'mark', s_colour: '#000000', a_a_o_seg: f_a_a_o_seg('a_a_o_seg__mark') }); }
+        if(o_setting.b_logo){ a_o_line.push({ s_name: 'logo', s_colour: '#808080', a_a_o_seg: f_a_a_o_seg__logo_dot(o_setting) }); }
+    }
+    // last: a cutter that keeps the file's order cuts the windows before the sheet comes loose
+    if(o_setting.b_outline){
+        a_o_line.push({ s_name: 'outline', s_colour: '#ff0000', b_closed: true, a_a_o_seg: [[
+            f_o_line([0, 0], [n_x, 0]), f_o_line([n_x, 0], [n_x, n_y]), f_o_line([n_x, n_y], [0, n_y])
+        ]] });
+    }
+    return a_o_line;
+};
+// The same as SVG paths. Every path says itself that it is a line and no area: not
+// every cutter's software reads that from a group around it.
+let f_a_s_path = function(o_setting, s_sheet){
+    return f_a_o_line(o_setting, s_sheet).map(function(o_line){
+        let s_d = o_line.a_a_o_seg.map(f_s_d).join(' ') + (o_line.b_closed ? ' Z' : '');
+        return `<path id="${s_sheet}_${o_line.s_name}" fill="none" stroke="${o_line.s_colour}" stroke-width="${n_mm__line}" d="${s_d}"/>`;
+    });
+};
+// The box around all that a sheet's cutting file holds: left, top, right, bottom; with
+// the calendar's edge in the file, the calendar. A cutter's software places a file by
+// this box.
+let f_a_n__box__file = function(o_setting, s_sheet){
+    return f_a_n__box(f_a_o_line(o_setting, s_sheet).flatMap(function(o_line){
+        return o_line.b_closed ? o_line.a_a_o_seg.map(function(a_o_seg){ return [...a_o_seg, f_o_line(f_a_n__end(a_o_seg), f_a_n__start(a_o_seg))]; }) : o_line.a_a_o_seg;
+    }));
+};
+
+// One sheet's cutting file: an SVG in mm, s_sheet 'front' or 'back'.
+let f_s_svg = function(o_setting, s_sheet){
+    let n_x = o_setting.n_mm__calendar_x;
+    let n_y = o_setting.n_mm__calendar_y;
     let s_do = s_sheet === 'front'
         ? 'Front sheet. Black: cut; the gaps are bridges that hold a door shut. Blue: cut, the dashes of the folds the doors turn on.'
         : 'Back sheet, as seen from the front; it is glued behind the front sheet. Black: cut, marks that show where the windows open. Grey: cut, the logo in dots, mirrored to be read from behind.';
     let s_setting = JSON.stringify(o_setting).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-    let a_s = [
+    return [
         '<?xml version="1.0" encoding="UTF-8"?>',
         `<svg xmlns="http://www.w3.org/2000/svg" width="${f_s_n(n_x)}mm" height="${f_s_n(n_y)}mm" viewBox="0 0 ${f_s_n(n_x)} ${f_s_n(n_y)}">`,
         `<title>VeryOS advent calendar, ${s_sheet}</title>`,
-        `<desc>${s_do} Red: the calendar's edge; cut it where the calendar is smaller than the sheet. Settings: ${s_setting}</desc>`
-    ];
-    if(s_sheet === 'front'){
-        a_s.push(f_s_path__all('cut', '#000000', a_o_door.flatMap(function(o_door){ return o_door.a_a_o_seg__cut; })));
-        a_s.push(f_s_path__all('fold', '#0000ff', a_o_door.flatMap(function(o_door){ return o_door.a_a_o_seg__fold; })));
-    } else {
-        a_s.push(f_s_path__all('mark', '#000000', a_o_door.flatMap(function(o_door){ return o_door.a_a_o_seg__mark; })));
-        if(o_setting.b_logo){ a_s.push(f_s_path__all('logo', '#808080', f_a_a_o_seg__logo_dot(o_setting))); }
-    }
-    // last: a cutter that keeps the file's order cuts the windows before the sheet comes loose
-    if(o_setting.b_outline){
-        a_s.push(f_s_path('outline', '#ff0000', `M 0 0 L ${f_s_n(n_x)} 0 L ${f_s_n(n_x)} ${f_s_n(n_y)} L 0 ${f_s_n(n_y)} Z`));
-    }
-    a_s.push('</svg>', '');
-    return a_s.join('\n');
+        `<desc>${s_do} Red: the calendar's edge; cut it where the calendar is smaller than the sheet. Settings: ${s_setting}</desc>`,
+        ...f_a_s_path(o_setting, s_sheet),
+        '</svg>', ''
+    ].join('\n');
 };
 
 export {
     a_s_shape, a_s_door, o_setting__default, n_mm__line, n_ratio__hinge,
-    f_n_len, f_n_len__path, f_a_n__at, f_b_corner, f_a_o_seg__part, f_s_d, f_a_a_n__dash, f_a_a_n__bridge,
-    f_o_door, f_a_o_window, f_a_n__logo, f_a_a_o_seg__logo, f_a_a_o_seg__logo_dot, f_a_s_problem, f_s_svg
+    f_n_len, f_n_len__path, f_a_n__at, f_b_corner, f_a_o_seg__part, f_s_n, f_s_d, f_a_a_n__dash, f_a_a_n__bridge,
+    f_o_door, f_a_o_window, f_a_n__logo, f_a_a_o_seg__logo, f_a_a_o_seg__logo_dot, f_a_n__box, f_a_s_problem,
+    f_a_s_path, f_a_n__box__file, f_s_svg
 };

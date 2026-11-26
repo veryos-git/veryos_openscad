@@ -26,8 +26,9 @@ body{
     color: var(--s_col__text);
     font: 14px/1.4 system-ui, -apple-system, "Segoe UI", Roboto, Ubuntu, sans-serif;
 }
-#el_app{ display: grid; grid-template-columns: 320px minmax(0, 1fr); min-height: 100vh; }
-#el_panel{ background: var(--s_col__panel); border-right: 1px solid var(--s_col__line); padding: 14px; }
+/* the settings and the sheets scroll each on their own: a sheet stays in view while a setting far down the list is changed */
+#el_app{ display: grid; grid-template-columns: 320px minmax(0, 1fr); height: 100vh; }
+#el_panel{ background: var(--s_col__panel); border-right: 1px solid var(--s_col__line); padding: 14px; overflow-y: auto; }
 header{ display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
 h1{ margin: 0; font-size: 18px; font-weight: 650; color: var(--s_col__gold); }
 #el_logo{ width: 34px; color: var(--s_col__text); }
@@ -42,8 +43,9 @@ label.row input[type=number], label.row select{
     color: var(--s_col__text);
     font: inherit;
 }
+label.row select.wide{ width: 170px; }
 input:invalid{ border-color: var(--s_col__warn); }
-input[type=checkbox]{ accent-color: var(--s_col__gold); }
+input[type=checkbox], input[type=radio]{ accent-color: var(--s_col__gold); }
 fieldset{ margin: 0 0 8px; padding: 0; border: 0; }
 fieldset.choice{ display: flex; flex-wrap: wrap; gap: 4px 12px; }
 fieldset.choice legend{ padding: 0; margin-bottom: 4px; }
@@ -59,43 +61,59 @@ button{
 }
 button.main{ border: 0; background: var(--s_col__gold); color: var(--s_col__black); font-weight: 650; }
 button:disabled{ opacity: .4; cursor: default; }
-#el_action{ display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 18px; }
-#el_action .wide{ grid-column: 1 / -1; }
-.hint, #el_size, #el_status{ margin: 8px 0 0; color: var(--s_col__muted); font-size: 12px; }
+.buttons{ display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 10px; }
+.buttons .wide{ grid-column: 1 / -1; }
+.hint, #el_size, #el_status{ margin: 0 0 8px; color: var(--s_col__muted); font-size: 12px; }
 #el_status{ color: var(--s_col__warn); white-space: pre-line; }
 #el_detail{ display: block; width: 100%; margin-bottom: 10px; background: #ffffff; border-radius: 4px; }
-#el_legend{ margin: 0; padding: 0; list-style: none; font-size: 12px; color: var(--s_col__muted); }
+#el_legend{ margin: 0 0 14px; padding: 0; list-style: none; font-size: 12px; color: var(--s_col__muted); }
 #el_legend li{ display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
 #el_legend svg{ width: 30px; height: 10px; flex: none; background: #ffffff; }
-#el_stage{ padding: 8px 24px 24px; }
+#el_stage{ padding: 8px 24px 24px; overflow: auto; }
+#el_tool{ display: flex; flex-wrap: wrap; align-items: center; gap: 6px 24px; padding: 6px 0; }
+#el_tool fieldset{ margin: 0; align-items: center; }
+#el_tool legend{ float: left; margin: 0 12px 0 0; }
+#el_tool select{ padding: 3px 6px; border: 1px solid var(--s_col__line); border-radius: 4px; background: var(--s_col__raised); color: var(--s_col__text); font: inherit; }
 .sheet{ background: #ffffff; }
-.sheet svg{ display: block; }
+.sheet > svg{ display: block; }
 @media screen{
-    /* a sheet fits the window's height; lines one pixel wide whatever the scale */
-    .sheet{ width: 100%; max-width: calc((100vh - 60px) * var(--n_ratio__sheet, 1.414)); box-shadow: 0 10px 40px #00000080; }
-    .sheet svg{ width: 100%; height: auto; }
-    .sheet path{ vector-effect: non-scaling-stroke; stroke-width: 1px; }
-    .sheet path.hit{ fill: transparent; stroke: none; cursor: move; pointer-events: all; touch-action: none; }
-    .sheet path.hit.selected{ stroke: var(--s_col__gold); stroke-width: 3px; fill: #f0b75030; }
+    /* a sheet fits the window's height, times the zoom; lines one pixel wide whatever the scale */
+    .sheet{ width: calc(min(100%, (100vh - 100px) * var(--n_ratio__sheet, 1.414)) * var(--n_zoom, 1)); box-shadow: 0 10px 40px #00000080; }
+    /* a picture's handles show around the paper too */
+    .sheet > svg{ width: 100%; height: auto; overflow: visible; }
+    .sheet path, .sheet rect, .sheet polygon, .sheet circle{ vector-effect: non-scaling-stroke; stroke-width: 1px; }
+    /* on a picture the lines get a light rim */
+    .has_picture .cut, .has_picture .opening{ filter: drop-shadow(0 0 0.4px #ffffff) drop-shadow(0 0 0.4px #ffffff); }
+    .sheet .margin{ fill: none; stroke: #9aa0a0; stroke-dasharray: 5 4; }
+    .sheet .edge{ fill: none; stroke: #9aa0a0; }
+    .sheet .opening{ fill: none; stroke: #303838; stroke-dasharray: 4 3; }
+    .sheet .hit{ fill: transparent; stroke: none; cursor: move; pointer-events: all; touch-action: none; }
+    .sheet .hit.selected{ stroke: var(--s_col__gold); stroke-width: 3px; fill: #f0b75030; }
+    .sheet .frame{ fill: none; stroke: var(--s_col__gold); stroke-width: 1.5px; }
+    .sheet .handle{ fill: var(--s_col__gold); stroke: #101517; cursor: crosshair; pointer-events: all; touch-action: none; }
+    .sheet .handle.side{ fill: #ffffff; }
+    body[data-mode=picture] .sheet{ cursor: move; touch-action: none; }
 }
 @media (max-width: 700px){
-    #el_app{ grid-template-columns: 1fr; align-content: start; }
-    #el_panel{ border-right: 0; border-bottom: 1px solid var(--s_col__line); }
+    #el_app{ grid-template-columns: 1fr; align-content: start; height: auto; }
+    #el_panel{ border-right: 0; border-bottom: 1px solid var(--s_col__line); overflow-y: visible; }
     #el_stage{ padding: 8px 16px 16px; }
 }
-/* Print: each sheet on a page of its own, in its real size; the page's size is set with
-   the calendar's, see f_update. */
+/* Print: every sheet of paper is a page, its top left corner the page's. The page's size
+   and the print's shift are set with the settings, see f_update. What a page shows
+   follows body's data-print. */
 @media print{
     body{ background: #ffffff; }
-    #el_panel, #el_stage h2, .hit{ display: none; }
-    #el_app, #el_stage{ display: block; min-height: 0; padding: 0; }
-    .sheet{ display: flex; align-items: center; justify-content: center; overflow: hidden; break-after: page; }
-    .sheet svg{ flex: none; }
+    #el_panel, #el_tool, #el_stage h2, .screen{ display: none; }
+    #el_app, #el_stage{ display: block; height: auto; padding: 0; overflow: visible; }
+    .sheet{ overflow: hidden; break-after: page; }
+    body[data-print=cut] .picture{ display: none; }
+    body[data-print=picture] .has_picture .cut{ display: none; }
 }
 </style>
 <style id="el_style__page"></style>
 </head>
-<body>
+<body data-mode="window">
 <main id="el_app">
     <form id="el_panel" aria-label="Settings">
         <header>
@@ -103,10 +121,18 @@ button:disabled{ opacity: .4; cursor: default; }
             <svg id="el_logo" viewBox="0 0 43.9095293518 31.2528266758" role="img" aria-label="VeryOS logo"><path fill="currentColor" fill-rule="evenodd" d="M 7.7528133542 9.1080260785 L 4.6193976626 1.5432914191 L 0 3.4567085809 L 11.5135290962 31.2528266758 L 32.3960002556 31.2528266758 L 43.9095293518 3.4567085809 L 39.2901316892 1.5432914191 L 36.1567159975 9.1080260785 A 15.6264133379 15.6264133379 0 0 0 7.7528133542 9.1080260785 Z M 30.9694268093 21.2528266758 A 10.6264133379 10.6264133379 0 0 0 21.9547646759 5 A 4.0632066689 4.0632066689 0 0 0 21.9547646759 13.1264133379 A 9.0632066689 9.0632066689 0 0 1 30.9694268093 21.2528266758 Z M 12.9401025425 10 A 9.0632066689 9.0632066689 0 0 0 21.9547646759 18.1264133379 A 4.0632066689 4.0632066689 0 0 1 21.9547646759 26.2528266758 A 10.6264133379 10.6264133379 0 0 1 12.9401025425 10 Z"/></svg>
         </header>
 
+        <h2>Sheet of paper</h2>
+        <label class="row" title="The paper a sheet of the calendar is printed on and cut from. A4 lying: 297 × 210, standing: 210 × 297; A3: 420 × 297; Letter: 279.4 × 215.9">Width, mm <input type="number" name="n_mm__sheet_x" min="50" max="1500" step="0.1" required></label>
+        <label class="row">Height, mm <input type="number" name="n_mm__sheet_y" min="50" max="1500" step="0.1" required></label>
+        <label class="row" title="The border of the sheet your printer leaves blank, drawn dashed. The calendar has to lie inside it">Printer's margin, mm <input type="number" name="n_mm__printer_margin" min="0" max="50" step="0.5" required></label>
+
         <h2>Calendar</h2>
-        <label class="row" title="Both sheets have this size">Width, mm <input type="number" name="n_mm__calendar_x" min="50" max="1000" step="0.5" required></label>
+        <label class="row" title="Both sheets of the calendar have this size. Smaller than the sheet of paper, and than what the printer prints of it">Width, mm <input type="number" name="n_mm__calendar_x" min="50" max="1000" step="0.5" required></label>
         <label class="row">Height, mm <input type="number" name="n_mm__calendar_y" min="50" max="1000" step="0.5" required></label>
-        <label class="row" title="A red rectangle of the calendar's size in both files. Cut it where the calendar is smaller than the sheet; else it shows the cutter's software where the cuts lie on the sheet">Calendar's edge in the files <input type="checkbox" name="b_outline"></label>
+        <label class="row" title="From the sheet's left edge to the calendar's. The print puts the calendar there; put the cutting file at the same place in the cutter's software">From the sheet's left, mm <input type="number" name="n_mm__left" min="0" max="1500" step="0.1" required></label>
+        <label class="row" title="From the sheet's bottom edge to the calendar's">From its bottom, mm <input type="number" name="n_mm__bottom" min="0" max="1500" step="0.1" required></label>
+        <p class="hint" id="el_place"></p>
+        <label class="row" title="A red rectangle of the calendar's size in both files: the cut that takes the calendar out of the sheet. With it both files are the calendar's size in the cutter's software, and the distances above are theirs">Calendar's edge in the files <input type="checkbox" name="b_outline"></label>
 
         <h2>Windows</h2>
         <label class="row">Number <input type="number" name="n_window" min="1" max="100" step="1" required></label>
@@ -155,13 +181,66 @@ button:disabled{ opacity: .4; cursor: default; }
             <button type="button" id="el_own_reset" title="Drops what this window has of its own: place, size, shape and door as the settings above give them">Back to the grid</button>
         </fieldset>
 
+        <h2>Picture</h2>
+        <label class="row" title="Each sheet can have a picture: the front one is the calendar's face, the back one shows through the opened doors">Printed on the <select id="el_picture_sheet" class="wide">
+            <option value="front">front sheet</option>
+            <option value="back">back sheet</option>
+        </select></label>
+        <div class="buttons">
+            <button type="button" id="el_picture_load" title="A picture file from this computer. It fills the calendar at first">Load a picture</button>
+            <button type="button" id="el_picture_remove">Remove it</button>
+        </div>
+        <input type="file" id="el_picture_file" accept="image/*" hidden>
+        <p class="hint" id="el_picture_hint">Without a picture a print shows the sheet's cut lines.</p>
+        <fieldset id="el_picture" hidden>
+            <div class="buttons">
+                <button type="button" data-picture="cover" title="As small as covers the calendar and the bleed around it, in the middle">Fill the calendar</button>
+                <button type="button" data-picture="contain" title="As large as fits into the calendar, in the middle">Fit into it</button>
+                <button type="button" data-picture="turn_left" title="A quarter turn against the clock">Turn ↺</button>
+                <button type="button" data-picture="turn_right" title="A quarter turn with the clock">Turn ↻</button>
+                <button type="button" data-picture="flip_x" title="Left becomes right">Mirror ↔</button>
+                <button type="button" data-picture="flip_y" title="Top becomes bottom">Mirror ↕</button>
+            </div>
+            <label class="row" title="The picture's middle, from the calendar's left edge">Middle x, mm <input type="number" name="picture__n_mm__x" step="any"></label>
+            <label class="row" title="The picture's middle, from the calendar's top edge">Middle y, mm <input type="number" name="picture__n_mm__y" step="any"></label>
+            <label class="row" title="Of what is left of the picture; its height follows, it is never stretched">Width, mm <input type="number" name="picture__n_mm__size_x" min="5" max="5000" step="any"></label>
+            <label class="row" title="Around its middle, with the clock">Turned, degrees <input type="number" name="picture__n_deg" min="-360" max="360" step="any"></label>
+            <label class="row" title="How much of the file is cut off at its left. What is left stays in its place">Cut off left, % <input type="number" name="picture__crop_0" min="0" max="95" step="any"></label>
+            <label class="row">Cut off top, % <input type="number" name="picture__crop_1" min="0" max="95" step="any"></label>
+            <label class="row">Cut off right, % <input type="number" name="picture__crop_2" min="0" max="95" step="any"></label>
+            <label class="row">Cut off bottom, % <input type="number" name="picture__crop_3" min="0" max="95" step="any"></label>
+            <p class="hint" id="el_picture_info"></p>
+            <p class="hint">Above the sheets, let the pointer move the picture: drag it to move it, a corner to size it, a side to cut it off. Ctrl and the wheel size it under the pointer.</p>
+        </fieldset>
+
         <h2>Cuts</h2>
         <label class="row" title="Width of the uncut places that hold a door shut; 0: none">Bridge, mm <input type="number" name="n_mm__bridge" min="0" max="5" step="0.05" required></label>
         <label class="row" title="Along a door's free edge: one bridge per this length of every stretch between two corners, and one at least">A bridge every, mm <input type="number" name="n_mm__bridge_distance" min="2" max="500" step="1" required></label>
         <label class="row" title="Length of the cut dashes of the fold a door turns on; they are fitted to the fold's length">Fold dash, mm <input type="number" name="n_mm__dash" min="0.2" max="50" step="0.1" required></label>
         <label class="row" title="Uncut between the dashes of a fold, and at both its ends">Fold gap, mm <input type="number" name="n_mm__gap" min="0.2" max="50" step="0.1" required></label>
-        <label class="row" title="Back sheet: how far a mark runs from a window's corner along both edges, and the length of the dashes along a curve">Mark on the back, mm <input type="number" name="n_mm__mark" min="0.5" max="20" step="0.5" required></label>
+        <label class="row" title="Back sheet: short cuts that show where the windows open, for pictures drawn by hand. Leave them out where the back's picture is printed: they would cut into it">Marks on the back <input type="checkbox" name="b_mark"></label>
+        <label class="row" title="How far a mark runs from a window's corner along both edges, and the length of the dashes along a curve">Mark's length, mm <input type="number" name="n_mm__mark" min="0.5" max="20" step="0.5" required></label>
         <label class="row" title="Back sheet, bottom right as seen from the front: dotted and mirrored, to be read from behind">VeryOS logo on the back <input type="checkbox" name="b_logo"></label>
+
+        <h2>Print</h2>
+        <label class="row" title="What a sheet with a picture shows in the print. With cut lines: a trial on plain paper, to cut and see whether the knife follows the printed lines. A sheet without a picture always shows its cut lines">Print <select name="s_print" class="wide">
+            <option value="picture">the pictures</option>
+            <option value="both">pictures with cut lines</option>
+            <option value="cut">cut lines only</option>
+        </select></label>
+        <label class="row" title="The picture is printed this far over the calendar's edge, so that a cut a little beside the edge shows no white">Bleed, mm <input type="number" name="n_mm__bleed" min="0" max="20" step="0.5" required></label>
+        <label class="row" title="Outside the calendar, cut off with the rest of the sheet: marks that point along the calendar's edges, and a line of a known length to lay a ruler on">Crop marks and ruler line <input type="checkbox" name="b_print_guide"></label>
+        <label class="row" title="Moves the whole print on its page. If a trial shows the print 0.5 left of the cuts: 0.5">Shift right, mm <input type="number" name="n_mm__print_x" min="-20" max="20" step="0.1" required></label>
+        <label class="row" title="If a trial shows the print 0.5 below the cuts: 0.5">Shift up, mm <input type="number" name="n_mm__print_y" min="-20" max="20" step="0.1" required></label>
+        <div class="buttons">
+            <button type="button" class="main wide" id="el_print" title="Front and back, each on a page as large as the sheet of paper. In the print dialog: this paper size, scale 100 %, margins none, and no fitting to the page in the printer's own settings">Print front and back</button>
+        </div>
+
+        <h2>Cutting files</h2>
+        <div class="buttons">
+            <button type="button" class="main" id="el_download__front">Front SVG</button>
+            <button type="button" class="main" id="el_download__back">Back SVG</button>
+        </div>
 
         <h2>Legend</h2>
         <ul id="el_legend">
@@ -169,225 +248,36 @@ button:disabled{ opacity: .4; cursor: default; }
             <li><svg viewBox="0 0 30 10"><path d="M 2 5 H 30" stroke="#0000ff" stroke-width="1.5" stroke-dasharray="6 4"/></svg>front: cut, the dashes of a fold</li>
             <li><svg viewBox="0 0 30 10"><path d="M 5 9 V 3 H 11 M 19 3 H 25 V 9" fill="none" stroke="#000000" stroke-width="1.5"/></svg>back: cut, marks at the windows</li>
             <li><svg viewBox="0 0 30 10"><path d="M 2 5 H 30" stroke="#808080" stroke-width="1.5" stroke-dasharray="2 2"/></svg>back: cut, the logo in dots</li>
-            <li><svg viewBox="0 0 30 10"><path d="M 0 5 H 30" stroke="#ff0000" stroke-width="1.5"/></svg>the calendar's edge</li>
+            <li><svg viewBox="0 0 30 10"><path d="M 0 5 H 30" stroke="#ff0000" stroke-width="1.5"/></svg>the calendar's edge: cut</li>
+            <li><svg viewBox="0 0 30 10"><path d="M 2 5 H 30" stroke="#303838" stroke-width="1.5" stroke-dasharray="4 3"/></svg>back: where a window opens, not cut</li>
+            <li><svg viewBox="0 0 30 10"><path d="M 0 5 H 30" stroke="#9aa0a0" stroke-width="1.5" stroke-dasharray="5 4"/></svg>the printer's margin</li>
         </ul>
 
-        <div id="el_action">
-            <button type="button" class="main wide" id="el_print" title="Front and back on a page each, in their real size: choose A4, scale 100 % and no margins in the print dialog">Print front and back</button>
-            <button type="button" class="main" id="el_download__front">Front SVG</button>
-            <button type="button" class="main" id="el_download__back">Back SVG</button>
-            <button type="button" class="wide" id="el_reset" title="All settings as at the first start; windows moved or changed alone go back to the grid">Start over</button>
+        <div class="buttons">
+            <button type="button" class="wide" id="el_reset" title="All settings as at the first start; windows moved or changed alone go back to the grid; the pictures are removed">Start over</button>
         </div>
         <p id="el_size"></p>
         <p id="el_status" role="status"></p>
     </form>
     <section id="el_stage" aria-label="Preview">
+        <div id="el_tool">
+            <fieldset class="choice" title="Windows: a click chooses a window, a drag moves it. Picture: a drag moves the sheet's picture, its corners size it, its sides cut it off, Ctrl and the wheel size it under the pointer">
+                <legend>The pointer moves</legend>
+                <label><input type="radio" name="s_mode" value="window" checked>windows</label>
+                <label><input type="radio" name="s_mode" value="picture">the picture</label>
+            </fieldset>
+            <label title="Larger sheets, to place a window on a picture exactly">Zoom <select id="el_zoom">
+                <option value="1">whole sheet</option>
+                <option value="2">2 ×</option>
+                <option value="4">4 ×</option>
+            </select></label>
+        </div>
         <h2>Front</h2>
-        <div class="sheet" id="el_sheet__front"></div>
+        <div class="sheet" id="el_sheet__front" data-sheet="front"><svg xmlns="http://www.w3.org/2000/svg"><g class="printed"><g class="picture"></g><g class="line"></g></g><g class="screen"></g></svg></div>
         <h2>Back, as seen from the front</h2>
-        <div class="sheet" id="el_sheet__back"></div>
+        <div class="sheet" id="el_sheet__back" data-sheet="back"><svg xmlns="http://www.w3.org/2000/svg"><g class="printed"><g class="picture"></g><g class="line"></g></g><g class="screen"></g></svg></div>
     </section>
 </main>
-<script type="module">
-import { o_setting__default, n_mm__line, f_a_o_window, f_o_door, f_a_s_problem, f_s_d, f_s_svg } from './calendar.module.js';
-
-let s_key__storage = 'paper_advent_calendar';
-let a_s_name__own = ['n_mm__x', 'n_mm__y', 'n_mm__size_x', 'n_mm__size_y', 's_shape', 's_door'];
-let el_panel = document.getElementById('el_panel');
-let el_sheet__front = document.getElementById('el_sheet__front');
-let el_sheet__back = document.getElementById('el_sheet__back');
-
-// The settings as the page last left them; they stay in this browser.
-let o_setting = structuredClone(o_setting__default);
-try{
-    let o_stored = JSON.parse(localStorage.getItem(s_key__storage)) ?? {};
-    for(let s_name of Object.keys(o_setting__default)){
-        if(s_name in o_stored){ o_setting[s_name] = o_stored[s_name]; }
-    }
-} catch(o_error){
-    console.warn(o_error);
-}
-let n_idx__selected = null;
-// the window being dragged: where the pointer took it, in mm
-let o_drag = null;
-let o_s_svg = { front: '', back: '' };
-
-// The form's fields are the settings but for n_seed and a_o_window__own.
-let f_a_el__field = function(s_name){
-    let v = el_panel.elements[s_name];
-    return v instanceof RadioNodeList ? [...v] : v ? [v] : [];
-};
-let f_fill_form = function(){
-    for(let [s_name, v] of Object.entries(o_setting)){
-        for(let el of f_a_el__field(s_name)){
-            if(Array.isArray(v)){ el.checked = v.includes(el.value); }
-            else if(el.type === 'checkbox'){ el.checked = v; }
-            else { el.value = v; }
-        }
-    }
-};
-let f_o_setting__form = function(){
-    let o = {};
-    for(let [s_name, v] of Object.entries(o_setting__default)){
-        let a_el = f_a_el__field(s_name);
-        if(!a_el.length){ continue; }
-        if(Array.isArray(v)){ o[s_name] = a_el.filter(function(el){ return el.checked; }).map(function(el){ return el.value; }); }
-        else if(a_el[0].type === 'checkbox'){ o[s_name] = a_el[0].checked; }
-        else { o[s_name] = a_el[0].valueAsNumber; }
-    }
-    return o;
-};
-
-let f_update = function(){
-    let o_form = f_o_setting__form();
-    el_panel.elements.n_mm__margin.max = Math.floor(Math.min(o_form.n_mm__calendar_x, o_form.n_mm__calendar_y) / 2 - 1);
-    let el_bad = [...el_panel.elements].find(function(el){ return el.name && !el.checkValidity(); });
-    let s_bad = el_bad ? `${el_bad.closest('label').textContent.trim()}: ${el_bad.validationMessage}` : '';
-    if(!s_bad && !o_form.a_s_shape.length){ s_bad = 'Shapes: tick one at least'; }
-    if(!s_bad && !o_form.a_s_door.length){ s_bad = 'Doors: tick one at least'; }
-    for(let s_id of ['el_print', 'el_download__front', 'el_download__back']){
-        document.getElementById(s_id).disabled = Boolean(s_bad);
-    }
-    if(s_bad){
-        document.getElementById('el_status').textContent = s_bad;
-        return;
-    }
-    Object.assign(o_setting, o_form);
-    try{ localStorage.setItem(s_key__storage, JSON.stringify(o_setting)); } catch(o_error){ console.warn(o_error); }
-    if(n_idx__selected !== null && n_idx__selected >= o_setting.n_window){ n_idx__selected = null; }
-
-    let a_o_window = f_a_o_window(o_setting);
-    let a_o_door = a_o_window.map(function(o_window){ return f_o_door(o_window, o_setting); });
-    o_s_svg.front = f_s_svg(o_setting, 'front');
-    o_s_svg.back = f_s_svg(o_setting, 'back');
-    el_sheet__front.innerHTML = o_s_svg.front;
-    el_sheet__back.innerHTML = o_s_svg.back;
-    // on the front sheet every window's opening takes the pointer
-    el_sheet__front.querySelector('svg').insertAdjacentHTML('beforeend', a_o_door.map(function(o_door, n_idx){
-        return `<path class="hit${n_idx === n_idx__selected ? ' selected' : ''}" data-idx="${n_idx}" d="${f_s_d(o_door.a_o_seg__opening)} Z"/>`;
-    }).join(''));
-
-    let b_selected = n_idx__selected !== null;
-    document.getElementById('el_own').hidden = !b_selected;
-    document.getElementById('el_own_hint').hidden = b_selected;
-    document.getElementById('el_own_title').textContent = b_selected ? `Window ${n_idx__selected + 1} of ${o_setting.n_window}` : 'One window';
-    if(b_selected){
-        let o_window = a_o_window[n_idx__selected];
-        let o_door = a_o_door[n_idx__selected];
-        for(let s_name of a_s_name__own){
-            let el = el_panel.elements[`own__${s_name}`];
-            if(el !== document.activeElement){ el.value = o_window[s_name]; }
-        }
-        document.getElementById('el_own_reset').disabled = !o_setting.a_o_window__own[n_idx__selected];
-        // the window close up, in the lines' real width
-        let n_mm__around = 3;
-        let el_detail = document.getElementById('el_detail');
-        el_detail.setAttribute('viewBox', [
-            o_window.n_mm__x - o_window.n_mm__size_x / 2 - n_mm__around, o_window.n_mm__y - o_window.n_mm__size_y / 2 - n_mm__around,
-            o_window.n_mm__size_x + 2 * n_mm__around, o_window.n_mm__size_y + 2 * n_mm__around
-        ].join(' '));
-        el_detail.innerHTML = `<g fill="none" stroke-width="${n_mm__line}">`
-            + `<path stroke="#000000" d="${o_door.a_a_o_seg__cut.map(f_s_d).join(' ')}"/>`
-            + `<path stroke="#0000ff" d="${o_door.a_a_o_seg__fold.map(f_s_d).join(' ')}"/></g>`;
-    }
-
-    // print: A4 the way the calendar lies, the sheet in the page's middle
-    let b_wide = o_setting.n_mm__calendar_x >= o_setting.n_mm__calendar_y;
-    let n_mm__page_x = b_wide ? 297 : 210;
-    let n_mm__page_y = b_wide ? 210 : 297;
-    document.getElementById('el_style__page').textContent = `@page{ size: A4 ${b_wide ? 'landscape' : 'portrait'}; margin: 0; }`
-        + `@media print{ .sheet{ width: ${n_mm__page_x}mm; height: ${n_mm__page_y - 0.5}mm; } }`;
-    document.getElementById('el_stage').style.setProperty('--n_ratio__sheet', o_setting.n_mm__calendar_x / o_setting.n_mm__calendar_y);
-
-    let n_row = Math.ceil(o_setting.n_window / o_setting.n_column);
-    let f_s = function(n){ return String(+n.toFixed(1)); };
-    document.getElementById('el_size').textContent = `${o_setting.n_window} windows in ${n_row} ${n_row === 1 ? 'row' : 'rows'}, `
-        + `${f_s((o_setting.n_mm__calendar_x - 2 * o_setting.n_mm__margin) / o_setting.n_column)} × ${f_s((o_setting.n_mm__calendar_y - 2 * o_setting.n_mm__margin) / n_row)} mm from one to the next. `
-        + `${a_o_door.reduce(function(n, o_door){ return n + o_door.a_a_o_seg__cut.length - o_door.a_a_o_seg__chain.length; }, 0)} bridges.`;
-    let a_s_problem = f_a_s_problem(o_setting);
-    if(o_setting.n_mm__calendar_x > n_mm__page_x || o_setting.n_mm__calendar_y > n_mm__page_y){
-        a_s_problem.push('The calendar is larger than A4: a print shows its middle only');
-    }
-    document.getElementById('el_status').textContent = a_s_problem.slice(0, 4).join('\n')
-        + (a_s_problem.length > 4 ? `\nand ${a_s_problem.length - 4} more` : '');
-};
-
-// What the chosen window has of its own, kept beside the grid's settings.
-let f_set_own = function(o_own){
-    o_setting.a_o_window__own[n_idx__selected] = { ...o_setting.a_o_window__own[n_idx__selected], ...o_own };
-};
-
-el_panel.addEventListener('input', function(o_event){
-    let el = o_event.target;
-    if(el.name.startsWith('own__') && el.checkValidity()){
-        let v = el.tagName === 'SELECT' ? el.value : el.valueAsNumber;
-        if(v === v){ f_set_own({ [el.name.slice(5)]: v }); }
-    }
-    f_update();
-});
-document.getElementById('el_shuffle').addEventListener('click', function(){
-    o_setting.n_seed++;
-    f_update();
-});
-document.getElementById('el_own_reset').addEventListener('click', function(){
-    delete o_setting.a_o_window__own[n_idx__selected];
-    f_update();
-});
-document.getElementById('el_reset').addEventListener('click', function(){
-    if(!confirm('Start over with the settings of the first start? Windows moved or changed alone go back to the grid.')){ return; }
-    o_setting = structuredClone(o_setting__default);
-    n_idx__selected = null;
-    f_fill_form();
-    f_update();
-});
-
-// A click on a window chooses it, a drag moves it in steps of 0.5 mm.
-let f_a_n__mm = function(o_event){
-    let o_rect = el_sheet__front.querySelector('svg').getBoundingClientRect();
-    let n_mm__per_px = o_setting.n_mm__calendar_x / o_rect.width;
-    return [(o_event.clientX - o_rect.left) * n_mm__per_px, (o_event.clientY - o_rect.top) * n_mm__per_px];
-};
-el_sheet__front.addEventListener('pointerdown', function(o_event){
-    let el_hit = o_event.target.closest('.hit');
-    n_idx__selected = el_hit ? Number(el_hit.dataset.idx) : null;
-    if(el_hit){
-        let o_window = f_a_o_window(o_setting)[n_idx__selected];
-        o_drag = { a_n__pointer: f_a_n__mm(o_event), a_n__window: [o_window.n_mm__x, o_window.n_mm__y] };
-        o_event.preventDefault();
-    }
-    f_update();
-});
-window.addEventListener('pointermove', function(o_event){
-    if(!o_drag){ return; }
-    let a_n = f_a_n__mm(o_event);
-    let [n_mm__x, n_mm__y] = [0, 1].map(function(n_idx){
-        return Math.round((o_drag.a_n__window[n_idx] + a_n[n_idx] - o_drag.a_n__pointer[n_idx]) * 2) / 2;
-    });
-    let o_window = f_a_o_window(o_setting)[n_idx__selected];
-    if(n_mm__x === o_window.n_mm__x && n_mm__y === o_window.n_mm__y){ return; }
-    // a window is not moved by a click: the pointer has to move it half a millimetre first
-    if(!o_drag.b_moved && Math.hypot(a_n[0] - o_drag.a_n__pointer[0], a_n[1] - o_drag.a_n__pointer[1]) < 0.5){ return; }
-    o_drag.b_moved = true;
-    f_set_own({ n_mm__x, n_mm__y });
-    f_update();
-});
-for(let s_event of ['pointerup', 'pointercancel']){
-    window.addEventListener(s_event, function(){ o_drag = null; });
-}
-
-document.getElementById('el_print').addEventListener('click', function(){ window.print(); });
-for(let s_sheet of ['front', 'back']){
-    document.getElementById(`el_download__${s_sheet}`).addEventListener('click', function(){
-        let el_a = document.createElement('a');
-        el_a.href = URL.createObjectURL(new Blob([o_s_svg[s_sheet]], { type: 'image/svg+xml' }));
-        el_a.download = `advent_calendar_${s_sheet}_veryos.svg`;
-        el_a.click();
-        setTimeout(function(){ URL.revokeObjectURL(el_a.href); }, 1000);
-    });
-}
-
-f_fill_form();
-f_update();
-</script>
+<script type="module" src="page.module.js"></script>
 </body>
 </html>

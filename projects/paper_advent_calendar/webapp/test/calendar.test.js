@@ -7,7 +7,8 @@
 import {
     a_s_shape, a_s_door, o_setting__default, n_ratio__hinge,
     f_n_len, f_n_len__path, f_a_n__at, f_b_corner, f_a_o_seg__part, f_s_d, f_a_a_n__dash, f_a_a_n__bridge,
-    f_o_door, f_a_o_window, f_a_n__logo, f_a_a_o_seg__logo, f_a_a_o_seg__logo_dot, f_a_s_problem, f_s_svg
+    f_o_door, f_a_o_window, f_a_n__logo, f_a_a_o_seg__logo, f_a_a_o_seg__logo_dot, f_a_n__box, f_a_s_problem,
+    f_a_n__box__file, f_s_svg
 } from '../calendar.module.js';
 
 let assert = function(b, s_message = 'assertion failed'){
@@ -334,12 +335,13 @@ Deno.test('openings of a known area', function(){
     assertAlmostEquals(f_n('round', 'double', 32, 32), Math.PI * 256 - 2 * n_beyond, 1e-6, 'circle, double');
 });
 
+// the default calendar: 277 x 190, a margin of 15 around the windows' field
 Deno.test('the grid: 24 windows in the middle of their cells, nothing wrong', function(){
     let a_o_window = f_a_o_window(o_setting__default);
     assert(a_o_window.length === 24, 'windows');
     a_o_window.forEach(function(o_window, n_idx){
-        assertAlmostEquals(o_window.n_mm__x, 15 + (n_idx % 6 + 0.5) * 260 / 6, 1e-9, 'x');
-        assertAlmostEquals(o_window.n_mm__y, 15 + (Math.floor(n_idx / 6) + 0.5) * 180 / 4, 1e-9, 'y');
+        assertAlmostEquals(o_window.n_mm__x, 15 + (n_idx % 6 + 0.5) * 247 / 6, 1e-9, 'x');
+        assertAlmostEquals(o_window.n_mm__y, 15 + (Math.floor(n_idx / 6) + 0.5) * 160 / 4, 1e-9, 'y');
         assert(o_window.n_mm__size_x === 32 && o_window.n_mm__size_y === 32, 'size');
     });
     assert(f_a_s_problem(o_setting__default).length === 0, f_a_s_problem(o_setting__default).join());
@@ -348,9 +350,9 @@ Deno.test('the grid: 24 windows in the middle of their cells, nothing wrong', fu
 Deno.test('the grid: a last row that is not full stands in the middle', function(){
     let a_o_window = f_a_o_window({ ...o_setting__default, n_window: 26 });
     assert(a_o_window.length === 26, 'windows');
-    assertAlmostEquals(a_o_window[24].n_mm__x + a_o_window[25].n_mm__x, 290, 1e-9, 'last row');
-    assertAlmostEquals(a_o_window[25].n_mm__x - a_o_window[24].n_mm__x, 260 / 6, 1e-9, 'last row\'s step');
-    assertAlmostEquals(a_o_window[25].n_mm__y, 15 + 4.5 * 180 / 5, 1e-9, 'last row\'s height');
+    assertAlmostEquals(a_o_window[24].n_mm__x + a_o_window[25].n_mm__x, 277, 1e-9, 'last row');
+    assertAlmostEquals(a_o_window[25].n_mm__x - a_o_window[24].n_mm__x, 247 / 6, 1e-9, 'last row\'s step');
+    assertAlmostEquals(a_o_window[25].n_mm__y, 15 + 4.5 * 160 / 5, 1e-9, 'last row\'s height');
 });
 
 Deno.test('the mix: only what is ticked, each about as often, the same for the same seed', function(){
@@ -413,8 +415,8 @@ Deno.test('the logo: three closed outlines of its size, dotted and mirrored in t
     assert(Math.abs(f_n_area(a_a_o_seg[0])) > 4 * Math.abs(f_n_area(a_a_o_seg[1])), 'outer outline');
 
     let a_n__box = f_a_n__logo(o_setting__default);
-    // 12 wide, 4 from the right and the bottom edge of 290 x 210
-    assert(JSON.stringify(a_n__box.map(function(n){ return +n.toFixed(6); })) === JSON.stringify([274, +(206 - 12 * 31.2528266758 / 43.9095293518).toFixed(6), 286, 206]), `logo at ${a_n__box}`);
+    // 12 wide, 4 from the right and the bottom edge of 277 x 190
+    assert(JSON.stringify(a_n__box.map(function(n){ return +n.toFixed(6); })) === JSON.stringify([261, +(186 - 12 * 31.2528266758 / 43.9095293518).toFixed(6), 273, 186]), `logo at ${a_n__box}`);
     let a_a_o_seg__dot = f_a_a_o_seg__logo_dot(o_setting__default);
     let n_scale = 12 / 43.9095293518;
     for(let a_o_seg of a_a_o_seg__dot){
@@ -435,7 +437,7 @@ let a_o_window__own = [{ n_mm__x: 40, n_mm__y: 30, n_mm__size_x: 55, n_mm__size_
 let a_o_setting = [
     o_setting__default,
     { ...o_setting__default, a_s_door: a_s_door, n_seed: 5, n_mm__corner: 6, a_o_window__own },
-    { ...o_setting__default, n_mm__calendar_x: 210, n_mm__calendar_y: 297, n_column: 4, n_window: 25, b_outline: false, b_logo: false, n_mm__bridge: 0 },
+    { ...o_setting__default, n_mm__calendar_x: 210, n_mm__calendar_y: 297, n_column: 4, n_window: 25, b_outline: false, b_logo: false, b_mark: false, n_mm__bridge: 0 },
     { ...o_setting__default, n_mm__calendar_x: 100.5, n_mm__calendar_y: 60, n_window: 3, n_column: 3, n_mm__margin: 5, n_mm__window_x: 20, n_mm__window_y: 30, a_s_shape: ['arch'], a_s_door: ['double'] }
 ];
 
@@ -452,7 +454,7 @@ a_o_setting.forEach(function(o_setting, n_idx__setting){
             assert(s_box === `0 0 ${s_x} ${s_y}`, 'viewBox');
             let a_a_v = s_sheet === 'front'
                 ? [['cut', f_n('a_a_o_seg__cut')], ['fold', f_n('a_a_o_seg__fold')], ['mark', null], ['logo', null]]
-                : [['cut', null], ['fold', null], ['mark', f_n('a_a_o_seg__mark')], ['logo', o_setting.b_logo ? f_a_a_o_seg__logo_dot(o_setting).length : null]];
+                : [['cut', null], ['fold', null], ['mark', o_setting.b_mark ? f_n('a_a_o_seg__mark') : null], ['logo', o_setting.b_logo ? f_a_a_o_seg__logo_dot(o_setting).length : null]];
             for(let [s_name, n_line] of a_a_v){
                 let s_d = f_s_d__of(s_svg, `${s_sheet}_${s_name}`);
                 assert((s_d === undefined) === (n_line === null), `${s_name} is there or not`);
@@ -470,7 +472,7 @@ a_o_setting.forEach(function(o_setting, n_idx__setting){
         let a_o_seg = a_o_door.flatMap(function(o_door){ return o_door.a_o_seg__opening.concat(o_door.a_a_o_seg__chain.flat()); });
         let s_svg__front = f_s_svg(o_setting, 'front'), s_svg__back = f_s_svg(o_setting, 'back');
         let n_len = 0;
-        for(let s_d of [f_s_d__of(s_svg__front, 'front_cut'), f_s_d__of(s_svg__front, 'front_fold'), f_s_d__of(s_svg__back, 'back_mark')]){
+        for(let s_d of [f_s_d__of(s_svg__front, 'front_cut'), f_s_d__of(s_svg__front, 'front_fold'), f_s_d__of(s_svg__back, 'back_mark') ?? '']){
             for(let a_a_n of f_a_a_a_n__read(s_d)){
                 for(let a_n of a_a_n){ assert(f_n_distance__path(a_n, a_o_seg) < 1e-3, `a line through ${a_n}`); }
                 n_len += a_a_n.slice(1).reduce(function(n, a_n, n_idx){ return n + f_n_distance(a_n, a_a_n[n_idx]); }, 0);
@@ -478,4 +480,45 @@ a_o_setting.forEach(function(o_setting, n_idx__setting){
         }
         assert(n_len > 0, 'no lines');
     });
+});
+
+Deno.test('the box around paths: lines by their ends, arcs by where they reach furthest', function(){
+    assert(f_a_n__box([]) === null, 'around nothing');
+    assert(String(f_a_n__box([[{ a_n_p: [3, 9], a_n_q: [-1, 4] }]])) === '-1,4,3,9', 'a line');
+    // a quarter from the right to the bottom, a half over the top either way round, an
+    // arc over top and left, an arc that reaches no extreme
+    for(let [o_arc, a_n__box] of [
+        [{ a_n_c: [10, 10], n_r: 2, n_rad__from: 0, n_rad__to: Math.PI / 2 }, [10, 10, 12, 12]],
+        [{ a_n_c: [0, 0], n_r: 5, n_rad__from: Math.PI, n_rad__to: 2 * Math.PI }, [-5, -5, 5, 0]],
+        [{ a_n_c: [0, 0], n_r: 5, n_rad__from: 2 * Math.PI, n_rad__to: Math.PI }, [-5, -5, 5, 0]],
+        [{ a_n_c: [1, 2], n_r: 3, n_rad__from: -Math.PI / 4, n_rad__to: -5 * Math.PI / 4 }, [-2, -1, 1 + 3 * Math.SQRT1_2, 2 + 3 * Math.SQRT1_2]],
+        [{ a_n_c: [0, 0], n_r: 5, n_rad__from: 0.2, n_rad__to: 1 }, [5 * Math.cos(1), 5 * Math.sin(0.2), 5 * Math.cos(0.2), 5 * Math.sin(1)]]
+    ]){
+        f_a_n__box([[o_arc]]).forEach(function(n, n_idx){ assertAlmostEquals(n, a_n__box[n_idx], 1e-9, `arc from ${o_arc.n_rad__from} to ${o_arc.n_rad__to}`); });
+    }
+    // every door's opening, against points sampled along it
+    for(let s_shape of a_s_shape){
+        for(let s_door of a_s_door){
+            let a_o_seg = f_o_door({ n_mm__x: 40, n_mm__y: 30, n_mm__size_x: 50, n_mm__size_y: 14, s_shape, s_door }, o_setting__default).a_o_seg__opening;
+            let a_a_n = f_a_a_n__sample(a_o_seg, 4000);
+            f_a_n__box([a_o_seg]).forEach(function(n, n_idx){
+                let f = n_idx < 2 ? Math.min : Math.max;
+                assertAlmostEquals(n, f(...a_a_n.map(function(a_n__point){ return a_n__point[n_idx % 2]; })), 1e-5, `${s_shape}, ${s_door}`);
+            });
+        }
+    }
+});
+
+Deno.test('a file\'s box: the calendar with its edge in the file, else what is cut', function(){
+    for(let s_sheet of ['front', 'back']){
+        assert(String(f_a_n__box__file(o_setting__default, s_sheet)) === '0,0,277,190', `${s_sheet} with the edge`);
+    }
+    // without the edge: the windows' field on the front, 32 wide windows in cells of 247 / 6 by 40
+    let o_setting = { ...o_setting__default, b_outline: false, a_s_shape: ['rect'], a_s_door: ['left'] };
+    let a_n = f_a_n__box__file(o_setting, 'front');
+    [15 + 247 / 12 - 16, 19, 277 - 15 - 247 / 12 + 16, 171].forEach(function(n, n_idx){ assertAlmostEquals(a_n[n_idx], n, 1e-9, 'front without the edge'); });
+    // the back reaches to the logo; without logo and marks it holds nothing
+    assert(String(f_a_n__box__file(o_setting, 'back').slice(2)) === '273,186', 'back without the edge');
+    assert(f_a_n__box__file({ ...o_setting, b_logo: false, b_mark: false }, 'back') === null, 'an empty back');
+    assert(!f_s_svg({ ...o_setting, b_logo: false, b_mark: false }, 'back').includes('<path'), 'an empty back file');
 });
