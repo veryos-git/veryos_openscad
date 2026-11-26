@@ -5,7 +5,7 @@
 // it is on the calendar, turned and mirrored or not; and the SVG has to put it there too.
 
 import {
-    a_s_side, n_mm__size_min, f_o_picture, f_a_n__px, f_a_n__size, f_n_dpi, f_a_n__calendar, f_a_n__own, f_a_n__handle,
+    a_s_side, n_mm__size_min, f_o_picture, f_a_n__px, f_a_n__size, f_n_dpi, f_a_n__calendar, f_a_n__own, f_a_n__from_px, f_a_n__to_px, f_a_n__handle,
     f_o_picture__fitted, f_b_covered, f_o_picture__resized, f_o_picture__scaled, f_o_picture__cut, f_o_picture__cropped, f_s_picture
 } from '../picture.module.js';
 
@@ -85,6 +85,21 @@ Deno.test('the picture\'s own frame: there and back, and where its handles sit',
         f_assert_same_place(f_a_n__handle(o_picture, [-n_x__sign, -n_y__sign]), f_a_n__of_px(o_picture, [n_x, n_y]), `${f_s_name(o_picture)}: the file's top left`, 1e-9);
         f_assert_same_place(f_a_n__handle(o_picture, [n_x__sign, n_y__sign]), f_a_n__of_px(o_picture, [n_x + n_w, n_y + n_h]), `${f_s_name(o_picture)}: the file's bottom right`, 1e-9);
     }
+});
+
+Deno.test('a place of the file on the calendar, and the calendar\'s point in the file', function(){
+    for(let o_picture of a_o_picture){
+        for(let a_n__px of [...a_a_n__px, [0, 0], [3000, 2000], [-40, 2500.5]]){
+            let a_n = f_a_n__from_px(o_picture, a_n__px);
+            f_assert_same_place(a_n, f_a_n__of_px(o_picture, a_n__px), `${f_s_name(o_picture)}: pixel ${a_n__px}`);
+            f_assert_same_place(f_a_n__to_px(o_picture, a_n), a_n__px, `${f_s_name(o_picture)}: pixel ${a_n__px} and back`, 1e-8);
+        }
+    }
+    // lying straight, 240 mm for 3000 pixels: the file's middle at the picture's, a pixel 0.08 mm
+    f_assert_same_place(f_a_n__to_px(o_picture__plain, [140, 95]), [1500, 1000], 'middle');
+    f_assert_same_place(f_a_n__to_px(o_picture__plain, [140 + 8, 95 - 4]), [1600, 950], 'beside the middle');
+    // mirrored left to right, the same point of the calendar shows the file's other half
+    f_assert_same_place(f_a_n__to_px({ ...o_picture__plain, b_flip_x: true }, [140 + 8, 95 - 4]), [1400, 950], 'mirrored');
 });
 
 Deno.test('fitted: in the box\'s middle, as small as covers it or as large as fits into it', function(){

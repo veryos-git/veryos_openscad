@@ -81,7 +81,7 @@ button:disabled{ opacity: .4; cursor: default; }
     .sheet{ width: calc(min(100%, (100vh - 100px) * var(--n_ratio__sheet, 1.414)) * var(--n_zoom, 1)); box-shadow: 0 10px 40px #00000080; }
     /* a picture's handles show around the paper too */
     .sheet > svg{ width: 100%; height: auto; overflow: visible; }
-    .sheet path, .sheet rect, .sheet polygon, .sheet circle{ vector-effect: non-scaling-stroke; stroke-width: 1px; }
+    .sheet path, .sheet rect, .sheet polygon, .sheet circle, .sheet line{ vector-effect: non-scaling-stroke; stroke-width: 1px; }
     /* on a picture the lines get a light rim */
     .has_picture .cut, .has_picture .opening{ filter: drop-shadow(0 0 0.4px #ffffff) drop-shadow(0 0 0.4px #ffffff); }
     .sheet .margin{ fill: none; stroke: #9aa0a0; stroke-dasharray: 5 4; }
@@ -93,6 +93,17 @@ button:disabled{ opacity: .4; cursor: default; }
     .sheet .handle{ fill: var(--s_col__gold); stroke: #101517; cursor: crosshair; pointer-events: all; touch-action: none; }
     .sheet .handle.side{ fill: #ffffff; }
     body[data-mode=picture] .sheet{ cursor: move; touch-action: none; }
+    /* matching by four points: the picture's points gold, the pattern's places white, a
+       line from each point to its place; what is not being clicked steps back */
+    .sheet .match{ pointer-events: none; }
+    .sheet circle.match.from{ fill: var(--s_col__gold); stroke: #101517; }
+    .sheet circle.match.to{ fill: #ffffff; stroke: #101517; }
+    .sheet circle.match.next{ fill: none; stroke: var(--s_col__gold); stroke-width: 2px; }
+    .sheet line.match{ stroke: var(--s_col__gold); stroke-dasharray: 4 3; }
+    .sheet text.match{ fill: #101517; font-family: system-ui, sans-serif; font-weight: 700; text-anchor: middle; dominant-baseline: central; }
+    body[data-match] .sheet.matching{ cursor: crosshair; touch-action: none; }
+    body[data-match=from] .sheet.matching .cut{ opacity: .3; }
+    body[data-match=to] .sheet.matching .picture{ opacity: .55; }
 }
 @media (max-width: 700px){
     #el_app{ grid-template-columns: 1fr; align-content: start; height: auto; }
@@ -211,6 +222,19 @@ button:disabled{ opacity: .4; cursor: default; }
             <label class="row">Cut off bottom, % <input type="number" name="picture__crop_3" min="0" max="95" step="any"></label>
             <p class="hint" id="el_picture_info"></p>
             <p class="hint">Above the sheets, let the pointer move the picture: drag it to move it, a corner to size it, a side to cut it off. Ctrl and the wheel size it under the pointer.</p>
+            <div class="buttons">
+                <button type="button" class="wide" id="el_match" title="Click four points on the picture, then the four places of the cut pattern they belong to. The picture is laid anew so that each point lies on its place, slanted and stretched as that takes: a photo of a drawing taken at a slant is put right">Match 4 points to the cut pattern</button>
+                <button type="button" class="wide" id="el_match_undo" title="The picture as it was before it was matched" hidden>Undo the match</button>
+            </div>
+            <p class="hint" id="el_match_note"></p>
+        </fieldset>
+        <fieldset id="el_matching" hidden>
+            <p id="el_match_step"></p>
+            <p class="hint">Zoom in to hit a point. On the cut pattern a click snaps to the corners and middles of the calendar and its windows; hold Alt to place it freely.</p>
+            <div class="buttons">
+                <button type="button" id="el_match_back" title="Takes the last point away, to click it again">One point back</button>
+                <button type="button" id="el_match_cancel" title="Leaves the picture as it was; also the Esc key">Cancel</button>
+            </div>
         </fieldset>
 
         <h2>Cuts</h2>

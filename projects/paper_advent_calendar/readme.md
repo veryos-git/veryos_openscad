@@ -28,7 +28,7 @@ Needs [Deno](https://deno.com) and a browser. The page does all the work itself;
 Print and cut meet if both put the calendar at the same place of the sheet of paper, measured from its bottom left corner.
 
 1. Set the sheet of paper, the calendar's size and its distance from the sheet's left and bottom edge. The calendar lies inside the printer's margin, the dashed frame.
-2. Load a picture for the front, and one for the back. Move the picture under the windows, or the windows onto the picture.
+2. Load a picture for the front, and one for the back. Move the picture under the windows, the windows onto the picture, or lay the picture by four points, see Match by four points.
 3. Trial: print `cut lines only` on plain paper. Lay a ruler on the ruler line under the calendar: 200 mm must be 200 mm.
 4. In the cutter's software place `Front SVG` at the distances the app names under the calendar's settings, lay the trial sheet on the mat with its bottom left corner at the software's, and cut.
 5. Where the knife runs beside the printed lines, measure how far and enter it as `Shift right` and `Shift up`; print and cut again until it fits.
@@ -129,12 +129,40 @@ Above the sheets: what the pointer moves, windows or the picture, and the zoom (
 | `Turn`, `Mirror` | a quarter turn; left for right, top for bottom |
 | Fields | middle, width, turn in degrees, cut off left, top, right, bottom in % of the file |
 | Under the fields | the file's pixels, the size shown, pixels per inch; below 150 it says coarse |
+| `Match 4 points to the cut pattern` | see Match by four points |
 | `Remove it` | the sheet's picture and its file are gone |
 
 - The back sheet shows where every window opens, dashed; these lines are not cut and not printed.
 - A picture file that says it lies turned (a phone's photo) is shown as it is meant.
 
 Under the buttons: what is wrong, e.g. `The calendar lies in the printer's margin, where a print stays blank: right`, `The front picture leaves a part of the calendar blank`, `The back picture does not reach 2 mm over the calendar's edge all around`, `Windows 8 and 9 overlap`, `Window 24 lies on the logo`; printing and the files still work.
+
+## Match by four points
+
+Four points of the picture are laid on four places of the cut pattern, and the rest of the picture follows as a flat sheet seen at a slant does: straight lines stay straight. A photo of a drawing taken at a slant is put right that way.
+
+![the mode with three of four places clicked: gold the picture's points, white their places](match.png)
+
+| Step | |
+|---|---|
+| `Match 4 points to the cut pattern` | the picture is fitted into the calendar, all of it in view; the panel says what to click |
+| 4 clicks on the picture | its points, numbered in gold; the cut lines step back. A click beside the picture is no point |
+| 4 clicks on the cut pattern | the place of point 1, then of 2, 3 and 4, numbered in white, a dashed line from each point to its place; the picture steps back |
+| With the fourth place | the picture is laid anew, the mode is left |
+| `One point back`, `Cancel` or Esc | the last click undone; the picture as it was before the mode |
+| `Undo the match` | afterwards: the picture and its place as before; until another picture is loaded or the page is left |
+
+| Rule | |
+|---|---|
+| Snap | a place within 8 pixels of the screen of one of the pattern's places goes there: the calendar's corners and middle, every window's middle, the corners of its box, and where its opening's edge goes from one line or curve to the next. Alt: just where it is clicked |
+| Ring | where the next click would land |
+| Order | the places in the order of the points. Else the picture would fold over on the calendar: said, nothing laid |
+| Three on a line | of the points or of the places: said, nothing laid |
+| Result | a new picture file over the calendar and its bleed, in place of the old one: as fine as the old picture comes to lie in the calendar's middle, between 100 and 300 pixels per inch; clear where the old picture ends, which is said. It is a picture like any other: moved, sized, printed, matched again |
+| What is cut off, turned, mirrored before | stays so: the points are taken from the picture as it is shown |
+
+- Zoom in before clicking: a point is as exact as the click.
+- Every match lays the pixels anew once; a second match of the result softens it a little more than one match of the first file would.
 
 ## Print
 
@@ -193,17 +221,20 @@ Not found: where Suite's zero lies and which point of a file its X and Y mean. T
 
 | Check | How | Result |
 |---|---|---|
-| Doors, grid, logo, cutting files | `deno task test`, `calendar.test.js`: every shape with every door in 6 sizes and 4 cut settings; grid, mix, a window's own values; the logo; both SVGs read back by a path reader written after the SVG specification; the box around a file's lines | 129 pass |
-| Pictures | same, `picture.test.js`: fitted into and over boxes, sized by every corner and around a point, cut off at every side by number and by the pointer, lying straight, turned and mirrored: a pixel of the file that stays in the picture stays where it is, and the SVG puts it there too | 9 pass |
+| Doors, grid, logo, cutting files | `deno task test`, 153 in all; `calendar.test.js`: every shape with every door in 6 sizes and 4 cut settings; grid, mix, a window's own values; the logo; both SVGs read back by a path reader written after the SVG specification; the box around a file's lines | 129 pass |
+| Pictures | same, `picture.test.js`: fitted into and over boxes, sized by every corner and around a point, cut off at every side by number and by the pointer, lying straight, turned and mirrored: a pixel of the file that stays in the picture stays where it is, and the SVG puts it there too | 10 pass |
+| Match | same, `match.test.js`: the mapping takes each of four points to its place within 0.000000001 mm, and a known slant is found again from four of its points; fours that cannot be matched; the pattern's places and the snap; pixels laid anew show the colour of the place they come from, to a step of 255, straight and at a slant, and a clear pixel gives no colour | 7 pass |
 | Sheet | same, `sheet.test.js`: the calendar's place from the bottom left corner; the print's lines are the cutting file's own, at the place the file's box has for the cutter; crop marks, ruler line, what is said | 7 pass |
-| Tests notice faults | 26 faults put into copies of the three modules one at a time (a sign, a swapped side, a missing clamp, the place measured from the top, ...); 12 more in the first version's module | each fails a test |
+| Tests notice faults | 42 faults put into copies of the four modules one at a time (a sign, a swapped side, a missing clamp, the place measured from the top, a mapping put together the wrong way round, ...); 12 more in the first version's module | each fails a test |
 | Print, measured | headless Chrome's PDF at 300 dots per inch, one-coloured test picture. A4 lying, calendar 277 × 190 at 10 / 10: picture with 2 of bleed expected 8 to 289 and 8 to 202 mm from the page's top left | 8.04 to 288.97, 7.96 to 202.01; the same on page 2 |
 | | the calendar's edge with `pictures with cut lines`, 0.2 wide, expected 9.9 to 287.1 and 9.9 to 200.1 | 9.91 to 287.1, 9.91 to 200.07 |
 | | shift 1.5 right, 2.5 up: expected 9.5 to 290.5, 5.5 to 199.5 | 9.48 to 290.49, 5.42 to 199.56 |
 | | A4 standing, calendar 150 × 200 at 12.5 / 30: edge expected 12.4 to 162.6, 66.9 to 267.1 | 12.36 to 162.56, 66.89 to 267.12 |
 | | what is on a page: no cut lines on a picture, no picture with `cut lines only`, crop marks from 2 to 295 mm, nothing but the picture without guides and bleed; always 2 pages of the sheet's size | as expected |
 | Page | headless Chrome: Chrome's own boxes of the drawn lines and pictures against the modules'; windows chosen and dragged; a picture loaded, dragged, sized by a corner, cut off at a side, sized by Ctrl and wheel, turned, mirrored, fitted, set by fields; a file that is no picture; both pictures and their files after a reload; zoom; both downloads; remove; start over; 400 px wide | 68 checks pass with the print's, no errors |
-| A turned photo | a JPEG of 400 × 200 that says it lies turned | shown 200 × 400 with its corner where it belongs, by a screenshot |
+| Match, measured | headless Chrome, 24 checks: a drawing of the calendar, 277 × 190 mm with two coloured squares, as a "photo" of 3000 × 2200 pixels taken at a slant; its four corners clicked, then the calendar's corners, each 1.5 mm beside it. The magenta square, drawn from 100 to 120 and 50 to 70 mm | in the new picture 100.01 to 119.95 and 49.97 to 70.03; in the print's PDF, 10 mm further on the sheet, 109.98 to 129.96 and 59.94 to 79.93 |
+| | the same run: a click beside the picture, one point back, places in the wrong order, three points on a line, cancel by button and Esc, a match with Alt, undo, a reload, a picture that ends on the calendar | as described above, no errors |
+| A turned photo | a JPEG of 400 × 200 that says it lies turned | shown 200 × 400 with its corner where it belongs, by a screenshot; matched by its corners, the corner lies where it is shown |
 | Not checked | a print on paper; a cut; the files in Bambu Suite; Firefox; a touch screen; a picture of 20 megapixels and more | |
 
 - Chrome's PDF of an A4 page is 297.01 × 209.89 mm, 0.11 short in height; places are reckoned from the top left corner, so a sheet's bottom edge may be off by that much.
@@ -219,6 +250,7 @@ Not found: where Suite's zero lies and which point of a file its X and Y mean. T
 | Sheet on sheet | both sheets get the calendar's edge cut, so they are the same size; how well the back's pictures sit behind the doors depends on print and cut of both sheets |
 | Glue | where not to glue is not in the files |
 | Layout and pictures | kept in the browser only; the SVGs hold the settings in `<desc>`, but the app cannot open them |
+| Match | the points are clicked once and not dragged afterwards: one point back, or match the result again. The old file is gone with the page, the four points with the match |
 | Calendar's size | the first brief said "A4 290x210mm"; the second asks for less than the printer prints: 277 × 190 now |
 | `idea_veryos.jpeg`, `reference/`, `software_improvements_decoration_drawing/image.png` | the two sketches and a photo of a bought calendar, not in git |
 
@@ -231,7 +263,9 @@ Not found: where Suite's zero lies and which point of a file its X and Y mean. T
 | A trial print of the cut lines and a shift in mm | trust in printer and cutter |
 | Bleed, crop marks and a ruler line outside the calendar | a picture that ends at the edge, and no way to see a scaled print |
 | A picture per sheet, front and back | the front alone |
-| A picture is moved, sized, turned, mirrored and cut off, never stretched | free transforms |
+| A picture is moved, sized, turned, mirrored and cut off, never stretched, but by a match of four points | free transforms by handles |
+| A match makes a new picture file, laid pixel by pixel | a slant kept as numbers and drawn by the browser: an SVG has no such transform, and a print should not depend on a trick |
+| The places of a match snap to the cut pattern | places by eye alone, never quite on a corner |
 | The files' own box named for the cutter's software | the calendar's place alone, wrong for a file without the edge |
 | Windows in a grid, single ones moved or changed by hand | free placement only, or a random scatter |
 | Shapes and doors dealt out evenly by a seed | set per window only |

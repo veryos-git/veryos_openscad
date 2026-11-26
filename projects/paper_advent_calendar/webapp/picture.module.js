@@ -51,6 +51,25 @@ let f_a_n__own = function(o_picture, a_n){
     let n_y = a_n[1] - o_picture.n_mm__y;
     return [n_x * Math.cos(n_rad) + n_y * Math.sin(n_rad), -n_x * Math.sin(n_rad) + n_y * Math.cos(n_rad)];
 };
+// Where a place of the file, given in its pixels from its top left corner, lies on the
+// calendar; and which place of the file lies at a point of the calendar.
+let f_a_n__from_px = function(o_picture, a_n__px){
+    let [n_x, n_y, n_px__x, n_px__y] = f_a_n__px(o_picture);
+    let n_mm__per_px = o_picture.n_mm__size_x / n_px__x;
+    return f_a_n__calendar(o_picture, [
+        (a_n__px[0] - n_x - n_px__x / 2) * n_mm__per_px * (o_picture.b_flip_x ? -1 : 1),
+        (a_n__px[1] - n_y - n_px__y / 2) * n_mm__per_px * (o_picture.b_flip_y ? -1 : 1)
+    ]);
+};
+let f_a_n__to_px = function(o_picture, a_n){
+    let [n_x, n_y, n_px__x, n_px__y] = f_a_n__px(o_picture);
+    let n_mm__per_px = o_picture.n_mm__size_x / n_px__x;
+    let a_n__own = f_a_n__own(o_picture, a_n);
+    return [
+        n_x + n_px__x / 2 + a_n__own[0] / n_mm__per_px * (o_picture.b_flip_x ? -1 : 1),
+        n_y + n_px__y / 2 + a_n__own[1] / n_mm__per_px * (o_picture.b_flip_y ? -1 : 1)
+    ];
+};
 // Where a handle sits on the calendar: a_n__sign -1, 0 or 1 along the frame's x and y, so
 // -1, -1 the frame's top left corner and 1, 0 the middle of its right side.
 let f_a_n__handle = function(o_picture, a_n__sign){
@@ -144,6 +163,6 @@ let f_s_picture = function(o_picture, s_href){
 };
 
 export {
-    a_s_side, n_mm__size_min, f_o_picture, f_a_n__px, f_a_n__size, f_n_dpi, f_a_n__calendar, f_a_n__own, f_a_n__handle,
+    a_s_side, n_mm__size_min, f_o_picture, f_a_n__px, f_a_n__size, f_n_dpi, f_a_n__calendar, f_a_n__own, f_a_n__from_px, f_a_n__to_px, f_a_n__handle,
     f_o_picture__fitted, f_b_covered, f_o_picture__resized, f_o_picture__scaled, f_o_picture__cut, f_o_picture__cropped, f_s_picture
 };

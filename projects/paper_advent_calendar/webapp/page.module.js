@@ -3,8 +3,9 @@
 // on them, and the pictures' files.
 
 import { o_setting__default, n_mm__line, f_a_o_window, f_o_door, f_a_s_problem, f_s_d, f_s_svg, f_a_n__box__file } from './calendar.module.js';
-import { a_s_side, f_o_picture, f_a_n__size, f_n_dpi, f_a_n__handle, f_o_picture__fitted, f_o_picture__resized, f_o_picture__scaled, f_o_picture__cut, f_o_picture__cropped } from './picture.module.js';
+import { a_s_side, f_o_picture, f_a_n__px, f_a_n__size, f_n_dpi, f_a_n__from_px, f_a_n__to_px, f_a_n__handle, f_o_picture__fitted, f_o_picture__resized, f_o_picture__scaled, f_o_picture__cut, f_o_picture__cropped } from './picture.module.js';
 import { f_a_n__calendar, f_a_n__distance, f_a_n__bleed, f_a_s_problem__sheet, f_s_picture__sheet, f_s_line__sheet } from './sheet.module.js';
+import { f_a_n_h, f_a_n__mapped, f_s_problem__match, f_a_a_n__anchor, f_a_n__snapped, f_n_px__per_mm, f_a_n__warped } from './match.module.js';
 
 let s_key__storage = 'paper_advent_calendar';
 let a_s_sheet = ['front', 'back'];
@@ -15,6 +16,13 @@ let a_a_n__sign = [[-1, -1], [1, -1], [1, 1], [-1, 1], [-1, 0], [0, -1], [1, 0],
 let n_px__handle = 6;
 // a picture's frame and handles show this far around their sheet of paper and no further: not on the other sheet
 let n_px__around = 20;
+// matching by four points: how large a point is drawn, and from how far a click snaps to a place of the cut pattern
+let n_px__match = 9;
+let n_px__snap = 8;
+// a matched picture is laid anew from no more of its file than this along its longer
+// side, and no finer than a print can show
+let n_px__work = 4096;
+let n_px__per_mm__print = 300 / 25.4;
 let el_panel = document.getElementById('el_panel');
 let el_stage = document.getElementById('el_stage');
 
@@ -37,6 +45,13 @@ let s_sheet__picture = 'front';
 let o_s_url = { front: '', back: '' };
 // what is being dragged: a window, or a sheet's picture as it was when taken
 let o_drag = null;
+// a picture being matched to the cut pattern by four points: its sheet, the points
+// clicked so far, a_a_n__px on the picture in its file's pixels and a_a_n__mm their
+// places on the calendar, the picture's place before, where a click would land now,
+// and what there is to say
+let o_match = null;
+// the picture a match took the place of, to bring it back: its sheet, file and place
+let o_undo = null;
 let o_s_svg = { front: '', back: '' };
 
 // The pictures' files are too large for the settings' place: they are kept in the
@@ -102,14 +117,27 @@ let f_s_screen = function(s_sheet, a_o_door, n_mm__per_px){
     if(s_sheet === 'back'){
         a_s.push(...a_o_door.map(function(o_door){ return `<path class="opening" d="${f_s_d(o_door.a_o_seg__opening)} Z"/>`; }));
     }
-    if(s_sheet === 'front' && s_mode === 'window'){
+    if(s_sheet === 'front' && s_mode === 'window' && !o_match){
         a_s.push(...a_o_door.map(function(o_door, n_idx){
             return `<path class="hit${n_idx === n_idx__selected ? ' selected' : ''}" data-idx="${n_idx}" d="${f_s_d(o_door.a_o_seg__opening)} Z"/>`;
         }));
     }
     a_s.push('</g>');
     let o_picture = o_setting[`o_picture__${s_sheet}`];
-    if(s_mode === 'picture' && s_sheet === s_sheet__picture && o_picture && o_s_url[s_sheet]){
+    if(o_match && o_match.s_sheet === s_sheet){
+        // the picture's points, their places, a line from each point to its place, and where the next click lands
+        let n_r = n_px__match * n_mm__per_px;
+        let a_a_n__from = o_match.a_a_n__px.map(function(a_n__px){ return f_a_n__from_px(o_picture, a_n__px); });
+        let f_s_point = function(s_class, a_n, n_idx){
+            return `<circle class="match ${s_class}" cx="${a_n[0]}" cy="${a_n[1]}" r="${n_r}"/><text class="match" x="${a_n[0]}" y="${a_n[1]}" font-size="${1.3 * n_r}">${n_idx + 1}</text>`;
+        };
+        a_s.push(`<g transform="translate(${f_a_n__calendar(o_setting).join(' ')})">`);
+        a_s.push(...o_match.a_a_n__mm.map(function(a_n, n_idx){ return `<line class="match" x1="${a_a_n__from[n_idx][0]}" y1="${a_a_n__from[n_idx][1]}" x2="${a_n[0]}" y2="${a_n[1]}"/>`; }));
+        a_s.push(...a_a_n__from.map(function(a_n, n_idx){ return f_s_point('from', a_n, n_idx); }));
+        a_s.push(...o_match.a_a_n__mm.map(function(a_n, n_idx){ return f_s_point('to', a_n, n_idx); }));
+        if(o_match.a_n__next){ a_s.push(`<circle class="match next" cx="${o_match.a_n__next[0]}" cy="${o_match.a_n__next[1]}" r="${n_r}"/>`); }
+        a_s.push('</g>');
+    } else if(s_mode === 'picture' && s_sheet === s_sheet__picture && o_picture && o_s_url[s_sheet]){
         let n_around = n_px__around * n_mm__per_px;
         a_s.push(`<clipPath id="${s_sheet}_around"><rect x="${-n_around}" y="${-n_around}" width="${o_setting.n_mm__sheet_x + 2 * n_around}" height="${o_setting.n_mm__sheet_y + 2 * n_around}"/></clipPath>`);
         a_s.push(`<g clip-path="url(#${s_sheet}_around)"><g transform="translate(${f_a_n__calendar(o_setting).join(' ')})">`);
@@ -145,6 +173,8 @@ let f_update = function(){
     let a_o_door = a_o_window.map(function(o_window){ return f_o_door(o_window, o_setting); });
     document.body.dataset.mode = s_mode;
     document.body.dataset.print = o_setting.s_print;
+    // what a match is waiting for: points 'from' the picture, or the places they go 'to'
+    if(o_match){ document.body.dataset.match = o_match.a_a_n__px.length < 4 ? 'from' : 'to'; } else { delete document.body.dataset.match; }
     el_stage.style.setProperty('--n_ratio__sheet', o_setting.n_mm__sheet_x / o_setting.n_mm__sheet_y);
     for(let s_sheet of a_s_sheet){
         o_s_svg[s_sheet] = f_s_svg(o_setting, s_sheet);
@@ -154,6 +184,7 @@ let f_update = function(){
         el_svg.setAttribute('width', `${o_setting.n_mm__sheet_x}mm`);
         el_svg.setAttribute('height', `${o_setting.n_mm__sheet_y}mm`);
         el_sheet.classList.toggle('has_picture', Boolean(o_setting[`o_picture__${s_sheet}`] && o_s_url[s_sheet]));
+        el_sheet.classList.toggle('matching', o_match?.s_sheet === s_sheet);
         f_set_html(el_svg.querySelector('.picture'), f_s_picture__sheet(o_setting, s_sheet, o_s_url[s_sheet]));
         f_set_html(el_svg.querySelector('.line'), f_s_line__sheet(o_setting, s_sheet));
         // the handles keep their size on the screen whatever the sheet's
@@ -198,9 +229,25 @@ let f_update = function(){
 
     let o_picture = o_s_url[s_sheet__picture] ? o_setting[`o_picture__${s_sheet__picture}`] : null;
     document.getElementById('el_picture_sheet').value = s_sheet__picture;
-    document.getElementById('el_picture').hidden = !o_picture;
+    document.getElementById('el_picture').hidden = !o_picture || Boolean(o_match);
     document.getElementById('el_picture_hint').hidden = Boolean(o_picture);
-    document.getElementById('el_picture_remove').disabled = !o_picture;
+    document.getElementById('el_picture_remove').disabled = !o_picture || Boolean(o_match);
+    // while a picture is matched, the panel says what to click, and the picture is no one else's
+    for(let s_id of ['el_picture_sheet', 'el_picture_load']){ document.getElementById(s_id).disabled = Boolean(o_match); }
+    document.getElementById('el_matching').hidden = !o_match;
+    if(o_match){
+        let n_from = o_match.a_a_n__px.length;
+        let n_to = o_match.a_a_n__mm.length;
+        document.getElementById('el_match_step').textContent = [
+            n_from < 4 ? `Point ${n_from + 1} of 4: click it on the picture, on the ${o_match.s_sheet} sheet.`
+                : n_to < 4 ? `Place ${n_to + 1} of 4: click where point ${n_to + 1} belongs on the cut pattern.` : '',
+            o_match.s_message
+        ].filter(Boolean).join(' ');
+        document.getElementById('el_match_back').disabled = n_from === 0 || o_match.b_busy;
+        document.getElementById('el_match_cancel').disabled = Boolean(o_match.b_busy);
+    }
+    document.getElementById('el_match_undo').hidden = o_undo?.s_sheet !== s_sheet__picture;
+    document.getElementById('el_match_note').textContent = o_undo?.s_sheet === s_sheet__picture ? o_undo.s_note : '';
     for(let el of document.querySelectorAll('[name=s_mode]')){ el.checked = el.value === s_mode; }
     if(o_picture){
         for(let s_name of a_s_name__picture){
@@ -258,8 +305,9 @@ document.getElementById('el_own_reset').addEventListener('click', function(){
     f_update();
 });
 
-// A sheet's picture: its file goes into the browser's database, its place into the settings.
-let f_set_picture = async function(s_sheet, o_file){
+// A sheet's picture: its file goes into the browser's database, its place into the
+// settings. Without a place given it fills the calendar and its bleed.
+let f_set_picture = async function(s_sheet, o_file, o_picture__given = null){
     let s_url = o_file ? URL.createObjectURL(o_file) : '';
     let o_picture = null;
     if(o_file){
@@ -273,7 +321,7 @@ let f_set_picture = async function(s_sheet, o_file){
             document.getElementById('el_picture_hint').textContent = `${o_file.name} is not a picture this browser can show.`;
             return;
         }
-        o_picture = f_o_picture__fitted(f_o_picture(el_img.naturalWidth, el_img.naturalHeight), f_a_n__bleed(o_setting), true);
+        o_picture = o_picture__given ?? f_o_picture__fitted(f_o_picture(el_img.naturalWidth, el_img.naturalHeight), f_a_n__bleed(o_setting), true);
     }
     try{
         await (o_file ? f_v__stored('put', o_file, s_sheet) : f_v__stored('delete', s_sheet));
@@ -296,12 +344,16 @@ document.getElementById('el_picture_file').addEventListener('change', async func
     let o_file = o_event.target.files[0];
     o_event.target.value = '';
     if(!o_file){ return; }
+    if(o_undo?.s_sheet === s_sheet__picture){ o_undo = null; }
     await f_set_picture(s_sheet__picture, o_file);
     // a new picture is there to be placed
     if(o_s_url[s_sheet__picture]){ s_mode = 'picture'; }
     f_update();
 });
-document.getElementById('el_picture_remove').addEventListener('click', function(){ f_set_picture(s_sheet__picture, null); });
+document.getElementById('el_picture_remove').addEventListener('click', function(){
+    if(o_undo?.s_sheet === s_sheet__picture){ o_undo = null; }
+    f_set_picture(s_sheet__picture, null);
+});
 let f_n_deg = function(n_deg){ return ((n_deg + 180) % 360 + 360) % 360 - 180; };
 let o_f_o_picture = {
     cover: function(o_picture){ return f_o_picture__fitted(o_picture, f_a_n__bleed(o_setting), true); },
@@ -318,11 +370,151 @@ document.getElementById('el_picture').addEventListener('click', function(o_event
     f_update();
 });
 
+// Matching by four points. The picture is first fitted into the calendar, so that all of
+// it can be clicked; then four clicks on it, four on the cut pattern, and it is laid anew.
+document.getElementById('el_match').addEventListener('click', function(){
+    let o_picture = o_setting[`o_picture__${s_sheet__picture}`];
+    o_match = { s_sheet: s_sheet__picture, a_a_n__px: [], a_a_n__mm: [], o_picture, a_n__next: null, s_message: '', b_busy: false };
+    o_setting[`o_picture__${s_sheet__picture}`] = f_o_picture__fitted(o_picture, [0, 0, o_setting.n_mm__calendar_x, o_setting.n_mm__calendar_y], false);
+    f_update();
+});
+let f_cancel_match = function(){
+    if(!o_match || o_match.b_busy){ return; }
+    o_setting[`o_picture__${o_match.s_sheet}`] = o_match.o_picture;
+    o_match = null;
+    f_update();
+};
+document.getElementById('el_match_cancel').addEventListener('click', f_cancel_match);
+window.addEventListener('keydown', function(o_event){
+    if(o_event.key === 'Escape'){ f_cancel_match(); }
+});
+document.getElementById('el_match_back').addEventListener('click', function(){
+    (o_match.a_a_n__mm.length ? o_match.a_a_n__mm : o_match.a_a_n__px).pop();
+    o_match.s_message = '';
+    f_update();
+});
+// The place a click at a_n, in the calendar's mm, means while matching: null beside the
+// picture as long as its points are asked for, then the cut pattern's nearest place
+// within reach, or with b_free just where it is.
+let f_a_n__match = function(a_n, b_free){
+    let o_picture = o_setting[`o_picture__${o_match.s_sheet}`];
+    if(o_match.a_a_n__px.length < 4){
+        let a_n__px = f_a_n__to_px(o_picture, a_n);
+        let [n_x, n_y, n_px__x, n_px__y] = f_a_n__px(o_picture);
+        return a_n__px[0] >= n_x && a_n__px[1] >= n_y && a_n__px[0] <= n_x + n_px__x && a_n__px[1] <= n_y + n_px__y ? a_n : null;
+    }
+    if(b_free){ return a_n; }
+    let n_mm__per_px = o_setting.n_mm__sheet_x / document.getElementById(`el_sheet__${o_match.s_sheet}`).firstElementChild.getBoundingClientRect().width;
+    return f_a_n__snapped(a_n, f_a_a_n__anchor(o_setting), n_px__snap * n_mm__per_px);
+};
+// A sheet's picture laid anew by four points, a_a_n__px in its file and a_a_n__mm their
+// places on the calendar: a new picture file over the calendar and its bleed, its
+// place, and whether the old picture reached everywhere.
+let f_o_matched = async function(s_sheet, a_a_n__px, a_a_n__mm){
+    let el_img = new Image();
+    el_img.src = o_s_url[s_sheet];
+    await el_img.decode();
+    // what is left of the file, and the points counted from that part's corner
+    let [n_x, n_y, n_px__x, n_px__y] = f_a_n__px(o_setting[`o_picture__${s_sheet}`]);
+    let a_a_n__part = a_a_n__px.map(function(a_n){ return [a_n[0] - n_x, a_n[1] - n_y]; });
+    // the new picture's pixels: as fine as the old picture comes to lie in the calendar's
+    // middle, a third of what a print shows at least and no finer than that; the same
+    // along x and y, so the last row may reach a little over the bleed
+    let [n_left, n_top, n_right, n_bottom] = f_a_n__bleed(o_setting);
+    let n_px__per_mm__old = f_n_px__per_mm(f_a_n_h(a_a_n__mm, a_a_n__part), [o_setting.n_mm__calendar_x / 2, o_setting.n_mm__calendar_y / 2]);
+    let n_px__x__new = Math.round((n_right - n_left) * Math.min(n_px__per_mm__print, Math.max(n_px__per_mm__print / 3, n_px__per_mm__old)));
+    let n_px__per_mm = n_px__x__new / (n_right - n_left);
+    let n_px__y__new = Math.ceil((n_bottom - n_top) * n_px__per_mm);
+    // the old picture's pixels, made smaller first where they are much finer than the
+    // new ones: the browser does that better than picking a pixel here and there
+    let n_scale = Math.min(1, n_px__work / Math.max(n_px__x, n_px__y), 1.25 * n_px__per_mm / n_px__per_mm__old);
+    let n_px__x__old = Math.max(1, Math.round(n_px__x * n_scale));
+    let n_px__y__old = Math.max(1, Math.round(n_px__y * n_scale));
+    let el_canvas = document.createElement('canvas');
+    el_canvas.width = n_px__x__old;
+    el_canvas.height = n_px__y__old;
+    let o_context = el_canvas.getContext('2d', { willReadFrequently: true });
+    o_context.imageSmoothingQuality = 'high';
+    o_context.drawImage(el_img, n_x, n_y, n_px__x, n_px__y, 0, 0, n_px__x__old, n_px__y__old);
+    let a_n__rgba = o_context.getImageData(0, 0, n_px__x__old, n_px__y__old).data;
+    // from a place of the new picture, in its pixels, to the place of the old one it shows
+    let a_n_h = f_a_n_h(
+        a_a_n__mm.map(function(a_n){ return [(a_n[0] - n_left) * n_px__per_mm, (a_n[1] - n_top) * n_px__per_mm]; }),
+        a_a_n__part.map(function(a_n){ return [a_n[0] * n_px__x__old / n_px__x, a_n[1] * n_px__y__old / n_px__y]; })
+    );
+    el_canvas.width = n_px__x__new;
+    el_canvas.height = n_px__y__new;
+    o_context.putImageData(new ImageData(f_a_n__warped(a_n__rgba, n_px__x__old, n_px__y__old, a_n_h, n_px__x__new, n_px__y__new), n_px__x__new, n_px__y__new), 0, 0);
+    return {
+        o_file: await new Promise(function(f_resolve){ el_canvas.toBlob(f_resolve, 'image/png'); }),
+        o_picture: { ...f_o_picture(n_px__x__new, n_px__y__new), n_mm__x: (n_left + n_right) / 2, n_mm__y: n_top + n_px__y__new / n_px__per_mm / 2, n_mm__size_x: n_right - n_left },
+        b_covered: [[0, 0], [n_px__x__new, 0], [n_px__x__new, n_px__y__new], [0, n_px__y__new]].every(function(a_n){
+            let [n_x__old, n_y__old] = f_a_n__mapped(a_n_h, a_n);
+            return n_x__old >= 0 && n_y__old >= 0 && n_x__old <= n_px__x__old && n_y__old <= n_px__y__old;
+        })
+    };
+};
+// A click while matching: a point more; with the fourth place, the match itself.
+let f_add_match = async function(a_n){
+    let { s_sheet, a_a_n__px, a_a_n__mm } = o_match;
+    if(o_match.b_busy || a_a_n__mm.length === 4){ return; }
+    if(!a_n){
+        o_match.s_message = 'That is beside the picture.';
+        f_update();
+        return;
+    }
+    o_match.s_message = '';
+    o_match.a_n__next = null;
+    if(a_a_n__px.length < 4){
+        a_a_n__px.push(f_a_n__to_px(o_setting[`o_picture__${s_sheet}`], a_n));
+        f_update();
+        return;
+    }
+    a_a_n__mm.push(a_n);
+    if(a_a_n__mm.length < 4){
+        f_update();
+        return;
+    }
+    let s_problem = f_s_problem__match(a_a_n__px, a_a_n__mm, f_a_n__bleed(o_setting));
+    if(s_problem){
+        o_match.s_message = `${s_problem} Take a point back, or cancel.`;
+        f_update();
+        return;
+    }
+    o_match.b_busy = true;
+    o_match.s_message = 'Laying the picture anew …';
+    f_update();
+    // the words first, then the work
+    await new Promise(function(f_resolve){ setTimeout(f_resolve, 30); });
+    try{
+        let o_file__before = await (await fetch(o_s_url[s_sheet])).blob();
+        let o_matched = await f_o_matched(s_sheet, a_a_n__px, a_a_n__mm);
+        o_undo = {
+            s_sheet, o_file: o_file__before, o_picture: o_match.o_picture,
+            s_note: `Matched by four points${o_matched.b_covered ? '.' : '; the picture does not reach all of the calendar, which stays blank where it ends.'}`
+        };
+        o_match = null;
+        await f_set_picture(s_sheet, o_matched.o_file, o_matched.o_picture);
+    } catch(o_error){
+        console.warn(o_error);
+        o_match.b_busy = false;
+        o_match.s_message = 'The picture could not be laid anew. Take a point back, or cancel.';
+        f_update();
+    }
+};
+document.getElementById('el_match_undo').addEventListener('click', async function(){
+    let { s_sheet, o_file, o_picture } = o_undo;
+    o_undo = null;
+    await f_set_picture(s_sheet, o_file, o_picture);
+});
+
 document.getElementById('el_reset').addEventListener('click', async function(){
     if(!confirm('Start over with the settings of the first start? Windows moved or changed alone go back to the grid, and the pictures are removed.')){ return; }
     o_setting = structuredClone(o_setting__default);
     n_idx__selected = null;
     s_mode = 'window';
+    o_match = null;
+    o_undo = null;
     f_fill_form();
     for(let s_sheet of a_s_sheet){ await f_set_picture(s_sheet, null); }
 });
@@ -353,6 +545,13 @@ el_stage.addEventListener('pointerdown', function(o_event){
     if(!el_sheet){ return; }
     let s_sheet = el_sheet.dataset.sheet;
     let a_n = f_a_n__mm(o_event, s_sheet);
+    if(o_match){
+        if(s_sheet === o_match.s_sheet){
+            o_event.preventDefault();
+            f_add_match(f_a_n__match(a_n, o_event.altKey));
+        }
+        return;
+    }
     if(s_mode === 'picture'){
         s_sheet__picture = s_sheet;
         let o_picture = o_s_url[s_sheet] ? o_setting[`o_picture__${s_sheet}`] : null;
@@ -376,6 +575,16 @@ el_stage.addEventListener('pointerdown', function(o_event){
     f_update();
 });
 window.addEventListener('pointermove', function(o_event){
+    if(o_match && !o_match.b_busy && o_match.a_a_n__mm.length < 4){
+        // a ring where a click would land: on the picture, or on the pattern's place it snaps to
+        let b_on_sheet = o_event.target instanceof Element && o_event.target.closest('.sheet')?.dataset.sheet === o_match.s_sheet;
+        let a_n__next = b_on_sheet ? f_a_n__match(f_a_n__mm(o_event, o_match.s_sheet), o_event.altKey) : null;
+        if(String(a_n__next) !== String(o_match.a_n__next)){
+            o_match.a_n__next = a_n__next;
+            f_update();
+        }
+        return;
+    }
     if(!o_drag){ return; }
     let a_n = f_a_n__mm(o_event, o_drag.s_sheet);
     if(o_drag.o_picture){
@@ -412,7 +621,7 @@ for(let s_event of ['pointerup', 'pointercancel']){
 // the pointer: its handles may lie far outside the sheet.
 el_stage.addEventListener('wheel', function(o_event){
     let s_sheet = o_event.target.closest('.sheet')?.dataset.sheet;
-    if(s_mode !== 'picture' || !o_event.ctrlKey || !s_sheet || !o_s_url[s_sheet]){ return; }
+    if(s_mode !== 'picture' || o_match || !o_event.ctrlKey || !s_sheet || !o_s_url[s_sheet]){ return; }
     o_event.preventDefault();
     let o_picture = f_o_picture__scaled(o_setting[`o_picture__${s_sheet}`], Math.exp(-o_event.deltaY / 1000), f_a_n__mm(o_event, s_sheet));
     for(let s_name of ['n_mm__x', 'n_mm__y', 'n_mm__size_x']){ o_picture[s_name] = Math.round(o_picture[s_name] * 100) / 100; }
