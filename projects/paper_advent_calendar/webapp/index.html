@@ -11,7 +11,8 @@
 :root{
     --s_col__black: #101517;
     --s_col__panel: #192222;
-    --s_col__raised: #243030;
+    --s_col__group: #1f2a2a;
+    --s_col__raised: #2a3737;
     --s_col__line: #344040;
     --s_col__text: #f7f2e6;
     --s_col__muted: #b9bcb0;
@@ -20,65 +21,158 @@
     color-scheme: dark;
 }
 *{ box-sizing: border-box; }
+/* hidden is hidden, whatever an element's own display says */
+[hidden]{ display: none !important; }
 html, body{ height: 100%; margin: 0; }
+*{ scrollbar-width: thin; scrollbar-color: #4a5959 transparent; }
+/* The page: a bar with the steps on top; under it the settings of the step that is
+   open and the sheet, each scrolling on its own. */
 body{
+    display: grid;
+    grid-template: auto minmax(0, 1fr) / minmax(0, 1fr);
     background: var(--s_col__black);
     color: var(--s_col__text);
     font: 14px/1.4 system-ui, -apple-system, "Segoe UI", Roboto, Ubuntu, sans-serif;
 }
-/* the settings and the sheets scroll each on their own: a sheet stays in view while a setting far down the list is changed */
-#el_app{ display: grid; grid-template-columns: 320px minmax(0, 1fr); height: 100vh; }
-#el_panel{ background: var(--s_col__panel); border-right: 1px solid var(--s_col__line); padding: 14px; overflow-y: auto; }
-header{ display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
-h1{ margin: 0; font-size: 18px; font-weight: 650; color: var(--s_col__gold); }
-#el_logo{ width: 34px; color: var(--s_col__text); }
-h2{ margin: 18px 0 8px; font-size: 11px; font-weight: 650; text-transform: uppercase; letter-spacing: .08em; color: var(--s_col__muted); }
-label.row{ display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 8px; }
-label.row input[type=number], label.row select{
-    width: 100px;
-    padding: 5px 7px;
+:focus-visible{ outline: 2px solid var(--s_col__gold); outline-offset: 1px; }
+
+#el_bar{ display: flex; align-items: center; gap: 12px; padding: 0 16px; background: var(--s_col__panel); border-bottom: 1px solid var(--s_col__line); }
+#el_logo{ flex: none; width: 30px; color: var(--s_col__text); }
+h1{ margin: 0 12px 0 0; font-size: 16px; font-weight: 650; color: var(--s_col__gold); white-space: nowrap; }
+#el_step{ display: flex; flex: 1; align-self: stretch; gap: 2px; min-width: 0; overflow-x: auto; }
+#el_step button{ display: flex; align-items: center; gap: 8px; min-height: 48px; padding: 0 14px; border: 0; border-bottom: 2px solid transparent; border-radius: 0; background: none; color: var(--s_col__muted); white-space: nowrap; }
+#el_step button:hover{ background: none; color: var(--s_col__text); }
+#el_step b{ display: grid; place-items: center; width: 22px; height: 22px; border: 1px solid var(--s_col__muted); border-radius: 50%; font-size: 12px; font-weight: 650; }
+#el_step button[aria-current]{ border-bottom-color: var(--s_col__gold); color: var(--s_col__text); }
+#el_step button[aria-current] b{ border-color: var(--s_col__gold); background: var(--s_col__gold); color: var(--s_col__black); }
+/* a step with a field that is wrong */
+#el_step button.bad b{ border-color: var(--s_col__warn); background: var(--s_col__warn); color: var(--s_col__black); }
+
+#el_app{ display: grid; grid-template-columns: 360px minmax(0, 1fr); min-height: 0; }
+/* the settings, and under them what is wrong: there it never moves the sheet under the pointer */
+#el_side{ display: flex; flex-direction: column; min-height: 0; background: var(--s_col__panel); border-right: 1px solid var(--s_col__line); }
+#el_panel{ flex: 1; min-height: 0; padding: 16px; overflow-y: auto; }
+#el_status{ flex: none; max-height: 40%; margin: 0; padding: 10px 16px 10px 40px; overflow-y: auto; border-top: 1px solid var(--s_col__line); background: #2b2216; color: var(--s_col__warn); font-size: 13px; white-space: pre-line; text-indent: -24px; }
+#el_status::before{ content: '⚠'; display: inline-block; width: 24px; text-indent: 0; }
+#el_status:empty{ display: none; }
+.lead{ margin: 0 0 14px; color: var(--s_col__muted); font-size: 13px; }
+.group{ margin-bottom: 12px; padding: 12px; border: 1px solid var(--s_col__line); border-radius: 8px; background: var(--s_col__group); }
+.group > :last-child{ margin-bottom: 0; }
+h2{ margin: 0 0 10px; font-size: 11px; font-weight: 650; text-transform: uppercase; letter-spacing: .08em; color: var(--s_col__muted); }
+.note{ margin: 8px 0; color: var(--s_col__muted); font-size: 12px; }
+fieldset{ min-width: 0; margin: 0; padding: 0; border: 0; }
+legend{ padding: 0; }
+
+/* A setting: its name left, its field right. A name with a dotted line has more to say
+   when the pointer rests on it. */
+.row{ display: flex; align-items: center; justify-content: space-between; gap: 10px; min-height: 30px; margin-bottom: 8px; }
+.row > span[title], legend[title], h2[title]{ text-decoration: underline dotted #5d6b68; text-underline-offset: 4px; cursor: help; }
+.field{ display: flex; flex: none; align-items: center; gap: 6px; }
+.field i{ width: 22px; color: var(--s_col__muted); font-size: 12px; font-style: normal; }
+.field b{ color: var(--s_col__muted); font-weight: 400; }
+input[type=number], select{
+    height: 30px;
+    padding: 0 7px;
     border: 1px solid var(--s_col__line);
-    border-radius: 4px;
-    background: var(--s_col__raised);
+    border-radius: 6px;
+    background: var(--s_col__black);
     color: var(--s_col__text);
     font: inherit;
 }
-label.row select.wide{ width: 170px; }
+input[type=number]{ width: 78px; }
+/* two fields in a row: width × height, x / y */
+.field b ~ input, .field input:has(~ b){ width: 66px; }
 input:invalid{ border-color: var(--s_col__warn); }
-input[type=checkbox], input[type=radio]{ accent-color: var(--s_col__gold); }
-fieldset{ margin: 0 0 8px; padding: 0; border: 0; }
-fieldset.choice{ display: flex; flex-wrap: wrap; gap: 4px 12px; }
-fieldset.choice legend{ padding: 0; margin-bottom: 4px; }
-fieldset.choice label{ display: flex; align-items: center; gap: 5px; }
+input[type=radio]{ accent-color: var(--s_col__gold); }
+
 button{
-    padding: 7px 10px;
+    min-height: 32px;
+    padding: 0 12px;
     border: 1px solid var(--s_col__line);
-    border-radius: 4px;
+    border-radius: 6px;
     background: var(--s_col__raised);
     color: var(--s_col__text);
     font: inherit;
     cursor: pointer;
 }
-button.main{ border: 0; background: var(--s_col__gold); color: var(--s_col__black); font-weight: 650; }
-button:disabled{ opacity: .4; cursor: default; }
-.buttons{ display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 10px; }
-.buttons .wide{ grid-column: 1 / -1; }
-.hint, #el_size, #el_status{ margin: 0 0 8px; color: var(--s_col__muted); font-size: 12px; }
-#el_status{ color: var(--s_col__warn); white-space: pre-line; }
-#el_detail{ display: block; width: 100%; margin-bottom: 10px; background: #ffffff; border-radius: 4px; }
-#el_legend{ margin: 0 0 14px; padding: 0; list-style: none; font-size: 12px; color: var(--s_col__muted); }
+button:hover{ background: #324141; }
+button.main{ border-color: var(--s_col__gold); background: var(--s_col__gold); color: var(--s_col__black); font-weight: 650; }
+button.main:hover{ background: #f6c872; }
+button.ghost{ border-color: transparent; background: none; color: var(--s_col__muted); }
+button.ghost:hover{ background: var(--s_col__raised); color: var(--s_col__text); }
+button:disabled{ opacity: .4; cursor: default; pointer-events: none; }
+.buttons{ display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 8px; }
+.tools{ display: flex; gap: 6px; margin-bottom: 10px; }
+.tools button{ flex: 1; padding: 0; }
+.tools svg{ display: block; width: 18px; height: 18px; margin: auto; fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; pointer-events: none; }
+.next{ display: flex; justify-content: flex-end; margin: 0; }
+
+/* on or off */
+input.switch{ flex: none; appearance: none; position: relative; width: 36px; height: 20px; margin: 0; border-radius: 10px; background: var(--s_col__line); cursor: pointer; transition: background .15s; }
+input.switch::after{ content: ''; position: absolute; top: 3px; left: 3px; width: 14px; height: 14px; border-radius: 50%; background: var(--s_col__muted); transition: transform .15s; }
+input.switch:checked{ background: var(--s_col__gold); }
+input.switch:checked::after{ background: var(--s_col__black); transform: translateX(16px); }
+/* some of several: the shapes and doors that occur */
+.chips{ margin-bottom: 10px; }
+.chips legend{ margin-bottom: 6px; }
+.chips div{ display: flex; flex-wrap: wrap; gap: 6px; }
+.chips label{ display: flex; align-items: center; gap: 6px; padding: 4px 11px 4px 8px; border: 1px solid var(--s_col__line); border-radius: 16px; color: var(--s_col__muted); cursor: pointer; user-select: none; }
+.chips input{ position: absolute; opacity: 0; pointer-events: none; }
+.chips svg{ width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 1.4; }
+.chips label:has(:checked){ border-color: var(--s_col__gold); background: #f0b75022; color: var(--s_col__text); }
+.chips label:has(:focus-visible), .seg label:has(:focus-visible){ outline: 2px solid var(--s_col__gold); outline-offset: 1px; }
+/* one of a few, side by side */
+.seg{ display: inline-flex; padding: 2px; border: 1px solid var(--s_col__line); border-radius: 8px; background: var(--s_col__black); }
+.seg label{ flex: 1; border-radius: 6px; }
+.seg input{ position: absolute; opacity: 0; pointer-events: none; }
+.seg span{ display: block; padding: 4px 12px; border-radius: 6px; color: var(--s_col__muted); text-align: center; white-space: nowrap; cursor: pointer; }
+.seg span:hover{ color: var(--s_col__text); }
+.seg :checked + span{ background: var(--s_col__raised); color: var(--s_col__text); }
+.seg :disabled + span{ opacity: .4; cursor: default; }
+/* a sheet that has a picture */
+.seg .has span::after{ content: ''; display: inline-block; width: 6px; height: 6px; margin-left: 7px; border-radius: 50%; background: var(--s_col__gold); vertical-align: middle; }
+#el_picture_sheet{ display: flex; margin-bottom: 12px; }
+/* one of a few, each with a line about it */
+.pick{ display: grid; gap: 6px; margin-bottom: 10px; }
+.pick label{ display: flex; align-items: baseline; gap: 9px; padding: 7px 10px; border: 1px solid var(--s_col__line); border-radius: 6px; cursor: pointer; }
+.pick label:has(:checked){ border-color: var(--s_col__gold); background: #f0b75022; }
+.pick small{ display: block; color: var(--s_col__muted); font-size: 12px; }
+/* a picture's sides, laid out as they lie */
+.crop{ display: grid; grid-template-columns: repeat(3, 78px); grid-template-rows: repeat(3, 30px); justify-content: center; gap: 6px; }
+.crop .top{ grid-area: 1 / 2; }
+.crop .left{ grid-area: 2 / 1; }
+.crop span{ grid-area: 2 / 2; border: 1px dashed #5d6b68; border-radius: 4px; }
+.crop .right{ grid-area: 2 / 3; }
+.crop .bottom{ grid-area: 3 / 2; }
+#el_detail{ display: block; width: 100%; height: 130px; margin-bottom: 10px; background: #ffffff; border-radius: 4px; }
+#el_own button, #el_match, #el_match_undo, #el_print{ width: 100%; }
+#el_match_undo{ margin-top: 8px; }
+
+/* The sheet: above it which one and how large. */
+#el_stage{ display: flex; flex-direction: column; min-width: 0; min-height: 0; }
+#el_tool{ display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; padding: 8px 16px; border-bottom: 1px solid var(--s_col__line); }
+#el_shown_note{ flex: 1; margin: 0; }
+#el_legend_box{ position: relative; }
+#el_legend_box summary{ padding: 5px 12px; border: 1px solid var(--s_col__line); border-radius: 8px; color: var(--s_col__muted); list-style: none; cursor: pointer; }
+#el_legend_box summary::-webkit-details-marker{ display: none; }
+#el_legend_box summary:hover, #el_legend_box[open] summary{ color: var(--s_col__text); }
+#el_legend{ position: absolute; z-index: 1; top: calc(100% + 6px); right: 0; width: 280px; margin: 0; padding: 12px 12px 8px; border: 1px solid var(--s_col__line); border-radius: 8px; background: var(--s_col__panel); box-shadow: 0 10px 30px #000000a0; list-style: none; font-size: 12px; color: var(--s_col__muted); }
 #el_legend li{ display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
 #el_legend svg{ width: 30px; height: 10px; flex: none; background: #ffffff; }
-#el_stage{ padding: 8px 24px 24px; overflow: auto; }
-#el_tool{ display: flex; flex-wrap: wrap; align-items: center; gap: 6px 24px; padding: 6px 0; }
-#el_tool fieldset{ margin: 0; align-items: center; }
-#el_tool legend{ float: left; margin: 0 12px 0 0; }
-#el_tool select{ padding: 3px 6px; border: 1px solid var(--s_col__line); border-radius: 4px; background: var(--s_col__raised); color: var(--s_col__text); font: inherit; }
-.sheet{ background: #ffffff; }
+/* matching by four points: what to click next, over the sheet where the clicks go */
+#el_match_bar{ display: flex; flex-wrap: wrap; align-items: center; gap: 8px; padding: 8px 16px; border-bottom: 1px solid var(--s_col__gold); background: #f0b75022; }
+#el_match_step{ flex: 1; min-width: 200px; margin: 0; font-weight: 650; }
+#el_view{ flex: 1; min-height: 0; }
+#el_scroll{ display: flex; width: 100%; height: 100%; padding: 28px; overflow: auto; }
+.sheet{ flex: none; margin: auto; background: #ffffff; }
 .sheet > svg{ display: block; }
 @media screen{
-    /* a sheet fits the window's height, times the zoom; lines one pixel wide whatever the scale */
-    .sheet{ width: calc(min(100%, (100vh - 100px) * var(--n_ratio__sheet, 1.414)) * var(--n_zoom, 1)); box-shadow: 0 10px 40px #00000080; }
+    /* one sheet at a time, as large as fits between the bars, times the zoom; lines one pixel wide whatever the scale */
+    #el_view{ container-type: size; }
+    .sheet:not(.shown){ display: none; }
+    /* user-select: a drag on a sheet marks none of its words */
+    .sheet{ width: calc(min(100vw - 440px, (100vh - 200px) * var(--n_ratio__sheet, 1.414)) * var(--n_zoom, 1)); box-shadow: 0 10px 40px #00000080; user-select: none; }
+    .sheet{ width: calc(min(100cqw - 56px, (100cqh - 56px) * var(--n_ratio__sheet, 1.414)) * var(--n_zoom, 1)); }
     /* a picture's handles show around the paper too */
     .sheet > svg{ width: 100%; height: auto; overflow: visible; }
     .sheet path, .sheet rect, .sheet polygon, .sheet circle, .sheet line{ vector-effect: non-scaling-stroke; stroke-width: 1px; }
@@ -88,11 +182,12 @@ button:disabled{ opacity: .4; cursor: default; }
     .sheet .edge{ fill: none; stroke: #9aa0a0; }
     .sheet .opening{ fill: none; stroke: #303838; stroke-dasharray: 4 3; }
     .sheet .hit{ fill: transparent; stroke: none; cursor: move; pointer-events: all; touch-action: none; }
+    .sheet .hit:hover{ fill: #f0b75030; }
     .sheet .hit.selected{ stroke: var(--s_col__gold); stroke-width: 3px; fill: #f0b75030; }
     .sheet .frame{ fill: none; stroke: var(--s_col__gold); stroke-width: 1.5px; }
     .sheet .handle{ fill: var(--s_col__gold); stroke: #101517; cursor: crosshair; pointer-events: all; touch-action: none; }
     .sheet .handle.side{ fill: #ffffff; }
-    body[data-mode=picture] .sheet{ cursor: move; touch-action: none; }
+    body[data-step=picture] .has_picture{ cursor: move; touch-action: none; }
     /* matching by four points: the picture's points gold, the pattern's places white, a
        line from each point to its place; what is not being clicked steps back */
     .sheet .match{ pointer-events: none; }
@@ -105,203 +200,279 @@ button:disabled{ opacity: .4; cursor: default; }
     body[data-match=from] .sheet.matching .cut{ opacity: .3; }
     body[data-match=to] .sheet.matching .picture{ opacity: .55; }
 }
-@media (max-width: 700px){
-    #el_app{ grid-template-columns: 1fr; align-content: start; height: auto; }
-    #el_panel{ border-right: 0; border-bottom: 1px solid var(--s_col__line); overflow-y: visible; }
-    #el_stage{ padding: 8px 16px 16px; }
+/* A narrow window: the sheet on top, the settings under it. On the screen only: a
+   printed page counts as narrow too, and a line under the sheets would make a page more. */
+@media screen and (max-width: 760px){
+    #el_bar{ flex-wrap: wrap; padding-top: 8px; }
+    h1{ flex: 1; }
+    #el_step{ order: 1; flex-basis: 100%; scrollbar-width: none; }
+    #el_step button{ min-height: 40px; padding: 0 10px; }
+    #el_app{ grid-template-columns: minmax(0, 1fr); grid-template-rows: 46vh minmax(0, 1fr); }
+    #el_stage{ order: -1; border-bottom: 1px solid var(--s_col__line); }
+    #el_side{ border-right: 0; }
+    #el_tool{ padding: 6px 12px; }
+    #el_scroll{ padding: 24px; }
+    .sheet{ width: calc(min(100cqw - 48px, (100cqh - 48px) * var(--n_ratio__sheet, 1.414)) * var(--n_zoom, 1)); }
 }
 /* Print: every sheet of paper is a page, its top left corner the page's. The page's size
    and the print's shift are set with the settings, see f_update. What a page shows
    follows body's data-print. */
 @media print{
-    body{ background: #ffffff; }
-    #el_panel, #el_tool, #el_stage h2, .screen{ display: none; }
-    #el_app, #el_stage{ display: block; height: auto; padding: 0; overflow: visible; }
-    .sheet{ overflow: hidden; break-after: page; }
+    #el_bar, #el_side, #el_tool, #el_match_bar, .screen{ display: none; }
+    body{ display: block; background: #ffffff; }
+    #el_app, #el_stage, #el_view, #el_scroll{ display: block; height: auto; padding: 0; overflow: visible; }
+    .sheet{ margin: 0; overflow: hidden; break-after: page; }
     body[data-print=cut] .picture{ display: none; }
     body[data-print=picture] .has_picture .cut{ display: none; }
 }
 </style>
 <style id="el_style__page"></style>
 </head>
-<body data-mode="window">
+<body data-step="paper">
+<header id="el_bar">
+    <svg id="el_logo" viewBox="0 0 43.9095293518 31.2528266758" role="img" aria-label="VeryOS logo"><path fill="currentColor" fill-rule="evenodd" d="M 7.7528133542 9.1080260785 L 4.6193976626 1.5432914191 L 0 3.4567085809 L 11.5135290962 31.2528266758 L 32.3960002556 31.2528266758 L 43.9095293518 3.4567085809 L 39.2901316892 1.5432914191 L 36.1567159975 9.1080260785 A 15.6264133379 15.6264133379 0 0 0 7.7528133542 9.1080260785 Z M 30.9694268093 21.2528266758 A 10.6264133379 10.6264133379 0 0 0 21.9547646759 5 A 4.0632066689 4.0632066689 0 0 0 21.9547646759 13.1264133379 A 9.0632066689 9.0632066689 0 0 1 30.9694268093 21.2528266758 Z M 12.9401025425 10 A 9.0632066689 9.0632066689 0 0 0 21.9547646759 18.1264133379 A 4.0632066689 4.0632066689 0 0 1 21.9547646759 26.2528266758 A 10.6264133379 10.6264133379 0 0 1 12.9401025425 10 Z"/></svg>
+    <h1>Advent calendar</h1>
+    <!-- the way to a calendar, one step's settings at a time; any step can be opened at any time -->
+    <nav id="el_step" aria-label="Steps">
+        <button type="button" data-step="paper"><b>1</b>Paper</button>
+        <button type="button" data-step="window"><b>2</b>Windows</button>
+        <button type="button" data-step="picture"><b>3</b>Picture</button>
+        <button type="button" data-step="cut"><b>4</b>Cuts</button>
+        <button type="button" data-step="output"><b>5</b>Print and cut</button>
+    </nav>
+    <button type="button" class="ghost" id="el_reset" title="All settings as at the first start; windows moved or changed alone go back to the grid; the pictures are removed">Start over</button>
+</header>
 <main id="el_app">
+    <div id="el_side">
     <form id="el_panel" aria-label="Settings">
-        <header>
-            <h1>Advent calendar</h1>
-            <svg id="el_logo" viewBox="0 0 43.9095293518 31.2528266758" role="img" aria-label="VeryOS logo"><path fill="currentColor" fill-rule="evenodd" d="M 7.7528133542 9.1080260785 L 4.6193976626 1.5432914191 L 0 3.4567085809 L 11.5135290962 31.2528266758 L 32.3960002556 31.2528266758 L 43.9095293518 3.4567085809 L 39.2901316892 1.5432914191 L 36.1567159975 9.1080260785 A 15.6264133379 15.6264133379 0 0 0 7.7528133542 9.1080260785 Z M 30.9694268093 21.2528266758 A 10.6264133379 10.6264133379 0 0 0 21.9547646759 5 A 4.0632066689 4.0632066689 0 0 0 21.9547646759 13.1264133379 A 9.0632066689 9.0632066689 0 0 1 30.9694268093 21.2528266758 Z M 12.9401025425 10 A 9.0632066689 9.0632066689 0 0 0 21.9547646759 18.1264133379 A 4.0632066689 4.0632066689 0 0 1 21.9547646759 26.2528266758 A 10.6264133379 10.6264133379 0 0 1 12.9401025425 10 Z"/></svg>
-        </header>
-
-        <h2>Sheet of paper</h2>
-        <label class="row" title="The paper a sheet of the calendar is printed on and cut from. A4 lying: 297 × 210, standing: 210 × 297; A3: 420 × 297; Letter: 279.4 × 215.9">Width, mm <input type="number" name="n_mm__sheet_x" min="50" max="1500" step="0.1" required></label>
-        <label class="row">Height, mm <input type="number" name="n_mm__sheet_y" min="50" max="1500" step="0.1" required></label>
-        <label class="row" title="The border of the sheet your printer leaves blank, drawn dashed. The calendar has to lie inside it">Printer's margin, mm <input type="number" name="n_mm__printer_margin" min="0" max="50" step="0.5" required></label>
-
-        <h2>Calendar</h2>
-        <label class="row" title="Both sheets of the calendar have this size. Smaller than the sheet of paper, and than what the printer prints of it">Width, mm <input type="number" name="n_mm__calendar_x" min="50" max="1000" step="0.5" required></label>
-        <label class="row">Height, mm <input type="number" name="n_mm__calendar_y" min="50" max="1000" step="0.5" required></label>
-        <label class="row" title="From the sheet's left edge to the calendar's. The print puts the calendar there; put the cutting file at the same place in the cutter's software">From the sheet's left, mm <input type="number" name="n_mm__left" min="0" max="1500" step="0.1" required></label>
-        <label class="row" title="From the sheet's bottom edge to the calendar's">From its bottom, mm <input type="number" name="n_mm__bottom" min="0" max="1500" step="0.1" required></label>
-        <p class="hint" id="el_place"></p>
-        <label class="row" title="A red rectangle of the calendar's size in both files: the cut that takes the calendar out of the sheet">Calendar's edge in the files <input type="checkbox" name="b_outline"></label>
-        <label class="row" title="A dot, a cut of 0.2 mm, in each corner of the sheet of paper. With them a cutting file is as large as the sheet: in the cutter's software it is laid on the sheet corner on corner, and the calendar lies where the print has it. Without them a file is as large as what is cut, and is placed by the distances named above">Paper's corners in the files <input type="checkbox" name="b_sheet_dot"></label>
-
-        <h2>Windows</h2>
-        <label class="row">Number <input type="number" name="n_window" min="1" max="100" step="1" required></label>
-        <label class="row" title="Windows in a row; the rows follow from the number">Columns <input type="number" name="n_column" min="1" max="20" step="1" required></label>
-        <label class="row" title="From the calendar's edge to the field the windows are spread over">Margin, mm <input type="number" name="n_mm__margin" min="0" step="0.5" required></label>
-        <label class="row">Width, mm <input type="number" name="n_mm__window_x" min="5" max="300" step="0.5" required></label>
-        <label class="row">Height, mm <input type="number" name="n_mm__window_y" min="5" max="300" step="0.5" required></label>
-        <label class="row" title="Of a rectangle's corners and an arch's foot; a corner a hinge ends in stays sharp">Corner radius, mm <input type="number" name="n_mm__corner" min="0" max="50" step="0.5" required></label>
-        <fieldset class="choice" title="The windows get the ticked shapes, each about as often as the others. Round is a circle where width and height are equal">
-            <legend>Shapes</legend>
-            <label><input type="checkbox" name="a_s_shape" value="rect">Rectangle</label>
-            <label><input type="checkbox" name="a_s_shape" value="arch">Arch</label>
-            <label><input type="checkbox" name="a_s_shape" value="round">Round</label>
-        </fieldset>
-        <fieldset class="choice" title="The side a door turns on. Double: two leaves, hinged left and right, cut apart down the middle">
-            <legend>Doors, hinge on the</legend>
-            <label><input type="checkbox" name="a_s_door" value="left">Left</label>
-            <label><input type="checkbox" name="a_s_door" value="right">Right</label>
-            <label><input type="checkbox" name="a_s_door" value="top">Top</label>
-            <label><input type="checkbox" name="a_s_door" value="bottom">Bottom</label>
-            <label><input type="checkbox" name="a_s_door" value="double">Double</label>
-        </fieldset>
-        <button type="button" id="el_shuffle" title="Deals the ticked shapes and doors out anew">Shuffle shapes and doors</button>
-
-        <h2 id="el_own_title">One window</h2>
-        <p class="hint" id="el_own_hint">Click a window on the front sheet to change it alone, drag it to move it.</p>
-        <fieldset id="el_own" hidden>
-            <svg id="el_detail" role="img" aria-label="The window close up"></svg>
-            <!-- step any: a window's place in the grid is no multiple of a step -->
-            <label class="row" title="The window's middle, from the calendar's left edge">Middle x, mm <input type="number" name="own__n_mm__x" step="any"></label>
-            <label class="row" title="The window's middle, from the calendar's top edge">Middle y, mm <input type="number" name="own__n_mm__y" step="any"></label>
-            <label class="row">Width, mm <input type="number" name="own__n_mm__size_x" min="5" max="300" step="0.5"></label>
-            <label class="row">Height, mm <input type="number" name="own__n_mm__size_y" min="5" max="300" step="0.5"></label>
-            <label class="row">Shape <select name="own__s_shape">
-                <option value="rect">Rectangle</option>
-                <option value="arch">Arch</option>
-                <option value="round">Round</option>
-            </select></label>
-            <label class="row">Door, hinge <select name="own__s_door">
-                <option value="left">Left</option>
-                <option value="right">Right</option>
-                <option value="top">Top</option>
-                <option value="bottom">Bottom</option>
-                <option value="double">Double</option>
-            </select></label>
-            <button type="button" id="el_own_reset" title="Drops what this window has of its own: place, size, shape and door as the settings above give them">Back to the grid</button>
-        </fieldset>
-
-        <h2>Picture</h2>
-        <label class="row" title="Each sheet can have a picture: the front one is the calendar's face, the back one shows through the opened doors">Printed on the <select id="el_picture_sheet" class="wide">
-            <option value="front">front sheet</option>
-            <option value="back">back sheet</option>
-        </select></label>
-        <div class="buttons">
-            <button type="button" id="el_picture_load" title="A picture file from this computer. It fills the calendar at first">Load a picture</button>
-            <button type="button" id="el_picture_remove">Remove it</button>
-        </div>
-        <input type="file" id="el_picture_file" accept="image/*" hidden>
-        <p class="hint" id="el_picture_hint">Without a picture a print shows the sheet's cut lines.</p>
-        <fieldset id="el_picture" hidden>
-            <div class="buttons">
-                <button type="button" data-picture="cover" title="As small as covers the calendar and the bleed around it, in the middle">Fill the calendar</button>
-                <button type="button" data-picture="contain" title="As large as fits into the calendar, in the middle">Fit into it</button>
-                <button type="button" data-picture="turn_left" title="A quarter turn against the clock">Turn ↺</button>
-                <button type="button" data-picture="turn_right" title="A quarter turn with the clock">Turn ↻</button>
-                <button type="button" data-picture="flip_x" title="Left becomes right">Mirror ↔</button>
-                <button type="button" data-picture="flip_y" title="Top becomes bottom">Mirror ↕</button>
+        <section class="step" data-step="paper">
+            <p class="lead">The paper a sheet of the calendar is printed on and cut from, and where the calendar lies on it. Print and cut meet if both measure from the sheet's bottom left corner.</p>
+            <div class="group">
+                <h2>Sheet of paper</h2>
+                <label class="row"><span>Format</span><select id="el_format">
+                    <option value="297 210">A4 landscape</option>
+                    <option value="210 297">A4 portrait</option>
+                    <option value="420 297">A3 landscape</option>
+                    <option value="297 420">A3 portrait</option>
+                    <option value="279.4 215.9">Letter landscape</option>
+                    <option value="215.9 279.4">Letter portrait</option>
+                    <option value="">Own size</option>
+                </select></label>
+                <div class="row"><span title="The paper a sheet of the calendar is printed on and cut from: width × height">Size</span><span class="field"><input type="number" name="n_mm__sheet_x" aria-label="Sheet's width" min="50" max="1500" step="0.1" required><b>×</b><input type="number" name="n_mm__sheet_y" aria-label="Sheet's height" min="50" max="1500" step="0.1" required><i>mm</i></span></div>
+                <label class="row"><span title="The border of the sheet your printer leaves blank, drawn dashed. The calendar has to lie inside it">Printer's margin</span><span class="field"><input type="number" name="n_mm__printer_margin" min="0" max="50" step="0.5" required><i>mm</i></span></label>
             </div>
-            <label class="row" title="The picture's middle, from the calendar's left edge">Middle x, mm <input type="number" name="picture__n_mm__x" step="any"></label>
-            <label class="row" title="The picture's middle, from the calendar's top edge">Middle y, mm <input type="number" name="picture__n_mm__y" step="any"></label>
-            <label class="row" title="Of what is left of the picture; its height follows, it is never stretched">Width, mm <input type="number" name="picture__n_mm__size_x" min="5" max="5000" step="any"></label>
-            <label class="row" title="Around its middle, with the clock">Turned, degrees <input type="number" name="picture__n_deg" min="-360" max="360" step="any"></label>
-            <label class="row" title="How much of the file is cut off at its left. What is left stays in its place">Cut off left, % <input type="number" name="picture__crop_0" min="0" max="95" step="any"></label>
-            <label class="row">Cut off top, % <input type="number" name="picture__crop_1" min="0" max="95" step="any"></label>
-            <label class="row">Cut off right, % <input type="number" name="picture__crop_2" min="0" max="95" step="any"></label>
-            <label class="row">Cut off bottom, % <input type="number" name="picture__crop_3" min="0" max="95" step="any"></label>
-            <p class="hint" id="el_picture_info"></p>
-            <p class="hint">Above the sheets, let the pointer move the picture: drag it to move it, a corner to size it, a side to cut it off. Ctrl and the wheel size it under the pointer.</p>
-            <div class="buttons">
-                <button type="button" class="wide" id="el_match" title="Click four points on the picture, then the four places of the cut pattern they belong to. The picture is laid anew so that each point lies on its place, slanted and stretched as that takes: a photo of a drawing taken at a slant is put right">Match 4 points to the cut pattern</button>
-                <button type="button" class="wide" id="el_match_undo" title="The picture as it was before it was matched" hidden>Undo the match</button>
+            <div class="group">
+                <h2>Calendar</h2>
+                <div class="row"><span title="Both sheets of the calendar have this size, width × height. Smaller than the sheet of paper, and than what the printer prints of it">Size</span><span class="field"><input type="number" name="n_mm__calendar_x" aria-label="Calendar's width" min="50" max="1000" step="0.5" required><b>×</b><input type="number" name="n_mm__calendar_y" aria-label="Calendar's height" min="50" max="1000" step="0.5" required><i>mm</i></span></div>
+                <label class="row"><span title="From the sheet's left edge to the calendar's. The print puts the calendar there; a cutting file without the paper's corners is put at the same place in the cutter's software">From the sheet's left</span><span class="field"><input type="number" name="n_mm__left" min="0" max="1500" step="0.1" required><i>mm</i></span></label>
+                <label class="row"><span title="From the sheet's bottom edge to the calendar's">From its bottom</span><span class="field"><input type="number" name="n_mm__bottom" min="0" max="1500" step="0.1" required><i>mm</i></span></label>
+                <p class="note" id="el_place"></p>
             </div>
-            <p class="hint" id="el_match_note"></p>
-        </fieldset>
-        <fieldset id="el_matching" hidden>
-            <p id="el_match_step"></p>
-            <p class="hint">Zoom in to hit a point. On the cut pattern a click snaps to the corners and middles of the calendar and its windows; hold Alt to place it freely.</p>
-            <div class="buttons">
-                <button type="button" id="el_match_back" title="Takes the last point away, to click it again">One point back</button>
-                <button type="button" id="el_match_cancel" title="Leaves the picture as it was; also the Esc key">Cancel</button>
+            <p class="next"><button type="button" class="ghost" data-step="window">Next: Windows →</button></p>
+        </section>
+
+        <section class="step" data-step="window" hidden>
+            <p class="lead">How many windows, how large, with which shapes and doors. On the sheet, click a window to change it alone, drag it to move it.</p>
+            <div class="group">
+                <h2>Grid</h2>
+                <label class="row"><span>Number</span><span class="field"><input type="number" name="n_window" min="1" max="100" step="1" required><i></i></span></label>
+                <label class="row"><span title="Windows in a row; the rows follow from the number">Columns</span><span class="field"><input type="number" name="n_column" min="1" max="20" step="1" required><i></i></span></label>
+                <label class="row"><span title="From the calendar's edge to the field the windows are spread over">Margin</span><span class="field"><input type="number" name="n_mm__margin" min="0" step="0.5" required><i>mm</i></span></label>
+                <div class="row"><span title="Every window's width × height">Size</span><span class="field"><input type="number" name="n_mm__window_x" aria-label="Windows' width" min="5" max="300" step="0.5" required><b>×</b><input type="number" name="n_mm__window_y" aria-label="Windows' height" min="5" max="300" step="0.5" required><i>mm</i></span></div>
+                <label class="row"><span title="Of a rectangle's corners and an arch's foot; a corner a hinge ends in stays sharp">Corner radius</span><span class="field"><input type="number" name="n_mm__corner" min="0" max="50" step="0.5" required><i>mm</i></span></label>
+                <p class="note" id="el_size"></p>
             </div>
-        </fieldset>
+            <div class="group">
+                <h2>Shapes and doors</h2>
+                <fieldset class="chips">
+                    <legend title="The windows get the chosen shapes, each about as often as the others. Round is a circle where width and height are equal">Shapes</legend>
+                    <div>
+                        <label><input type="checkbox" name="a_s_shape" value="rect"><svg viewBox="0 0 16 16"><rect x="2.5" y="2.5" width="11" height="11" rx="1.5"/></svg>Rectangle</label>
+                        <label><input type="checkbox" name="a_s_shape" value="arch"><svg viewBox="0 0 16 16"><path d="M 2.5 13.5 V 8 A 5.5 5.5 0 0 1 13.5 8 V 13.5 Z"/></svg>Arch</label>
+                        <label><input type="checkbox" name="a_s_shape" value="round"><svg viewBox="0 0 16 16"><circle cx="8" cy="8" r="5.5"/></svg>Round</label>
+                    </div>
+                </fieldset>
+                <fieldset class="chips">
+                    <legend title="The side a door turns on. Double: two leaves, hinged left and right, cut apart down the middle">Doors, hinge on the</legend>
+                    <div>
+                        <label><input type="checkbox" name="a_s_door" value="left"><svg viewBox="0 0 16 16"><path d="M 3 2.5 H 13.5 V 13.5 H 3"/><path d="M 3.5 1.5 V 14.5" stroke-width="3"/></svg>Left</label>
+                        <label><input type="checkbox" name="a_s_door" value="right"><svg viewBox="0 0 16 16"><path d="M 13 2.5 H 2.5 V 13.5 H 13"/><path d="M 12.5 1.5 V 14.5" stroke-width="3"/></svg>Right</label>
+                        <label><input type="checkbox" name="a_s_door" value="top"><svg viewBox="0 0 16 16"><path d="M 2.5 3 V 13.5 H 13.5 V 3"/><path d="M 1.5 3.5 H 14.5" stroke-width="3"/></svg>Top</label>
+                        <label><input type="checkbox" name="a_s_door" value="bottom"><svg viewBox="0 0 16 16"><path d="M 2.5 13 V 2.5 H 13.5 V 13"/><path d="M 1.5 12.5 H 14.5" stroke-width="3"/></svg>Bottom</label>
+                        <label><input type="checkbox" name="a_s_door" value="double"><svg viewBox="0 0 16 16"><path d="M 3 2.5 H 13 M 3 13.5 H 13 M 8 2.5 V 13.5"/><path d="M 3.5 1.5 V 14.5 M 12.5 1.5 V 14.5" stroke-width="3"/></svg>Double</label>
+                    </div>
+                </fieldset>
+                <button type="button" id="el_shuffle" title="Deals the chosen shapes and doors out anew">Shuffle</button>
+            </div>
+            <div class="group" id="el_own_group">
+                <h2 id="el_own_title">One window</h2>
+                <p class="note" id="el_own_hint">None chosen. Click a window on the sheet to give it a place, size, shape and door of its own.</p>
+                <fieldset id="el_own" hidden>
+                    <svg id="el_detail" role="img" aria-label="The window close up"></svg>
+                    <!-- step any: a window's place in the grid is no multiple of a step -->
+                    <div class="row"><span title="The window's middle, from the calendar's left edge and from its top edge">Middle</span><span class="field"><input type="number" name="own__n_mm__x" aria-label="Window's middle x" step="any"><b>/</b><input type="number" name="own__n_mm__y" aria-label="Window's middle y" step="any"><i>mm</i></span></div>
+                    <div class="row"><span title="This window's width × height">Size</span><span class="field"><input type="number" name="own__n_mm__size_x" aria-label="Window's width" min="5" max="300" step="0.5"><b>×</b><input type="number" name="own__n_mm__size_y" aria-label="Window's height" min="5" max="300" step="0.5"><i>mm</i></span></div>
+                    <label class="row"><span>Shape</span><select name="own__s_shape">
+                        <option value="rect">Rectangle</option>
+                        <option value="arch">Arch</option>
+                        <option value="round">Round</option>
+                    </select></label>
+                    <label class="row"><span>Door, hinge</span><select name="own__s_door">
+                        <option value="left">Left</option>
+                        <option value="right">Right</option>
+                        <option value="top">Top</option>
+                        <option value="bottom">Bottom</option>
+                        <option value="double">Double</option>
+                    </select></label>
+                    <button type="button" id="el_own_reset" title="Drops what this window has of its own: place, size, shape and door as the grid gives them">Back to the grid</button>
+                </fieldset>
+            </div>
+            <p class="next"><button type="button" class="ghost" data-step="picture">Next: Picture →</button></p>
+        </section>
 
-        <h2>Cuts</h2>
-        <label class="row" title="Width of the uncut places that hold a door shut; 0: none">Bridge, mm <input type="number" name="n_mm__bridge" min="0" max="5" step="0.05" required></label>
-        <label class="row" title="Along a door's free edge: one bridge per this length of every stretch between two corners, and one at least">A bridge every, mm <input type="number" name="n_mm__bridge_distance" min="2" max="500" step="1" required></label>
-        <label class="row" title="Length of the cut dashes of the fold a door turns on; they are fitted to the fold's length">Fold dash, mm <input type="number" name="n_mm__dash" min="0.2" max="50" step="0.1" required></label>
-        <label class="row" title="Uncut between the dashes of a fold, and at both its ends">Fold gap, mm <input type="number" name="n_mm__gap" min="0.2" max="50" step="0.1" required></label>
-        <label class="row" title="Back sheet: short cuts that show where the windows open, for pictures drawn by hand. Leave them out where the back's picture is printed: they would cut into it">Marks on the back <input type="checkbox" name="b_mark"></label>
-        <label class="row" title="How far a mark runs from a window's corner along both edges, and the length of the dashes along a curve">Mark's length, mm <input type="number" name="n_mm__mark" min="0.5" max="20" step="0.5" required></label>
-        <label class="row" title="Back sheet, bottom right as seen from the front: dotted and mirrored, to be read from behind">VeryOS logo on the back <input type="checkbox" name="b_logo"></label>
-
-        <h2>Print</h2>
-        <label class="row" title="What a sheet with a picture shows in the print. With cut lines: a trial on plain paper, to cut and see whether the knife follows the printed lines. A sheet without a picture always shows its cut lines">Print <select name="s_print" class="wide">
-            <option value="picture">the pictures</option>
-            <option value="both">pictures with cut lines</option>
-            <option value="cut">cut lines only</option>
-        </select></label>
-        <label class="row" title="The picture is printed this far over the calendar's edge, so that a cut a little beside the edge shows no white">Bleed, mm <input type="number" name="n_mm__bleed" min="0" max="20" step="0.5" required></label>
-        <label class="row" title="Outside the calendar, cut off with the rest of the sheet: marks that point along the calendar's edges, and a line of a known length to lay a ruler on">Crop marks and ruler line <input type="checkbox" name="b_print_guide"></label>
-        <label class="row" title="Moves the whole print on its page. If a trial shows the print 0.5 left of the cuts: 0.5">Shift right, mm <input type="number" name="n_mm__print_x" min="-20" max="20" step="0.1" required></label>
-        <label class="row" title="If a trial shows the print 0.5 below the cuts: 0.5">Shift up, mm <input type="number" name="n_mm__print_y" min="-20" max="20" step="0.1" required></label>
-        <div class="buttons">
-            <button type="button" class="main wide" id="el_print" title="Front and back, each on a page as large as the sheet of paper. In the print dialog: this paper size, scale 100 %, margins none, and no fitting to the page in the printer's own settings">Print front and back</button>
-        </div>
-
-        <h2>Cutting files</h2>
-        <div class="buttons">
-            <button type="button" class="main" id="el_download__front">Front SVG</button>
-            <button type="button" class="main" id="el_download__back">Back SVG</button>
-        </div>
-
-        <h2>Legend</h2>
-        <ul id="el_legend">
-            <li><svg viewBox="0 0 30 10"><path d="M 0 5 H 13 M 15 5 H 30" stroke="#000000" stroke-width="1.5"/></svg>front: cut, the gaps are bridges</li>
-            <li><svg viewBox="0 0 30 10"><path d="M 2 5 H 30" stroke="#0000ff" stroke-width="1.5" stroke-dasharray="6 4"/></svg>front: cut, the dashes of a fold</li>
-            <li><svg viewBox="0 0 30 10"><path d="M 5 9 V 3 H 11 M 19 3 H 25 V 9" fill="none" stroke="#000000" stroke-width="1.5"/></svg>back: cut, marks at the windows</li>
-            <li><svg viewBox="0 0 30 10"><path d="M 2 5 H 30" stroke="#808080" stroke-width="1.5" stroke-dasharray="2 2"/></svg>back: cut, the logo in dots</li>
-            <li><svg viewBox="0 0 30 10"><path d="M 0 5 H 30" stroke="#ff0000" stroke-width="1.5"/></svg>the calendar's edge: cut</li>
-            <li><svg viewBox="0 0 30 10"><path d="M 13 3 L 17 7" stroke="#008000" stroke-width="1.5"/></svg>a dot in each corner of the paper: cut</li>
-            <li><svg viewBox="0 0 30 10"><path d="M 2 5 H 30" stroke="#303838" stroke-width="1.5" stroke-dasharray="4 3"/></svg>back: where a window opens, not cut</li>
-            <li><svg viewBox="0 0 30 10"><path d="M 0 5 H 30" stroke="#9aa0a0" stroke-width="1.5" stroke-dasharray="5 4"/></svg>the printer's margin</li>
-        </ul>
-
-        <div class="buttons">
-            <button type="button" class="wide" id="el_reset" title="All settings as at the first start; windows moved or changed alone go back to the grid; the pictures are removed">Start over</button>
-        </div>
-        <p id="el_size"></p>
-        <p id="el_status" role="status"></p>
-    </form>
-    <section id="el_stage" aria-label="Preview">
-        <div id="el_tool">
-            <fieldset class="choice" title="Windows: a click chooses a window, a drag moves it. Picture: a drag moves the sheet's picture, its corners size it, its sides cut it off, Ctrl and the wheel size it under the pointer">
-                <legend>The pointer moves</legend>
-                <label><input type="radio" name="s_mode" value="window" checked>windows</label>
-                <label><input type="radio" name="s_mode" value="picture">the picture</label>
+        <section class="step" data-step="picture" hidden>
+            <p class="lead">A picture for each sheet, printed where the cuts will fall: the front's is the calendar's face, the back's shows through the opened doors.</p>
+            <fieldset class="seg" id="el_picture_sheet" aria-label="The picture of the">
+                <label><input type="radio" name="s_sheet__picture" value="front"><span>Front sheet</span></label>
+                <label><input type="radio" name="s_sheet__picture" value="back"><span>Back sheet</span></label>
             </fieldset>
-            <label title="Larger sheets, to place a window on a picture exactly">Zoom <select id="el_zoom">
-                <option value="1">whole sheet</option>
-                <option value="2">2 ×</option>
-                <option value="4">4 ×</option>
-            </select></label>
+            <div class="group">
+                <h2 id="el_picture_title">Picture</h2>
+                <div class="buttons">
+                    <button type="button" id="el_picture_load" title="A picture file from this computer. It fills the calendar at first">Load a picture</button>
+                    <button type="button" id="el_picture_remove">Remove it</button>
+                </div>
+                <input type="file" id="el_picture_file" accept="image/*" hidden>
+                <p class="note" id="el_picture_hint"></p>
+            </div>
+            <fieldset id="el_picture" hidden>
+                <div class="group">
+                    <h2>Place and size</h2>
+                    <div class="tools">
+                        <button type="button" data-picture="cover" title="As small as covers the calendar and the bleed around it, in the middle">Fill</button>
+                        <button type="button" data-picture="contain" title="As large as fits into the calendar, in the middle">Fit</button>
+                        <button type="button" data-picture="turn_left" title="A quarter turn against the clock" aria-label="Turn left"><svg viewBox="0 0 20 20"><path d="M 10 4.5 A 6 6 0 1 0 16 10.5"/><path d="M 13.5 13 L 16 10.5 L 18.5 13"/></svg></button>
+                        <button type="button" data-picture="turn_right" title="A quarter turn with the clock" aria-label="Turn right"><svg viewBox="0 0 20 20"><path d="M 10 4.5 A 6 6 0 1 1 4 10.5"/><path d="M 1.5 13 L 4 10.5 L 6.5 13"/></svg></button>
+                        <button type="button" data-picture="flip_x" title="Mirror: left becomes right" aria-label="Mirror left and right"><svg viewBox="0 0 20 20"><path d="M 10 3 V 17" stroke-dasharray="2 2.5"/><path d="M 7 6 L 3 10 L 7 14 Z"/><path d="M 13 6 L 17 10 L 13 14 Z"/></svg></button>
+                        <button type="button" data-picture="flip_y" title="Mirror: top becomes bottom" aria-label="Mirror top and bottom"><svg viewBox="0 0 20 20"><path d="M 3 10 H 17" stroke-dasharray="2 2.5"/><path d="M 6 7 L 10 3 L 14 7 Z"/><path d="M 6 13 L 10 17 L 14 13 Z"/></svg></button>
+                    </div>
+                    <div class="row"><span title="The picture's middle, from the calendar's left edge and from its top edge">Middle</span><span class="field"><input type="number" name="picture__n_mm__x" aria-label="Picture's middle x" step="any"><b>/</b><input type="number" name="picture__n_mm__y" aria-label="Picture's middle y" step="any"><i>mm</i></span></div>
+                    <label class="row"><span title="Of what is left of the picture; its height follows, it is never stretched">Width</span><span class="field"><input type="number" name="picture__n_mm__size_x" min="5" max="5000" step="any"><i>mm</i></span></label>
+                    <label class="row"><span title="Around its middle, with the clock">Turned</span><span class="field"><input type="number" name="picture__n_deg" min="-360" max="360" step="any"><i>°</i></span></label>
+                    <p class="note">On the sheet: drag the picture to move it, a corner to size it, a side to crop it. Ctrl and the wheel size it under the pointer.</p>
+                </div>
+                <div class="group">
+                    <h2 title="How much of the file is cut off at each of its sides, in % of the file. What is left stays in its place">Crop, %</h2>
+                    <div class="crop">
+                        <input type="number" class="top" name="picture__crop_1" aria-label="Crop top" min="0" max="95" step="any">
+                        <input type="number" class="left" name="picture__crop_0" aria-label="Crop left" min="0" max="95" step="any">
+                        <span></span>
+                        <input type="number" class="right" name="picture__crop_2" aria-label="Crop right" min="0" max="95" step="any">
+                        <input type="number" class="bottom" name="picture__crop_3" aria-label="Crop bottom" min="0" max="95" step="any">
+                    </div>
+                </div>
+                <div class="group">
+                    <h2>A photo of a drawing</h2>
+                    <p class="note">Taken at a slant? Four points of the picture laid on four places of the cut pattern put it right.</p>
+                    <button type="button" id="el_match" title="Click four points on the picture, then the four places of the cut pattern they belong to. The picture is laid anew so that each point lies on its place, slanted and stretched as that takes">Match 4 points to the cut pattern</button>
+                    <button type="button" id="el_match_undo" title="The picture as it was before it was matched" hidden>Undo the match</button>
+                    <p class="note" id="el_match_note"></p>
+                </div>
+            </fieldset>
+            <div class="group" id="el_matching" hidden>
+                <h2>Matching 4 points</h2>
+                <p class="note">Over the sheet: what to click next. Zoom in to hit a point. On the cut pattern a click snaps to the corners and middles of the calendar and its windows; hold Alt to place it freely.</p>
+            </div>
+            <p class="next"><button type="button" class="ghost" data-step="cut">Next: Cuts →</button></p>
+        </section>
+
+        <section class="step" data-step="cut" hidden>
+            <p class="lead">What the knife cuts. A bridge is a tiny uncut place that holds a door shut until it is torn open; a row of cut dashes is the fold a door turns on.</p>
+            <div class="group">
+                <h2>Doors, front sheet</h2>
+                <label class="row"><span title="Width of the uncut places that hold a door shut; 0: none">Bridge</span><span class="field"><input type="number" name="n_mm__bridge" min="0" max="5" step="0.05" required><i>mm</i></span></label>
+                <label class="row"><span title="Along a door's free edge: one bridge per this length of every stretch between two corners, and one at least">A bridge every</span><span class="field"><input type="number" name="n_mm__bridge_distance" min="2" max="500" step="1" required><i>mm</i></span></label>
+                <label class="row"><span title="Length of the cut dashes of the fold a door turns on; they are fitted to the fold's length">Fold dash</span><span class="field"><input type="number" name="n_mm__dash" min="0.2" max="50" step="0.1" required><i>mm</i></span></label>
+                <label class="row"><span title="Uncut between the dashes of a fold, and at both its ends">Fold gap</span><span class="field"><input type="number" name="n_mm__gap" min="0.2" max="50" step="0.1" required><i>mm</i></span></label>
+                <p class="note" id="el_bridge"></p>
+            </div>
+            <div class="group">
+                <h2>Back sheet</h2>
+                <label class="row"><span title="Short cuts that show where the windows open, for pictures drawn by hand. Leave them out where the back's picture is printed: they would cut into it">Marks on the back</span><input type="checkbox" class="switch" name="b_mark"></label>
+                <label class="row"><span title="How far a mark runs from a window's corner along both edges, and the length of the dashes along a curve">Mark's length</span><span class="field"><input type="number" name="n_mm__mark" min="0.5" max="20" step="0.5" required><i>mm</i></span></label>
+                <label class="row"><span title="Bottom right as seen from the front: dotted and mirrored, to be read from behind">VeryOS logo on the back</span><input type="checkbox" class="switch" name="b_logo"></label>
+            </div>
+            <div class="group">
+                <h2>Both sheets</h2>
+                <label class="row"><span title="A red rectangle of the calendar's size in both files: the cut that takes the calendar out of the sheet">Calendar's edge in the files</span><input type="checkbox" class="switch" name="b_outline"></label>
+                <label class="row"><span title="A dot, a cut of 0.2 mm, in each corner of the sheet of paper. With them a cutting file is as large as the sheet: in the cutter's software it is laid on the sheet corner on corner, and the calendar lies where the print has it. Without them a file is as large as what is cut, and is placed by distances from the sheet's left and bottom">Paper's corners in the files</span><input type="checkbox" class="switch" name="b_sheet_dot"></label>
+            </div>
+            <p class="next"><button type="button" class="ghost" data-step="output">Next: Print and cut →</button></p>
+        </section>
+
+        <section class="step" data-step="output" hidden>
+            <p class="lead">Print both sheets, then cut each with its file. Try it on plain paper first, with the cut lines only: the knife has to follow the printed lines.</p>
+            <div class="group">
+                <h2>Print</h2>
+                <fieldset class="pick" aria-label="What a sheet with a picture shows in the print">
+                    <label><input type="radio" name="s_print" value="picture"><span>The pictures<small>the calendar itself, on card</small></span></label>
+                    <label><input type="radio" name="s_print" value="both"><span>Pictures with cut lines<small>to see where the cuts fall on a picture</small></span></label>
+                    <label><input type="radio" name="s_print" value="cut"><span>Cut lines only<small>a trial on plain paper, to cut and compare</small></span></label>
+                </fieldset>
+                <label class="row"><span title="The picture is printed this far over the calendar's edge, so that a cut a little beside the edge shows no white">Bleed</span><span class="field"><input type="number" name="n_mm__bleed" min="0" max="20" step="0.5" required><i>mm</i></span></label>
+                <label class="row"><span title="Outside the calendar, cut off with the rest of the sheet: marks that point along the calendar's edges, and a line of a known length to lay a ruler on">Crop marks and ruler line</span><input type="checkbox" class="switch" name="b_print_guide"></label>
+                <label class="row"><span title="Moves the whole print on its page. If a trial shows the print 0.5 left of the cuts: 0.5">Shift right</span><span class="field"><input type="number" name="n_mm__print_x" min="-20" max="20" step="0.1" required><i>mm</i></span></label>
+                <label class="row"><span title="If a trial shows the print 0.5 below the cuts: 0.5">Shift up</span><span class="field"><input type="number" name="n_mm__print_y" min="-20" max="20" step="0.1" required><i>mm</i></span></label>
+                <button type="button" class="main" id="el_print" title="Front and back, each on a page as large as the sheet of paper; a sheet without a picture shows its cut lines">Print front and back</button>
+                <p class="note" id="el_print_note"></p>
+            </div>
+            <div class="group">
+                <h2>Cutting files</h2>
+                <div class="buttons">
+                    <button type="button" class="main" id="el_download__front">Front SVG</button>
+                    <button type="button" class="main" id="el_download__back">Back SVG</button>
+                </div>
+                <p class="note" id="el_file"></p>
+            </div>
+        </section>
+    </form>
+    <p id="el_status" role="status"></p>
+    </div>
+    <section id="el_stage" aria-label="The sheets">
+        <div id="el_tool">
+            <fieldset class="seg" aria-label="The sheet shown">
+                <label><input type="radio" name="s_sheet__shown" value="front" checked><span>Front</span></label>
+                <label><input type="radio" name="s_sheet__shown" value="back"><span>Back</span></label>
+            </fieldset>
+            <p class="note" id="el_shown_note"></p>
+            <fieldset class="seg" aria-label="Zoom" title="Larger, to place a window on a picture exactly">
+                <label><input type="radio" name="n_zoom" value="1" checked><span>Fit</span></label>
+                <label><input type="radio" name="n_zoom" value="2"><span>2 ×</span></label>
+                <label><input type="radio" name="n_zoom" value="4"><span>4 ×</span></label>
+            </fieldset>
+            <details id="el_legend_box">
+                <summary>Line colours</summary>
+                <ul id="el_legend">
+                    <li><svg viewBox="0 0 30 10"><path d="M 0 5 H 13 M 15 5 H 30" stroke="#000000" stroke-width="1.5"/></svg>front: cut, the gaps are bridges</li>
+                    <li><svg viewBox="0 0 30 10"><path d="M 2 5 H 30" stroke="#0000ff" stroke-width="1.5" stroke-dasharray="6 4"/></svg>front: cut, the dashes of a fold</li>
+                    <li><svg viewBox="0 0 30 10"><path d="M 5 9 V 3 H 11 M 19 3 H 25 V 9" fill="none" stroke="#000000" stroke-width="1.5"/></svg>back: cut, marks at the windows</li>
+                    <li><svg viewBox="0 0 30 10"><path d="M 2 5 H 30" stroke="#808080" stroke-width="1.5" stroke-dasharray="2 2"/></svg>back: cut, the logo in dots</li>
+                    <li><svg viewBox="0 0 30 10"><path d="M 0 5 H 30" stroke="#ff0000" stroke-width="1.5"/></svg>the calendar's edge: cut</li>
+                    <li><svg viewBox="0 0 30 10"><path d="M 13 3 L 17 7" stroke="#008000" stroke-width="1.5"/></svg>a dot in each corner of the paper: cut</li>
+                    <li><svg viewBox="0 0 30 10"><path d="M 2 5 H 30" stroke="#303838" stroke-width="1.5" stroke-dasharray="4 3"/></svg>back: where a window opens, not cut</li>
+                    <li><svg viewBox="0 0 30 10"><path d="M 0 5 H 30" stroke="#9aa0a0" stroke-width="1.5" stroke-dasharray="5 4"/></svg>the printer's margin</li>
+                </ul>
+            </details>
         </div>
-        <h2>Front</h2>
-        <div class="sheet" id="el_sheet__front" data-sheet="front"><svg xmlns="http://www.w3.org/2000/svg"><g class="printed"><g class="picture"></g><g class="line"></g></g><g class="screen"></g></svg></div>
-        <h2>Back, as seen from the front</h2>
-        <div class="sheet" id="el_sheet__back" data-sheet="back"><svg xmlns="http://www.w3.org/2000/svg"><g class="printed"><g class="picture"></g><g class="line"></g></g><g class="screen"></g></svg></div>
+        <div id="el_match_bar" hidden>
+            <p id="el_match_step" role="status"></p>
+            <button type="button" id="el_match_back" title="Takes the last point away, to click it again">One point back</button>
+            <button type="button" id="el_match_cancel" title="Leaves the picture as it was; also the Esc key">Cancel</button>
+        </div>
+        <div id="el_view"><div id="el_scroll">
+            <div class="sheet" id="el_sheet__front" data-sheet="front"><svg xmlns="http://www.w3.org/2000/svg"><g class="printed"><g class="picture"></g><g class="line"></g></g><g class="screen"></g></svg></div>
+            <div class="sheet" id="el_sheet__back" data-sheet="back"><svg xmlns="http://www.w3.org/2000/svg"><g class="printed"><g class="picture"></g><g class="line"></g></g><g class="screen"></g></svg></div>
+        </div></div>
     </section>
 </main>
 <script type="module" src="page.module.js"></script>

@@ -1,6 +1,6 @@
 // Copyright (C) [Jonas Immanuel Frey] - Licensed under GPL
-// The page: the settings' form, both sheets as they are drawn and printed, the pointer
-// on them, and the pictures' files.
+// The page: the steps and their settings, both sheets as they are drawn and printed, the
+// pointer on them, and the pictures' files.
 
 import { o_setting__default, n_mm__line, f_a_o_window, f_o_door, f_a_s_problem, f_s_d, f_s_svg, f_a_n__box__file } from './calendar.module.js';
 import { a_s_side, f_o_picture, f_a_n__px, f_a_n__size, f_n_dpi, f_a_n__from_px, f_a_n__to_px, f_a_n__handle, f_o_picture__fitted, f_o_picture__resized, f_o_picture__scaled, f_o_picture__cut, f_o_picture__cropped } from './picture.module.js';
@@ -37,10 +37,21 @@ try{
     console.warn(o_error);
 }
 let n_idx__selected = null;
-// what the pointer moves on the sheets: 'window' or 'picture'
-let s_mode = 'window';
-// the sheet whose picture the panel shows
-let s_sheet__picture = 'front';
+// The step whose settings the panel shows: 'paper', 'window', 'picture', 'cut' or
+// 'output'. It is also what the pointer moves on the sheet: windows in 'window', the
+// sheet's picture in 'picture', nothing in the others.
+let s_step = 'paper';
+// the sheet shown, 'front' or 'back': the step 'picture' is about its picture
+let s_sheet__shown = 'front';
+try{
+    let o_stored = JSON.parse(localStorage.getItem(`${s_key__storage}__page`)) ?? {};
+    if(document.querySelector(`.step[data-step="${o_stored.s_step}"]`)){ s_step = o_stored.s_step; }
+    if(a_s_sheet.includes(o_stored.s_sheet__shown)){ s_sheet__shown = o_stored.s_sheet__shown; }
+} catch(o_error){
+    console.warn(o_error);
+}
+// what there is to say about the last picture file chosen, '' if it was taken
+let s_note__file = '';
 // the pictures' files as addresses the page can show, '' without one
 let o_s_url = { front: '', back: '' };
 // what is being dragged: a window, or a sheet's picture as it was when taken
@@ -79,6 +90,7 @@ let f_fill_form = function(){
         for(let el of f_a_el__field(s_name)){
             if(Array.isArray(v)){ el.checked = v.includes(el.value); }
             else if(el.type === 'checkbox'){ el.checked = v; }
+            else if(el.type === 'radio'){ el.checked = el.value === v; }
             else { el.value = v; }
         }
     }
@@ -90,12 +102,18 @@ let f_o_setting__form = function(){
         if(!a_el.length){ continue; }
         if(Array.isArray(v)){ o[s_name] = a_el.filter(function(el){ return el.checked; }).map(function(el){ return el.value; }); }
         else if(a_el[0].type === 'checkbox'){ o[s_name] = a_el[0].checked; }
+        else if(a_el[0].type === 'radio'){ o[s_name] = a_el.find(function(el){ return el.checked; })?.value ?? v; }
         else if(typeof v === 'string'){ o[s_name] = a_el[0].value; }
         else { o[s_name] = a_el[0].valueAsNumber; }
     }
     return o;
 };
 let f_s = function(n){ return String(+n.toFixed(2)); };
+// A field's name as the page shows it: its step, and its own name or its row's.
+let f_s_name = function(el){
+    let s_step__field = el.closest('.step').dataset.step;
+    return `${document.querySelector(`#el_step [data-step="${s_step__field}"]`).lastChild.textContent}, ${el.getAttribute('aria-label') ?? el.closest('label').firstElementChild.textContent}`;
+};
 // Sets what an element holds, if it holds something else: a picture left alone is not loaded anew.
 let f_set_html = function(el, s_html){
     if(el.s_html !== s_html){
@@ -117,7 +135,7 @@ let f_s_screen = function(s_sheet, a_o_door, n_mm__per_px){
     if(s_sheet === 'back'){
         a_s.push(...a_o_door.map(function(o_door){ return `<path class="opening" d="${f_s_d(o_door.a_o_seg__opening)} Z"/>`; }));
     }
-    if(s_sheet === 'front' && s_mode === 'window' && !o_match){
+    if(s_step === 'window' && !o_match){
         a_s.push(...a_o_door.map(function(o_door, n_idx){
             return `<path class="hit${n_idx === n_idx__selected ? ' selected' : ''}" data-idx="${n_idx}" d="${f_s_d(o_door.a_o_seg__opening)} Z"/>`;
         }));
@@ -137,7 +155,7 @@ let f_s_screen = function(s_sheet, a_o_door, n_mm__per_px){
         a_s.push(...o_match.a_a_n__mm.map(function(a_n, n_idx){ return f_s_point('to', a_n, n_idx); }));
         if(o_match.a_n__next){ a_s.push(`<circle class="match next" cx="${o_match.a_n__next[0]}" cy="${o_match.a_n__next[1]}" r="${n_r}"/>`); }
         a_s.push('</g>');
-    } else if(s_mode === 'picture' && s_sheet === s_sheet__picture && o_picture && o_s_url[s_sheet]){
+    } else if(s_step === 'picture' && o_picture && o_s_url[s_sheet]){
         let n_around = n_px__around * n_mm__per_px;
         a_s.push(`<clipPath id="${s_sheet}_around"><rect x="${-n_around}" y="${-n_around}" width="${o_setting.n_mm__sheet_x + 2 * n_around}" height="${o_setting.n_mm__sheet_y + 2 * n_around}"/></clipPath>`);
         a_s.push(`<g clip-path="url(#${s_sheet}_around)"><g transform="translate(${f_a_n__calendar(o_setting).join(' ')})">`);
@@ -152,12 +170,30 @@ let f_s_screen = function(s_sheet, a_o_door, n_mm__per_px){
 };
 
 let f_update = function(){
+    // the step that is open and the sheet shown: first, so that a field that is wrong can be got to
+    document.body.dataset.step = s_step;
+    for(let el of el_panel.querySelectorAll('.step')){ el.hidden = el.dataset.step !== s_step; }
+    for(let el of document.querySelectorAll('[name=s_sheet__shown], [name=s_sheet__picture]')){
+        el.checked = el.value === s_sheet__shown;
+        // while a picture is matched, its sheet stays
+        el.disabled = Boolean(o_match);
+        el.parentElement.classList.toggle('has', el.name === 's_sheet__picture' && Boolean(o_s_url[el.value]));
+    }
+    for(let s_sheet of a_s_sheet){ document.getElementById(`el_sheet__${s_sheet}`).classList.toggle('shown', s_sheet === s_sheet__shown); }
+    document.getElementById('el_shown_note').textContent = s_sheet__shown === 'back' ? 'as seen from the front' : '';
+    try{ localStorage.setItem(`${s_key__storage}__page`, JSON.stringify({ s_step, s_sheet__shown })); } catch(o_error){ console.warn(o_error); }
+
     let o_form = f_o_setting__form();
     el_panel.elements.n_mm__margin.max = Math.floor(Math.min(o_form.n_mm__calendar_x, o_form.n_mm__calendar_y) / 2 - 1);
     let el_bad = [...el_panel.elements].find(function(el){ return el.name && !el.checkValidity(); });
-    let s_bad = el_bad ? `${el_bad.closest('label').textContent.trim()}: ${el_bad.validationMessage}` : '';
-    if(!s_bad && !o_form.a_s_shape.length){ s_bad = 'Shapes: tick one at least'; }
-    if(!s_bad && !o_form.a_s_door.length){ s_bad = 'Doors: tick one at least'; }
+    let s_bad = el_bad ? `${f_s_name(el_bad)}: ${el_bad.validationMessage}` : '';
+    if(!s_bad && !o_form.a_s_shape.length){ s_bad = 'Windows, Shapes: choose one at least'; }
+    if(!s_bad && !o_form.a_s_door.length){ s_bad = 'Windows, Doors: choose one at least'; }
+    let s_step__bad = el_bad ? el_bad.closest('.step').dataset.step : s_bad ? 'window' : '';
+    for(let el of document.querySelectorAll('#el_step button')){
+        if(el.dataset.step === s_step){ el.setAttribute('aria-current', 'step'); } else { el.removeAttribute('aria-current'); }
+        el.classList.toggle('bad', el.dataset.step === s_step__bad);
+    }
     for(let s_id of ['el_print', 'el_download__front', 'el_download__back']){
         document.getElementById(s_id).disabled = Boolean(s_bad);
     }
@@ -171,7 +207,6 @@ let f_update = function(){
 
     let a_o_window = f_a_o_window(o_setting);
     let a_o_door = a_o_window.map(function(o_window){ return f_o_door(o_window, o_setting); });
-    document.body.dataset.mode = s_mode;
     document.body.dataset.print = o_setting.s_print;
     // what a match is waiting for: points 'from' the picture, or the places they go 'to'
     if(o_match){ document.body.dataset.match = o_match.a_a_n__px.length < 4 ? 'from' : 'to'; } else { delete document.body.dataset.match; }
@@ -202,8 +237,14 @@ let f_update = function(){
         return `${f_s(a_n__box[2] - a_n__box[0])} × ${f_s(a_n__box[3] - a_n__box[1])} mm, `
             + (a_n__file.every(function(n){ return Math.abs(n) < 1e-9; }) ? 'the sheet of paper itself, corner on corner' : `${f_s(a_n__file[0])} from the sheet's left, ${f_s(a_n__file[1])} from its bottom`);
     };
-    document.getElementById('el_place').textContent = `${f_s(a_n[2])} from the sheet's right, ${f_s(a_n[3])} from its top. In the cutter's software `
+    document.getElementById('el_place').textContent = `That leaves ${f_s(a_n[2])} mm to the sheet's right edge and ${f_s(a_n[3])} mm to its top.`;
+    document.getElementById('el_file').textContent = 'In the cutter\'s software '
         + (f_s_file('front') === f_s_file('back') ? `both files: ${f_s_file('front')}.` : `the front file: ${f_s_file('front')}; the back file: ${f_s_file('back')}.`);
+    // the format's name follows the sheet's size, whichever way it was set
+    let el_format = document.getElementById('el_format');
+    let s_format = `${o_setting.n_mm__sheet_x} ${o_setting.n_mm__sheet_y}`;
+    el_format.value = [...el_format.options].some(function(el){ return el.value === s_format; }) ? s_format : '';
+    el_panel.elements.n_mm__mark.disabled = !o_setting.b_mark;
 
     let b_selected = n_idx__selected !== null;
     document.getElementById('el_own').hidden = !b_selected;
@@ -225,18 +266,21 @@ let f_update = function(){
             o_window.n_mm__size_x + 2 * n_mm__around, o_window.n_mm__size_y + 2 * n_mm__around
         ].join(' '));
         el_detail.innerHTML = `<g fill="none" stroke-width="${n_mm__line}">`
-            + `<path stroke="#000000" d="${o_door.a_a_o_seg__cut.map(f_s_d).join(' ')}"/>`
-            + `<path stroke="#0000ff" d="${o_door.a_a_o_seg__fold.map(f_s_d).join(' ')}"/></g>`;
+            + `<path stroke="#000000" d="${o_door.a_a_o_seg__cut.map(function(a_o_seg){ return f_s_d(a_o_seg); }).join(' ')}"/>`
+            + `<path stroke="#0000ff" d="${o_door.a_a_o_seg__fold.map(function(a_o_seg){ return f_s_d(a_o_seg); }).join(' ')}"/></g>`;
     }
 
-    let o_picture = o_s_url[s_sheet__picture] ? o_setting[`o_picture__${s_sheet__picture}`] : null;
-    document.getElementById('el_picture_sheet').value = s_sheet__picture;
+    let o_picture = o_s_url[s_sheet__shown] ? o_setting[`o_picture__${s_sheet__shown}`] : null;
+    document.getElementById('el_picture_title').textContent = `Picture of the ${s_sheet__shown} sheet`;
     document.getElementById('el_picture').hidden = !o_picture || Boolean(o_match);
-    document.getElementById('el_picture_hint').hidden = Boolean(o_picture);
+    let el_load = document.getElementById('el_picture_load');
+    el_load.textContent = o_picture ? 'Load another' : 'Load a picture';
+    el_load.classList.toggle('main', !o_picture);
+    // while a picture is matched, the bar over the sheet says what to click, and the picture is no one else's
+    el_load.disabled = Boolean(o_match);
     document.getElementById('el_picture_remove').disabled = !o_picture || Boolean(o_match);
-    // while a picture is matched, the panel says what to click, and the picture is no one else's
-    for(let s_id of ['el_picture_sheet', 'el_picture_load']){ document.getElementById(s_id).disabled = Boolean(o_match); }
     document.getElementById('el_matching').hidden = !o_match;
+    document.getElementById('el_match_bar').hidden = !o_match;
     if(o_match){
         let n_from = o_match.a_a_n__px.length;
         let n_to = o_match.a_a_n__mm.length;
@@ -248,9 +292,9 @@ let f_update = function(){
         document.getElementById('el_match_back').disabled = n_from === 0 || o_match.b_busy;
         document.getElementById('el_match_cancel').disabled = Boolean(o_match.b_busy);
     }
-    document.getElementById('el_match_undo').hidden = o_undo?.s_sheet !== s_sheet__picture;
-    document.getElementById('el_match_note').textContent = o_undo?.s_sheet === s_sheet__picture ? o_undo.s_note : '';
-    for(let el of document.querySelectorAll('[name=s_mode]')){ el.checked = el.value === s_mode; }
+    document.getElementById('el_match_undo').hidden = o_undo?.s_sheet !== s_sheet__shown;
+    document.getElementById('el_match_note').textContent = o_undo?.s_sheet === s_sheet__shown ? o_undo.s_note : '';
+    let s_note__picture = 'None yet. Without a picture a print shows the sheet\'s cut lines.';
     if(o_picture){
         for(let s_name of a_s_name__picture){
             let el = el_panel.elements[`picture__${s_name}`];
@@ -262,19 +306,22 @@ let f_update = function(){
         });
         let [n_x, n_y] = f_a_n__size(o_picture);
         let n_dpi = f_n_dpi(o_picture);
-        document.getElementById('el_picture_info').textContent = `${o_picture.n_px__x} × ${o_picture.n_px__y} pixels, shown ${f_s(n_x)} × ${f_s(n_y)} mm: ${Math.round(n_dpi)} pixels per inch`
+        s_note__picture = `${o_picture.n_px__x} × ${o_picture.n_px__y} pixels, shown ${f_s(n_x)} × ${f_s(n_y)} mm: ${Math.round(n_dpi)} pixels per inch`
             + (n_dpi < 150 ? ', coarse in print; 300 is sharp.' : '.');
     }
+    document.getElementById('el_picture_hint').textContent = [s_note__file, s_note__picture].filter(Boolean).join(' ');
 
     // print: a page is the sheet of paper, nothing around it; the shift's y points up, a page's down
     document.getElementById('el_style__page').textContent = `@page{ size: ${o_setting.n_mm__sheet_x}mm ${o_setting.n_mm__sheet_y}mm; margin: 0; }`
         + `@media print{ .sheet, .sheet > svg{ width: ${o_setting.n_mm__sheet_x}mm; height: ${o_setting.n_mm__sheet_y}mm; }`
         + ` .printed{ transform: translate(${o_setting.n_mm__print_x}px, ${-o_setting.n_mm__print_y}px); } }`;
+    document.getElementById('el_print_note').textContent = `In the print dialog: paper ${f_s(o_setting.n_mm__sheet_x)} × ${f_s(o_setting.n_mm__sheet_y)} mm, scale 100 %, margins none; and no fitting to the page in the printer's own settings.`;
 
     let n_row = Math.ceil(o_setting.n_window / o_setting.n_column);
     document.getElementById('el_size').textContent = `${o_setting.n_window} windows in ${n_row} ${n_row === 1 ? 'row' : 'rows'}, `
-        + `${f_s((o_setting.n_mm__calendar_x - 2 * o_setting.n_mm__margin) / o_setting.n_column)} × ${f_s((o_setting.n_mm__calendar_y - 2 * o_setting.n_mm__margin) / n_row)} mm from one to the next. `
-        + `${a_o_door.reduce(function(n, o_door){ return n + o_door.a_a_o_seg__cut.length - o_door.a_a_o_seg__chain.length; }, 0)} bridges.`;
+        + `${f_s((o_setting.n_mm__calendar_x - 2 * o_setting.n_mm__margin) / o_setting.n_column)} × ${f_s((o_setting.n_mm__calendar_y - 2 * o_setting.n_mm__margin) / n_row)} mm from one to the next.`;
+    let n_bridge = a_o_door.reduce(function(n, o_door){ return n + o_door.a_a_o_seg__cut.length - o_door.a_a_o_seg__chain.length; }, 0);
+    document.getElementById('el_bridge').textContent = `${n_bridge} ${n_bridge === 1 ? 'bridge' : 'bridges'} in all.`;
     let a_s_problem = [...f_a_s_problem__sheet(o_setting), ...f_a_s_problem(o_setting)];
     document.getElementById('el_status').textContent = a_s_problem.slice(0, 4).join('\n')
         + (a_s_problem.length > 4 ? `\nand ${a_s_problem.length - 4} more` : '');
@@ -291,12 +338,18 @@ el_panel.addEventListener('input', function(o_event){
     if(el.checkValidity() && v === v){
         if(el.name.startsWith('own__')){ f_set_own({ [el.name.slice(5)]: v }); }
         if(el.name.startsWith('picture__crop_')){
-            o_setting[`o_picture__${s_sheet__picture}`] = f_o_picture__cut(o_setting[`o_picture__${s_sheet__picture}`], Number(el.name.slice(14)), v / 100);
+            o_setting[`o_picture__${s_sheet__shown}`] = f_o_picture__cut(o_setting[`o_picture__${s_sheet__shown}`], Number(el.name.slice(14)), v / 100);
         } else if(el.name.startsWith('picture__')){
-            o_setting[`o_picture__${s_sheet__picture}`] = { ...o_setting[`o_picture__${s_sheet__picture}`], [el.name.slice(9)]: v };
+            o_setting[`o_picture__${s_sheet__shown}`] = { ...o_setting[`o_picture__${s_sheet__shown}`], [el.name.slice(9)]: v };
         }
     }
     f_update();
+});
+// The sheet's format: a size by its name. On input: before the form hears of it and
+// sets the fields as the page has them.
+document.getElementById('el_format').addEventListener('input', function(o_event){
+    if(!o_event.target.value){ return; }
+    [el_panel.elements.n_mm__sheet_x.value, el_panel.elements.n_mm__sheet_y.value] = o_event.target.value.split(' ');
 });
 document.getElementById('el_shuffle').addEventListener('click', function(){
     o_setting.n_seed++;
@@ -320,7 +373,8 @@ let f_set_picture = async function(s_sheet, o_file, o_picture__given = null){
             if(!el_img.naturalWidth || !el_img.naturalHeight){ throw new Error('no size'); }
         } catch(o_error){
             URL.revokeObjectURL(s_url);
-            document.getElementById('el_picture_hint').textContent = `${o_file.name} is not a picture this browser can show.`;
+            s_note__file = `${o_file.name} is not a picture this browser can show.`;
+            f_update();
             return;
         }
         o_picture = o_picture__given ?? f_o_picture__fitted(f_o_picture(el_img.naturalWidth, el_img.naturalHeight), f_a_n__bleed(o_setting), true);
@@ -334,27 +388,20 @@ let f_set_picture = async function(s_sheet, o_file, o_picture__given = null){
     URL.revokeObjectURL(o_s_url[s_sheet]);
     o_s_url[s_sheet] = s_url;
     o_setting[`o_picture__${s_sheet}`] = o_picture;
-    document.getElementById('el_picture_hint').textContent = 'Without a picture a print shows the sheet\'s cut lines.';
+    s_note__file = '';
     f_update();
 };
-document.getElementById('el_picture_sheet').addEventListener('change', function(o_event){
-    s_sheet__picture = o_event.target.value;
-    f_update();
-});
 document.getElementById('el_picture_load').addEventListener('click', function(){ document.getElementById('el_picture_file').click(); });
 document.getElementById('el_picture_file').addEventListener('change', async function(o_event){
     let o_file = o_event.target.files[0];
     o_event.target.value = '';
     if(!o_file){ return; }
-    if(o_undo?.s_sheet === s_sheet__picture){ o_undo = null; }
-    await f_set_picture(s_sheet__picture, o_file);
-    // a new picture is there to be placed
-    if(o_s_url[s_sheet__picture]){ s_mode = 'picture'; }
-    f_update();
+    if(o_undo?.s_sheet === s_sheet__shown){ o_undo = null; }
+    await f_set_picture(s_sheet__shown, o_file);
 });
 document.getElementById('el_picture_remove').addEventListener('click', function(){
-    if(o_undo?.s_sheet === s_sheet__picture){ o_undo = null; }
-    f_set_picture(s_sheet__picture, null);
+    if(o_undo?.s_sheet === s_sheet__shown){ o_undo = null; }
+    f_set_picture(s_sheet__shown, null);
 });
 let f_n_deg = function(n_deg){ return ((n_deg + 180) % 360 + 360) % 360 - 180; };
 let o_f_o_picture = {
@@ -368,16 +415,16 @@ let o_f_o_picture = {
 document.getElementById('el_picture').addEventListener('click', function(o_event){
     let f_o_picture__changed = o_f_o_picture[o_event.target.dataset.picture];
     if(!f_o_picture__changed){ return; }
-    o_setting[`o_picture__${s_sheet__picture}`] = f_o_picture__changed(o_setting[`o_picture__${s_sheet__picture}`]);
+    o_setting[`o_picture__${s_sheet__shown}`] = f_o_picture__changed(o_setting[`o_picture__${s_sheet__shown}`]);
     f_update();
 });
 
 // Matching by four points. The picture is first fitted into the calendar, so that all of
 // it can be clicked; then four clicks on it, four on the cut pattern, and it is laid anew.
 document.getElementById('el_match').addEventListener('click', function(){
-    let o_picture = o_setting[`o_picture__${s_sheet__picture}`];
-    o_match = { s_sheet: s_sheet__picture, a_a_n__px: [], a_a_n__mm: [], o_picture, a_n__next: null, s_message: '', b_busy: false };
-    o_setting[`o_picture__${s_sheet__picture}`] = f_o_picture__fitted(o_picture, [0, 0, o_setting.n_mm__calendar_x, o_setting.n_mm__calendar_y], false);
+    let o_picture = o_setting[`o_picture__${s_sheet__shown}`];
+    o_match = { s_sheet: s_sheet__shown, a_a_n__px: [], a_a_n__mm: [], o_picture, a_n__next: null, s_message: '', b_busy: false };
+    o_setting[`o_picture__${s_sheet__shown}`] = f_o_picture__fitted(o_picture, [0, 0, o_setting.n_mm__calendar_x, o_setting.n_mm__calendar_y], false);
     f_update();
 });
 let f_cancel_match = function(){
@@ -514,24 +561,53 @@ document.getElementById('el_reset').addEventListener('click', async function(){
     if(!confirm('Start over with the settings of the first start? Windows moved or changed alone go back to the grid, and the pictures are removed.')){ return; }
     o_setting = structuredClone(o_setting__default);
     n_idx__selected = null;
-    s_mode = 'window';
+    s_step = 'paper';
+    s_sheet__shown = 'front';
     o_match = null;
     o_undo = null;
     f_fill_form();
     for(let s_sheet of a_s_sheet){ await f_set_picture(s_sheet, null); }
 });
 
-for(let el of document.querySelectorAll('[name=s_mode]')){
-    el.addEventListener('change', function(){
-        s_mode = el.value;
+// The steps: the bar's buttons, and at each step's end the one to the next.
+for(let el of document.querySelectorAll('button[data-step]')){
+    el.addEventListener('click', function(){
+        s_step = el.dataset.step;
+        f_update();
+        el_panel.scrollTop = 0;
+    });
+}
+// The sheet shown, over the sheet and in the step 'picture'. On input: before the form
+// hears of it and sets the fields as the page has them.
+for(let el of document.querySelectorAll('[name=s_sheet__shown], [name=s_sheet__picture]')){
+    el.addEventListener('input', function(){
+        s_sheet__shown = el.value;
+        s_note__file = '';
         f_update();
     });
 }
-document.getElementById('el_zoom').addEventListener('change', function(o_event){
-    el_stage.style.setProperty('--n_zoom', o_event.target.value);
-    f_update();
+// Zoom: what was in the middle of the view stays there.
+for(let el of document.querySelectorAll('[name=n_zoom]')){
+    el.addEventListener('change', function(){
+        let el_scroll = document.getElementById('el_scroll');
+        let el_sheet = document.getElementById(`el_sheet__${s_sheet__shown}`);
+        let o_rect__view = el_scroll.getBoundingClientRect();
+        let a_n__middle = [o_rect__view.left + o_rect__view.width / 2, o_rect__view.top + o_rect__view.height / 2];
+        let o_rect = el_sheet.getBoundingClientRect();
+        let a_n_ratio = [(a_n__middle[0] - o_rect.left) / o_rect.width, (a_n__middle[1] - o_rect.top) / o_rect.height];
+        el_stage.style.setProperty('--n_zoom', el.value);
+        o_rect = el_sheet.getBoundingClientRect();
+        el_scroll.scrollBy(o_rect.left + a_n_ratio[0] * o_rect.width - a_n__middle[0], o_rect.top + a_n_ratio[1] * o_rect.height - a_n__middle[1]);
+        f_update();
+    });
+}
+// A sheet is as large as its place between the bars; what is drawn in the screen's pixels follows.
+new ResizeObserver(function(){ requestAnimationFrame(f_update); }).observe(document.getElementById('el_view'));
+// The lines' legend closes with a press beside it.
+window.addEventListener('pointerdown', function(o_event){
+    let el_legend_box = document.getElementById('el_legend_box');
+    if(!el_legend_box.contains(o_event.target)){ el_legend_box.open = false; }
 });
-window.addEventListener('resize', f_update);
 
 // Where the pointer is on a sheet, in the calendar's mm.
 let f_a_n__mm = function(o_event, s_sheet){
@@ -540,8 +616,9 @@ let f_a_n__mm = function(o_event, s_sheet){
     let [n_x, n_y] = f_a_n__calendar(o_setting);
     return [(o_event.clientX - o_rect.left) * n_mm__per_px - n_x, (o_event.clientY - o_rect.top) * n_mm__per_px - n_y];
 };
-// Windows: a click on one chooses it, a drag moves it in steps of 0.5 mm. Picture: a
-// drag anywhere on a sheet moves its picture, a drag of a handle sizes it or cuts it off.
+// Step 'window': a click on a window chooses it, a drag moves it in steps of 0.5 mm.
+// Step 'picture': a drag anywhere on the sheet moves its picture, a drag of a handle
+// sizes it or cuts it off. In the other steps the pointer moves nothing.
 el_stage.addEventListener('pointerdown', function(o_event){
     let el_sheet = o_event.target.closest('.sheet');
     if(!el_sheet){ return; }
@@ -554,8 +631,7 @@ el_stage.addEventListener('pointerdown', function(o_event){
         }
         return;
     }
-    if(s_mode === 'picture'){
-        s_sheet__picture = s_sheet;
+    if(s_step === 'picture'){
         let o_picture = o_s_url[s_sheet] ? o_setting[`o_picture__${s_sheet}`] : null;
         if(o_picture){
             let el_handle = o_event.target.closest('.handle');
@@ -565,7 +641,7 @@ el_stage.addEventListener('pointerdown', function(o_event){
             o_drag = { s_sheet, o_picture, a_n__sign, a_n__pointer: a_n, a_n__off: [a_n[0] - a_n__handle[0], a_n[1] - a_n__handle[1]] };
             o_event.preventDefault();
         }
-    } else if(s_sheet === 'front'){
+    } else if(s_step === 'window'){
         let el_hit = o_event.target.closest('.hit');
         n_idx__selected = el_hit ? Number(el_hit.dataset.idx) : null;
         if(el_hit){
@@ -575,6 +651,8 @@ el_stage.addEventListener('pointerdown', function(o_event){
         }
     }
     f_update();
+    // a window chosen: its fields into view
+    if(o_drag?.a_n__window){ document.getElementById('el_own_group').scrollIntoView({ block: 'nearest' }); }
 });
 window.addEventListener('pointermove', function(o_event){
     if(o_match && !o_match.b_busy && o_match.a_a_n__mm.length < 4){
@@ -623,12 +701,11 @@ for(let s_event of ['pointerup', 'pointercancel']){
 // the pointer: its handles may lie far outside the sheet.
 el_stage.addEventListener('wheel', function(o_event){
     let s_sheet = o_event.target.closest('.sheet')?.dataset.sheet;
-    if(s_mode !== 'picture' || o_match || !o_event.ctrlKey || !s_sheet || !o_s_url[s_sheet]){ return; }
+    if(s_step !== 'picture' || o_match || !o_event.ctrlKey || !s_sheet || !o_s_url[s_sheet]){ return; }
     o_event.preventDefault();
     let o_picture = f_o_picture__scaled(o_setting[`o_picture__${s_sheet}`], Math.exp(-o_event.deltaY / 1000), f_a_n__mm(o_event, s_sheet));
     for(let s_name of ['n_mm__x', 'n_mm__y', 'n_mm__size_x']){ o_picture[s_name] = Math.round(o_picture[s_name] * 100) / 100; }
     o_setting[`o_picture__${s_sheet}`] = o_picture;
-    s_sheet__picture = s_sheet;
     f_update();
 }, { passive: false });
 
