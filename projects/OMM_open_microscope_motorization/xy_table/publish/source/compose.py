@@ -12,6 +12,8 @@ OUT, PROJECT, ROOT = Path(cfg['output']), Path(cfg['project']), Path(cfg['root']
 D = cfg['dims']
 # Brand: Ivory background, Graphite ink, Ochre accent on ivory.
 BG, INK, MUTE, LINE, OCHRE, PANEL = '#F4EFE3', '#151B1D', '#5D6461', '#D9D2C3', '#B77B1E', '#E6DFCF'
+# Movement arrows: red, off the brand's palette, so that they stand out on every part.
+RED = '#D62E1F'
 FONT = os.environ.get('PUBLISH_FONT') or subprocess.check_output(['fc-match', '-f', '%{file}', 'DejaVu Sans Mono'], text=True)
 FAMILY = ImageFont.truetype(FONT, 20).getname()[0]
 BOLD = os.environ.get('PUBLISH_FONT_BOLD') or subprocess.check_output(['fc-match', '-f', '%{file}', FAMILY+':style=Bold'], text=True)
@@ -143,11 +145,41 @@ def line(points, width=3):
     draw.line(points, fill=BG, width=width+6, joint='curve')
     draw.line(points, fill=OCHRE, width=width, joint='curve')
 
-def arrow(tip, direction):
-    (x, y), (dx, dy) = tip, direction
-    l, s = 22, 8
-    pts = [(x, y), (x-dx*l-dy*s, y-dy*l+dx*s), (x-dx*l+dy*s, y-dy*l-dx*s)]
-    draw.polygon(pts, fill=OCHRE, outline=BG)
+def along(pts, dist):
+    """The polyline pts without its first dist px."""
+    for i in range(len(pts)-1):
+        n = math.dist(pts[i], pts[i+1])
+        if dist <= n:
+            t = dist/n
+            return [(pts[i][0]+(pts[i+1][0]-pts[i][0])*t, pts[i][1]+(pts[i+1][1]-pts[i][1])*t)]+pts[i+1:]
+        dist -= n
+    return pts[-1:]
+
+def red_arrow(pts, both=False, width=16, head=54):
+    """A fat red arrow along the polyline pts, on an Ivory halo, its head at
+    the last point and at the first too if both; drawn three times larger and
+    scaled down, so its edges are smooth."""
+    k, pad = 3, head+20
+    x0, y0 = min(p[0] for p in pts)-pad, min(p[1] for p in pts)-pad
+    pts = [((p[0]-x0)*k, (p[1]-y0)*k) for p in pts]
+    width, head = width*k, head*k
+    ends, shaft = [pts], along(pts[::-1], head*.8)[::-1]
+    if both: ends.append(pts[::-1]); shaft = along(shaft, head*.8)
+    heads = []
+    for end in ends:
+        tip, base = end[-1], along(end[::-1], head)[0]
+        dx, dy = (tip[0]-base[0])/math.dist(tip, base), (tip[1]-base[1])/math.dist(tip, base)
+        b = (tip[0]-dx*head, tip[1]-dy*head)
+        heads.append([tip, (b[0]-dy*head*.48, b[1]+dx*head*.48), (b[0]+dy*head*.48, b[1]-dx*head*.48)])
+    size = (round(max(p[0] for p in pts)+pad*k), round(max(p[1] for p in pts)+pad*k))
+    layer = Image.new('RGBA', size, (0, 0, 0, 0)); d = ImageDraw.Draw(layer)
+    for fill, grow in ((BG, 6*k), (RED, 0)):
+        d.line(shaft, fill=fill, width=width+2*grow, joint='curve')
+        for h in heads:
+            d.polygon(h, fill=fill)
+            if grow: d.line(h+[h[0]], fill=fill, width=2*grow, joint='curve')
+    layer = layer.resize((size[0]//k, size[1]//k), Image.Resampling.LANCZOS)
+    im.alpha_composite(layer, (round(x0), round(y0)))
 
 def label(x, y, s, size=28):
     """A value in a pill centred on (x, y)."""
@@ -165,13 +197,6 @@ def span(a, b, y, s):
 
 def dot(p):
     draw.ellipse((p[0]-9, p[1]-9, p[0]+9, p[1]+9), fill=OCHRE, outline=BG, width=3)
-
-def dashed(a, b, dash=22, gap=14):
-    """A dashed line from a to b."""
-    n = math.dist(a, b)
-    for i in range(int(n//(dash+gap))+1):
-        t0, t1 = i*(dash+gap)/n, min((i*(dash+gap)+dash)/n, 1)
-        line([(a[0]+(b[0]-a[0])*t0, a[1]+(b[1]-a[1])*t0), (a[0]+(b[0]-a[0])*t1, a[1]+(b[1]-a[1])*t1)], 3)
 
 def callouts(at, side, x, edge, step=170, top=470, bottom=1330, width=440):
     """Titles with their lines in a column at x, each with a line from the
@@ -200,7 +225,6 @@ NOT_PRINTED = 'O-RINGS AND SANDING PAPER ARE NOT PRINTED AND NOT IN THE SCRIPT, 
 new('01 / HOW IT WORKS: THE STACK')
 heading('Four layers, one optical axis.', 'Each layer slides on a printed rail of the layer below. The light passes through the windows. Shown lifted apart.')
 at = place('stack', (580, 450, 1240, 1110))
-dashed(at('axis_top'), at('axis_bottom'))
 text(at('axis_top')[0]+18, at('axis_top')[1]-6, 'OPTICAL AXIS', 22, OCHRE, True)
 callouts(at, [('glass', 'GLASS SLIDE', [f'{size("standard")[0]} × {S["scl_z_slide"]:g} mm, not printed.']),
               ('holder', 'SLIDE HOLDER', ['Lifts off to change the slide.', 'Its grooves sit on the X slider.']),
@@ -230,7 +254,7 @@ for (name, title, value, lines), (x, y, w, h), at in zip(MOVES, boxes, pinned([m
     (ax, ay), (sx, sy) = at('axis'), at('slide')
     if math.dist((ax, ay), (sx, sy)) > 1:
         n = math.dist((ax, ay), (sx, sy))
-        line([(ax, ay), (sx, sy)], 4); arrow((sx, sy), ((sx-ax)/n, (sy-ay)/n))
+        red_arrow([(ax+(sx-ax)/n*26, ay+(sy-ay)/n*26), (sx, sy)])
     line([(ax-34, ay), (ax+34, ay)], 3); line([(ax, ay-34), (ax, ay+34)], 3)
     draw.ellipse((ax-20, ay-20, ax+20, ay+20), outline=OCHRE, width=3)
 footer(['Travel in the model: about 41 mm in Y (-13 to +28) and 90 mm in X (-45 to +45).',
@@ -240,7 +264,10 @@ save('images/02_two_axes.png')
 
 new('03 / HOW IT WORKS: THE DRIVE')
 heading('A roller on a rail.', 'No gears, no lead screw. Each motor turns a printed sleeve with three O-rings; they roll on sanding paper on the rail\'s top.')
-picture('drive_view', (100, 470, 840, 700))
+at = picture('drive_view', (100, 470, 840, 700))
+# The roller turns both ways, the Y slider's arm moves with it.
+red_arrow([at(f'turn_{i}') for i in range(sum(k.startswith('turn_') for k in info['drive_view']['marks']))], both=True, width=12, head=42)
+for k in 'bf': red_arrow([at(f'move_{k}0'), at(f'move_{k}1')])
 badge(130, 500, 'Y DRIVE')
 text(1000, 470, 'CUT THROUGH THE Y MOTOR\'S AXIS', 26, OCHRE, True)
 draw.line((1000, 510, W-100, 510), fill=LINE, width=2)
@@ -287,16 +314,25 @@ new('05 / TOL_RAIL')
 heading('tol_rail sets the play.', 'Cut through a rail of the table in the slot of the Y slider\'s arm. All rails share this profile. Shown at the same scale.')
 RAILS = ['rail010', 'standard', 'rail040']
 guided = S['table_rail_y'][1]-S['table_rail_y'][0]
-for k, (left, top, right, at) in zip(RAILS, row(['rail_'+k for k in RAILS], (100, 720, 2200, 520), 90)):
+for k, (left, top, right, at) in zip(RAILS, row(['rail_'+k for k in RAILS], (100, 700, 2200, 460), 90)):
     d = D[k]
     draw.line((left, 460, right, 460), fill=LINE, width=2)
     text(left, 488, v('tol_rail', k), 40, bold=True)
     text(left, 546, f'{d["tol_rail"]/2:g} mm per side and above', 28, MUTE, maxwidth=right-left)
     text(left, 586, f'yaw play ±{math.degrees(d["tol_rail"]/guided):.2f}°', 28, MUTE, maxwidth=right-left)
     span(at('slot_l'), at('slot_r'), top-64, f'slot {d["scl_x_rail"]+d["tol_rail"]:g}')
-    span(at('rail_l'), at('rail_r'), 1304, f'rail {d["scl_x_rail"]:g}')
+    span(at('rail_l'), at('rail_r'), 1222, f'rail {d["scl_x_rail"]:g}')
     text(*at('arm'), 'arm', 26, INK, True, anchor='mm'); text(*at('table'), 'table', 26, BG, True, anchor='mm')
-    badge(left, 1380, 'DEFAULT' if k == 'standard' else 'DIGITAL ONLY', k == 'standard')
+    # A thin line without a halo, which would hide the lip
+    (mx, my), (tx, ty) = at('mouth'), at('mouth_text')
+    draw.line([(tx+8, ty), (mx-2, my)], fill=INK, width=2)
+    text(tx, ty, 'mouth', 26, INK, True, anchor='rm')
+    badge(left, 1290, 'DEFAULT' if k == 'standard' else 'DIGITAL ONLY', k == 'standard')
+text(100, 1392, 'MOUTH', 26, OCHRE, True)
+for j, s in enumerate([f'The slot\'s first layer, rail_mouth_h = {S["rail_mouth_h"]:g}, is only workaround_no_space = {S["workaround_no_space"]:g} per side wider than the rail,',
+                       'for every tol_rail. The lip makes up for the slicer\'s elephant foot compensation (often 0.15 mm by default),',
+                       'which shrinks the first layer and so widens the slot there.']):
+    text(290, 1392+j*44, s, 27, maxwidth=2010)
 footer([f'Slot = rail + tol_rail. Yaw play of the Y slider = tol_rail / guided length, here {guided:.0f} mm.',
         f'The rail is {S["scl_x_rail"]:g} × {S["scl_y_rail"]:g} with 45° flanks and a top one line wide: {v("extr_width")}. Tight binds, loose wiggles.'],
        'SAME SCALE  /  CAD RENDERS, CUT  /  ILLUSTRATIVE COLORS  /  PLAY FROM THE GEOMETRY, NOT MEASURED  /  v3.1.0 IS NOT PRINTED YET  /  MM')

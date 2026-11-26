@@ -4,7 +4,7 @@
 Stages: --stage=mesh, --stage=render, --stage=compose; all three without one.
 --draft renders at half size with fewer samples, for checking only.
 """
-import concurrent.futures, json, os, re, shutil, subprocess, sys
+import concurrent.futures, json, math, os, re, shutil, subprocess, sys
 from pathlib import Path
 import numpy as np
 
@@ -33,7 +33,7 @@ DIMS = ['x_travel', 'y_travel', 'explode', 'paper_t', 'lift', 'rail_cut_y', 'scl
         'scl_z_slide', 'tol_slide_holder', 'wall_slide_holder', 'scl_x_handle_slide_holder', 'scl_z_slide_holder',
         'scl_z_inset_slide_slideholder', 'scl_z_inset_slideh', 'wall_x_slider', 'scl_x_x_slider', 'scl_y_x_slider',
         'scl_z_x_slider', 'x_rail_end', 'scl_x_rail', 'scl_y_rail', 'extr_width', 'tol_rail', 'scl_y_rail_outer',
-        'scl_z_rail', 'scl_z_y_slider', 'y_rail2_x', 'scl_x_x_rail', 'scl_y_table', 'table_y1', 'table_motor_y',
+        'scl_z_rail', 'rail_mouth_h', 'workaround_no_space', 'scl_z_y_slider', 'y_rail2_x', 'scl_x_x_rail', 'scl_y_table', 'table_y1', 'table_motor_y',
         'table_rail_y', 'table_bracket_x', 'y_bracket_y', 'y_back', 'y_front', 'y_arm_end', 'rail_y',
         'bracket_pitch', 'upright_w', 'upright_t', 'upright_h', 'motor_z', 'adapter_r', 'adapter_h',
         'dia_oring_cord', 'oring_groove', 'num_oring', 'scl_z_motor_shaft', 'byj_shaft_offset', 'byj_shaft_len',
@@ -104,6 +104,10 @@ module pieces() {{
         cube([sand_strips[1].x, sand_strips[1].y, paper_t]);
     else if (piece == "paper_x") on_x() translate([x_rail_end - scl_z_rail, rail_y - sand_strips[0].x / 2, scl_y_rail_outer])
         cube([sand_strips[0].y, sand_strips[0].x, paper_t]);
+    // The optical axis, dashed, from under the table to above the slide: drawn to explain, not a part
+    else if (piece == "axis") let(top = scl_z_y_slider + scl_z_x_slider - scl_z_inset_slideh + scl_z_slide_holder
+        - scl_z_inset_slide_slideholder + scl_z_slide + explode[0] + explode[1] + explode[2] + explode[3] + 16)
+        for (z = [-30 : 6 : top - 4]) translate([0, 0, z]) cylinder(d = 0.8, h = 4, $fn = 16);
     else if (piece == "lay_all") for (p = [{", ".join(f'"{p}"' for p in LAYOUT)}]) lay(p);
     else lay(piece);
 }}
@@ -131,14 +135,14 @@ def tint(moving): return {p: c for p, c in STILL.items() if p not in moving}
 
 # From the front: the Y motor in front, the X motor behind, the table's label reading upwards.
 VIEW = [-.35, -1, .85]
-scenes = [dict(id='stack', set='standard', pose='apart', pieces=pieces('standard', 'apart', STAGE+DRIVE_Y+DRIVE_X),
+scenes = [dict(id='stack', set='standard', pose='apart', pieces=pieces('standard', 'apart', STAGE+DRIVE_Y+DRIVE_X+['axis']),
                direction=[-.35, -1, .5]),
           # From above, the table's label reading from the left.
           *[dict(id='move_'+pose, set='standard', pose=pose, pieces=pieces('standard', pose, STAGE+DRIVE_Y+DRIVE_X),
                  group='move', euler=[0, 0, 0], exposure=-1.9, colors=tint(moving))
             for pose, moving in (('home', STAGE), ('y', ['y_slider', 'x_slider']), ('x', ['x_slider']))],
           dict(id='drive_view', set='standard', pose='home', pieces=pieces('standard', 'home', STAGE+DRIVE_Y+DRIVE_X),
-               direction=[-.3, -1, .75], frame=dict(target='drive', width=74)),
+               direction=[-.6, -1, .8], frame=dict(target='drive', width=74)),
           dict(id='drive', set='standard', pose='drive', direction=[0, -1, 0], front_light=True,
                pieces=pieces('standard', 'drive', ['table', 'y_slider']+DRIVE_Y)),
           *[dict(id='rail_'+k, set=k, pose='rail', direction=[0, -1, 0], front_light=True, group='rail',
@@ -244,13 +248,20 @@ def marks(scene, d):
                 'arm2': [d['y_rail2_x']+2.4, yc, 1.6], 'upright': [d['table_bracket_x']+d['upright_t']/2, yc, d['upright_h']-6]}
     if scene['pose'] == 'rail':
         yc, a, t = d['rail_cut_y'], d['scl_x_rail']/2, d['tol_rail']/2
+        h, e = d['rail_mouth_h'], d['workaround_no_space']
         return {'rail_l': [-a, yc, .6], 'rail_r': [a, yc, .6], 'slot_l': [-a-t, yc, 1], 'slot_r': [a+t, yc, 1],
-                'arm': [2.6, yc, 3.1], 'table': [-3, yc, -.7]}
+                'arm': [2.6, yc, 3.1], 'table': [-3, yc, -.7], 'mouth': [-a-(e+t)/2, yc, h/2], 'mouth_text': [-1.9, yc, 1.2]}
     if scene['id'] == 'layout':
         return {'table': [5+d['scl_y_table']/2, 200, 3], 'y_slider': [65+d['scl_y_table'], 112-d['y_arm_end']+(d['y_back']+d['y_front'])/2-12, 2.4],
                 'x_slider': [5+d['scl_z_rail']-d['x_rail_end'], 82+d['scl_y_x_slider']/2+d['wall_x_slider']/2+d['rail_y'], 4],
                 'slide_holder': [86.5-holder+10, 56, 4], 'adapters': [196, 95, d['adapter_h']], 'ruler': [54.5, 17.25, 3]}
-    return {'axis': [0, 0, zs+d['scl_z_slide']], 'axis_top': [0, 0, zs+16], 'axis_bottom': [0, 0, -30],
+    # The Y roller's turn, an arc around its free end that leaves out the bottom, where the arm is,
+    # and its arm's move, along the arm's top in front of and behind the roller, the one behind clear of the arc
+    free = face+d['scl_z_motor_shaft']-d['byj_shaft_len']-d['adapter_h']
+    turn = {f'turn_{i}': [free-.6, d['table_motor_y']+9*math.cos(math.radians(a)), shaft+9*math.sin(math.radians(a))]
+            for i, a in enumerate(range(-5, 186, 10))}
+    move = {f'move_{k}{i}': [0, d['table_motor_y']+r, top+d['paper_t']] for k, ends in (('b', (21, 38)), ('f', (-15, -32))) for i, r in enumerate(ends)}
+    return {**turn, **move, 'axis': [0, 0, zs+d['scl_z_slide']], 'axis_top': [0, 0, zs+16],
             'slide': [x, y, zs+d['scl_z_slide']], 'table': [half, d['table_y1']-12, 0], 'y_slider': [half, y+d['y_back']-4, zy],
             'arm': [0, y+d['y_arm_end']+8, zy-d['scl_z_y_slider']+top],
             'x_slider': [x+d['scl_x_x_slider']/2+d['wall_x_slider']/2, y, zx+d['scl_z_x_slider']],

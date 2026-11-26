@@ -103,7 +103,9 @@ Made for 0.2 mm layers, without support. `part = "print_layout"` puts all
 parts of the Standard preset on a 256 × 256 mm bed. `xy_table_v3p0p4_veryos.3mf`
 holds v3.0.4's plate for the Elegoo Centauri Carbon 2: PLA, 0.4 mm nozzle,
 0.2 mm layers, 2 walls, 15 % infill, support off; its Y slider has no bar
-between the arms.
+between the arms. The slots open to the bed are drawn narrow in their first
+layer, 0.01 per side over the rail, for the slicer's elephant foot
+compensation (often 0.15 by default), which widens them there.
 
 - Table: plate down, rails and bracket up.
 - Y slider: plate down; the arms' slots are open to the bed.
@@ -204,11 +206,11 @@ license where the site offers one.
 | --- | --- |
 | `thumbnail_4x3.png` | missing |
 | photos | missing |
-| `images/01_stack.png` | How it works, the stack: table, Y slider, X slider, slide holder and glass slide lifted apart around the optical axis, the two motors and the sanding paper. |
-| `images/02_two_axes.png` | How it works, two axes: top views at home, with the Y slider moved by 25 and with the X slider moved by 35; what stays is grey. |
-| `images/03_drive.png` | How it works, the drive: the Y motor in its slotted uprights, its sleeve with three O-rings on the sanding paper of the Y slider's arm, and a cut through the motor's axis. |
+| `images/01_stack.png` | How it works, the stack: table, Y slider, X slider, slide holder and glass slide lifted apart, the two motors and the sanding paper; the optical axis, dashed, runs through their windows. |
+| `images/02_two_axes.png` | How it works, two axes: top views at home, with the Y slider moved by 25 and with the X slider moved by 35; what stays is grey, a red arrow shows how far the slide moved. |
+| `images/03_drive.png` | How it works, the drive: the Y motor in its slotted uprights, its sleeve with three O-rings on the sanding paper of the Y slider's arm, red arrows for the roller's turn and the arm's move both ways, and a cut through the motor's axis. |
 | `images/04_slide_formats.png` | Four presets at the same scale: Standard 76 × 25, Petrographic 46 × 27, Wide 75 × 38, Large 75 × 50, with slide, table and slide holder sizes. |
-| `images/05_tol_rail.png` | tol_rail 0.1, 0.2 and 0.4: a cut through a rail in its slot, slot width and yaw play. |
+| `images/05_tol_rail.png` | tol_rail 0.1, 0.2 and 0.4: a cut through a rail in its slot, slot width and yaw play; the slot's narrow mouth in the first layer, against the slicer's elephant foot compensation. |
 | `images/06_print.png` | The print layout: table, Y slider, X slider, slide holder, two shaft adapters, four washers, the cutting ruler's two bars; motors, screws, O-rings, sanding paper and slides are not printed. |
 | `thumbnail_3x4.png` | missing |
 

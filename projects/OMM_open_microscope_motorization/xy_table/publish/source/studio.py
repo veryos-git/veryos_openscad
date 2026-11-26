@@ -14,11 +14,13 @@ S = .004
 # Illustrative colours, (colour, roughness, metallic): the printed parts in
 # the brand's colours, the motors in metal, O-rings black, sanding paper
 # red-brown. Engraving floors and cut faces get a second colour, so logos and
-# sections read.
+# sections read. The optical axis glows in Ochre and casts no shadow, so it
+# reads as a line where the parts do not hide it.
 COLORS = {'table': ('344948', .42, 0), 'y_slider': ('E7A43A', .42, 0), 'x_slider': ('B77B1E', .42, 0),
           'slide_holder': ('E4D9BE', .42, 0), 'slide': ('9CCFE6', .35, 0), 'motor': ('AEB4B9', .3, .8),
           'adapter': ('F4EFE3', .42, 0), 'adapters': ('F4EFE3', .42, 0), 'orings': ('202428', .5, 0),
-          'paper': ('A8562F', .9, 0), 'washers': ('F4EFE3', .42, 0), 'ruler': ('B77B1E', .42, 0)}
+          'paper': ('A8562F', .9, 0), 'washers': ('F4EFE3', .42, 0), 'ruler': ('B77B1E', .42, 0),
+          'axis': ('B77B1E', .5, 0)}
 ENGRAVE = {'table': 'F0B750', 'y_slider': 'F4EFE3'}
 NS = {'m': 'http://schemas.microsoft.com/3dmanufacturing/core/2015/02'}
 
@@ -96,6 +98,11 @@ def load(name, piece, entry):
     obj = bpy.data.objects.new(name, mesh); bpy.context.collection.objects.link(obj)
     obj.scale = (S,)*3
     mesh.materials.append(material(name, code, roughness, metallic, alpha=.45 if kind == 'slide' else 1))
+    if kind == 'axis':
+        bs = mesh.materials[0].node_tree.nodes['Principled BSDF']
+        bs.inputs['Emission Color'].default_value = linear(code)
+        bs.inputs['Emission Strength'].default_value = 2.5
+        obj.visible_shadow = False
     floor = entry['engrave'].get(piece)
     if floor:
         paint(mesh, material(name+' engraving', ENGRAVE[piece]), lambda x, y, z: abs(z-floor['z']) < 2e-3 and

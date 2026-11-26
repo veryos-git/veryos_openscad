@@ -80,6 +80,7 @@ Diameter clearance = added to the hole diameter, not per side.
 
 ## Rules
 
+- A slot open to the bed gets wider in its first layer: the slicer's elephant foot compensation, often 0.15 by default, shrinks the first layer's outlines. The OMM XY table's slots are only 0.01 per side wider than the rail for their first 0.2 (`rail_mouth_h`) to make up for it (the user, 2026-11-26).
 - A part that hangs behind a box tips it: the RGBW puck in its holder, 25.9 behind the back wall of a box 92.5 × 50.6 × 111.6, tipped it backwards (print, 2026-11-25). Carry the side walls on behind the box as feet, past the hanging part's end; where the box is printed on its top, their upper edge climbs at 45 degrees and needs no support (paper_light_box V3: feet 30 × 2, 29 mm of overhang wall sliced; not printed).
 - A small light close behind sheets of paper shows as a bright dot: the puck's lens behind a Ø36 window 15 from the last sheet. With more room it spreads, about 30 by the user's trial (paper_light_box V2 print, 2026-11-25; V3 has 30, not printed).
 - Paper cannot be pushed, so a sheet has to fall down its grooves: play p beside a sheet h high is used up by a tilt of p / h, 0.5 on 111 by 0.26 degrees. Give paper its room beside it and take it back in the grooves' depth (paper_light_box V2 print, 2026-11-25: 0.25 per side jammed; reasoned, where it stuck not reported).
