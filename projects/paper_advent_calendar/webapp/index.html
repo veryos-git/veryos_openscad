@@ -143,7 +143,8 @@ button:disabled{ opacity: .4; cursor: default; }
         <label class="row" title="From the sheet's left edge to the calendar's. The print puts the calendar there; put the cutting file at the same place in the cutter's software">From the sheet's left, mm <input type="number" name="n_mm__left" min="0" max="1500" step="0.1" required></label>
         <label class="row" title="From the sheet's bottom edge to the calendar's">From its bottom, mm <input type="number" name="n_mm__bottom" min="0" max="1500" step="0.1" required></label>
         <p class="hint" id="el_place"></p>
-        <label class="row" title="A red rectangle of the calendar's size in both files: the cut that takes the calendar out of the sheet. With it both files are the calendar's size in the cutter's software, and the distances above are theirs">Calendar's edge in the files <input type="checkbox" name="b_outline"></label>
+        <label class="row" title="A red rectangle of the calendar's size in both files: the cut that takes the calendar out of the sheet">Calendar's edge in the files <input type="checkbox" name="b_outline"></label>
+        <label class="row" title="A dot, a cut of 0.2 mm, in each corner of the sheet of paper. With them a cutting file is as large as the sheet: in the cutter's software it is laid on the sheet corner on corner, and the calendar lies where the print has it. Without them a file is as large as what is cut, and is placed by the distances named above">Paper's corners in the files <input type="checkbox" name="b_sheet_dot"></label>
 
         <h2>Windows</h2>
         <label class="row">Number <input type="number" name="n_window" min="1" max="100" step="1" required></label>
@@ -273,6 +274,7 @@ button:disabled{ opacity: .4; cursor: default; }
             <li><svg viewBox="0 0 30 10"><path d="M 5 9 V 3 H 11 M 19 3 H 25 V 9" fill="none" stroke="#000000" stroke-width="1.5"/></svg>back: cut, marks at the windows</li>
             <li><svg viewBox="0 0 30 10"><path d="M 2 5 H 30" stroke="#808080" stroke-width="1.5" stroke-dasharray="2 2"/></svg>back: cut, the logo in dots</li>
             <li><svg viewBox="0 0 30 10"><path d="M 0 5 H 30" stroke="#ff0000" stroke-width="1.5"/></svg>the calendar's edge: cut</li>
+            <li><svg viewBox="0 0 30 10"><path d="M 13 3 L 17 7" stroke="#008000" stroke-width="1.5"/></svg>a dot in each corner of the paper: cut</li>
             <li><svg viewBox="0 0 30 10"><path d="M 2 5 H 30" stroke="#303838" stroke-width="1.5" stroke-dasharray="4 3"/></svg>back: where a window opens, not cut</li>
             <li><svg viewBox="0 0 30 10"><path d="M 0 5 H 30" stroke="#9aa0a0" stroke-width="1.5" stroke-dasharray="5 4"/></svg>the printer's margin</li>
         </ul>

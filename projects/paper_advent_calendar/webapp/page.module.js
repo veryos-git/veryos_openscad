@@ -198,7 +198,9 @@ let f_update = function(){
         let a_n__box = f_a_n__box__file(o_setting, s_sheet);
         if(!a_n__box){ return 'empty'; }
         let a_n__file = f_a_n__distance(o_setting, a_n__box);
-        return `${f_s(a_n__box[2] - a_n__box[0])} × ${f_s(a_n__box[3] - a_n__box[1])} mm, ${f_s(a_n__file[0])} from the sheet's left, ${f_s(a_n__file[1])} from its bottom`;
+        // with a dot in each of the sheet's corners a file is the sheet
+        return `${f_s(a_n__box[2] - a_n__box[0])} × ${f_s(a_n__box[3] - a_n__box[1])} mm, `
+            + (a_n__file.every(function(n){ return Math.abs(n) < 1e-9; }) ? 'the sheet of paper itself, corner on corner' : `${f_s(a_n__file[0])} from the sheet's left, ${f_s(a_n__file[1])} from its bottom`);
     };
     document.getElementById('el_place').textContent = `${f_s(a_n[2])} from the sheet's right, ${f_s(a_n[3])} from its top. In the cutter's software `
         + (f_s_file('front') === f_s_file('back') ? `both files: ${f_s_file('front')}.` : `the front file: ${f_s_file('front')}; the back file: ${f_s_file('back')}.`);

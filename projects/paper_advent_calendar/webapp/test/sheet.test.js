@@ -30,7 +30,7 @@ Deno.test('the calendar\'s place: from the sheet\'s bottom left corner, drawn fr
 });
 
 Deno.test('print and cutting file meet: the file\'s box lies on the sheet where the print draws the calendar', function(){
-    for(let o_setting of [o_setting__default, o_setting__upright, { ...o_setting__upright, b_outline: false }]){
+    for(let o_setting of [o_setting__default, o_setting__upright, { ...o_setting__upright, b_sheet_dot: false }, { ...o_setting__upright, b_sheet_dot: false, b_outline: false }]){
         for(let s_sheet of ['front', 'back']){
             // the print: the file's own paths, moved by the calendar's corner
             let [n_x, n_y] = f_a_n__calendar(o_setting);
@@ -41,7 +41,12 @@ Deno.test('print and cutting file meet: the file\'s box lies on the sheet where 
             let a_n = f_a_n__distance(o_setting, a_n__box);
             assertAlmostEquals(a_n[0], n_x + a_n__box[0], 1e-9, 'left');
             assertAlmostEquals(a_n[1], o_setting.n_mm__sheet_y - (n_y + a_n__box[3]), 1e-9, 'bottom');
-            if(o_setting.b_outline){ assert(a_n[0] === o_setting.n_mm__left && a_n[1] === o_setting.n_mm__bottom, 'with the edge: the settings\' own numbers'); }
+            // with the sheet's dots the file is the sheet, corner on corner; without them and with the edge it is the calendar
+            if(o_setting.b_sheet_dot){
+                assert(String(a_n) === '0,0,0,0' && a_n__box[2] - a_n__box[0] === o_setting.n_mm__sheet_x && a_n__box[3] - a_n__box[1] === o_setting.n_mm__sheet_y, `with the sheet's dots: ${a_n}`);
+            } else if(o_setting.b_outline){
+                assert(a_n[0] === o_setting.n_mm__left && a_n[1] === o_setting.n_mm__bottom, 'with the edge: the settings\' own numbers');
+            }
         }
     }
 });

@@ -6,7 +6,7 @@
 // place is given the way a cutter's software takes it, from the sheet's bottom left
 // corner; a sheet is drawn the way a page is, in mm from its top left corner, y down.
 
-import { n_mm__line, f_s_n, f_a_s_path } from './calendar.module.js';
+import { n_mm__line, f_s_n, f_a_n__sheet, f_a_s_path } from './calendar.module.js';
 import { f_b_covered, f_s_picture } from './picture.module.js';
 
 let a_s_edge = ['left', 'bottom', 'right', 'top'];
@@ -19,7 +19,8 @@ let n_mm__ruler_below = 2;
 
 // The calendar's top left corner on the sheet.
 let f_a_n__calendar = function(o_setting){
-    return [o_setting.n_mm__left, o_setting.n_mm__sheet_y - o_setting.n_mm__bottom - o_setting.n_mm__calendar_y];
+    let [n_left, n_top] = f_a_n__sheet(o_setting);
+    return [-n_left, -n_top];
 };
 // How far a box of the calendar lies from the sheet's edges: left, bottom, right, top.
 // The box is left, top, right, bottom in the calendar's mm; by default the calendar.

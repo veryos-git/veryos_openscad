@@ -8,7 +8,7 @@ import {
     a_s_shape, a_s_door, o_setting__default, n_ratio__hinge,
     f_n_len, f_n_len__path, f_a_n__at, f_b_corner, f_a_o_seg__part, f_s_d, f_a_a_n__dash, f_a_a_n__bridge,
     f_o_door, f_a_o_window, f_a_n__logo, f_a_a_o_seg__logo, f_a_a_o_seg__logo_dot, f_a_n__box, f_a_s_problem,
-    f_a_n__box__file, f_s_svg
+    f_a_n__sheet, f_a_n__box__file, f_s_svg
 } from '../calendar.module.js';
 
 let assert = function(b, s_message = 'assertion failed'){
@@ -437,30 +437,44 @@ let a_o_window__own = [{ n_mm__x: 40, n_mm__y: 30, n_mm__size_x: 55, n_mm__size_
 let a_o_setting = [
     o_setting__default,
     { ...o_setting__default, a_s_door: a_s_door, n_seed: 5, n_mm__corner: 6, a_o_window__own },
-    { ...o_setting__default, n_mm__calendar_x: 210, n_mm__calendar_y: 297, n_column: 4, n_window: 25, b_outline: false, b_logo: false, b_mark: false, n_mm__bridge: 0 },
-    { ...o_setting__default, n_mm__calendar_x: 100.5, n_mm__calendar_y: 60, n_window: 3, n_column: 3, n_mm__margin: 5, n_mm__window_x: 20, n_mm__window_y: 30, a_s_shape: ['arch'], a_s_door: ['double'] }
+    { ...o_setting__default, n_mm__calendar_x: 210, n_mm__calendar_y: 297, n_column: 4, n_window: 25, b_outline: false, b_sheet_dot: false, b_logo: false, b_mark: false, n_mm__bridge: 0 },
+    { ...o_setting__default, n_mm__calendar_x: 100.5, n_mm__calendar_y: 60, n_mm__left: 31.25, n_mm__bottom: 7, n_window: 3, n_column: 3, n_mm__margin: 5, n_mm__window_x: 20, n_mm__window_y: 30, a_s_shape: ['arch'], a_s_door: ['double'] },
+    { ...o_setting__default, b_sheet_dot: false }
 ];
 
 a_o_setting.forEach(function(o_setting, n_idx__setting){
     let a_o_door = f_a_o_window(o_setting).map(function(o_window){ return f_o_door(o_window, o_setting); });
     let f_n = function(s_name){ return a_o_door.reduce(function(n, o_door){ return n + o_door[s_name].length; }, 0); };
 
+    // with a dot in each of the sheet's corners a file is the sheet of paper, the calendar at its place on it
+    let [n_x, n_y] = o_setting.b_sheet_dot ? [o_setting.n_mm__sheet_x, o_setting.n_mm__sheet_y] : [o_setting.n_mm__calendar_x, o_setting.n_mm__calendar_y];
+    let a_n__move = o_setting.b_sheet_dot ? [o_setting.n_mm__left, o_setting.n_mm__sheet_y - o_setting.n_mm__bottom - o_setting.n_mm__calendar_y] : [0, 0];
+    let f_s_n = function(n){ return String(+n.toFixed(4)); };
+
     for(let s_sheet of ['front', 'back']){
-        Deno.test(`calendar ${n_idx__setting}, ${s_sheet}: the SVG is the calendar's size in mm with its lines`, function(){
+        Deno.test(`calendar ${n_idx__setting}, ${s_sheet}: the SVG is the sheet's or the calendar's size in mm with its lines`, function(){
             let s_svg = f_s_svg(o_setting, s_sheet);
             assert(!/NaN|undefined|Infinity/.test(s_svg), 'a number is missing');
             let [, s_x, s_y, s_box] = s_svg.match(/<svg [^>]*width="([\d.]+)mm" height="([\d.]+)mm" viewBox="([^"]+)"/);
-            assert(Number(s_x) === o_setting.n_mm__calendar_x && Number(s_y) === o_setting.n_mm__calendar_y, 'size');
+            assert(Number(s_x) === n_x && Number(s_y) === n_y, `size ${s_x} × ${s_y}`);
             assert(s_box === `0 0 ${s_x} ${s_y}`, 'viewBox');
             let a_a_v = s_sheet === 'front'
                 ? [['cut', f_n('a_a_o_seg__cut')], ['fold', f_n('a_a_o_seg__fold')], ['mark', null], ['logo', null]]
                 : [['cut', null], ['fold', null], ['mark', o_setting.b_mark ? f_n('a_a_o_seg__mark') : null], ['logo', o_setting.b_logo ? f_a_a_o_seg__logo_dot(o_setting).length : null]];
+            a_a_v.push(['sheet', o_setting.b_sheet_dot ? 4 : null]);
             for(let [s_name, n_line] of a_a_v){
                 let s_d = f_s_d__of(s_svg, `${s_sheet}_${s_name}`);
                 assert((s_d === undefined) === (n_line === null), `${s_name} is there or not`);
                 if(s_d !== undefined){ assert((s_d.match(/M/g) || []).length === n_line, `${s_name}: ${n_line} lines`); }
             }
-            assert((f_s_d__of(s_svg, `${s_sheet}_outline`) === `M 0 0 L ${s_x} 0 L ${s_x} ${s_y} L 0 ${s_y} Z`) === o_setting.b_outline, 'outline');
+            // the calendar's edge at the calendar's place
+            let [n_left, n_top] = a_n__move;
+            let [n_right, n_bottom] = [n_left + o_setting.n_mm__calendar_x, n_top + o_setting.n_mm__calendar_y].map(f_s_n);
+            assert((f_s_d__of(s_svg, `${s_sheet}_outline`) === `M ${n_left} ${n_top} L ${n_right} ${n_top} L ${n_right} ${n_bottom} L ${n_left} ${n_bottom} Z`) === o_setting.b_outline, `outline ${f_s_d__of(s_svg, `${s_sheet}_outline`)}`);
+            // the dots: from each corner of the sheet 0.2 along x and y, into the sheet
+            if(o_setting.b_sheet_dot){
+                assert(f_s_d__of(s_svg, `${s_sheet}_sheet`) === `M 0 0 L 0.2 0.2 M ${n_x} 0 L ${f_s_n(n_x - 0.2)} 0.2 M ${n_x} ${n_y} L ${f_s_n(n_x - 0.2)} ${f_s_n(n_y - 0.2)} M 0 ${n_y} L 0.2 ${f_s_n(n_y - 0.2)}`, f_s_d__of(s_svg, `${s_sheet}_sheet`));
+            }
             assert((s_svg.match(/ id="/g) || []).length === new Set(s_svg.match(/ id="[^"]*"/g)).size, 'an id twice');
             // the settings can be read back from the file
             let s_setting = s_svg.match(/Settings: (.*)<\/desc>/)[1].replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&amp;/g, '&');
@@ -474,11 +488,29 @@ a_o_setting.forEach(function(o_setting, n_idx__setting){
         let n_len = 0;
         for(let s_d of [f_s_d__of(s_svg__front, 'front_cut'), f_s_d__of(s_svg__front, 'front_fold'), f_s_d__of(s_svg__back, 'back_mark') ?? '']){
             for(let a_a_n of f_a_a_a_n__read(s_d)){
-                for(let a_n of a_a_n){ assert(f_n_distance__path(a_n, a_o_seg) < 1e-3, `a line through ${a_n}`); }
+                for(let a_n of a_a_n){ assert(f_n_distance__path([a_n[0] - a_n__move[0], a_n[1] - a_n__move[1]], a_o_seg) < 1e-3, `a line through ${a_n}`); }
                 n_len += a_a_n.slice(1).reduce(function(n, a_n, n_idx){ return n + f_n_distance(a_n, a_a_n[n_idx]); }, 0);
             }
         }
         assert(n_len > 0, 'no lines');
+    });
+
+    Deno.test(`calendar ${n_idx__setting}: the box around all a file's lines, read back, is the sheet of paper where it has the sheet's dots`, function(){
+        for(let s_sheet of ['front', 'back']){
+            let a_a_n = [...f_s_svg(o_setting, s_sheet).matchAll(/<path [^>]* d="([^"]*)"/g)].flatMap(function(a_s){ return f_a_a_a_n__read(a_s[1].replace(/ Z$/, '')).flat(); });
+            if(!a_a_n.length){ continue; }
+            let a_n__box = [0, 1].map(function(n_axis){ return Math.min(...a_a_n.map(function(a_n){ return a_n[n_axis]; })); })
+                .concat([0, 1].map(function(n_axis){ return Math.max(...a_a_n.map(function(a_n){ return a_n[n_axis]; })); }));
+            if(o_setting.b_sheet_dot){
+                assert(String(a_n__box) === `0,0,${n_x},${n_y}`, `${s_sheet}: ${a_n__box}`);
+            } else {
+                // without them nothing reaches over the calendar, whose corner is the file's
+                assert(a_n__box[0] >= 0 && a_n__box[1] >= 0 && a_n__box[2] <= n_x && a_n__box[3] <= n_y, `${s_sheet}: ${a_n__box}`);
+            }
+            // and the module's own box says the same, counted from the calendar's corner
+            let a_n__module = f_a_n__box__file(o_setting, s_sheet);
+            a_n__box.forEach(function(n, n_idx){ assertAlmostEquals(n, a_n__module[n_idx] + a_n__move[n_idx % 2], 2e-4, `${s_sheet}: the module's box`); });
+        }
     });
 });
 
@@ -509,12 +541,22 @@ Deno.test('the box around paths: lines by their ends, arcs by where they reach f
     }
 });
 
-Deno.test('a file\'s box: the calendar with its edge in the file, else what is cut', function(){
+Deno.test('the sheet of paper as the calendar sees it: placed from the sheet\'s bottom left corner', function(){
+    // A4 lying, 277 x 190 at 10 and 10: 10 of the sheet around the calendar
+    assert(String(f_a_n__sheet(o_setting__default)) === '-10,-10,287,200', String(f_a_n__sheet(o_setting__default)));
+    // A4 standing, 150 x 200 at 12.5 from the left and 30 from the bottom: 67 above it
+    let a_n = f_a_n__sheet({ ...o_setting__default, n_mm__sheet_x: 210, n_mm__sheet_y: 297, n_mm__calendar_x: 150, n_mm__calendar_y: 200, n_mm__left: 12.5, n_mm__bottom: 30 });
+    assert(String(a_n) === '-12.5,-67,197.5,230', String(a_n));
+});
+
+Deno.test('a file\'s box: the sheet with its dots in the file, the calendar with its edge, else what is cut', function(){
     for(let s_sheet of ['front', 'back']){
-        assert(String(f_a_n__box__file(o_setting__default, s_sheet)) === '0,0,277,190', `${s_sheet} with the edge`);
+        assert(String(f_a_n__box__file(o_setting__default, s_sheet)) === '-10,-10,287,200', `${s_sheet} with the sheet's dots`);
+        assert(String(f_a_n__box__file({ ...o_setting__default, b_sheet_dot: false }, s_sheet)) === '0,0,277,190', `${s_sheet} with the edge`);
+        assert(String(f_a_n__box__file({ ...o_setting__default, b_outline: false }, s_sheet)) === '-10,-10,287,200', `${s_sheet} with the dots alone`);
     }
-    // without the edge: the windows' field on the front, 32 wide windows in cells of 247 / 6 by 40
-    let o_setting = { ...o_setting__default, b_outline: false, a_s_shape: ['rect'], a_s_door: ['left'] };
+    // without dots and edge: the windows' field on the front, 32 wide windows in cells of 247 / 6 by 40
+    let o_setting = { ...o_setting__default, b_outline: false, b_sheet_dot: false, a_s_shape: ['rect'], a_s_door: ['left'] };
     let a_n = f_a_n__box__file(o_setting, 'front');
     [15 + 247 / 12 - 16, 19, 277 - 15 - 247 / 12 + 16, 171].forEach(function(n, n_idx){ assertAlmostEquals(a_n[n_idx], n, 1e-9, 'front without the edge'); });
     // the back reaches to the logo; without logo and marks it holds nothing

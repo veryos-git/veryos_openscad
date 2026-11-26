@@ -30,7 +30,7 @@ Print and cut meet if both put the calendar at the same place of the sheet of pa
 1. Set the sheet of paper, the calendar's size and its distance from the sheet's left and bottom edge. The calendar lies inside the printer's margin, the dashed frame.
 2. Load a picture for the front, and one for the back. Move the picture under the windows, the windows onto the picture, or lay the picture by four points, see Match by four points.
 3. Trial: print `cut lines only` on plain paper. Lay a ruler on the ruler line under the calendar: 200 mm must be 200 mm.
-4. In the cutter's software place `Front SVG` at the distances the app names under the calendar's settings, lay the trial sheet on the mat with its bottom left corner at the software's, and cut.
+4. In the cutter's software lay `Front SVG` on the sheet corner on corner: with a dot in each corner of the paper the file is as large as the sheet, 297 × 210 by default, and the calendar lies in it where the print has it. Lay the trial sheet on the mat where the software has the sheet, and cut. Without the dots, place the file at the distances the app names under the calendar's settings.
 5. Where the knife runs beside the printed lines, measure how far and enter it as `Shift right` and `Shift up`; print and cut again until it fits.
 6. Print `the pictures` on card: page 1 the front, page 2 the back. Cut each with its file, at the same distances.
 7. Glue the front on the back, edge on edge; no glue behind the doors.
@@ -52,7 +52,8 @@ Print and cut meet if both put the calendar at the same place of the sheet of pa
 |---|---|---|---|
 | Width, height | 277 × 190 mm | 50 to 1000 | both sheets of the calendar; 10 mm less than A4 all around |
 | From the sheet's left, from its bottom | 10, 10 mm | 0 to 1500 | where the calendar lies on the sheet; below them the distances from the right and the top, and each cutting file's size and place for the cutter's software |
-| Calendar's edge in the files | on | | a red rectangle of the calendar's size in both SVGs: the cut that takes the calendar out of the sheet. Without it a file is as large as its cuts, and the app names that box's place |
+| Calendar's edge in the files | on | | a red rectangle of the calendar's size in both SVGs: the cut that takes the calendar out of the sheet |
+| Paper's corners in the files | on | | a dot in each corner of the sheet of paper, a slanted cut of 0.2 mm into the sheet. With them a file is the sheet: as large, the calendar at its place in it, and laid on the sheet corner on corner in the cutter's software. Without them a file is the calendar with its edge, or as large as its cuts without, and placed by the distances the app names |
 
 | Windows | Default | Range | Does |
 |---|---|---|---|
@@ -189,11 +190,12 @@ Four points of the picture are laid on four places of the cut pattern, and the r
 | `back_mark` | black | the marks | cut; not there without `Marks on the back` |
 | `back_logo` | grey | the logo's dots | cut, or delete |
 | `front_outline`, `back_outline` | red | the calendar's edge, last in the file | cut |
+| `front_sheet`, `back_sheet` | green | the dots in the paper's corners, first in the file: from each corner 0.2 mm along x and y into the sheet | cut: a nick in the corner of what is cut off anyway |
 
-- Size in mm at 1 : 1 (`width="277mm"`, viewBox in mm); lines 0.2 wide, no fills; every path carries its own `fill="none"`.
+- Size in mm at 1 : 1, with the paper's corners the sheet's (`width="297mm"`, viewBox in mm, the calendar's lines moved to its place), without them the calendar's; lines 0.2 wide, no fills; every path carries its own `fill="none"`, and no group moves anything.
 - Bridges, dashes and dots are real gaps between lines, not a `stroke-dasharray`: a cutter cuts the lines as drawn.
-- All of a colour is one path: up to 3 paths per file.
-- With the edge both files have the same box, the calendar: in the cutter's software they must measure the calendar's size, 277 × 190 by default. If not, type that size there for both.
+- All of a colour is one path: up to 4 paths per file.
+- With the paper's corners both files have the same box, the sheet: in the cutter's software they must measure the sheet's size, 297 × 210 by default. If not, type that size there for both. The dots end exactly in the corners, nothing reaches over the sheet.
 - `<desc>` holds the settings as JSON: the calendar's place on the sheet, the windows' own values, the pictures' places.
 
 ## Cutter's software
@@ -221,17 +223,17 @@ Not found: where Suite's zero lies and which point of a file its X and Y mean. T
 
 | Check | How | Result |
 |---|---|---|
-| Doors, grid, logo, cutting files | `deno task test`, 153 in all; `calendar.test.js`: every shape with every door in 6 sizes and 4 cut settings; grid, mix, a window's own values; the logo; both SVGs read back by a path reader written after the SVG specification; the box around a file's lines | 129 pass |
+| Doors, grid, logo, cutting files | `deno task test`, 162 in all; `calendar.test.js`: every shape with every door in 6 sizes and 4 cut settings; grid, mix, a window's own values; the logo; both SVGs read back by a path reader written after the SVG specification; the box around a file's lines, which with the paper's corners is the sheet to the last digit | 138 pass |
 | Pictures | same, `picture.test.js`: fitted into and over boxes, sized by every corner and around a point, cut off at every side by number and by the pointer, lying straight, turned and mirrored: a pixel of the file that stays in the picture stays where it is, and the SVG puts it there too | 10 pass |
 | Match | same, `match.test.js`: the mapping takes each of four points to its place within 0.000000001 mm, and a known slant is found again from four of its points; fours that cannot be matched; the pattern's places and the snap; pixels laid anew show the colour of the place they come from, to a step of 255, straight and at a slant, and a clear pixel gives no colour | 7 pass |
 | Sheet | same, `sheet.test.js`: the calendar's place from the bottom left corner; the print's lines are the cutting file's own, at the place the file's box has for the cutter; crop marks, ruler line, what is said | 7 pass |
-| Tests notice faults | 42 faults put into copies of the four modules one at a time (a sign, a swapped side, a missing clamp, the place measured from the top, a mapping put together the wrong way round, ...); 12 more in the first version's module | each fails a test |
+| Tests notice faults | 42 faults put into copies of the four modules one at a time (a sign, a swapped side, a missing clamp, the place measured from the top, a mapping put together the wrong way round, ...); 12 more in the first version's module. Done before the paper's corners came into the files, not since | each failed a test |
 | Print, measured | headless Chrome's PDF at 300 dots per inch, one-coloured test picture. A4 lying, calendar 277 × 190 at 10 / 10: picture with 2 of bleed expected 8 to 289 and 8 to 202 mm from the page's top left | 8.04 to 288.97, 7.96 to 202.01; the same on page 2 |
 | | the calendar's edge with `pictures with cut lines`, 0.2 wide, expected 9.9 to 287.1 and 9.9 to 200.1 | 9.91 to 287.1, 9.91 to 200.07 |
 | | shift 1.5 right, 2.5 up: expected 9.5 to 290.5, 5.5 to 199.5 | 9.48 to 290.49, 5.42 to 199.56 |
 | | A4 standing, calendar 150 × 200 at 12.5 / 30: edge expected 12.4 to 162.6, 66.9 to 267.1 | 12.36 to 162.56, 66.89 to 267.12 |
 | | what is on a page: no cut lines on a picture, no picture with `cut lines only`, crop marks from 2 to 295 mm, nothing but the picture without guides and bleed; always 2 pages of the sheet's size | as expected |
-| Page | headless Chrome: Chrome's own boxes of the drawn lines and pictures against the modules'; windows chosen and dragged; a picture loaded, dragged, sized by a corner, cut off at a side, sized by Ctrl and wheel, turned, mirrored, fitted, set by fields; a file that is no picture; both pictures and their files after a reload; zoom; both downloads; remove; start over; 400 px wide | 68 checks pass with the print's, no errors |
+| Page | headless Chrome: Chrome's own boxes of the drawn lines and pictures against the modules'; windows chosen and dragged; a picture loaded, dragged, sized by a corner, cut off at a side, sized by Ctrl and wheel, turned, mirrored, fitted, set by fields; a file that is no picture; both pictures and their files after a reload; zoom; both downloads; remove; start over; 400 px wide; the box Chrome draws around all of a file's lines: the sheet with the paper's corners, 0 0 297 210, the calendar without | 72 checks pass with the print's, no errors |
 | Match, measured | headless Chrome, 24 checks: a drawing of the calendar, 277 × 190 mm with two coloured squares, as a "photo" of 3000 × 2200 pixels taken at a slant; its four corners clicked, then the calendar's corners, each 1.5 mm beside it. The magenta square, drawn from 100 to 120 and 50 to 70 mm | in the new picture 100.01 to 119.95 and 49.97 to 70.03; in the print's PDF, 10 mm further on the sheet, 109.98 to 129.96 and 59.94 to 79.93 |
 | | the same run: a click beside the picture, one point back, places in the wrong order, three points on a line, cancel by button and Esc, a match with Alt, undo, a reload, a picture that ends on the calendar | as described above, no errors |
 | A turned photo | a JPEG of 400 × 200 that says it lies turned | shown 200 × 400 with its corner where it belongs, by a screenshot; matched by its corners, the corner lies where it is shown |
@@ -245,6 +247,7 @@ Not found: where Suite's zero lies and which point of a file its X and Y mean. T
 |---|---|
 | Printer | how exactly it places a page on the sheet, and whether it keeps the size along the paper's way, is not known: the trial of step 3 to 5 shows it. A printer that stretches the page is not made up for, only shifted |
 | Cutter | where the sheet's corner lies for it, how it reads the SVG's size, and how well a sheet is laid on the mat by hand: see Cutter's software |
+| Paper's corners | whether the cutter takes a cut that starts in the very corner of the sheet, at the edge of what it reaches, is untried; if not, switch them off and place the files by distances |
 | Bridge 0.5, a bridge every 25 | guessed from the photo in `reference/` (4 bridges on a door of about 35); a drag knife may cut them shorter or longer than drawn. Try one window first: number 1, calendar 60 × 60 |
 | Fold dash 3 / gap 2 | read off the same photo; untried in 250 g card |
 | Sheet on sheet | both sheets get the calendar's edge cut, so they are the same size; how well the back's pictures sit behind the doors depends on print and cut of both sheets |
@@ -258,7 +261,9 @@ Not found: where Suite's zero lies and which point of a file its X and Y mean. T
 
 | Chosen | Instead of |
 |---|---|
-| Print and cut meet by distances from the sheet's bottom left corner, as the brief asks | printed marks a camera finds, Bambu Suite's own Print Then Cut |
+| Print and cut meet by the sheet's corners: the print's page and the cutting file are both the sheet | printed marks a camera finds, Bambu Suite's own Print Then Cut |
+| A dot in each corner of the paper makes a file the sheet's size | a file of the calendar's size placed by typed distances: still there with the dots off |
+| The dots run from the corners into the sheet | a round dot on each corner: half of it would lie beside the paper and make the file larger than the sheet |
 | The print's page is the sheet of paper, the picture at its place on it | a picture file of the calendar's size, placed by the print dialog |
 | A trial print of the cut lines and a shift in mm | trust in printer and cutter |
 | Bleed, crop marks and a ruler line outside the calendar | a picture that ends at the edge, and no way to see a scaled print |
