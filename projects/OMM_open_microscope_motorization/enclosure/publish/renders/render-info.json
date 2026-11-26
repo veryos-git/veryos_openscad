@@ -1,0 +1,288 @@
+[
+  {
+    "id": "inside",
+    "meshes": {
+      "base": "open_base",
+      "esp_pcb": "open_esp_pcb",
+      "esp_can": "open_esp_can",
+      "esp_usb": "open_esp_usb",
+      "esp_headers": "open_esp_headers",
+      "esp_pins": "open_esp_pins",
+      "uln_pcb": "open_uln_pcb",
+      "uln_jst": "open_uln_jst",
+      "rail": "open_rail"
+    },
+    "camera_rotation": [
+      0.9030216336250305,
+      0.35022830963134766,
+      0.08995853364467621,
+      0.23194719851016998
+    ],
+    "orthographic_width_mm": 205.64,
+    "px_per_mm": 8.753,
+    "resolution": [
+      1800,
+      1500
+    ],
+    "marks": {
+      "esp": [
+        543.9,
+        228.39
+      ],
+      "can": [
+        408.92,
+        391.34
+      ],
+      "uln": [
+        1273.74,
+        770.49
+      ],
+      "rail": [
+        1108.44,
+        907.18
+      ],
+      "pocket": [
+        461.65,
+        613.86
+      ],
+      "standoffs": [
+        1217.21,
+        1047.63
+      ],
+      "rail_pocket": [
+        704.62,
+        974.44
+      ],
+      "post": [
+        1320.71,
+        1112.54
+      ]
+    }
+  },
+  {
+    "id": "back",
+    "meshes": {
+      "base": "closed_base",
+      "lid": "closed_lid",
+      "esp_pcb": "closed_esp_pcb",
+      "esp_can": "closed_esp_can",
+      "esp_usb": "closed_esp_usb",
+      "esp_headers": "closed_esp_headers",
+      "esp_pins": "closed_esp_pins",
+      "uln_pcb": "closed_uln_pcb",
+      "uln_jst": "closed_uln_jst",
+      "rail": "closed_rail"
+    },
+    "camera_rotation": [
+      0.17650748789310455,
+      0.11350924521684647,
+      0.5288484692573547,
+      0.82236248254776
+    ],
+    "orthographic_width_mm": 197.29,
+    "px_per_mm": 9.1236,
+    "resolution": [
+      1800,
+      1500
+    ],
+    "marks": {
+      "usb": [
+        1500.16,
+        686.93
+      ],
+      "supply": [
+        1027.0,
+        422.04
+      ],
+      "slot_0": [
+        1169.24,
+        713.43
+      ],
+      "slot_1": [
+        848.08,
+        773.39
+      ],
+      "slot_2": [
+        526.93,
+        833.34
+      ],
+      "lid": [
+        900.0,
+        559.07
+      ]
+    }
+  },
+  {
+    "id": "front",
+    "meshes": {
+      "base": "closed_base",
+      "lid": "closed_lid",
+      "esp_pcb": "closed_esp_pcb",
+      "esp_can": "closed_esp_can",
+      "esp_usb": "closed_esp_usb",
+      "esp_headers": "closed_esp_headers",
+      "esp_pins": "closed_esp_pins",
+      "uln_pcb": "closed_uln_pcb",
+      "uln_jst": "closed_uln_jst",
+      "rail": "closed_rail"
+    },
+    "camera_rotation": [
+      0.82236248254776,
+      0.5288484692573547,
+      -0.11350922286510468,
+      -0.17650751769542694
+    ],
+    "orthographic_width_mm": 197.29,
+    "px_per_mm": 9.1236,
+    "resolution": [
+      1800,
+      1500
+    ],
+    "marks": {
+      "usb": [
+        299.83,
+        593.08
+      ],
+      "supply": [
+        772.99,
+        787.41
+      ],
+      "slot_0": [
+        630.76,
+        496.02
+      ],
+      "slot_1": [
+        951.92,
+        436.06
+      ],
+      "slot_2": [
+        1273.07,
+        376.11
+      ],
+      "lid": [
+        900.0,
+        559.07
+      ]
+    }
+  },
+  {
+    "id": "cut",
+    "meshes": {
+      "base": "cut_base",
+      "lid": "cut_lid",
+      "esp_pcb": "cut_esp_pcb",
+      "esp_can": "cut_esp_can",
+      "esp_usb": "cut_esp_usb",
+      "esp_headers": "cut_esp_headers",
+      "housings": "cut_housings",
+      "uln_pcb": "cut_uln_pcb"
+    },
+    "camera_rotation": [
+      0.7071067690849304,
+      0.7071067690849304,
+      0.0,
+      0.0
+    ],
+    "orthographic_width_mm": 63.72,
+    "px_per_mm": 28.2486,
+    "resolution": [
+      1800,
+      1500
+    ],
+    "marks": {
+      "floor": [
+        820.2,
+        1314.99
+      ],
+      "under": [
+        820.2,
+        467.53
+      ],
+      "pillar": [
+        1003.81,
+        258.49
+      ],
+      "gap": [
+        1032.06,
+        331.94
+      ],
+      "can": [
+        735.45,
+        378.55
+      ],
+      "pcb": [
+        1046.19,
+        444.93
+      ],
+      "rail_l": [
+        523.59,
+        512.73
+      ],
+      "slot_l": [
+        463.56,
+        487.31
+      ],
+      "housing_l": [
+        462.01,
+        735.89
+      ],
+      "wire_0": [
+        462.01,
+        961.88
+      ],
+      "wire_1": [
+        462.01,
+        1089.0
+      ],
+      "wire_2": [
+        650.71,
+        1173.75
+      ],
+      "wire_3": [
+        1449.43,
+        1173.75
+      ],
+      "window": [
+        538.42,
+        1117.25
+      ],
+      "open": [
+        1265.82,
+        750.02
+      ],
+      "uln": [
+        1477.68,
+        1128.55
+      ]
+    }
+  },
+  {
+    "id": "layout",
+    "meshes": {
+      "lay_base": "layout_lay_base",
+      "lay_lid": "layout_lay_lid"
+    },
+    "camera_rotation": [
+      0.9597466588020325,
+      0.2764146327972412,
+      -0.013786351308226585,
+      -0.04786795750260353
+    ],
+    "orthographic_width_mm": 370.28,
+    "px_per_mm": 4.8612,
+    "resolution": [
+      1800,
+      1500
+    ],
+    "marks": {
+      "base": [
+        481.23,
+        797.84
+      ],
+      "lid": [
+        1318.77,
+        719.16
+      ]
+    }
+  }
+]

@@ -28,7 +28,7 @@ Everything goes in `<project>/publish/`. Numbered items are uploaded in this ord
 | --- | --- | --- | --- |
 | 1 | thumbnail | `thumbnail_4x3.png` | real photo, both logos |
 | 2 | photos | original photo files | the print from other angles, in use, details |
-| 3 | how it works | `images/NN_<topic>.png` | only for a mechanism, see [how it works images](#how-it-works-images) |
+| 3 | how it works | `images/NN_<topic>.png` | a mechanism, or what goes where in a box or holder, see [how it works images](#how-it-works-images) |
 | 4 | variant overview | `images/NN_<topic>.png` | different variations from one script |
 | 5 | parameter images | `images/NN_<parameter>.png` | the most important parameters, annotated |
 | 6 | print layout | `images/NN_print.png` | parts on the bed, required hardware |
@@ -92,6 +92,8 @@ Only where the model is a mechanism: parts that move, a drive. Example: [the dri
 | names | every part under the name it has in the script and in `rendered_parts/` |
 | not in the script | a part drawn only to explain (O-ring, sanding paper) comes from the script's values and is named as not printed; an assumed size is named as assumed |
 | numbers | travel, play, step size: from the geometry, named as not measured |
+| movement | fat red arrows (`#D62E1F` on an Ivory halo): red is for movement only |
+| a box or holder | no mechanism, so instead: what goes where, the contents lifted out; where the cables go; how a part is held, in a cut with its fit parameters. Example: [the ESP32's pocket](projects/OMM_open_microscope_motorization/enclosure/publish/images/03_esp32_pocket.png) |
 
 ## variant overview
 

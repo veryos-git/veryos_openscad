@@ -13,6 +13,7 @@ Box for the electronics of the open microscope motorization: an ESP32-S3 WROOM-1
 | `omm_enclosureV7.scad` | the generator, standalone, no libraries. `version` at its top is engraved in every part with the project's name; bump it with the file name |
 | `omm_enclosureV7_base.stl`, `omm_enclosureV7_lid.stl` | exported from the generator with the brand font, for slicers and viewers without DejaVu |
 | `archive/` | every earlier version, script and STLs. Each change to the generator makes a new version file; the old one stays |
+| `publish/` | publishing material for V7: four images that show what goes where, the cable slots, the ESP32's pocket in a cut and the print layout; `listing.md`; both STLs in print orientation. Not ready to upload: no photo of a printed V7. `publish/source/build.py` rebuilds it |
 | `readme_hgc.md` | original goal |
 | `current_setup/` | photos of the setup it replaces |
 | `image*.png` | the boards, with the ULN2003 drawing |

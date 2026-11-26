@@ -1,0 +1,24 @@
+[
+  {
+    "file": "omm_enclosureV7_base.stl",
+    "triangles": 19250,
+    "closed": true,
+    "volume_mm3": 139092.1,
+    "size_mm": [
+      163.15,
+      82.6,
+      43.0
+    ]
+  },
+  {
+    "file": "omm_enclosureV7_lid.stl",
+    "triangles": 11156,
+    "closed": true,
+    "volume_mm3": 40154.2,
+    "size_mm": [
+      163.15,
+      82.6,
+      10.0
+    ]
+  }
+]
