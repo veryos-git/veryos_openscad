@@ -1,0 +1,15 @@
+venv/
+runs/
+# empty placeholders the Claude Code sandbox creates here
+.bash_profile
+.bashrc
+.claude/
+.gitconfig
+.gitmodules
+.idea
+.mcp.json
+.profile
+.ripgreprc
+.vscode
+.zprofile
+.zshrc

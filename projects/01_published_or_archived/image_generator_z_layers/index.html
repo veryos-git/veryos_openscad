@@ -1,0 +1,90 @@
+<!-- Copyright (C) Jonas Immanuel Frey - Licensed under GPL -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Loop Evolve</title>
+<style>
+    :root { --bg: #151B1D; --panel: #1f2729; --line: #334043; --text: #F4EFE3; --dim: #a39f94; --amber: #F1B84F; --gold: #F0B750; }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--bg); color: var(--text); font: 15px/1.4 "DejaVu Sans Mono", monospace; }
+    header { padding: 14px 20px; border-bottom: 1px solid var(--line); display: flex; align-items: baseline; gap: 16px; }
+    header h1 { margin: 0; font-size: 18px; color: var(--amber); }
+    header span { color: var(--dim); font-size: 13px; }
+    main { display: grid; grid-template-columns: 320px 1fr; gap: 20px; padding: 20px; }
+    @media (max-width: 800px) { main { grid-template-columns: 1fr; } }
+    form { display: flex; flex-direction: column; gap: 10px; }
+    label { display: flex; flex-direction: column; gap: 3px; font-size: 13px; color: var(--dim); }
+    label.row { flex-direction: row; align-items: center; gap: 8px; }
+    input, textarea { background: var(--panel); color: var(--text); border: 1px solid var(--line); border-radius: 4px; padding: 6px 8px; font: inherit; }
+    textarea { resize: vertical; min-height: 60px; }
+    input:focus, textarea:focus { outline: none; border-color: var(--gold); }
+    .numbers { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    button { background: var(--amber); color: var(--bg); border: 0; border-radius: 4px; padding: 9px 14px; font: inherit; font-weight: bold; cursor: pointer; }
+    button.quiet { background: var(--panel); color: var(--text); border: 1px solid var(--line); }
+    button:disabled { opacity: .5; cursor: default; }
+    .buttons { display: flex; gap: 8px; }
+    #error { color: #ff8a65; font-size: 13px; min-height: 1.4em; }
+    section h2 { margin: 0 0 10px; font-size: 15px; color: var(--amber); }
+    #view { background: var(--panel); border: 1px solid var(--line); border-radius: 6px; padding: 16px; margin-bottom: 20px; }
+    #view .images { display: flex; flex-wrap: wrap; gap: 16px; }
+    #view figure { margin: 0; }
+    #view img { display: block; width: 256px; max-width: 100%; border-radius: 4px; background: #fff; }
+    #view figcaption { font-size: 12px; color: var(--dim); margin-top: 4px; }
+    #view h2 { color: var(--text); }
+    #download { font-size: 13px; color: var(--dim); margin-top: 6px; }
+    #view .empty { color: var(--dim); }
+    progress { width: 100%; max-width: 512px; height: 8px; accent-color: var(--gold); display: block; margin: 10px 0 6px; }
+    #status { color: var(--dim); font-size: 13px; }
+    #log { font-size: 12px; color: var(--dim); white-space: pre-wrap; max-height: 10em; overflow: auto; margin-top: 8px; }
+    #gallery { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 12px; }
+    .card { background: var(--panel); border: 1px solid var(--line); border-radius: 6px; padding: 8px; cursor: pointer; }
+    .card.selected { border-color: var(--gold); }
+    .card img { width: 100%; aspect-ratio: 1; object-fit: cover; border-radius: 4px; background: #fff; display: block; }
+    .card .prompt { font-size: 13px; margin-top: 6px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .card .meta { font-size: 11px; color: var(--dim); }
+</style>
+</head>
+<body>
+<header><h1>Loop Evolve</h1><span>sketch → noise → image to image → repeat, every frame becomes part of the animation</span></header>
+<main>
+    <form id="form">
+        <label>prompt<textarea name="prompt"></textarea></label>
+        <div class="numbers">
+            <label>frames<input name="frames" type="number"></label>
+            <label>strength<input name="strength" type="number" step="0.05"></label>
+            <label>steps<input name="steps" type="number"></label>
+            <label>noise px<input name="noise" type="number"></label>
+            <label>spread px<input name="spread" type="number"></label>
+            <label>seed<input name="seed" type="number"></label>
+            <label>fps<input name="fps" type="number"></label>
+        </div>
+        <label class="row"><input name="dry_run" type="checkbox"> dry run, noise only, no AI model</label>
+        <div class="buttons">
+            <button id="start" type="submit">start</button>
+            <button id="stop" type="button" class="quiet" disabled>stop</button>
+        </div>
+        <div id="error"></div>
+    </form>
+    <div>
+        <section id="view">
+            <div class="empty">no run selected</div>
+            <div class="run" hidden>
+                <h2 id="view-prompt"></h2>
+                <div class="images">
+                    <figure><img id="view-frame" alt=""><figcaption>latest frame</figcaption></figure>
+                    <figure><img id="view-gif" alt=""><figcaption id="view-gif-caption">animation so far</figcaption></figure>
+                </div>
+                <progress id="view-progress"></progress>
+                <div id="status"></div>
+                <div id="download"><a id="view-download" download style="color:var(--gold)">download gif</a> · <span id="view-folder"></span></div>
+                <div id="log"></div>
+            </div>
+        </section>
+        <section><h2>runs</h2><div id="gallery"></div></section>
+    </div>
+</main>
+<script src="app.js"></script>
+</body>
+</html>
