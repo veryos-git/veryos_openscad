@@ -1,14 +1,14 @@
 // Copyright (C) [Jonas Immanuel Frey] - Licensed under GPL
 // A picture's place: what is left of its file and how large, fitted into a box and over
 // it, sized by a corner and around a point, cut off at a side by number and by the
-// pointer, stretched and skewed by a side. Throughout, a pixel of the file that stays in
-// the picture has to stay where it is on the calendar, turned, mirrored, stretched and
-// skewed or not; and the SVG has to put it there too.
+// pointer, stretched and skewed by a side, split into pieces. Throughout, a pixel of the
+// file that stays in the picture has to stay where it is on the calendar, turned,
+// mirrored, stretched and skewed or not; and the SVG has to put it there too.
 
 import {
     a_s_side, n_mm__size_min, n_deg__skew_max, f_o_picture, f_a_n__px, f_a_n__size, f_n_dpi, f_a_n__calendar, f_a_n__own, f_a_n__from_px, f_a_n__to_px, f_a_n__handle, f_a_n__handle__shown, f_a_n__handle__turn,
-    f_o_picture__fitted, f_o_picture__spread, f_b_covered, f_o_picture__resized, f_o_picture__turned, f_o_picture__scaled, f_o_picture__cut, f_o_picture__cropped,
-    f_o_picture__stretched, f_o_picture__skewed, f_s_picture
+    f_f_b__in, f_o_picture__fitted, f_o_picture__spread, f_b_covered, f_o_picture__resized, f_o_picture__turned, f_o_picture__scaled, f_o_picture__cut, f_o_picture__cropped,
+    f_o_picture__stretched, f_o_picture__skewed, f_a_o_picture__split, f_s_picture
 } from '../picture.module.js';
 
 let assert = function(b, s_message = 'assertion failed'){
@@ -470,4 +470,74 @@ Deno.test('the SVG puts every pixel where the picture has it', function(){
             f_assert_same_place(f_a_n__of_px__svg(s_svg, a_n__px), f_a_n__of_px(o_picture, a_n__px), `${f_s_name(o_picture)}: pixel ${a_n__px}`, 1e-3);
         }
     }
+});
+
+Deno.test('a point in the picture: in what is left of it, as its own frame has it', function(){
+    for(let o_picture of a_o_picture){
+        let [n_x, n_y] = f_a_n__size(o_picture);
+        let f_b__in = f_f_b__in(o_picture);
+        // points of the frame and around it, by their place in the frame
+        for(let n_x__own of [-0.6, -0.49, 0, 0.3, 0.49, 0.6]){
+            for(let n_y__own of [-0.6, -0.49, 0.1, 0.49, 0.6]){
+                let a_n = f_a_n__calendar(o_picture, [n_x__own * n_x, n_y__own * n_y]);
+                assert(f_b__in(a_n) === (Math.abs(n_x__own) < 0.5 && Math.abs(n_y__own) < 0.5), `${f_s_name(o_picture)}: ${n_x__own}, ${n_y__own}`);
+            }
+        }
+        // the pixels of the file: those that are left are in it, those cut off are not
+        let [n_px__left, n_px__top, n_px__x, n_px__y] = f_a_n__px(o_picture);
+        for(let a_n__px of [[10, 10], [1500, 1100], [2990, 1990], [200, 1950], [2500, 300]]){
+            let b_left = a_n__px[0] > n_px__left && a_n__px[0] < n_px__left + n_px__x && a_n__px[1] > n_px__top && a_n__px[1] < n_px__top + n_px__y;
+            assert(f_b__in(f_a_n__of_px(o_picture, a_n__px)) === b_left, `${f_s_name(o_picture)}: pixel ${a_n__px}`);
+        }
+    }
+});
+
+Deno.test('split into pieces: each shows its part of the file where that part lay, together all that was left, row by row as the picture lies', function(){
+    for(let o_picture of a_o_picture){
+        let s_name = f_s_name(o_picture);
+        let [n_px__left, n_px__top, n_px__x, n_px__y] = f_a_n__px(o_picture);
+        let a_o_piece = f_a_o_picture__split(o_picture, 3, 2);
+        assert(a_o_piece.length === 6, `${s_name}: ${a_o_piece.length} pieces`);
+        let n_px__area = 0;
+        a_o_piece.forEach(function(o_piece, n_idx){
+            let [n_px__left__piece, n_px__top__piece, n_px__x__piece, n_px__y__piece] = f_a_n__px(o_piece);
+            // a third of the width and half the height of what was left, inside it
+            assertAlmostEquals(n_px__x__piece, n_px__x / 3, 1e-6, `${s_name}: piece ${n_idx}'s pixels across`);
+            assertAlmostEquals(n_px__y__piece, n_px__y / 2, 1e-6, `${s_name}: piece ${n_idx}'s pixels down`);
+            assert(n_px__left__piece >= n_px__left - 1e-6 && n_px__top__piece >= n_px__top - 1e-6 && n_px__left__piece + n_px__x__piece <= n_px__left + n_px__x + 1e-6 && n_px__top__piece + n_px__y__piece <= n_px__top + n_px__y + 1e-6, `${s_name}: piece ${n_idx} reaches over what was left`);
+            n_px__area += n_px__x__piece * n_px__y__piece;
+            // its pixels lie where the whole picture had them: its corners and its middle
+            for(let [n_ratio__x, n_ratio__y] of [[0, 0], [1, 0], [1, 1], [0, 1], [0.5, 0.5], [0.2, 0.9]]){
+                let a_n__px = [n_px__left__piece + n_ratio__x * n_px__x__piece, n_px__top__piece + n_ratio__y * n_px__y__piece];
+                f_assert_same_place(f_a_n__of_px(o_piece, a_n__px), f_a_n__of_px(o_picture, a_n__px), `${s_name}: piece ${n_idx}, pixel ${a_n__px}`, 1e-8);
+                f_assert_same_place(f_a_n__from_px(o_piece, a_n__px), f_a_n__of_px(o_picture, a_n__px), `${s_name}: piece ${n_idx} by the module, pixel ${a_n__px}`, 1e-8);
+            }
+            // row by row from the top left, as the whole picture lies: its middle in the whole's own frame
+            let [n_x, n_y] = f_a_n__size(o_picture);
+            let a_n__own = f_a_n__own(o_picture, [o_piece.n_mm__x, o_piece.n_mm__y]);
+            assertAlmostEquals(a_n__own[0], ((n_idx % 3 + 0.5) / 3 - 0.5) * n_x, 1e-8, `${s_name}: piece ${n_idx} lies in another column`);
+            assertAlmostEquals(a_n__own[1], ((Math.floor(n_idx / 3) + 0.5) / 2 - 0.5) * n_y, 1e-8, `${s_name}: piece ${n_idx} lies in another row`);
+            // all else as the whole's
+            for(let s_key of ['s_file', 'n_px__x', 'n_px__y', 'n_ratio__stretch', 'n_deg', 'n_deg__skew', 'b_flip_x', 'b_flip_y']){ assert(o_piece[s_key] === o_picture[s_key], `${s_name}: piece ${n_idx}'s ${s_key}`); }
+        });
+        // no two share a pixel: six parts of a sixth each, each inside, at six different places
+        assertAlmostEquals(n_px__area, n_px__x * n_px__y, 1e-3, `${s_name}: the pieces' pixels together`);
+        assert(new Set(a_o_piece.map(function(o_piece){ return f_a_n__px(o_piece).slice(0, 2).map(Math.round).join(); })).size === 6, `${s_name}: two pieces show the same part`);
+    }
+    // one piece is the picture itself
+    let [o_same] = f_a_o_picture__split(a_o_picture[7], 1, 1);
+    for(let n_idx = 0; n_idx < 4; n_idx++){ assertAlmostEquals(o_same.a_n_ratio__crop[n_idx], a_o_picture[7].a_n_ratio__crop[n_idx], 1e-12, 'one piece: cut off'); }
+    f_assert_same_place([o_same.n_mm__x, o_same.n_mm__y], [a_o_picture[7].n_mm__x, a_o_picture[7].n_mm__y], 'one piece: its middle');
+    // no piece smaller than the smallest a picture can be: 240 x 160 mm gives 48 by 32 at most
+    assert(n_mm__size_min === 5 && f_a_o_picture__split(o_picture__plain, 100, 100).length === 48 * 32, String(f_a_o_picture__split(o_picture__plain, 100, 100).length));
+    assert(f_a_o_picture__split(o_picture__plain, 0, 2).length === 2, 'none across is one across');
+    // the picture handed in is left alone
+    assert(String(o_picture__plain.a_n_ratio__crop) === '0,0,0,0' && o_picture__plain.n_mm__size_x === 240, 'the whole was changed');
+});
+
+Deno.test('the SVG of a piece names its file instead of holding it', function(){
+    let o_picture = { ...a_o_picture[3], s_file: 'abc' };
+    let s_svg = f_s_picture(o_picture, '#front_file_abc', true);
+    assert(s_svg === f_s_picture(o_picture, 'x').replace('<image href="x" width="3000" height="2000"/>', '<use href="#front_file_abc"/>'), s_svg);
+    assert(f_s_picture(o_picture, 'x').includes('<image href="x" width="3000" height="2000"/>'), 'without it the file\'s address');
 });

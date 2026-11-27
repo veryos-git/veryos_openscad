@@ -51,9 +51,9 @@ let f_s_design = function(o_design){
 // f_o_design__of_project: a saved project's design, with the defaults of what was added
 //     since it was saved.
 // f_open_design, f_new_design: put a saved or a new project on screen.
-// f_save_extra: saves what a project keeps beside its settings, under a name; all of it
-//     for a project that is new, else what has changed.
-// f_b_extra_dirty: whether that has changed.
+// f_save_extra: saves what a project keeps beside its settings; it gets the project as
+//     the server answered the save.
+// f_b_extra_dirty: whether some of that is not saved.
 // f_s_summary: a saved project in a few words, for the list.
 // f_b_ready: whether what is on screen can be saved or replaced now.
 // f_opened: tells which project is open, by its name or null.
@@ -139,13 +139,12 @@ let f_o_panel__project = function({
                     if(o_error.n_status !== 404){ throw o_error; }
                 }
             }
-            let b_new = o_saved === null;
-            if(b_new){ o_saved = await f_v_fetched(f_s_url__project(s_name), f_o_option__json('POST', f_o_design())); }
+            if(o_saved === null){ o_saved = await f_v_fetched(f_s_url__project(s_name), f_o_option__json('POST', f_o_design())); }
             // open from here on: if what it keeps beside its settings fails, Save tries that again
             f_set_saved(o_saved);
             f_set_open(o_saved.s_name);
             el_name.value = o_saved.s_name;
-            await f_save_extra(o_saved.s_name, b_new);
+            await f_save_extra(o_saved);
         } catch(o_error){
             s_note = o_error.message;
             el_box.open = true;

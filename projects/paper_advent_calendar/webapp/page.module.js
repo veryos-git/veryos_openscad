@@ -3,7 +3,7 @@
 // pointer on them, and the pictures' files.
 
 import { o_setting__default, n_mm__line, f_a_o_window, f_o_door, f_a_s_problem, f_s_d, f_s_svg, f_a_n__box__file } from './calendar.module.js';
-import { a_s_side, f_o_picture, f_a_n__px, f_a_n__size, f_n_dpi, f_a_n__from_px, f_a_n__to_px, f_a_n__handle, f_a_n__handle__shown, f_a_n__handle__turn, f_o_picture__fitted, f_o_picture__spread, f_o_picture__resized, f_o_picture__turned, f_o_picture__scaled, f_o_picture__cut, f_o_picture__cropped, f_o_picture__stretched, f_o_picture__skewed } from './picture.module.js';
+import { f_o_picture, f_a_n__px, f_a_n__size, f_n_dpi, f_a_n__from_px, f_a_n__to_px, f_a_n__handle, f_a_n__handle__shown, f_a_n__handle__turn, f_f_b__in, f_o_picture__fitted, f_o_picture__spread, f_o_picture__resized, f_o_picture__turned, f_o_picture__scaled, f_o_picture__cut, f_o_picture__cropped, f_o_picture__stretched, f_o_picture__skewed, f_a_o_picture__split } from './picture.module.js';
 import { f_a_n__calendar, f_a_n__distance, f_a_n__bleed, f_a_s_problem__sheet, f_s_picture__sheet, f_s_line__sheet, f_s_svg__page } from './sheet.module.js';
 import { f_a_n_h, f_a_n__mapped, f_s_problem__match, f_a_a_n__anchor, f_a_n__snapped, f_n_px__per_mm, f_a_n__warped } from './match.module.js';
 import { f_a_n__png_sized, f_a_v__pdf } from './file.module.js';
@@ -13,9 +13,7 @@ let s_key__storage = 'paper_advent_calendar';
 let a_s_sheet = ['front', 'back'];
 let a_s_name__own = ['n_mm__x', 'n_mm__y', 'n_mm__size_x', 'n_mm__size_y', 's_shape', 's_door'];
 let a_s_name__picture = ['n_mm__x', 'n_mm__y', 'n_mm__size_x', 'n_deg', 'n_deg__skew'];
-// a picture's handles: where on its frame, -1, 0 or 1 along x and y; corners size it,
-// sides do what the panel's choice says, by its names
-let o_f_o_picture__side = { crop: f_o_picture__cropped, stretch: f_o_picture__stretched, skew: f_o_picture__skewed };
+// a picture's handles: where on its frame, -1, 0 or 1 along x and y
 let a_a_n__sign = [[-1, -1], [1, -1], [1, 1], [-1, 1], [-1, 0], [0, -1], [1, 0], [0, 1]];
 let n_px__handle = 6;
 // the handle that turns a picture: this far from the handle of the picture's top side
@@ -43,8 +41,12 @@ let f_o_setting__kept = function(o_kept){
         if(o_kept && typeof o_kept === 'object' && s_name in o_kept){ o[s_name] = structuredClone(o_kept[s_name]); }
     }
     for(let s_sheet of a_s_sheet){
+        let s_name = `a_o_picture__${s_sheet}`;
+        // kept before a sheet could have several pictures: its one picture, the file under the sheet's name
+        let o_picture__alone = o_kept?.[`o_picture__${s_sheet}`];
+        if(o_picture__alone && !(s_name in o_kept)){ o[s_name] = [{ ...structuredClone(o_picture__alone), s_file: s_sheet }]; }
         // a place kept before pictures could be stretched and skewed says neither: it is neither
-        if(o[`o_picture__${s_sheet}`]){ o[`o_picture__${s_sheet}`] = { ...f_o_picture(0, 0), ...o[`o_picture__${s_sheet}`] }; }
+        o[s_name] = (Array.isArray(o[s_name]) ? o[s_name] : []).map(function(o_picture){ return { ...f_o_picture(0, 0), ...o_picture }; });
     }
     return o;
 };
@@ -62,23 +64,27 @@ let n_idx__selected = null;
 let s_step = 'paper';
 // the sheet shown, 'front' or 'back': the step 'picture' is about its picture
 let s_sheet__shown = 'front';
-// the saved project that is open, by its name, null for none; and the sheets whose
-// picture file is another than the one that project keeps
+// the saved project that is open, by its name, null for none
 let s_name__project = null;
-let o_b_unsaved = { front: false, back: false };
 try{
     let o_stored = JSON.parse(localStorage.getItem(`${s_key__storage}__page`)) ?? {};
     if(document.querySelector(`.step[data-step="${o_stored.s_step}"]`)){ s_step = o_stored.s_step; }
     if(a_s_sheet.includes(o_stored.s_sheet__shown)){ s_sheet__shown = o_stored.s_sheet__shown; }
     if(typeof o_stored.s_name__project === 'string'){ s_name__project = o_stored.s_name__project; }
-    for(let s_sheet of a_s_sheet){ o_b_unsaved[s_sheet] = Boolean(o_stored.o_b_unsaved?.[s_sheet]); }
 } catch(o_error){
     console.warn(o_error);
 }
-// what there is to say about the last picture file chosen, '' if it was taken
+// what there is to say about the last thing done with the pictures' files, '' for nothing
 let s_note__file = '';
-// the pictures' files as addresses the page can show, '' without one
-let o_s_url = { front: '', back: '' };
+// the pictures' files as addresses the page can show, by the names the files are kept under
+let o_s_url = {};
+// the picture chosen on the sheet shown, the one the pointer and the fields change: its
+// place in the sheet's list, null for none
+let n_idx__picture = null;
+// whether the chosen picture's handles cut it off instead of sizing and stretching it
+let b_crop = false;
+// whether a picture file of the open project did not get to the server
+let b_file__unsaved = false;
 // what is being dragged: a window, or a sheet's picture as it was when taken
 let o_drag = null;
 // a picture being matched to the cut pattern by four points: its sheet, the points
@@ -86,7 +92,8 @@ let o_drag = null;
 // places on the calendar, the picture's place before, where a click would land now,
 // and what there is to say
 let o_match = null;
-// the picture a match took the place of, to bring it back: its sheet, file and place
+// the picture a match took the place of, to bring it back: its sheet, the file of the
+// picture that came of the match, and the picture as it was
 let o_undo = null;
 let o_s_svg = { front: '', back: '' };
 // a page of the print as a file: whether one is being made, and what there is to say about the last
@@ -94,7 +101,7 @@ let b_busy__page = false;
 let s_note__page = '';
 
 // The pictures' files are too large for the settings' place: they are kept in the
-// browser's database, a sheet's under the sheet's name. s_do: 'get', 'put' or 'delete'.
+// browser's database, each under its name. s_do: 'get', 'put', 'delete' or 'getAllKeys'.
 let f_v__stored = function(s_do, ...a_v){
     return new Promise(function(f_resolve, f_reject){
         let o_request__open = indexedDB.open(s_key__storage, 1);
@@ -137,6 +144,17 @@ let f_o_setting__form = function(){
     return o;
 };
 let f_s = function(n){ return String(+n.toFixed(2)); };
+// A sheet's pictures, by default the shown sheet's; and the one chosen on the sheet
+// shown, null if none is.
+let f_a_o_picture = function(s_sheet = s_sheet__shown){ return o_setting[`a_o_picture__${s_sheet}`]; };
+let f_o_picture__chosen = function(){ return n_idx__picture === null ? null : f_a_o_picture()[n_idx__picture] ?? null; };
+let f_set_chosen = function(o_picture){ f_a_o_picture()[n_idx__picture] = o_picture; };
+// A picture's place in hundredths of a mm, of a degree and of a %: enough, and short in the fields.
+let f_o_picture__rounded = function(o_picture){
+    let o = { ...o_picture, n_ratio__stretch: Math.round(o_picture.n_ratio__stretch * 1e4) / 1e4 };
+    for(let s_name of ['n_mm__x', 'n_mm__y', 'n_mm__size_x', 'n_deg', 'n_deg__skew']){ o[s_name] = Math.round(o[s_name] * 100) / 100; }
+    return o;
+};
 // How fine a sheet's page is as a file, in pixels a mm: as a print shows, less for a very large sheet.
 let f_n_px__per_mm__page = function(){
     return Math.min(n_px__per_mm__print, n_px__page / Math.max(o_setting.n_mm__sheet_x, o_setting.n_mm__sheet_y));
@@ -174,7 +192,7 @@ let f_s_screen = function(s_sheet, a_o_door, n_mm__per_px, a_n__view){
         }));
     }
     a_s.push('</g>');
-    let o_picture = o_setting[`o_picture__${s_sheet}`];
+    let o_picture = s_sheet === s_sheet__shown ? f_o_picture__chosen() : null;
     if(o_match && o_match.s_sheet === s_sheet){
         // the picture's points, their places, a line from each point to its place, and where the next click lands
         let n_r = n_px__match * n_mm__per_px;
@@ -188,12 +206,12 @@ let f_s_screen = function(s_sheet, a_o_door, n_mm__per_px, a_n__view){
         a_s.push(...o_match.a_a_n__mm.map(function(a_n, n_idx){ return f_s_point('to', a_n, n_idx); }));
         if(o_match.a_n__next){ a_s.push(`<circle class="match next" cx="${o_match.a_n__next[0]}" cy="${o_match.a_n__next[1]}" r="${n_r}"/>`); }
         a_s.push('</g>');
-    } else if(s_step === 'picture' && o_picture && o_s_url[s_sheet]){
+    } else if(s_step === 'picture' && o_picture){
         let n_around = n_px__around * n_mm__per_px;
         a_s.push(`<clipPath id="${s_sheet}_around"><rect x="${-n_around}" y="${-n_around}" width="${o_setting.n_mm__sheet_x + 2 * n_around}" height="${o_setting.n_mm__sheet_y + 2 * n_around}"/></clipPath>`);
         let [n_x__calendar, n_y__calendar] = f_a_n__calendar(o_setting);
         a_s.push(`<g clip-path="url(#${s_sheet}_around)"><g transform="translate(${n_x__calendar} ${n_y__calendar})">`);
-        a_s.push(`<polygon class="frame" points="${a_a_n__sign.slice(0, 4).map(function(a_n__sign){ return f_a_n__handle(o_picture, a_n__sign).join(','); }).join(' ')}"/>`);
+        a_s.push(`<polygon class="frame${b_crop ? ' crop' : ''}" points="${a_a_n__sign.slice(0, 4).map(function(a_n__sign){ return f_a_n__handle(o_picture, a_n__sign).join(','); }).join(' ')}"/>`);
         // the handles are not cut off with the frame: each is drawn in view, in the calendar's mm
         a_s.push(`</g></g><g transform="translate(${n_x__calendar} ${n_y__calendar})">`);
         let a_n__box = [a_n__view[0] - n_x__calendar, a_n__view[1] - n_y__calendar, a_n__view[2] - n_x__calendar, a_n__view[3] - n_y__calendar];
@@ -203,9 +221,9 @@ let f_s_screen = function(s_sheet, a_o_door, n_mm__per_px, a_n__view){
         a_s.push(`<line class="frame" x1="${a_n__top[0]}" y1="${a_n__top[1]}" x2="${a_n__turn[0]}" y2="${a_n__turn[1]}"/>`);
         a_s.push(...a_a_n__sign.map(function(a_n__sign){
             let [n_x, n_y] = f_a_n__handle__shown(o_picture, a_n__sign, a_n__box);
-            return `<circle class="handle${a_n__sign.includes(0) ? ' side' : ''}" data-sign="${a_n__sign.join(',')}" cx="${n_x}" cy="${n_y}" r="${n_px__handle * n_mm__per_px}"><title>Drag to ${a_n__sign.includes(0) ? el_panel.elements.s_side.value : 'size'}</title></circle>`;
+            return `<circle class="handle${a_n__sign.includes(0) ? ' side' : ''}" data-sign="${a_n__sign.join(',')}" cx="${n_x}" cy="${n_y}" r="${n_px__handle * n_mm__per_px}"><title>${b_crop ? 'Drag to crop' : a_n__sign.includes(0) ? 'Drag to stretch, with Ctrl to skew' : 'Drag to size, with Shift out of its shape'}</title></circle>`;
         }));
-        a_s.push(`<circle class="handle turn" cx="${a_n__turn[0]}" cy="${a_n__turn[1]}" r="${n_px__handle * n_mm__per_px}"><title>Drag to turn</title></circle></g>`);
+        a_s.push(`<circle class="handle turn" cx="${a_n__turn[0]}" cy="${a_n__turn[1]}" r="${n_px__handle * n_mm__per_px}"><title>Drag to turn, with Shift in steps of 15°</title></circle></g>`);
     }
     return a_s.join('');
 };
@@ -218,11 +236,11 @@ let f_update = function(){
         el.checked = el.value === s_sheet__shown;
         // while a picture is matched, its sheet stays
         el.disabled = Boolean(o_match);
-        el.parentElement.classList.toggle('has', el.name === 's_sheet__picture' && Boolean(o_s_url[el.value]));
+        el.parentElement.classList.toggle('has', el.name === 's_sheet__picture' && f_a_o_picture(el.value).length > 0);
     }
     for(let s_sheet of a_s_sheet){ document.getElementById(`el_sheet__${s_sheet}`).classList.toggle('shown', s_sheet === s_sheet__shown); }
     document.getElementById('el_shown_note').textContent = s_sheet__shown === 'back' ? 'as seen from the front' : '';
-    try{ localStorage.setItem(`${s_key__storage}__page`, JSON.stringify({ s_step, s_sheet__shown, s_name__project, o_b_unsaved })); } catch(o_error){ console.warn(o_error); }
+    try{ localStorage.setItem(`${s_key__storage}__page`, JSON.stringify({ s_step, s_sheet__shown, s_name__project })); } catch(o_error){ console.warn(o_error); }
     // while a picture is matched, what is on screen is neither saved nor replaced
     let el_project_box = document.getElementById('el_project_box');
     el_project_box.inert = Boolean(o_match);
@@ -251,6 +269,10 @@ let f_update = function(){
     Object.assign(o_setting, o_form);
     try{ localStorage.setItem(s_key__storage, JSON.stringify(o_setting)); } catch(o_error){ console.warn(o_error); }
     if(n_idx__selected !== null && n_idx__selected >= o_setting.n_window){ n_idx__selected = null; }
+    // a sheet's only picture is the chosen one; of several the one clicked
+    if(f_a_o_picture().length === 1){ n_idx__picture = 0; }
+    if(!f_o_picture__chosen()){ n_idx__picture = null; }
+    if(o_undo && !f_a_o_picture(o_undo.s_sheet).some(function(o_picture){ return o_picture.s_file === o_undo.s_file; })){ o_undo = null; }
 
     let a_o_window = f_a_o_window(o_setting);
     let a_o_door = a_o_window.map(function(o_window){ return f_o_door(o_window, o_setting); });
@@ -265,9 +287,10 @@ let f_update = function(){
         el_svg.setAttribute('viewBox', `0 0 ${o_setting.n_mm__sheet_x} ${o_setting.n_mm__sheet_y}`);
         el_svg.setAttribute('width', `${o_setting.n_mm__sheet_x}mm`);
         el_svg.setAttribute('height', `${o_setting.n_mm__sheet_y}mm`);
-        el_sheet.classList.toggle('has_picture', Boolean(o_setting[`o_picture__${s_sheet}`] && o_s_url[s_sheet]));
+        el_sheet.classList.toggle('has_picture', f_a_o_picture(s_sheet).length > 0);
         el_sheet.classList.toggle('matching', o_match?.s_sheet === s_sheet);
-        f_set_html(el_svg.querySelector('.picture'), f_s_picture__sheet(o_setting, s_sheet, o_s_url[s_sheet]));
+        // while a picture is matched, it is the only one of its sheet to be seen
+        f_set_html(el_svg.querySelector('.picture'), f_s_picture__sheet(o_setting, s_sheet, o_s_url, o_match?.s_sheet === s_sheet ? n_idx__picture : null));
         f_set_html(el_svg.querySelector('.line'), f_s_line__sheet(o_setting, s_sheet));
         // the handles keep their size on the screen whatever the sheet's, and stay whole in
         // what of the sheet and the pixels around it the view shows
@@ -328,15 +351,18 @@ let f_update = function(){
             + `<path stroke="#0000ff" d="${o_door.a_a_o_seg__fold.map(function(a_o_seg){ return f_s_d(a_o_seg); }).join(' ')}"/></g>`;
     }
 
-    let o_picture = o_s_url[s_sheet__shown] ? o_setting[`o_picture__${s_sheet__shown}`] : null;
-    document.getElementById('el_picture_title').textContent = `Picture of the ${s_sheet__shown} sheet`;
+    let a_o_picture = f_a_o_picture();
+    let o_picture = f_o_picture__chosen();
+    document.getElementById('el_picture_title').textContent = `Pictures of the ${s_sheet__shown} sheet`;
     document.getElementById('el_picture').hidden = !o_picture || Boolean(o_match);
     let el_load = document.getElementById('el_picture_load');
-    el_load.textContent = o_picture ? 'Load another' : 'Load a picture';
-    el_load.classList.toggle('main', !o_picture);
+    el_load.textContent = a_o_picture.length ? 'Add pictures' : 'Load pictures';
+    el_load.classList.toggle('main', !a_o_picture.length);
     // while a picture is matched, the bar over the sheet says what to click, and the picture is no one else's
     el_load.disabled = Boolean(o_match);
     document.getElementById('el_picture_remove').disabled = !o_picture || Boolean(o_match);
+    document.getElementById('el_crop').setAttribute('aria-pressed', String(b_crop));
+    for(let el of document.querySelectorAll('[data-order]')){ el.disabled = a_o_picture.length < 2; }
     document.getElementById('el_matching').hidden = !o_match;
     document.getElementById('el_match_bar').hidden = !o_match;
     if(o_match){
@@ -350,9 +376,12 @@ let f_update = function(){
         document.getElementById('el_match_back').disabled = n_from === 0 || o_match.b_busy;
         document.getElementById('el_match_cancel').disabled = Boolean(o_match.b_busy);
     }
-    document.getElementById('el_match_undo').hidden = o_undo?.s_sheet !== s_sheet__shown;
-    document.getElementById('el_match_note').textContent = o_undo?.s_sheet === s_sheet__shown ? o_undo.s_note : '';
-    let s_note__picture = 'None yet. Without a picture a print shows the sheet\'s cut lines.';
+    // a match is taken back with the picture that came of it chosen
+    let b_undo = Boolean(o_undo) && o_undo.s_sheet === s_sheet__shown && o_picture?.s_file === o_undo.s_file;
+    document.getElementById('el_match_undo').hidden = !b_undo;
+    document.getElementById('el_match_note').textContent = b_undo ? o_undo.s_note : '';
+    let s_note__picture = a_o_picture.length === 0 ? 'None yet. Without a picture a print shows the sheet\'s cut lines.'
+        : a_o_picture.length === 1 ? '' : `${a_o_picture.length} pictures${o_picture ? '; the chosen one:' : '. Click one on the sheet to place it.'}`;
     if(o_picture){
         for(let s_name of a_s_name__picture){
             let el = el_panel.elements[`picture__${s_name}`];
@@ -367,7 +396,8 @@ let f_update = function(){
         let [n_x, n_y] = f_a_n__size(o_picture);
         let n_dpi = f_n_dpi(o_picture);
         // stretched, it is finer one way than the other
-        s_note__picture = `${o_picture.n_px__x} × ${o_picture.n_px__y} pixels, shown ${f_s(n_x)} × ${f_s(n_y)} mm: ${o_picture.n_ratio__stretch === 1 ? '' : 'at least '}${Math.round(n_dpi)} pixels per inch`
+        let [, , n_px__x, n_px__y] = f_a_n__px(o_picture);
+        s_note__picture += `${s_note__picture && ' '}${Math.round(n_px__x)} × ${Math.round(n_px__y)} pixels, shown ${f_s(n_x)} × ${f_s(n_y)} mm: ${o_picture.n_ratio__stretch === 1 ? '' : 'at least '}${Math.round(n_dpi)} pixels per inch`
             + (n_dpi < 150 ? ', coarse in print; 300 is sharp.' : '.');
     }
     document.getElementById('el_picture_hint').textContent = [s_note__file, s_note__picture].filter(Boolean).join(' ');
@@ -403,12 +433,15 @@ el_panel.addEventListener('input', function(o_event){
     let v = el.tagName === 'SELECT' ? el.value : el.valueAsNumber;
     if(el.checkValidity() && v === v){
         if(el.name.startsWith('own__')){ f_set_own({ [el.name.slice(5)]: v }); }
-        if(el.name.startsWith('picture__crop_')){
-            o_setting[`o_picture__${s_sheet__shown}`] = f_o_picture__cut(o_setting[`o_picture__${s_sheet__shown}`], Number(el.name.slice(14)), v / 100);
+        let o_picture = f_o_picture__chosen();
+        if(!o_picture){
+            // the fields of a picture are there with one chosen only
+        } else if(el.name.startsWith('picture__crop_')){
+            f_set_chosen(f_o_picture__cut(o_picture, Number(el.name.slice(14)), v / 100));
         } else if(el.name === 'picture__stretch'){
-            o_setting[`o_picture__${s_sheet__shown}`] = { ...o_setting[`o_picture__${s_sheet__shown}`], n_ratio__stretch: v / 100 };
+            f_set_chosen({ ...o_picture, n_ratio__stretch: v / 100 });
         } else if(el.name.startsWith('picture__')){
-            o_setting[`o_picture__${s_sheet__shown}`] = { ...o_setting[`o_picture__${s_sheet__shown}`], [el.name.slice(9)]: v };
+            f_set_chosen({ ...o_picture, [el.name.slice(9)]: v });
         }
     }
     f_update();
@@ -428,51 +461,89 @@ document.getElementById('el_own_reset').addEventListener('click', function(){
     f_update();
 });
 
-// A sheet's picture: its file goes into the browser's database, its place into the
-// settings. Without a place given it fills the calendar and its bleed. Says whether the
-// file was taken: one that is no picture is not.
-let f_b_set_picture = async function(s_sheet, o_file, o_picture__given = null){
-    let s_url = o_file ? URL.createObjectURL(o_file) : '';
-    let o_picture = null;
-    if(o_file){
-        let el_img = new Image();
-        el_img.src = s_url;
-        try{
-            await el_img.decode();
-            if(!el_img.naturalWidth || !el_img.naturalHeight){ throw new Error('no size'); }
-        } catch(o_error){
-            URL.revokeObjectURL(s_url);
-            s_note__file = `${o_file.name} is not a picture this browser can show.`;
-            f_update();
-            return false;
-        }
-        o_picture = o_picture__given ?? f_o_picture__fitted(f_o_picture(el_img.naturalWidth, el_img.naturalHeight), f_a_n__bleed(o_setting), true);
-    }
+// A picture file taken in: kept in the browser's database under a name, s_file or a
+// new one, and to be shown by an address. A picture of its size, to be placed; null for
+// a file that is no picture.
+let f_o_picture__of_file = async function(o_file, s_file = null){
+    let s_url = URL.createObjectURL(o_file);
+    let el_img = new Image();
+    el_img.src = s_url;
     try{
-        await (o_file ? f_v__stored('put', o_file, s_sheet) : f_v__stored('delete', s_sheet));
+        await el_img.decode();
+        if(!el_img.naturalWidth || !el_img.naturalHeight){ throw new Error('no size'); }
+    } catch(o_error){
+        URL.revokeObjectURL(s_url);
+        return null;
+    }
+    while(s_file === null || (s_file in o_s_url)){ s_file = `p${Math.random().toString(36).slice(2, 10)}`; }
+    try{
+        await f_v__stored('put', o_file, s_file);
     } catch(o_error){
         // without the database the picture is there until the page is left
         console.warn(o_error);
     }
-    URL.revokeObjectURL(o_s_url[s_sheet]);
-    o_s_url[s_sheet] = s_url;
-    o_setting[`o_picture__${s_sheet}`] = o_picture;
-    o_b_unsaved[s_sheet] = true;
-    s_note__file = '';
-    f_update();
-    return true;
+    o_s_url[s_file] = s_url;
+    return { ...f_o_picture(el_img.naturalWidth, el_img.naturalHeight), s_file };
+};
+// The files no picture shows any more leave the page and the browser's database; the one
+// a match can be taken back to stays.
+let f_drop_files = async function(){
+    let a_s_file = a_s_sheet.flatMap(function(s_sheet){ return f_a_o_picture(s_sheet).map(function(o_picture){ return o_picture.s_file; }); });
+    if(o_undo){ a_s_file.push(o_undo.o_picture.s_file); }
+    for(let s_file of Object.keys(o_s_url)){
+        if(a_s_file.includes(s_file)){ continue; }
+        URL.revokeObjectURL(o_s_url[s_file]);
+        delete o_s_url[s_file];
+    }
+    try{
+        for(let s_file of await f_v__stored('getAllKeys')){
+            if(!a_s_file.includes(s_file)){ await f_v__stored('delete', s_file); }
+        }
+    } catch(o_error){
+        console.warn(o_error);
+    }
 };
 document.getElementById('el_picture_load').addEventListener('click', function(){ document.getElementById('el_picture_file').click(); });
+// Picture files chosen, one or many. The sheet's first picture lies over the calendar
+// and its bleed; one more comes into the calendar's middle, a third of it at most;
+// several at once come to lie on the windows, the first on window 1, each as large as
+// fits into its window and 2 mm around it.
 document.getElementById('el_picture_file').addEventListener('change', async function(o_event){
-    let o_file = o_event.target.files[0];
+    let a_o_file = [...o_event.target.files];
     o_event.target.value = '';
-    if(!o_file){ return; }
-    if(o_undo?.s_sheet === s_sheet__shown){ o_undo = null; }
-    await f_b_set_picture(s_sheet__shown, o_file);
+    if(!a_o_file.length){ return; }
+    let a_o_picture__new = [];
+    let a_s_name__bad = [];
+    for(let o_file of a_o_file){
+        let o_picture = await f_o_picture__of_file(o_file);
+        if(o_picture){ a_o_picture__new.push(o_picture); } else { a_s_name__bad.push(o_file.name); }
+    }
+    let a_o_picture = f_a_o_picture();
+    let a_o_window = f_a_o_window(o_setting);
+    let [n_x, n_y] = [o_setting.n_mm__calendar_x, o_setting.n_mm__calendar_y];
+    a_o_picture__new.forEach(function(o_picture, n_idx){
+        if(a_o_picture__new.length > 1){
+            let o_window = a_o_window[n_idx % a_o_window.length];
+            let [n_x__half, n_y__half] = [o_window.n_mm__size_x / 2 + 2, o_window.n_mm__size_y / 2 + 2];
+            a_o_picture.push(f_o_picture__rounded(f_o_picture__fitted(o_picture, [o_window.n_mm__x - n_x__half, o_window.n_mm__y - n_y__half, o_window.n_mm__x + n_x__half, o_window.n_mm__y + n_y__half], false)));
+        } else if(a_o_picture.length){
+            a_o_picture.push(f_o_picture__rounded(f_o_picture__fitted(o_picture, [n_x / 3, n_y / 3, 2 * n_x / 3, 2 * n_y / 3], false)));
+        } else {
+            a_o_picture.push(f_o_picture__fitted(o_picture, f_a_n__bleed(o_setting), true));
+        }
+    });
+    // one picture added is the chosen one; of several the one clicked next
+    if(a_o_picture__new.length){ n_idx__picture = a_o_picture__new.length === 1 ? a_o_picture.length - 1 : null; }
+    s_note__file = a_s_name__bad.length === 0 ? '' : `${a_s_name__bad.join(', ')} ${a_s_name__bad.length === 1 ? 'is not a picture' : 'are not pictures'} this browser can show.`;
+    f_update();
 });
-document.getElementById('el_picture_remove').addEventListener('click', function(){
-    if(o_undo?.s_sheet === s_sheet__shown){ o_undo = null; }
-    f_b_set_picture(s_sheet__shown, null);
+document.getElementById('el_picture_remove').addEventListener('click', async function(){
+    if(!f_o_picture__chosen()){ return; }
+    f_a_o_picture().splice(n_idx__picture, 1);
+    n_idx__picture = null;
+    s_note__file = '';
+    f_update();
+    await f_drop_files();
 });
 let f_n_deg = function(n_deg){ return ((n_deg + 180) % 360 + 360) % 360 - 180; };
 let o_f_o_picture = {
@@ -486,22 +557,49 @@ let o_f_o_picture = {
 };
 document.getElementById('el_picture').addEventListener('click', function(o_event){
     let f_o_picture__changed = o_f_o_picture[o_event.target.dataset.picture];
-    if(!f_o_picture__changed){ return; }
-    o_setting[`o_picture__${s_sheet__shown}`] = f_o_picture__changed(o_setting[`o_picture__${s_sheet__shown}`]);
+    let s_order = o_event.target.dataset.order;
+    let o_picture = f_o_picture__chosen();
+    if(!o_picture || !(f_o_picture__changed || s_order)){ return; }
+    if(s_order){
+        // over or under all other pictures of its sheet
+        let a_o_picture = f_a_o_picture();
+        a_o_picture.splice(n_idx__picture, 1);
+        n_idx__picture = s_order === 'front' ? a_o_picture.length : 0;
+        a_o_picture.splice(n_idx__picture, 0, o_picture);
+    } else {
+        f_set_chosen(f_o_picture__changed(o_picture));
+    }
+    f_update();
+});
+document.getElementById('el_crop').addEventListener('click', function(){
+    b_crop = !b_crop;
+    f_update();
+});
+// The chosen picture split into pieces, each a picture of its own where it lay; the
+// first of them is the chosen one, so that its frame shows that there are pieces now.
+document.getElementById('el_split').addEventListener('click', function(){
+    let o_picture = f_o_picture__chosen();
+    let [n_column, n_row] = [el_panel.elements.split__n_column.valueAsNumber, el_panel.elements.split__n_row.valueAsNumber];
+    if(!o_picture || !(n_column >= 1 && n_row >= 1)){ return; }
+    let a_o_piece = f_a_o_picture__split(o_picture, n_column, n_row).map(f_o_picture__rounded);
+    f_a_o_picture().splice(n_idx__picture, 1, ...a_o_piece);
+    if(o_undo?.s_file === o_picture.s_file){ o_undo = null; }
+    s_note__file = a_o_piece.length === 1 ? 'One piece is the picture as it was.' : `Split into ${a_o_piece.length} pictures: drag each to its place.`
+        + (a_o_piece.length < n_column * n_row ? ' More would be smaller than 5 mm.' : '');
     f_update();
 });
 
 // Matching by four points. The picture is first fitted into the calendar, so that all of
 // it can be clicked; then four clicks on it, four on the cut pattern, and it is laid anew.
 document.getElementById('el_match').addEventListener('click', function(){
-    let o_picture = o_setting[`o_picture__${s_sheet__shown}`];
+    let o_picture = f_o_picture__chosen();
     o_match = { s_sheet: s_sheet__shown, a_a_n__px: [], a_a_n__mm: [], o_picture, a_n__next: null, s_message: '', b_busy: false };
-    o_setting[`o_picture__${s_sheet__shown}`] = f_o_picture__fitted(o_picture, [0, 0, o_setting.n_mm__calendar_x, o_setting.n_mm__calendar_y], false);
+    f_set_chosen(f_o_picture__fitted(o_picture, [0, 0, o_setting.n_mm__calendar_x, o_setting.n_mm__calendar_y], false));
     f_update();
 });
 let f_cancel_match = function(){
     if(!o_match || o_match.b_busy){ return; }
-    o_setting[`o_picture__${o_match.s_sheet}`] = o_match.o_picture;
+    f_set_chosen(o_match.o_picture);
     o_match = null;
     f_update();
 };
@@ -518,7 +616,7 @@ document.getElementById('el_match_back').addEventListener('click', function(){
 // picture as long as its points are asked for, then the cut pattern's nearest place
 // within reach, or with b_free just where it is.
 let f_a_n__match = function(a_n, b_free){
-    let o_picture = o_setting[`o_picture__${o_match.s_sheet}`];
+    let o_picture = f_o_picture__chosen();
     if(o_match.a_a_n__px.length < 4){
         let a_n__px = f_a_n__to_px(o_picture, a_n);
         let [n_x, n_y, n_px__x, n_px__y] = f_a_n__px(o_picture);
@@ -528,15 +626,15 @@ let f_a_n__match = function(a_n, b_free){
     let n_mm__per_px = o_setting.n_mm__sheet_x / document.getElementById(`el_sheet__${o_match.s_sheet}`).firstElementChild.getBoundingClientRect().width;
     return f_a_n__snapped(a_n, f_a_a_n__anchor(o_setting), n_px__snap * n_mm__per_px);
 };
-// A sheet's picture laid anew by four points, a_a_n__px in its file and a_a_n__mm their
+// A picture laid anew by four points, a_a_n__px in its file and a_a_n__mm their
 // places on the calendar: a new picture file over the calendar and its bleed, its
 // place, and whether the old picture reached everywhere.
-let f_o_matched = async function(s_sheet, a_a_n__px, a_a_n__mm){
+let f_o_matched = async function(o_picture, a_a_n__px, a_a_n__mm){
     let el_img = new Image();
-    el_img.src = o_s_url[s_sheet];
+    el_img.src = o_s_url[o_picture.s_file];
     await el_img.decode();
     // what is left of the file, and the points counted from that part's corner
-    let [n_x, n_y, n_px__x, n_px__y] = f_a_n__px(o_setting[`o_picture__${s_sheet}`]);
+    let [n_x, n_y, n_px__x, n_px__y] = f_a_n__px(o_picture);
     let a_a_n__part = a_a_n__px.map(function(a_n){ return [a_n[0] - n_x, a_n[1] - n_y]; });
     // the new picture's pixels: as fine as the old picture comes to lie in the calendar's
     // middle, a third of what a print shows at least and no finer than that; the same
@@ -587,7 +685,7 @@ let f_add_match = async function(a_n){
     o_match.s_message = '';
     o_match.a_n__next = null;
     if(a_a_n__px.length < 4){
-        a_a_n__px.push(f_a_n__to_px(o_setting[`o_picture__${s_sheet}`], a_n));
+        a_a_n__px.push(f_a_n__to_px(f_o_picture__chosen(), a_n));
         f_update();
         return;
     }
@@ -608,14 +706,16 @@ let f_add_match = async function(a_n){
     // the words first, then the work
     await new Promise(function(f_resolve){ setTimeout(f_resolve, 30); });
     try{
-        let o_file__before = await (await fetch(o_s_url[s_sheet])).blob();
-        let o_matched = await f_o_matched(s_sheet, a_a_n__px, a_a_n__mm);
+        let o_matched = await f_o_matched(f_o_picture__chosen(), a_a_n__px, a_a_n__mm);
+        let o_picture__file = await f_o_picture__of_file(o_matched.o_file);
+        f_set_chosen({ ...o_matched.o_picture, s_file: o_picture__file.s_file });
         o_undo = {
-            s_sheet, o_file: o_file__before, o_picture: o_match.o_picture,
+            s_sheet, s_file: o_picture__file.s_file, o_picture: o_match.o_picture,
             s_note: `Matched by four points${o_matched.b_covered ? '.' : '; the picture does not reach all of the calendar, which stays blank where it ends.'}`
         };
         o_match = null;
-        await f_b_set_picture(s_sheet, o_matched.o_file, o_matched.o_picture);
+        f_update();
+        await f_drop_files();
     } catch(o_error){
         console.warn(o_error);
         o_match.b_busy = false;
@@ -624,52 +724,60 @@ let f_add_match = async function(a_n){
     }
 };
 document.getElementById('el_match_undo').addEventListener('click', async function(){
-    let { s_sheet, o_file, o_picture } = o_undo;
+    // the chosen picture is the one that came of the match: the one it was takes its place again
+    f_set_chosen(o_undo.o_picture);
     o_undo = null;
-    await f_b_set_picture(s_sheet, o_file, o_picture);
+    f_update();
+    await f_drop_files();
 });
 
 // ---- the saved projects, see project.module.js. What is on screen stays in this
 // browser as before; a project is that, saved under a name by the app's server.
 
-// Puts settings on screen, a saved project's with its pictures, s_name its name, or
-// those of a new one, null, which has no pictures.
+// Puts settings on screen, a saved project's with its pictures' files, s_name its
+// name, or those of a new one, null, which has no pictures.
 let f_show_design = async function(o_design, s_name){
-    // the pictures first: if the server does not answer, the screen stays as it is
-    let o_o_file = { front: null, back: null };
-    for(let s_sheet of a_s_sheet){
-        if(s_name === null || !o_design.o_setting[`o_picture__${s_sheet}`]){ continue; }
-        let o_response = await f_o_response__server(`${f_s_url__project(s_name)}/${s_sheet}`);
-        if(o_response.ok){ o_o_file[s_sheet] = await o_response.blob(); }
-        else if(o_response.status !== 404){ throw new Error(`The ${s_sheet} sheet’s picture could not be read.`); }
+    // the files first: if the server does not answer, the screen stays as it is
+    let a_s_file = [...new Set(a_s_sheet.flatMap(function(s_sheet){ return o_design.o_setting[`a_o_picture__${s_sheet}`].map(function(o_picture){ return o_picture.s_file; }); }))];
+    let a_o_file = [];
+    for(let s_file of a_s_file){
+        let o_response = await f_o_response__server(`${f_s_url__project(s_name)}/${encodeURIComponent(s_file)}`);
+        if(o_response.ok){ a_o_file.push(await o_response.blob()); }
+        else if(o_response.status === 404){ a_o_file.push(null); }
+        else { throw new Error('A picture of the project could not be read.'); }
     }
     o_setting = o_design.o_setting;
     n_idx__selected = null;
+    n_idx__picture = null;
     o_undo = null;
+    s_note__file = '';
+    b_file__unsaved = false;
+    // the files that were on screen leave; the project's come under the names it has for them
+    for(let s_file of Object.keys(o_s_url)){
+        URL.revokeObjectURL(o_s_url[s_file]);
+        delete o_s_url[s_file];
+    }
+    for(let n_idx = 0; n_idx < a_s_file.length; n_idx++){
+        if(a_o_file[n_idx]){ await f_o_picture__of_file(a_o_file[n_idx], a_s_file[n_idx]); }
+    }
+    // a picture without its file, or with a file that is no picture, is of no use
+    for(let s_sheet of a_s_sheet){
+        o_setting[`a_o_picture__${s_sheet}`] = f_a_o_picture(s_sheet).filter(function(o_picture){ return o_s_url[o_picture.s_file]; });
+    }
     f_fill_form();
-    for(let s_sheet of a_s_sheet){
-        // a place without its file, or with a file that is no picture, is of no use
-        if(!o_o_file[s_sheet] || !await f_b_set_picture(s_sheet, o_o_file[s_sheet], o_setting[`o_picture__${s_sheet}`])){ await f_b_set_picture(s_sheet, null); }
-        o_b_unsaved[s_sheet] = false;
-    }
     f_update();
+    await f_drop_files();
 };
-// A project keeps its sheets' pictures beside its settings: the files that are others
-// than it has, all of them for a project that is new.
-let f_save_picture = async function(s_name, b_all){
-    for(let s_sheet of a_s_sheet){
-        if(b_all){ o_b_unsaved[s_sheet] = true; }
-    }
-    for(let s_sheet of a_s_sheet){
-        if(!o_b_unsaved[s_sheet]){ continue; }
-        let s_url = `${f_s_url__project(s_name)}/${s_sheet}`;
-        let o_response = o_s_url[s_sheet]
-            ? await f_o_response__server(s_url, { method: 'PUT', body: await (await fetch(o_s_url[s_sheet])).blob() })
-            : await f_o_response__server(s_url, { method: 'DELETE' });
+// A project keeps its pictures' files beside its settings. The server says which of
+// them it has not got: those are sent.
+let f_save_files = async function(o_saved){
+    b_file__unsaved = true;
+    for(let s_file of o_saved.a_s_file__missing){
+        if(!o_s_url[s_file]){ continue; }
+        let o_response = await f_o_response__server(`${f_s_url__project(o_saved.s_name)}/${encodeURIComponent(s_file)}`, { method: 'PUT', body: await (await fetch(o_s_url[s_file])).blob() });
         if(!o_response.ok){ throw new Error((await o_response.json()).s_message); }
-        o_b_unsaved[s_sheet] = false;
     }
-    f_update();
+    b_file__unsaved = false;
 };
 let o_panel__project = f_o_panel__project({
     el_box: document.getElementById('el_project_box'),
@@ -687,13 +795,13 @@ let o_panel__project = f_o_panel__project({
         f_update();
         el_panel.scrollTop = 0;
     },
-    f_save_extra: f_save_picture,
-    f_b_extra_dirty: function(){ return a_s_sheet.some(function(s_sheet){ return o_b_unsaved[s_sheet]; }); },
+    f_save_extra: f_save_files,
+    f_b_extra_dirty: function(){ return b_file__unsaved; },
     f_s_summary: function(o_project){
         let o = f_o_setting__kept(o_project.o_setting);
-        let a_s_sheet__picture = a_s_sheet.filter(function(s_sheet){ return o[`o_picture__${s_sheet}`]; });
+        let a_s = a_s_sheet.filter(function(s_sheet){ return o[`a_o_picture__${s_sheet}`].length; }).map(function(s_sheet){ return `${o[`a_o_picture__${s_sheet}`].length} ${s_sheet}`; });
         return `${o.n_window} ${o.n_window === 1 ? 'window' : 'windows'} · ${o.n_mm__calendar_x} × ${o.n_mm__calendar_y} mm`
-            + (a_s_sheet__picture.length ? ` · ${a_s_sheet__picture.join(' and ')} picture` : '');
+            + (a_s.length ? ` · pictures: ${a_s.join(', ')}` : '');
     },
     f_b_ready: function(){ return !o_match; },
     f_opened: function(s_name){
@@ -715,6 +823,7 @@ for(let el of document.querySelectorAll('button[data-step]')){
 for(let el of document.querySelectorAll('[name=s_sheet__shown], [name=s_sheet__picture]')){
     el.addEventListener('input', function(){
         s_sheet__shown = el.value;
+        n_idx__picture = null;
         s_note__file = '';
         f_update();
     });
@@ -754,8 +863,9 @@ let f_a_n__mm = function(o_event, s_sheet){
     return [(o_event.clientX - o_rect.left) * n_mm__per_px - n_x, (o_event.clientY - o_rect.top) * n_mm__per_px - n_y];
 };
 // Step 'window': a click on a window chooses it, a drag moves it in steps of 0.5 mm.
-// Step 'picture': a drag anywhere on the sheet moves its picture, a drag of a handle
-// sizes it, turns it, or cuts it off, stretches or skews it by a side. In the other steps the pointer moves nothing.
+// Step 'picture': a press on a picture chooses it, the topmost under the pointer, and a
+// drag moves it; a drag of one of the chosen picture's handles sizes, stretches, skews,
+// turns or crops it, see the pointer's move. In the other steps the pointer moves nothing.
 el_stage.addEventListener('pointerdown', function(o_event){
     let el_sheet = o_event.target.closest('.sheet');
     if(!el_sheet){ return; }
@@ -769,14 +879,22 @@ el_stage.addEventListener('pointerdown', function(o_event){
         return;
     }
     if(s_step === 'picture'){
-        let o_picture = o_s_url[s_sheet] ? o_setting[`o_picture__${s_sheet}`] : null;
+        let el_handle = o_event.target.closest('.handle');
+        if(!el_handle){
+            // beside all pictures: none chosen
+            let a_o_picture = f_a_o_picture();
+            n_idx__picture = null;
+            for(let n_idx = a_o_picture.length - 1; n_idx >= 0 && n_idx__picture === null; n_idx--){
+                if(f_f_b__in(a_o_picture[n_idx])(a_n)){ n_idx__picture = n_idx; }
+            }
+        }
+        let o_picture = f_o_picture__chosen();
         if(o_picture){
-            let el_handle = o_event.target.closest('.handle');
             // the handle that turns has no place on the frame
             let a_n__sign = el_handle?.dataset.sign ? el_handle.dataset.sign.split(',').map(Number) : null;
             // a handle is rarely taken by its middle: what the pointer is off, it stays off
             let a_n__handle = a_n__sign ? f_a_n__handle(o_picture, a_n__sign) : a_n;
-            o_drag = { s_sheet, o_picture, a_n__sign, b_turn: Boolean(el_handle) && !a_n__sign, a_n__pointer: a_n, a_n__off: [a_n[0] - a_n__handle[0], a_n[1] - a_n__handle[1]] };
+            o_drag = { s_sheet, n_idx: n_idx__picture, o_picture, a_n__sign, b_turn: Boolean(el_handle) && !a_n__sign, a_n__pointer: a_n, a_n__off: [a_n[0] - a_n__handle[0], a_n[1] - a_n__handle[1]] };
             o_event.preventDefault();
         }
     } else if(s_step === 'window'){
@@ -808,20 +926,30 @@ window.addEventListener('pointermove', function(o_event){
     if(o_drag.o_picture){
         let a_n__on = [a_n[0] - o_drag.a_n__off[0], a_n[1] - o_drag.a_n__off[1]];
         let o_picture;
+        // the sides the handle sits on: a side's own, a corner's two
+        let a_s_side = o_drag.a_n__sign ? [o_drag.a_n__sign[0] && (o_drag.a_n__sign[0] < 0 ? 'left' : 'right'), o_drag.a_n__sign[1] && (o_drag.a_n__sign[1] < 0 ? 'top' : 'bottom')].filter(Boolean) : [];
+        let f_o_picture__by_sides = function(f_o_picture__by_side){
+            return a_s_side.reduce(function(o_picture, s_side){ return f_o_picture__by_side(o_picture, s_side, a_n__on); }, o_drag.o_picture);
+        };
         if(o_drag.b_turn){
+            // the ring: turned, with Shift in steps of 15 degrees
             o_picture = f_o_picture__turned(o_drag.o_picture, o_drag.a_n__pointer, a_n);
-            o_picture.n_deg = f_n_deg(o_picture.n_deg);
+            o_picture.n_deg = f_n_deg(o_event.shiftKey ? Math.round(o_picture.n_deg / 15) * 15 : o_picture.n_deg);
         } else if(!o_drag.a_n__sign){
             o_picture = { ...o_drag.o_picture, n_mm__x: o_drag.o_picture.n_mm__x + a_n[0] - o_drag.a_n__pointer[0], n_mm__y: o_drag.o_picture.n_mm__y + a_n[1] - o_drag.a_n__pointer[1] };
-        } else if(o_drag.a_n__sign.includes(0)){
-            o_picture = o_f_o_picture__side[el_panel.elements.s_side.value](o_drag.o_picture, a_s_side[a_a_n__sign.findIndex(function(a_n__sign){ return String(a_n__sign) === String(o_drag.a_n__sign); }) - 4], a_n__on);
+        } else if(b_crop){
+            // with Crop on every handle cuts off, a corner's at both its sides
+            o_picture = f_o_picture__by_sides(f_o_picture__cropped);
+        } else if(a_s_side.length === 1){
+            // a side: stretched, with Ctrl skewed
+            o_picture = f_o_picture__by_sides(o_event.ctrlKey || o_event.metaKey ? f_o_picture__skewed : f_o_picture__stretched);
+        } else if(o_event.shiftKey){
+            // a corner with Shift: both its sides follow the pointer, out of the picture's shape
+            o_picture = f_o_picture__by_sides(f_o_picture__stretched);
         } else {
             o_picture = f_o_picture__resized(o_drag.o_picture, o_drag.a_n__sign, a_n__on);
         }
-        // hundredths of a mm, of a degree and of a % are enough, and short in the fields
-        for(let s_name of ['n_mm__x', 'n_mm__y', 'n_mm__size_x', 'n_deg', 'n_deg__skew']){ o_picture[s_name] = Math.round(o_picture[s_name] * 100) / 100; }
-        o_picture.n_ratio__stretch = Math.round(o_picture.n_ratio__stretch * 1e4) / 1e4;
-        o_setting[`o_picture__${o_drag.s_sheet}`] = o_picture;
+        f_a_o_picture(o_drag.s_sheet)[o_drag.n_idx] = f_o_picture__rounded(o_picture);
         f_update();
         return;
     }
@@ -839,15 +967,15 @@ window.addEventListener('pointermove', function(o_event){
 for(let s_event of ['pointerup', 'pointercancel']){
     window.addEventListener(s_event, function(){ o_drag = null; });
 }
-// Ctrl and the wheel, or two fingers spread on a touchpad, size a sheet's picture under
+// Ctrl and the wheel, or two fingers spread on a touchpad, size the chosen picture under
 // the pointer: its handles may lie far outside the sheet.
 el_stage.addEventListener('wheel', function(o_event){
     let s_sheet = o_event.target.closest('.sheet')?.dataset.sheet;
-    if(s_step !== 'picture' || o_match || !o_event.ctrlKey || !s_sheet || !o_s_url[s_sheet]){ return; }
+    if(s_step !== 'picture' || o_match || !o_event.ctrlKey || !s_sheet || !f_o_picture__chosen()){ return; }
     o_event.preventDefault();
-    let o_picture = f_o_picture__scaled(o_setting[`o_picture__${s_sheet}`], Math.exp(-o_event.deltaY / 1000), f_a_n__mm(o_event, s_sheet));
+    let o_picture = f_o_picture__scaled(f_o_picture__chosen(), Math.exp(-o_event.deltaY / 1000), f_a_n__mm(o_event, s_sheet));
     for(let s_name of ['n_mm__x', 'n_mm__y', 'n_mm__size_x']){ o_picture[s_name] = Math.round(o_picture[s_name] * 100) / 100; }
-    o_setting[`o_picture__${s_sheet}`] = o_picture;
+    f_set_chosen(o_picture);
     f_update();
 }, { passive: false });
 
@@ -866,20 +994,21 @@ for(let s_sheet of a_s_sheet){
 }
 
 // A sheet's page of the print as a file, a PDF or a PNG. The browser draws the page's
-// SVG; the picture's file goes into it as text, since an SVG drawn as a picture sees no
-// other file.
+// SVG; the pictures' files go into it as text, each once, since an SVG drawn as a
+// picture sees no other file.
 let f_el_canvas__page = async function(s_sheet){
-    let s_href = '';
-    if(o_s_url[s_sheet]){
-        let o_file = await (await fetch(o_s_url[s_sheet])).blob();
-        s_href = await new Promise(function(f_resolve, f_reject){
+    let o_s_href = {};
+    for(let { s_file } of f_a_o_picture(s_sheet)){
+        if(s_file in o_s_href || !o_s_url[s_file]){ continue; }
+        let o_file = await (await fetch(o_s_url[s_file])).blob();
+        o_s_href[s_file] = await new Promise(function(f_resolve, f_reject){
             let o_reader = new FileReader();
             o_reader.onload = function(){ f_resolve(o_reader.result); };
             o_reader.onerror = function(){ f_reject(o_reader.error); };
             o_reader.readAsDataURL(o_file);
         });
     }
-    let s_url = URL.createObjectURL(new Blob([f_s_svg__page(o_setting, s_sheet, s_href, f_n_px__per_mm__page())], { type: 'image/svg+xml' }));
+    let s_url = URL.createObjectURL(new Blob([f_s_svg__page(o_setting, s_sheet, o_s_href, f_n_px__per_mm__page())], { type: 'image/svg+xml' }));
     try{
         let el_img = new Image();
         await new Promise(function(f_resolve, f_reject){
@@ -932,11 +1061,14 @@ for(let el of document.querySelectorAll('[data-page]')){
     });
 }
 
-// A picture's place without its file is of no use: the file may be gone with the browser's data.
+// A picture without its file is of no use: the file may be gone with the browser's data.
 for(let s_sheet of a_s_sheet){
-    if(!o_setting[`o_picture__${s_sheet}`]){ continue; }
-    let o_file = await f_v__stored('get', s_sheet).catch(function(o_error){ console.warn(o_error); });
-    if(o_file){ o_s_url[s_sheet] = URL.createObjectURL(o_file); } else { o_setting[`o_picture__${s_sheet}`] = null; }
+    for(let { s_file } of f_a_o_picture(s_sheet)){
+        if(s_file in o_s_url){ continue; }
+        let o_file = await f_v__stored('get', s_file).catch(function(o_error){ console.warn(o_error); });
+        if(o_file){ o_s_url[s_file] = URL.createObjectURL(o_file); }
+    }
+    o_setting[`a_o_picture__${s_sheet}`] = f_a_o_picture(s_sheet).filter(function(o_picture){ return o_s_url[o_picture.s_file]; });
 }
 f_fill_form();
 f_update();

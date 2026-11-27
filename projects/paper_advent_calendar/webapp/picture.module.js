@@ -3,6 +3,7 @@
 // and cutting it off does to that. The file itself is not in here, only its size.
 //
 // o_picture:
+//   s_file                the name its file is kept under; pieces of one picture share it
 //   n_px__x, n_px__y      the file's size in pixels
 //   a_n_ratio__crop       how much of the file is cut off at its left, top, right and bottom, 0 to 1
 //   n_mm__x, n_mm__y      the middle of what is left, in mm from the calendar's top left corner
@@ -158,12 +159,25 @@ let f_o_picture__spread = function(o_picture, a_n__box){
     let a_n = f_a_n__reach(a_n__box[2] - a_n__box[0], a_n__box[3] - a_n__box[1], function(a_n){ return f_a_n__own(o_middle, a_n); });
     return { ...f_o_picture__sized(o_picture, 2 * a_n[0], 2 * a_n[1]), n_mm__x: (a_n__box[0] + a_n__box[2]) / 2, n_mm__y: (a_n__box[1] + a_n__box[3]) / 2 };
 };
+
+// For many points: tells whether a point of the calendar lies in the picture, in what
+// is left of it.
+let f_f_b__in = function(o_picture){
+    let [n_x, n_y] = f_a_n__size(o_picture);
+    let n_rad = o_picture.n_deg * Math.PI / 180;
+    let [n_cos, n_sin, n_tan] = [Math.cos(n_rad), Math.sin(n_rad), Math.tan(o_picture.n_deg__skew * Math.PI / 180)];
+    return function(a_n){
+        let [n_x__from, n_y__from] = [a_n[0] - o_picture.n_mm__x, a_n[1] - o_picture.n_mm__y];
+        // as f_a_n__own reckons
+        let n_y__own = -n_x__from * n_sin + n_y__from * n_cos;
+        return Math.abs(n_x__from * n_cos + n_y__from * n_sin + n_y__own * n_tan) <= n_x / 2 + 1e-6 && Math.abs(n_y__own) <= n_y / 2 + 1e-6;
+    };
+};
 // Whether the picture covers a box: the box's four corners lie in it.
 let f_b_covered = function(o_picture, a_n__box){
-    let [n_x, n_y] = f_a_n__size(o_picture);
+    let f_b__in = f_f_b__in(o_picture);
     return [[0, 1], [2, 1], [2, 3], [0, 3]].every(function([n_idx__x, n_idx__y]){
-        let a_n = f_a_n__own(o_picture, [a_n__box[n_idx__x], a_n__box[n_idx__y]]);
-        return Math.abs(a_n[0]) <= n_x / 2 + 1e-6 && Math.abs(a_n[1]) <= n_y / 2 + 1e-6;
+        return f_b__in([a_n__box[n_idx__x], a_n__box[n_idx__y]]);
     });
 };
 
@@ -285,17 +299,50 @@ let f_o_picture__skewed = function(o_picture, s_side, a_n__pointer){
     return f_o_picture__framed(o_picture, [o_picture.n_mm__x + n_mm__half * a_n__along[0], o_picture.n_mm__y + n_mm__half * a_n__along[1]], a_a_n[0], a_a_n[1]);
 };
 
+// The picture split into pieces, n_column across and n_row down what is left of it,
+// counted as it lies: each a picture of its own with its part of the file, where that
+// part lay; row by row from the top left. No piece comes out smaller than
+// n_mm__size_min: fewer pieces then.
+let f_a_o_picture__split = function(o_picture, n_column, n_row){
+    let [n_x, n_y] = f_a_n__size(o_picture);
+    let [n_px__left, n_px__top, n_px__x, n_px__y] = f_a_n__px(o_picture);
+    n_column = Math.max(1, Math.min(n_column, Math.floor(n_x / n_mm__size_min)));
+    n_row = Math.max(1, Math.min(n_row, Math.floor(n_y / n_mm__size_min)));
+    let a_o_picture = [];
+    for(let n_idx__row = 0; n_idx__row < n_row; n_idx__row++){
+        for(let n_idx__column = 0; n_idx__column < n_column; n_idx__column++){
+            // the file's column and row that show there: counted from the other end where it is mirrored
+            let n_idx__x = o_picture.b_flip_x ? n_column - 1 - n_idx__column : n_idx__column;
+            let n_idx__y = o_picture.b_flip_y ? n_row - 1 - n_idx__row : n_idx__row;
+            let a_n__middle = f_a_n__calendar(o_picture, [((n_idx__column + 0.5) / n_column - 0.5) * n_x, ((n_idx__row + 0.5) / n_row - 0.5) * n_y]);
+            a_o_picture.push({
+                ...o_picture,
+                a_n_ratio__crop: [
+                    (n_px__left + n_idx__x * n_px__x / n_column) / o_picture.n_px__x,
+                    (n_px__top + n_idx__y * n_px__y / n_row) / o_picture.n_px__y,
+                    1 - (n_px__left + (n_idx__x + 1) * n_px__x / n_column) / o_picture.n_px__x,
+                    1 - (n_px__top + (n_idx__y + 1) * n_px__y / n_row) / o_picture.n_px__y
+                ],
+                n_mm__x: a_n__middle[0], n_mm__y: a_n__middle[1], n_mm__size_x: n_x / n_column
+            });
+        }
+    }
+    return a_o_picture;
+};
+
 // The picture as SVG in the calendar's mm; s_href its file's address. The inner svg
 // shows the part of the file that is left, stretched to its size, and hides the rest.
-let f_s_picture = function(o_picture, s_href){
+// With b_use s_href names a picture file drawn elsewhere in the SVG, as '#' and its id:
+// pieces of one file then hold the file once.
+let f_s_picture = function(o_picture, s_href, b_use = false){
     let [n_x, n_y] = f_a_n__size(o_picture);
     return `<g transform="translate(${f_s_n(o_picture.n_mm__x)} ${f_s_n(o_picture.n_mm__y)}) rotate(${f_s_n(o_picture.n_deg)}) skewX(${f_s_n(-o_picture.n_deg__skew)}) scale(${o_picture.b_flip_x ? -1 : 1} ${o_picture.b_flip_y ? -1 : 1})">`
         + `<svg x="${f_s_n(-n_x / 2)}" y="${f_s_n(-n_y / 2)}" width="${f_s_n(n_x)}" height="${f_s_n(n_y)}" viewBox="${f_a_n__px(o_picture).map(f_s_n).join(' ')}" preserveAspectRatio="none">`
-        + `<image href="${s_href}" width="${o_picture.n_px__x}" height="${o_picture.n_px__y}"/></svg></g>`;
+        + (b_use ? `<use href="${s_href}"/>` : `<image href="${s_href}" width="${o_picture.n_px__x}" height="${o_picture.n_px__y}"/>`) + '</svg></g>';
 };
 
 export {
     a_s_side, n_mm__size_min, n_deg__skew_max, f_o_picture, f_a_n__px, f_a_n__size, f_n_dpi, f_a_n__calendar, f_a_n__own, f_a_n__from_px, f_a_n__to_px, f_a_n__handle, f_a_n__handle__shown, f_a_n__handle__turn,
-    f_o_picture__fitted, f_o_picture__spread, f_b_covered, f_o_picture__resized, f_o_picture__turned, f_o_picture__scaled, f_o_picture__cut, f_o_picture__cropped,
-    f_o_picture__stretched, f_o_picture__skewed, f_s_picture
+    f_f_b__in, f_o_picture__fitted, f_o_picture__spread, f_b_covered, f_o_picture__resized, f_o_picture__turned, f_o_picture__scaled, f_o_picture__cut, f_o_picture__cropped,
+    f_o_picture__stretched, f_o_picture__skewed, f_a_o_picture__split, f_s_picture
 };

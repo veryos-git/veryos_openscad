@@ -54,9 +54,9 @@ let o_setting__default = {
     b_mark: true,
     n_mm__mark: 3,
     b_logo: true,
-    // a sheet's picture, see picture.module.js; null: none
-    o_picture__front: null,
-    o_picture__back: null,
+    // a sheet's pictures, see picture.module.js, the last one on top
+    a_o_picture__front: [],
+    a_o_picture__back: [],
     // what a print shows where a sheet has a picture: 'picture', 'both' with the cut
     // lines on it, 'cut' the lines alone; a sheet without one shows its cut lines
     s_print: 'picture',

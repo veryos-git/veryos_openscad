@@ -11,7 +11,7 @@
 // deno task check .
 
 import { o_setting__default, f_a_o_window, f_o_door, f_a_n__box as f_a_n__box__path, f_s_svg } from '../calendar.module.js';
-import { f_a_n__from_px, f_a_n__to_px, f_a_n__handle, f_a_n__size } from '../picture.module.js';
+import { f_a_n__px as f_a_n__left, f_a_n__from_px, f_a_n__to_px, f_a_n__handle, f_a_n__size } from '../picture.module.js';
 import { f_o_page, f_a_n__box, f_o_print__png } from './chrome.js';
 
 let n_check = 0;
@@ -106,7 +106,17 @@ try{
         await Deno.writeFile(s_path, Uint8Array.from(atob(s_url.split(',')[1]), function(s){ return s.charCodeAt(0); }));
         return s_path;
     };
+    // A picture file loaded as the only picture of the sheet shown, s_sheet: the pictures
+    // the sheet has leave first, each chosen by a click on its middle and removed.
     let f_load = async function(s_path, s_sheet){
+        for(let n_try = 0; n_try < 60; n_try++){
+            let a_o_picture = (await f_o_state()).o_setting[`a_o_picture__${s_sheet}`];
+            if(!a_o_picture.length){ break; }
+            let o_picture__top = a_o_picture[a_o_picture.length - 1];
+            if(a_o_picture.length > 1){ await o_page.f_click(await f_a_n__px([o_picture__top.n_mm__x, o_picture__top.n_mm__y])); }
+            await o_page.f_click_on('#el_picture_remove');
+            await o_page.f_settle();
+        }
         await o_page.f_choose('#el_picture_file', [s_path]);
         await f_until(`document.getElementById('el_sheet__${s_sheet}').classList.contains('has_picture') && Boolean(document.querySelector('#el_sheet__${s_sheet} image'))`);
     };
@@ -118,7 +128,7 @@ try{
     f_check('opens on the first step, the front sheet shown', o_state.s_step === 'paper' && o_state.s_step__open === 'paper' && o_state.s_step__current === 'paper' && o_state.s_sheet === 'front', o_state);
     f_check('five steps in the bar', await o_page.f_v(`[...document.querySelectorAll('#el_step button')].map(function(el){ return el.textContent; }).join()`) === '1Paper,2Windows,3Picture,4Cuts,5Print and cut');
     let a_s_name__missing = await o_page.f_v(`${JSON.stringify(Object.keys(o_setting__default))}.filter(function(s_name){ return !document.getElementById('el_panel').elements[s_name]; })`);
-    f_check('every setting has a field but the seed, the pictures and the windows\' own values', String(a_s_name__missing) === 'n_seed,o_picture__front,o_picture__back,a_o_window__own', a_s_name__missing);
+    f_check('every setting has a field but the seed, the pictures and the windows\' own values', String(a_s_name__missing) === 'n_seed,a_o_picture__front,a_o_picture__back,a_o_window__own', a_s_name__missing);
     f_check('every field lies in a step', await o_page.f_v(`[...document.getElementById('el_panel').elements].every(function(el){ return el.closest('.step'); })`));
     for(let s_step of ['window', 'picture', 'cut', 'output', 'paper']){
         await f_step(s_step);
@@ -313,19 +323,25 @@ try{
         });`);
     let s_path__text = `${o_page.s_path__work}/text.txt`;
     await Deno.writeTextFile(s_path__text, 'no picture');
-    let f_o_picture = async function(s_sheet = 'front'){ return (await f_o_state()).o_setting[`o_picture__${s_sheet}`]; };
+    // whether two pictures lie the same way, to a millionth by default
+    let f_b_same_picture = function(o_picture, o_picture__other, n_tolerance = 1e-6){
+        return ['n_mm__x', 'n_mm__y', 'n_mm__size_x', 'n_ratio__stretch', 'n_deg', 'n_deg__skew', 'a_n_ratio__crop'].every(function(s_name){ return f_b_near(o_picture[s_name], o_picture__other[s_name], n_tolerance); })
+            && o_picture.b_flip_x === o_picture__other.b_flip_x && o_picture.b_flip_y === o_picture__other.b_flip_y && o_picture.n_px__x === o_picture__other.n_px__x && o_picture.n_px__y === o_picture__other.n_px__y;
+    };
+    // a sheet's first picture, its only one in most of what follows
+    let f_o_picture = async function(s_sheet = 'front'){ return (await f_o_state()).o_setting[`a_o_picture__${s_sheet}`][0] ?? null; };
 
     await f_step('picture');
     o_state = await f_o_state();
-    f_check('step Picture, none yet: Load a picture is the thing to press', o_state.s_load === 'Load a picture, main' && !o_state.b_picture && o_state.s_hint.startsWith('None yet.') && o_state.s_title === 'Picture of the front sheet' && o_state.n_hit === 0, o_state);
+    f_check('step Picture, none yet: Load pictures is the thing to press', o_state.s_load === 'Load pictures, main' && !o_state.b_picture && o_state.s_hint.startsWith('None yet.') && o_state.s_title === 'Pictures of the front sheet' && o_state.n_hit === 0, o_state);
     await f_load(s_path__front, 'front');
     o_state = await f_o_state();
-    let o_picture = o_state.o_setting.o_picture__front;
+    let o_picture = o_state.o_setting.a_o_picture__front[0];
     f_check('a picture loaded: it fills the calendar and its bleed', o_picture.n_px__x === 3000 && o_picture.n_px__y === 2000 && String([o_picture.n_mm__x, o_picture.n_mm__y, o_picture.n_mm__size_x]) === '138.5,95,291', o_picture);
-    f_check('the panel shows its tools, its size, and which sheet has one', o_state.b_picture && o_state.s_load === 'Load another' && o_state.s_hint === '3000 × 2000 pixels, shown 291 × 194 mm: 262 pixels per inch.' && o_state.s_sheet__has === 'front' && o_state.n_handle === 9 && o_state.s_status === '', o_state);
+    f_check('the panel shows its tools, its size, and which sheet has one', o_state.b_picture && o_state.s_load === 'Add pictures' && o_state.s_hint === '3000 × 2000 pixels, shown 291 × 194 mm: 262 pixels per inch.' && o_state.s_sheet__has === 'front' && o_state.n_handle === 9 && o_state.s_status === '', o_state);
     let f_a_n__image = async function(s_sheet = 'front'){
         // Chrome's own box of the picture, in the sheet's mm
-        let a_n = await o_page.f_v(`(function(){ let o = document.querySelector('#el_sheet__${s_sheet} image').getBoundingClientRect(); let o_sheet = document.querySelector('#el_sheet__${s_sheet} > svg').getBoundingClientRect(); return [o.left - o_sheet.left, o.top - o_sheet.top, o.right - o_sheet.left, o.bottom - o_sheet.top]; })()`);
+        let a_n = await o_page.f_v(`(function(){ let o = document.querySelector('#el_sheet__${s_sheet} use').getBoundingClientRect(); let o_sheet = document.querySelector('#el_sheet__${s_sheet} > svg').getBoundingClientRect(); return [o.left - o_sheet.left, o.top - o_sheet.top, o.right - o_sheet.left, o.bottom - o_sheet.top]; })()`);
         let n_px__per_mm__now = await f_n_px__per_mm();
         return a_n.map(function(n){ return n / n_px__per_mm__now; });
     };
@@ -343,12 +359,38 @@ try{
     let o_picture__sized = await f_o_picture();
     f_check('a corner sizes it: the corner across stays, nothing is stretched', f_b_near(f_a_n__handle(o_picture__sized, [-1, -1]), f_a_n__handle(o_picture, [-1, -1]), 0.011) && f_b_near(o_picture__sized.n_mm__size_x, 277 - 90 / n_px__per_mm, 0.02)
         && f_b_near(f_a_n__size(o_picture__sized)[0] / f_a_n__size(o_picture__sized)[1], 1.5, 1e-9), o_picture__sized);
+    f_check('one picture on the sheet is the chosen one: no order to change, its handles say what they do', await o_page.f_v(`[...document.querySelectorAll('[data-order]')].every(function(el){ return el.disabled; }) && [...document.querySelectorAll('.sheet.shown .handle title')].map(function(el){ return el.textContent; }).filter(function(s, n_idx, a_s){ return a_s.indexOf(s) === n_idx; }).join(' | ')`)
+        === 'Drag to size, with Shift out of its shape | Drag to stretch, with Ctrl to skew | Drag to turn, with Shift in steps of 15°');
+    // Crop on: the handles cut off
+    await o_page.f_click_on('#el_crop');
+    f_check('Crop on: the frame is dashed, every handle but the ring says crop', await o_page.f_v(`document.getElementById('el_crop').getAttribute('aria-pressed') === 'true' && document.querySelector('.sheet.shown polygon.frame').classList.contains('crop') && [...document.querySelectorAll('.sheet.shown .handle[data-sign] title')].every(function(el){ return el.textContent === 'Drag to crop'; })`));
     a_n__from = await f_a_n__px(f_a_n__handle(o_picture__sized, [1, 0]));
     await o_page.f_drag(a_n__from, [a_n__from[0] - 50, a_n__from[1]]);
     let o_picture__cropped = await f_o_picture();
     f_check('a side crops it: the other side stays, and what is left stays where it is', f_b_near(f_a_n__handle(o_picture__cropped, [-1, 0]), f_a_n__handle(o_picture__sized, [-1, 0]), 0.011) && f_b_near(o_picture__cropped.a_n_ratio__crop[2], 50 / n_px__per_mm / o_picture__sized.n_mm__size_x, 0.001)
         && f_b_near(f_a_n__from_px(o_picture__cropped, [600, 900]), f_a_n__from_px(o_picture__sized, [600, 900]), 0.011), o_picture__cropped);
     f_check('the crop\'s field shows it in %', f_b_near(Number(await o_page.f_v(`document.getElementById('el_panel').elements.picture__crop_2.value`)), o_picture__cropped.a_n_ratio__crop[2] * 100, 0.006));
+    a_n__from = await f_a_n__px(f_a_n__handle(o_picture__cropped, [-1, -1]));
+    await o_page.f_drag(a_n__from, [a_n__from[0] + 40, a_n__from[1] + 30]);
+    let o_picture__cornered = await f_o_picture();
+    f_check('a corner crops at both its sides: left and top cut off by what the pointer moved, the corner across and what is left stay', f_b_near([o_picture__cornered.a_n_ratio__crop[0] * 3000, o_picture__cornered.a_n_ratio__crop[1] * 2000].map(function(n_px, n_idx){ return n_px * f_a_n__size(o_picture__cropped)[n_idx] / f_a_n__left(o_picture__cropped)[2 + n_idx]; }), [40 / n_px__per_mm, 30 / n_px__per_mm], 0.03)
+        && f_b_near(f_a_n__handle(o_picture__cornered, [1, 1]), f_a_n__handle(o_picture__cropped, [1, 1]), 0.02) && f_b_near(f_a_n__from_px(o_picture__cornered, [1500, 1200]), f_a_n__from_px(o_picture__cropped, [1500, 1200]), 0.02) && o_picture__cornered.a_n_ratio__crop[2] === o_picture__cropped.a_n_ratio__crop[2], o_picture__cornered);
+    await o_page.f_fill('picture__crop_0', 0);
+    await o_page.f_fill('picture__crop_1', 0);
+    await o_page.f_click_on('#el_crop');
+    f_check('Crop off: the handles size and stretch again', await o_page.f_v(`document.getElementById('el_crop').getAttribute('aria-pressed') === 'false' && !document.querySelector('.sheet.shown polygon.frame').classList.contains('crop')`) && f_b_same_picture(await f_o_picture(), o_picture__cropped, 0.01), await f_o_picture());
+    o_picture__cropped = await f_o_picture();
+    // a corner with Shift: both its sides follow the pointer
+    a_n__from = await f_a_n__px(f_a_n__handle(o_picture__cropped, [1, 1]));
+    await o_page.f_drag(a_n__from, [a_n__from[0] - 30, a_n__from[1] + 24], 8);
+    let o_picture__free = await f_o_picture();
+    f_check('a corner with Shift: 30 pixels narrower and 24 higher, out of its shape, the corner across stays, nothing cut off', f_b_near(f_a_n__size(o_picture__free), [f_a_n__size(o_picture__cropped)[0] - 30 / n_px__per_mm, f_a_n__size(o_picture__cropped)[1] + 24 / n_px__per_mm], 0.03)
+        && f_b_near(f_a_n__handle(o_picture__free, [-1, -1]), f_a_n__handle(o_picture__cropped, [-1, -1]), 0.02) && String(o_picture__free.a_n_ratio__crop) === String(o_picture__cropped.a_n_ratio__crop) && o_picture__free.n_ratio__stretch > 1.05, o_picture__free);
+    await o_page.f_fill('picture__stretch', 100);
+    await o_page.f_fill('picture__n_mm__size_x', o_picture__cropped.n_mm__size_x);
+    await o_page.f_fill('picture__n_mm__x', o_picture__cropped.n_mm__x);
+    await o_page.f_fill('picture__n_mm__y', o_picture__cropped.n_mm__y);
+    f_check('by the fields as it was', f_b_same_picture(await f_o_picture(), o_picture__cropped), await f_o_picture());
     await o_page.f_wheel(await f_a_n__px([60, 70]), -200, 2);
     let o_picture__scaled = await f_o_picture();
     f_check('Ctrl and the wheel size it under the pointer', f_b_near(o_picture__scaled.n_mm__size_x / o_picture__cropped.n_mm__size_x, Math.exp(0.2), 0.001) && f_b_near(f_a_n__to_px(o_picture__scaled, [60, 70]), f_a_n__to_px(o_picture__cropped, [60, 70]), 0.6), [f_a_n__to_px(o_picture__scaled, [60, 70]), f_a_n__to_px(o_picture__cropped, [60, 70])]);
@@ -373,6 +415,10 @@ try{
     f_check('the ring at its top turns it slightly: 6 pixels of the pointer, about a degree, its middle and size stay', f_b_near(o_picture__turned.n_deg, n_deg__turned, 0.006) && n_deg__turned > 0.5 && n_deg__turned < 3
         && o_picture__turned.n_mm__x === o_picture.n_mm__x && o_picture__turned.n_mm__y === o_picture.n_mm__y && o_picture__turned.n_mm__size_x === o_picture.n_mm__size_x, [o_picture__turned.n_deg, n_deg__turned]);
     f_check('the field shows the turn', Number(await o_page.f_v(`document.getElementById('el_panel').elements.picture__n_deg.value`)) === o_picture__turned.n_deg);
+    a_n__from = await o_page.f_v(`(function(){ let o = document.querySelector('.sheet.shown .handle.turn').getBoundingClientRect(); return [(o.left + o.right) / 2, (o.top + o.bottom) / 2]; })()`);
+    await o_page.f_drag(a_n__from, [a_n__from[0] + 150, a_n__from[1] + 30], 8);
+    let n_deg__free = o_picture__turned.n_deg + f_n_deg__around([a_n__from[0] + 150, a_n__from[1] + 30]) - f_n_deg__around(a_n__from);
+    f_check('the ring with Shift: turned in steps of 15°, to the step nearest to where the pointer went', (await f_o_picture()).n_deg % 15 === 0 && (await f_o_picture()).n_deg >= 15 && Math.abs((await f_o_picture()).n_deg - n_deg__free) <= 7.5, [(await f_o_picture()).n_deg, n_deg__free]);
     await o_page.f_fill('picture__crop_2', 0);
     await o_page.f_fill('picture__crop_1', 10);
     await o_page.f_fill('picture__n_mm__x', 120);
@@ -431,26 +477,23 @@ try{
     await o_page.f_click_on('[data-picture=contain]');
     o_picture = await f_o_picture();
     f_check('Fit keeps it stretched: 190 high, as much less wide', f_b_near(f_a_n__size(o_picture), [281 * 190 / 194, 190], 1e-9), f_a_n__size(o_picture));
-    await o_page.f_click_on('[name=s_side][value=stretch] + span');
-    f_check('Drag a side to Stretch: the sides\' handles say so', await o_page.f_v(`document.querySelector('.sheet.shown .handle.side title').textContent`) === 'Drag to stretch');
     a_n__from = await f_a_n__px(f_a_n__handle(o_picture, [1, 0]));
     await o_page.f_drag(a_n__from, [a_n__from[0] - 60, a_n__from[1] + 15]);
     let o_picture__stretched = await f_o_picture();
     f_check('a side stretches it: the right side follows the pointer, the left side and the height stay, nothing is cut off', f_b_near(f_a_n__size(o_picture__stretched), [f_a_n__size(o_picture)[0] - 60 / n_px__per_mm, 190], 0.03)
         && f_b_near(f_a_n__handle(o_picture__stretched, [-1, 0]), f_a_n__handle(o_picture, [-1, 0]), 0.02) && String(o_picture__stretched.a_n_ratio__crop) === '0,0,0,0', o_picture__stretched);
     f_check('Chrome draws it so', f_b_near(await f_a_n__image(), [...f_a_n__on_sheet(o_picture__stretched, [-1, -1]), ...f_a_n__on_sheet(o_picture__stretched, [1, 1])], 0.05), await f_a_n__image());
-    await o_page.f_click_on('[name=s_side][value=skew] + span');
     a_n__from = await f_a_n__px(f_a_n__handle(o_picture__stretched, [0, -1]));
-    await o_page.f_drag(a_n__from, [a_n__from[0] + 80, a_n__from[1] - 10]);
+    await o_page.f_drag(a_n__from, [a_n__from[0] + 80, a_n__from[1] - 10], 2);
     let o_picture__skewed = await f_o_picture();
     let n_deg__skew = Math.atan(80 / n_px__per_mm / 190) * 180 / Math.PI;
-    f_check('Drag a side to Skew: the top side slides as far as the pointer goes along it, the bottom side stays, the upright sides lean to the right', f_b_near(o_picture__skewed.n_deg__skew, n_deg__skew, 0.02) && n_deg__skew > 5
+    f_check('a side with Ctrl skews it: the top side slides as far as the pointer goes along it, the bottom side stays, the upright sides lean to the right', f_b_near(o_picture__skewed.n_deg__skew, n_deg__skew, 0.02) && n_deg__skew > 5
         && f_b_near(f_a_n__handle(o_picture__skewed, [-1, 1]), f_a_n__handle(o_picture__stretched, [-1, 1]), 0.02) && f_b_near(f_a_n__handle(o_picture__skewed, [1, 1]), f_a_n__handle(o_picture__stretched, [1, 1]), 0.02)
         && f_b_near(f_a_n__size(o_picture__skewed), f_a_n__size(o_picture__stretched), 0.02) && o_picture__skewed.n_deg === 0, [o_picture__skewed, n_deg__skew]);
     f_check('Chrome draws it leaning: its box reaches from its bottom left corner to its top right one', f_b_near(await f_a_n__image(), [f_a_n__on_sheet(o_picture__skewed, [-1, 1])[0], f_a_n__on_sheet(o_picture__skewed, [1, -1])[1], f_a_n__on_sheet(o_picture__skewed, [1, -1])[0], f_a_n__on_sheet(o_picture__skewed, [-1, 1])[1]], 0.05), await f_a_n__image());
     // the right side, which leans now: 40 pixels down the screen are 40 cos of the lean along it
     a_n__from = await f_a_n__px(f_a_n__handle(o_picture__skewed, [1, 0]));
-    await o_page.f_drag(a_n__from, [a_n__from[0], a_n__from[1] + 40]);
+    await o_page.f_drag(a_n__from, [a_n__from[0], a_n__from[1] + 40], 2);
     let o_picture__leaning = await f_o_picture();
     let n_rad__skew = o_picture__skewed.n_deg__skew * Math.PI / 180;
     let n_mm__along = 40 / n_px__per_mm * Math.cos(n_rad__skew);
@@ -467,11 +510,10 @@ try{
     await o_page.f_fill('picture__n_deg', 0);
     o_picture = await f_o_picture();
     f_check('Height 100 % and Skew 0°: the shape its file has', o_picture.n_ratio__stretch === 1 && o_picture.n_deg__skew === 0 && f_b_near(f_a_n__size(o_picture)[0] / f_a_n__size(o_picture)[1], 1.5, 1e-9) && (await f_o_state()).s_hint.endsWith('pixels per inch.'), o_picture);
-    await o_page.f_click_on('[name=s_side][value=crop] + span');
     await o_page.f_click_on('[data-picture=cover]');
     await o_page.f_choose('#el_picture_file', [s_path__text]);
     o_state = await f_o_state();
-    f_check('a file that is no picture: said, the picture stays', o_state.s_hint.startsWith('text.txt is not a picture this browser can show.') && o_state.s_sheet__picture === 'front' && o_state.o_setting.o_picture__front.n_px__x === 3000, o_state.s_hint);
+    f_check('a file that is no picture: said, the picture stays', o_state.s_hint.startsWith('text.txt is not a picture this browser can show.') && o_state.s_sheet__picture === 'front' && o_state.o_setting.a_o_picture__front[0].n_px__x === 3000, o_state.s_hint);
     await f_step('window');
     s_setting = JSON.stringify((await f_o_state()).o_setting);
     await o_page.f_drag(await f_a_n__px([138.5, 95]), await f_a_n__px([150, 100]));
@@ -481,25 +523,34 @@ try{
     await f_step('picture');
     await o_page.f_click_on('[name=s_sheet__picture][value=back] + span');
     o_state = await f_o_state();
-    f_check('Back sheet in the panel: the back sheet shown, no picture yet, the other file\'s note gone', o_state.s_sheet === 'back' && o_state.s_sheet__checked === 'back,back' && o_state.s_title === 'Picture of the back sheet' && o_state.s_hint.startsWith('None yet.') && !o_state.b_picture, o_state);
+    f_check('Back sheet in the panel: the back sheet shown, no picture yet, the other file\'s note gone', o_state.s_sheet === 'back' && o_state.s_sheet__checked === 'back,back' && o_state.s_title === 'Pictures of the back sheet' && o_state.s_hint.startsWith('None yet.') && !o_state.b_picture, o_state);
     await f_load(s_path__back, 'back');
     o_state = await f_o_state();
     f_check('the back\'s picture: both sheets have one, and the marks on the back are said to cut into it', o_state.s_sheet__has === 'front,back' && o_state.s_sheet__picture === 'front,back' && o_state.s_status === 'The marks on the back are cut into its picture: leave them out, under Cuts', o_state.s_status);
     f_check('Chrome draws it on the calendar and its bleed', f_b_near(await f_a_n__image('back'), [8, 8, 289, 202], 0.05), await f_a_n__image('back'));
     await o_page.f_open();
     o_state = await f_o_state();
-    f_check('a reload keeps both pictures, their files and their places', o_state.s_sheet__picture === 'front,back' && o_state.s_step__open === 'picture' && o_state.s_sheet === 'back' && o_state.n_handle === 9 && f_b_near(o_state.o_setting.o_picture__front.n_mm__size_x, 291, 1e-9)
+    f_check('a reload keeps both pictures, their files and their places', o_state.s_sheet__picture === 'front,back' && o_state.s_step__open === 'picture' && o_state.s_sheet === 'back' && o_state.n_handle === 9 && f_b_near(o_state.o_setting.a_o_picture__front[0].n_mm__size_x, 291, 1e-9)
         && await o_page.f_v(`Promise.all([...document.querySelectorAll('.sheet image')].map(function(el){ return fetch(el.href.baseVal).then(function(o){ return o.blob(); }).then(function(o){ return o.size; }); })).then(function(a_n){ return a_n.length === 2 && a_n.every(function(n){ return n > 10000; }); })`), o_state);
-    // places as they were kept before pictures could be stretched and skewed
-    await o_page.f_v(`(function(){
+    // as the page kept pictures before: one a sheet, its place under the sheet's name without stretch and skew, its file under the sheet's name too
+    await o_page.f_v(`(async function(){
         let o_setting = JSON.parse(localStorage.getItem('paper_advent_calendar'));
-        for(let s_sheet of ['front', 'back']){ delete o_setting['o_picture__' + s_sheet].n_ratio__stretch; delete o_setting['o_picture__' + s_sheet].n_deg__skew; }
+        let o_db = await new Promise(function(f_resolve){ let o_request = indexedDB.open('paper_advent_calendar', 1); o_request.onsuccess = function(){ f_resolve(o_request.result); }; });
+        let f_v = function(s_do, ...a_v){ return new Promise(function(f_resolve){ let o_request = o_db.transaction('picture', 'readwrite').objectStore('picture')[s_do](...a_v); o_request.onsuccess = function(){ f_resolve(o_request.result); }; }); };
+        for(let s_sheet of ['front', 'back']){
+            let { s_file, n_ratio__stretch, n_deg__skew, ...o_picture } = o_setting['a_o_picture__' + s_sheet][0];
+            await f_v('put', await f_v('get', s_file), s_sheet);
+            await f_v('delete', s_file);
+            o_setting['o_picture__' + s_sheet] = o_picture;
+            delete o_setting['a_o_picture__' + s_sheet];
+        }
         localStorage.setItem('paper_advent_calendar', JSON.stringify(o_setting));
     })()`);
     await o_page.f_open();
     o_state = await f_o_state();
-    f_check('a picture\'s place kept before stretch and skew came: neither, and drawn where it was', o_state.s_sheet__picture === 'front,back' && o_state.o_setting.o_picture__back.n_ratio__stretch === 1 && o_state.o_setting.o_picture__back.n_deg__skew === 0
-        && o_state.o_setting.o_picture__front.n_ratio__stretch === 1 && f_b_near(await f_a_n__image('back'), [8, 8, 289, 202], 0.05), [o_state.o_setting.o_picture__back, await f_a_n__image('back')]);
+    f_check('pictures kept before a sheet could have several, and before stretch and skew: each is its sheet\'s one picture, neither stretched nor skewed, drawn where it was', o_state.s_sheet__picture === 'front,back' && o_state.o_setting.a_o_picture__back.length === 1 && o_state.o_setting.a_o_picture__back[0].s_file === 'back' && o_state.o_setting.a_o_picture__front[0].s_file === 'front'
+        && o_state.o_setting.a_o_picture__back[0].n_ratio__stretch === 1 && o_state.o_setting.a_o_picture__back[0].n_deg__skew === 0 && o_state.o_setting.a_o_picture__front[0].n_ratio__stretch === 1 && !('o_picture__front' in o_state.o_setting)
+        && o_state.n_handle === 9 && f_b_near(await f_a_n__image('back'), [8, 8, 289, 202], 0.05), [o_state.o_setting.a_o_picture__back, await f_a_n__image('back')]);
     await f_step('cut');
     await o_page.f_click_on('[name=b_mark]');
     o_state = await f_o_state();
@@ -516,7 +567,94 @@ try{
     await o_page.f_click_on('#el_picture_remove');
     await f_until(`!document.getElementById('el_sheet__back').classList.contains('has_picture')`);
     o_state = await f_o_state();
-    f_check('Remove it: the back\'s picture is gone, the front\'s stays', o_state.o_setting.o_picture__back === null && o_state.s_sheet__has === 'front' && o_state.s_load === 'Load a picture, main', o_state);
+    f_check('Remove it: the back\'s picture is gone, the front\'s stays', o_state.o_setting.a_o_picture__back.length === 0 && o_state.s_sheet__has === 'front' && o_state.s_load === 'Load pictures, main', o_state);
+
+    // ---- several pictures on a sheet: loaded together, chosen by a click, ordered, removed; one split into pieces
+    let a_s_path__small = [];
+    for(let [n_idx, s_colour] of ['#c02020', '#20a040', '#2040c0'].entries()){
+        a_s_path__small.push(await f_s_path__picture(`small_${n_idx}.png`, 300 + 100 * n_idx, 300, `o_context.fillStyle = '${s_colour}'; o_context.fillRect(0, 0, n_px__x, n_px__y);`));
+    }
+    let f_a_o_back = async function(){ return (await f_o_state()).o_setting.a_o_picture__back; };
+    let f_s_field = function(s_name){ return o_page.f_v(`document.getElementById('el_panel').elements[${JSON.stringify(s_name)}].value`); };
+    await o_page.f_choose('#el_picture_file', a_s_path__small);
+    await f_until(`JSON.parse(localStorage.getItem('paper_advent_calendar')).a_o_picture__back.length === 3`);
+    o_state = await f_o_state();
+    let a_o_small = o_state.o_setting.a_o_picture__back;
+    let a_o_window = f_a_o_window(o_state.o_setting);
+    f_check('three pictures loaded at once: on windows 1, 2 and 3, each as large as fits into its window and 2 mm around it, 36 wide', a_o_small.every(function(o_small, n_idx){ return f_b_near([o_small.n_mm__x, o_small.n_mm__y, o_small.n_mm__size_x], [a_o_window[n_idx].n_mm__x, a_o_window[n_idx].n_mm__y, 36], 0.006); })
+        && String(a_o_small.map(function(o_small){ return f_a_n__size(o_small)[1]; })) === '36,27,21.6' && new Set(a_o_small.map(function(o_small){ return o_small.s_file; })).size === 3, a_o_small);
+    f_check('none of them is chosen yet: no handles, no fields, and the panel says what to do', o_state.n_handle === 0 && !o_state.b_picture && o_state.s_hint === '3 pictures. Click one on the sheet to place it.' && o_state.s_load === 'Add pictures' && o_state.s_sheet__has === 'front,back', o_state);
+    f_check('each file once in the page, each picture drawn from its file', await o_page.f_v(`document.querySelectorAll('#el_sheet__back defs image').length + ' ' + document.querySelectorAll('#el_sheet__back use').length`) === '3 3');
+    f_check('of the back only the windows count: said which of them the pictures do not cover', o_state.s_status === 'The back pictures leave windows 2, 3, 4, 5, 6, 7 and 17 more blank in part', o_state.s_status);
+    await o_page.f_click(await f_a_n__px([a_o_window[1].n_mm__x, a_o_window[1].n_mm__y]));
+    o_state = await f_o_state();
+    f_check('a click on one chooses it: its handles, its fields, its size in the panel', o_state.n_handle === 9 && o_state.b_picture && o_state.s_hint === '3 pictures; the chosen one: 400 × 300 pixels, shown 36 × 27 mm: 282 pixels per inch.' && await f_s_field('picture__n_mm__size_x') === '36'
+        && f_b_near(Number(await f_s_field('picture__n_mm__x')), a_o_window[1].n_mm__x, 0.006), o_state.s_hint);
+    a_n__from = await f_a_n__px([a_o_window[1].n_mm__x + 5, a_o_window[1].n_mm__y - 4]);
+    await o_page.f_drag(a_n__from, [a_n__from[0] + 30, a_n__from[1] + 50]);
+    let a_o_back = await f_a_o_back();
+    f_check('a drag moves the one under the pointer and no other', f_b_near([a_o_back[1].n_mm__x, a_o_back[1].n_mm__y], [a_o_small[1].n_mm__x + 30 / n_px__per_mm, a_o_small[1].n_mm__y + 50 / n_px__per_mm], 0.011) && JSON.stringify([a_o_back[0], a_o_back[2]]) === JSON.stringify([a_o_small[0], a_o_small[2]]), a_o_back);
+    await o_page.f_click(await f_a_n__px([138.5, 95]));
+    f_check('a click beside all pictures: none chosen', (await f_o_state()).n_handle === 0 && !(await f_o_state()).b_picture);
+    // one more: into the calendar's middle, a third of it at most
+    await o_page.f_choose('#el_picture_file', [a_s_path__small[0]]);
+    await f_until(`JSON.parse(localStorage.getItem('paper_advent_calendar')).a_o_picture__back.length === 4`);
+    o_state = await f_o_state();
+    a_o_back = o_state.o_setting.a_o_picture__back;
+    f_check('one more picture: in the calendar\'s middle, a third of its height, on top and chosen', f_b_near([a_o_back[3].n_mm__x, a_o_back[3].n_mm__y, a_o_back[3].n_mm__size_x], [138.5, 95, 63.33], 0.006) && o_state.n_handle === 9 && await f_s_field('picture__n_mm__size_x') === '63.33'
+        && await o_page.f_v(`[...document.querySelectorAll('[data-order]')].every(function(el){ return !el.disabled; })`), a_o_back[3]);
+    // laid over window 1's picture: a click there takes the upper one; To back puts it under
+    await o_page.f_fill('picture__n_mm__x', a_o_window[0].n_mm__x);
+    await o_page.f_fill('picture__n_mm__y', a_o_window[0].n_mm__y);
+    await o_page.f_click(await f_a_n__px([138.5, 95]));
+    await o_page.f_click(await f_a_n__px([a_o_window[0].n_mm__x, a_o_window[0].n_mm__y]));
+    f_check('where two pictures lie on each other a click chooses the upper one', await f_s_field('picture__n_mm__size_x') === '63.33');
+    await o_page.f_click_on('[data-order=back]');
+    a_o_back = await f_a_o_back();
+    f_check('To back: it is the first of the sheet\'s pictures now, still the chosen one', a_o_back.length === 4 && a_o_back[0].n_mm__size_x === 63.33 && a_o_back[1].s_file === a_o_small[0].s_file && await f_s_field('picture__n_mm__size_x') === '63.33' && (await f_o_state()).n_handle === 9, a_o_back);
+    await o_page.f_click(await f_a_n__px([138.5, 95]));
+    await o_page.f_click(await f_a_n__px([a_o_window[0].n_mm__x, a_o_window[0].n_mm__y]));
+    f_check('and the click there chooses the other one, 36 wide', await f_s_field('picture__n_mm__size_x') === '36');
+    await o_page.f_click_on('[data-order=back]');
+    await o_page.f_click_on('[data-order=front]');
+    a_o_back = await f_a_o_back();
+    f_check('To back and To front: it is the last of them', a_o_back[3].s_file === a_o_small[0].s_file && a_o_back[3].n_mm__size_x === 36 && a_o_back[0].n_mm__size_x === 63.33, a_o_back);
+    await o_page.f_click_on('#el_picture_remove');
+    await f_until(`JSON.parse(localStorage.getItem('paper_advent_calendar')).a_o_picture__back.length === 3`);
+    o_state = await f_o_state();
+    await o_page.f_wait(200);
+    let f_n_file = function(){ return o_page.f_v(`new Promise(function(f_resolve){ let o_open = indexedDB.open('paper_advent_calendar', 1); o_open.onsuccess = function(){ let o_request = o_open.result.transaction('picture').objectStore('picture').getAllKeys(); o_request.onsuccess = function(){ f_resolve(o_request.result.length); }; }; })`); };
+    f_check('Remove it: the chosen one is gone, the others stay; its file has left the browser\'s database, which keeps the front\'s one and the back\'s three', o_state.o_setting.a_o_picture__back.length === 3 && o_state.o_setting.a_o_picture__back[0].n_mm__size_x === 63.33 && o_state.n_handle === 0
+        && await o_page.f_v(`document.querySelectorAll('#el_sheet__back defs image').length + ' ' + document.querySelectorAll('#el_sheet__back use').length`) === '3 3' && await f_n_file() === 4, [o_state.o_setting.a_o_picture__back, await f_n_file()]);
+    await o_page.f_open();
+    o_state = await f_o_state();
+    f_check('a reload keeps the sheet\'s pictures, their order and their files', JSON.stringify(o_state.o_setting.a_o_picture__back) === JSON.stringify(a_o_back.slice(0, 3)) && await o_page.f_v(`document.querySelectorAll('#el_sheet__back defs image').length`) === 3 && o_state.n_handle === 0, o_state.o_setting.a_o_picture__back);
+    // the front's picture split into 3 x 2 pieces
+    await o_page.f_click_on('[name=s_sheet__picture][value=front] + span');
+    o_picture = await f_o_picture();
+    await o_page.f_fill('split__n_column', 3);
+    await o_page.f_fill('split__n_row', 2);
+    await o_page.f_click_on('#el_split');
+    o_state = await f_o_state();
+    let a_o_piece = o_state.o_setting.a_o_picture__front;
+    f_check('Split 3 × 2: six pictures of the one file, each 97 × 97 mm with a sixth of the file, where that part lay', a_o_piece.length === 6 && a_o_piece.every(function(o_piece, n_idx){
+        return o_piece.s_file === o_picture.s_file && f_b_near(f_a_n__size(o_piece), [97, 97], 1e-9) && f_b_near(f_a_n__left(o_piece), [n_idx % 3 * 1000, Math.floor(n_idx / 3) * 1000, 1000, 1000], 1e-6)
+            && f_b_near(f_a_n__from_px(o_piece, [n_idx % 3 * 1000 + 300, Math.floor(n_idx / 3) * 1000 + 700]), f_a_n__from_px(o_picture, [n_idx % 3 * 1000 + 300, Math.floor(n_idx / 3) * 1000 + 700]), 1e-6);
+    }), a_o_piece);
+    f_check('the first piece is the chosen one, the panel says what was done, and the calendar is still covered', o_state.n_handle === 9 && o_state.s_hint === 'Split into 6 pictures: drag each to its place. 6 pictures; the chosen one: 1000 × 1000 pixels, shown 97 × 97 mm: 262 pixels per inch.'
+        && f_b_near([Number(await f_s_field('picture__n_mm__x')), Number(await f_s_field('picture__n_mm__y'))], [41.5, 46.5], 1e-9) && o_state.s_status === 'The back pictures leave windows 2, 3, 4, 5, 6, 7 and 17 more blank in part', [o_state.s_hint, o_state.s_status]);
+    // Chrome's box of what each piece draws is the whole file's, where the unsplit picture had it; the file stands once
+    let a_a_n__use = await o_page.f_v(`(function(){ let o_sheet = document.querySelector('#el_sheet__front > svg').getBoundingClientRect(); return [...document.querySelectorAll('#el_sheet__front use')].map(function(el){ let o = el.getBoundingClientRect(); return [o.left - o_sheet.left, o.top - o_sheet.top, o.right - o_sheet.left, o.bottom - o_sheet.top]; }); })()`);
+    f_check('every piece draws the file where the whole picture had it, and the page holds the file once', a_a_n__use.length === 6 && a_a_n__use.every(function(a_n){ return f_b_near(a_n.map(function(n){ return n / n_px__per_mm; }), [3, 8, 294, 202], 0.05); })
+        && await o_page.f_v(`document.querySelectorAll('#el_sheet__front defs image').length`) === 1, a_a_n__use);
+    a_n__from = await f_a_n__px([41.5, 46.5]);
+    await o_page.f_drag(a_n__from, [a_n__from[0] + 30, a_n__from[1] + 20]);
+    o_state = await f_o_state();
+    f_check('a piece dragged away: it alone moves, and the calendar is said to be blank in part', f_b_near([o_state.o_setting.a_o_picture__front[0].n_mm__x, o_state.o_setting.a_o_picture__front[0].n_mm__y], [41.5 + 30 / n_px__per_mm, 46.5 + 20 / n_px__per_mm], 0.011)
+        && JSON.stringify(o_state.o_setting.a_o_picture__front.slice(1)) === JSON.stringify(a_o_piece.slice(1)) && o_state.s_status.startsWith('The front pictures leave a part of the calendar blank\n'), o_state.s_status);
+    await o_page.f_fill('split__n_column', 100);
+    f_check('a hundred pieces across: said, as a field that is wrong', (await f_o_state()).s_status.startsWith('Picture, Pieces across: '), (await f_o_state()).s_status);
+    await o_page.f_fill('split__n_column', 3);
 
     // ---- a match by four points: a drawing of the calendar with two squares, as a photo taken at a slant
     let a_a_n__corner = [[420, 330], [2650, 250], [2760, 1930], [330, 2020]];
@@ -542,11 +680,11 @@ try{
         o_context.drawImage(el_photo, 0, 0);`);
     await o_page.f_click_on('[name=s_sheet__picture][value=front] + span');
     await f_load(s_path__photo, 'front');
-    await f_until(`JSON.parse(localStorage.getItem('paper_advent_calendar')).o_picture__front.n_px__y === 2200`);
+    await f_until(`JSON.parse(localStorage.getItem('paper_advent_calendar')).a_o_picture__front[0]?.n_px__y === 2200`);
     let o_picture__photo = await f_o_picture();
     await o_page.f_click_on('#el_match');
     o_state = await f_o_state();
-    o_picture = o_state.o_setting.o_picture__front;
+    o_picture = o_state.o_setting.a_o_picture__front[0];
     f_check('Match 4 points: a bar over the sheet says what to click, the picture is fitted into the calendar, the sheets stay', o_state.b_bar && o_state.s_match === 'Point 1 of 4: click it on the picture, on the front sheet.' && o_state.b_matching && !o_state.b_picture && o_state.s_match__body === 'from'
         && f_b_near(f_a_n__size(o_picture), [190 * 3000 / 2200, 190], 1e-6) && await o_page.f_v(`[...document.querySelectorAll('[name=s_sheet__shown], [name=s_sheet__picture], #el_picture_load, #el_picture_remove')].every(function(el){ return el.disabled; }) && document.getElementById('el_project_box').inert`), o_state);
     await f_check_fit('with the bar over it', 297 / 210);
@@ -574,7 +712,7 @@ try{
     f_check('with Alt just where the pointer is', f_b_near(await f_a_n__ring(), a_a_n__place[0], 0.6) && (await f_a_n__ring())[0] > 0.5, await f_a_n__ring());
     for(let n_idx of [0, 1, 3, 2]){ await o_page.f_click(await f_a_n__px(a_a_n__place[n_idx])); }
     o_state = await f_o_state();
-    f_check('places in another order than the points: said, nothing laid', o_state.s_match.includes('would fold over') && o_state.b_bar && o_state.o_setting.o_picture__front.n_px__x === 3000, o_state.s_match);
+    f_check('places in another order than the points: said, nothing laid', o_state.s_match.includes('would fold over') && o_state.b_bar && o_state.o_setting.a_o_picture__front[0].n_px__x === 3000, o_state.s_match);
     if(Deno.args[0]){
         await o_page.f_click_on('#el_match_back');
         await o_page.f_move(await f_a_n__px([200, 150]));
@@ -586,9 +724,9 @@ try{
     await o_page.f_click_on('#el_match_back');
     await o_page.f_click(await f_a_n__px(a_a_n__place[2]));
     await o_page.f_click(await f_a_n__px(a_a_n__place[3]));
-    await f_until(`!document.getElementById('el_match_bar').getClientRects().length && JSON.parse(localStorage.getItem('paper_advent_calendar')).o_picture__front.n_px__x !== 3000`);
+    await f_until(`!document.getElementById('el_match_bar').getClientRects().length && JSON.parse(localStorage.getItem('paper_advent_calendar')).a_o_picture__front[0]?.n_px__x !== 3000`);
     o_state = await f_o_state();
-    o_picture = o_state.o_setting.o_picture__front;
+    o_picture = o_state.o_setting.a_o_picture__front[0];
     f_check('the fourth place: the picture is laid anew over the calendar and its bleed, the bar is gone, the match can be undone', !o_state.b_bar && !o_state.b_matching && o_state.b_picture && o_state.b_undo && o_state.s_match__body === ''
         && f_b_near([o_picture.n_mm__x, o_picture.n_mm__size_x], [138.5, 281], 1e-9) && await o_page.f_v(`document.getElementById('el_match_note').textContent`) === 'Matched by four points.', [o_picture, o_state]);
     // where the drawing's magenta square lies now: in the new picture's pixels, drawn from 100 to 120 and 50 to 70 mm
@@ -620,9 +758,9 @@ try{
     f_check('and in the print 10 mm further on the sheet, within 0.15', f_b_near(a_n__square_print, [110, 60, 130, 80], 0.15), f_a_n__round(a_n__square_print));
     console.log(`     the square: ${f_a_n__round(a_n__square_mm)} in the picture, ${f_a_n__round(a_n__square_print)} in the print`);
     await o_page.f_click_on('#el_match_undo');
-    await f_until(`JSON.parse(localStorage.getItem('paper_advent_calendar')).o_picture__front.n_px__x === 3000`);
+    await f_until(`JSON.parse(localStorage.getItem('paper_advent_calendar')).a_o_picture__front[0]?.n_px__x === 3000`);
     o_state = await f_o_state();
-    f_check('Undo the match: the photo as it lay before', JSON.stringify(o_state.o_setting.o_picture__front) === JSON.stringify(o_picture__photo) && !o_state.b_undo, o_state.o_setting.o_picture__front);
+    f_check('Undo the match: the photo as it lay before', JSON.stringify(o_state.o_setting.a_o_picture__front[0]) === JSON.stringify(o_picture__photo) && !o_state.b_undo, o_state.o_setting.a_o_picture__front[0]);
     // three points on a line, then cancel; Esc
     await o_page.f_click_on('#el_match');
     o_picture = await f_o_picture();
@@ -632,12 +770,12 @@ try{
     f_check('three points on a line: said, nothing laid', o_state.s_match.includes('Three of the points lie on one line') && o_state.b_bar, o_state.s_match);
     await o_page.f_click_on('#el_match_cancel');
     o_state = await f_o_state();
-    f_check('Cancel: the picture as it lay before, the tools back', !o_state.b_bar && o_state.b_picture && JSON.stringify(o_state.o_setting.o_picture__front) === JSON.stringify(o_picture__photo), o_state);
+    f_check('Cancel: the picture as it lay before, the tools back', !o_state.b_bar && o_state.b_picture && JSON.stringify(o_state.o_setting.a_o_picture__front[0]) === JSON.stringify(o_picture__photo), o_state);
     await o_page.f_click_on('#el_match');
     for(let s_type of ['keyDown', 'keyUp']){ await o_page.f_send('Input.dispatchKeyEvent', { type: s_type, key: 'Escape', code: 'Escape', windowsVirtualKeyCode: 27 }); }
     await o_page.f_settle();
     o_state = await f_o_state();
-    f_check('Esc cancels too', !o_state.b_bar && JSON.stringify(o_state.o_setting.o_picture__front) === JSON.stringify(o_picture__photo), o_state);
+    f_check('Esc cancels too', !o_state.b_bar && JSON.stringify(o_state.o_setting.a_o_picture__front[0]) === JSON.stringify(o_picture__photo), o_state);
 
     // ---- projects: what is on screen saved under a name by the app's server, opened again, changed, deleted
     let s_path__project = `${o_page.s_path__work}/project`;
@@ -690,6 +828,14 @@ try{
         return a_s.sort();
     };
     let f_o_kept = async function(s_name){ return JSON.parse(await Deno.readTextFile(`${s_path__project}/${s_name}/project.json`)); };
+    // whether a saved project's folder holds its settings' file and one PNG for each of the n_file picture files its settings name, and nothing else
+    let f_b_folder = async function(s_name, n_file){
+        let o_setting = (await f_o_kept(s_name)).o_setting;
+        let a_s = [...new Set(['front', 'back'].flatMap(function(s_sheet){ return o_setting[`a_o_picture__${s_sheet}`].map(function(o_picture){ return `${o_picture.s_file}.png`; }); }))];
+        return a_s.length === n_file && String(await f_a_s_file(s_name)) === String([...a_s, 'project.json'].sort());
+    };
+    // where a saved project keeps the file of a sheet's first picture
+    let f_s_path__kept = async function(s_name, s_sheet){ return `${s_path__project}/${s_name}/${(await f_o_kept(s_name)).o_setting[`a_o_picture__${s_sheet}`][0].s_file}.png`; };
     let f_b_same_file = async function(s_path, s_path__other){ return String(await Deno.readFile(s_path)) === String(await Deno.readFile(s_path__other)); };
 
     let o_project = await f_o_project();
@@ -708,9 +854,9 @@ try{
     await f_until_state('All changes saved');
     o_project = await f_o_project();
     o_state = await f_o_state();
-    f_check('named and saved: a folder of that name with the settings as the page has them and the front\'s picture, the file that was loaded', String(await f_a_s_file('Winter 2026')) === 'front.png,project.json'
-        && JSON.stringify((await f_o_kept('Winter 2026')).o_setting) === JSON.stringify(o_state.o_setting) && Object.keys(await f_o_kept('Winter 2026')).join() === 'o_setting' && await f_b_same_file(`${s_path__project}/Winter 2026/front.png`, s_path__photo), await f_a_s_file('Winter 2026'));
-    f_check('the bar names it, no changes; it is in the list, marked as the open one', o_project.s_title === 'Winter 2026' && !o_project.b_dirty && o_project.s_kind === 'clean' && String(o_project.a_s_row) === 'Winter 2026 | 24 windows · 277 × 190 mm · front picture | open', o_project);
+    f_check('named and saved: a folder of that name with the settings as the page has them and the four pictures\' files, the front\'s the file that was loaded', await f_b_folder('Winter 2026', 4)
+        && JSON.stringify((await f_o_kept('Winter 2026')).o_setting) === JSON.stringify(o_state.o_setting) && Object.keys(await f_o_kept('Winter 2026')).join() === 'o_setting' && await f_b_same_file(await f_s_path__kept('Winter 2026', 'front'), s_path__photo), await f_a_s_file('Winter 2026'));
+    f_check('the bar names it, no changes; it is in the list, marked as the open one', o_project.s_title === 'Winter 2026' && !o_project.b_dirty && o_project.s_kind === 'clean' && String(o_project.a_s_row) === 'Winter 2026 | 24 windows · 277 × 190 mm · pictures: 1 front, 3 back | open', o_project);
     await o_page.f_fill('n_window', 12);
     o_project = await f_o_project();
     f_check('a setting changed: Unsaved changes, marked in the bar', o_project.s_state === 'Unsaved changes' && o_project.s_kind === 'dirty' && o_project.b_dirty && (await f_o_kept('Winter 2026')).o_setting.n_window === 24, o_project);
@@ -722,12 +868,13 @@ try{
     await o_page.f_open();
     await f_until(`document.getElementById('el_project_title').textContent === 'Winter 2026'`);
     o_project = await f_o_project();
-    f_check('a reload: the same project open, no changes, its picture there', !o_project.b_dirty && o_project.s_name === 'Winter 2026' && (await f_o_state()).s_sheet__picture === 'front', o_project);
+    f_check('a reload: the same project open, no changes, its picture there', !o_project.b_dirty && o_project.s_name === 'Winter 2026' && (await f_o_state()).s_sheet__picture === 'front,back', o_project);
     // another picture file of the same size comes to lie at the same place: the settings are the saved ones, the file is not
     let s_path__other = await f_s_path__picture('other.png', 3000, 2200, `o_context.fillStyle = '#804020'; o_context.fillRect(0, 0, n_px__x, n_px__y);`);
     await f_load(s_path__other, 'front');
     await f_until(`document.getElementById('el_project_title').dataset.state === 'dirty'`);
-    f_check('another picture file at the same place: Unsaved changes, though the settings are the saved ones', (await f_o_project()).b_dirty && JSON.stringify((await f_o_kept('Winter 2026')).o_setting) === JSON.stringify((await f_o_state()).o_setting), await f_o_project());
+    f_check('another picture file at the same place: Unsaved changes, though nothing but the file is another', (await f_o_project()).b_dirty && f_b_same_picture((await f_o_kept('Winter 2026')).o_setting.a_o_picture__front[0], await f_o_picture())
+        && (await f_o_kept('Winter 2026')).o_setting.a_o_picture__front[0].s_file !== (await f_o_picture()).s_file, await f_o_project());
     await o_page.f_open();
     await f_until(`document.getElementById('el_project_list') && document.getElementById('el_project_title').textContent === 'Winter 2026'`);
     f_check('which is kept over a reload', (await f_o_project()).b_dirty);
@@ -735,8 +882,8 @@ try{
     await f_load(s_path__back, 'back');
     await o_page.f_key('s', 2);
     await f_until(`document.getElementById('el_project_title').dataset.state === 'clean'`);
-    f_check('saved: the front\'s new file and the back\'s picture in the folder', String(await f_a_s_file('Winter 2026')) === 'back.png,front.png,project.json' && await f_b_same_file(`${s_path__project}/Winter 2026/front.png`, s_path__other) && await f_b_same_file(`${s_path__project}/Winter 2026/back.png`, s_path__back)
-        && (await f_o_kept('Winter 2026')).o_setting.o_picture__back.n_px__x === 2810, await f_a_s_file('Winter 2026'));
+    f_check('saved: the front\'s new file and the back\'s one picture in the folder, the files of the pictures that left are gone from it', await f_b_folder('Winter 2026', 2) && await f_b_same_file(await f_s_path__kept('Winter 2026', 'front'), s_path__other) && await f_b_same_file(await f_s_path__kept('Winter 2026', 'back'), s_path__back)
+        && (await f_o_kept('Winter 2026')).o_setting.a_o_picture__back[0].n_px__x === 2810, await f_a_s_file('Winter 2026'));
     // under another name: a second project, the first stays
     await f_show_projects();
     await o_page.f_fill('el_project_name', 'Second');
@@ -745,8 +892,8 @@ try{
     await f_press('Save');
     await f_until_state('All changes saved');
     o_project = await f_o_project();
-    f_check('saved under it: two projects, each with both pictures, the second the open one', String(await f_a_s_file('.')) === 'Second,Winter 2026' && String(await f_a_s_file('Second')) === 'back.png,front.png,project.json' && await f_b_same_file(`${s_path__project}/Second/front.png`, s_path__other)
-        && String(o_project.a_s_row) === 'Second | 12 windows · 277 × 190 mm · front and back picture | open,Winter 2026 | 12 windows · 277 × 190 mm · front and back picture' && o_project.s_title === 'Second', o_project);
+    f_check('saved under it: two projects, each with both pictures, the second the open one', String(await f_a_s_file('.')) === 'Second,Winter 2026' && await f_b_folder('Second', 2) && await f_b_same_file(await f_s_path__kept('Second', 'front'), s_path__other)
+        && String(o_project.a_s_row) === 'Second | 12 windows · 277 × 190 mm · pictures: 1 front, 1 back | open,Winter 2026 | 12 windows · 277 × 190 mm · pictures: 1 front, 1 back' && o_project.s_title === 'Second', o_project);
     // the second changed: no back picture, 6 windows; the first opened over it
     await o_page.f_click_on('#el_picture_remove');
     await f_until(`!document.getElementById('el_sheet__back').classList.contains('has_picture')`);
@@ -763,7 +910,7 @@ try{
     await f_until(`document.getElementById('el_project_title').textContent === 'Winter 2026' && document.querySelectorAll('.sheet.has_picture').length === 2`);
     o_project = await f_o_project();
     o_state = await f_o_state();
-    f_check('Save first: the second is saved as it was, without its back picture, 6 windows', String(await f_a_s_file('Second')) === 'front.png,project.json' && (await f_o_kept('Second')).o_setting.n_window === 6 && (await f_o_kept('Second')).o_setting.o_picture__back === null, await f_a_s_file('Second'));
+    f_check('Save first: the second is saved as it was, without its back picture, 6 windows', await f_b_folder('Second', 1) && (await f_o_kept('Second')).o_setting.n_window === 6 && (await f_o_kept('Second')).o_setting.a_o_picture__back.length === 0, await f_a_s_file('Second'));
     f_check('and the first is on screen: its settings, both its pictures, the panel closed, the step as it was', o_project.s_title === 'Winter 2026' && !o_project.b_dirty && !o_project.b_shown && JSON.stringify(o_state.o_setting) === JSON.stringify((await f_o_kept('Winter 2026')).o_setting)
         && o_state.o_setting.n_window === 12 && o_state.s_sheet__picture === 'front,back' && o_state.s_step__open === 'picture' && o_state.n_hit === 0, [o_project, o_state.s_sheet__picture]);
     f_check('the pictures on screen are the project\'s files', await o_page.f_v(`Promise.all(['front', 'back'].map(function(s_sheet){ return fetch(document.querySelector('#el_sheet__' + s_sheet + ' image').href.baseVal).then(function(o){ return o.blob(); }).then(function(o){ return o.size + ' ' + o.type; }); })).then(String)`)
@@ -778,12 +925,12 @@ try{
     await f_press('Discard');
     await f_until(`document.querySelectorAll('.sheet.has_picture').length === 2`);
     o_state = await f_o_state();
-    f_check('the open project opened again, Discard: as it was saved, the removed picture back', o_state.o_setting.n_window === 12 && o_state.s_sheet__picture === 'front,back' && !(await f_o_project()).b_dirty && String(await f_a_s_file('Winter 2026')) === 'back.png,front.png,project.json', o_state.s_sheet__picture);
+    f_check('the open project opened again, Discard: as it was saved, the removed picture back', o_state.o_setting.n_window === 12 && o_state.s_sheet__picture === 'front,back' && !(await f_o_project()).b_dirty && await f_b_folder('Winter 2026', 2), o_state.s_sheet__picture);
     await f_show_projects();
     await f_press('open', 'Second');
     await f_until(`document.getElementById('el_project_title').textContent === 'Second'`);
     o_state = await f_o_state();
-    f_check('without changes another project opens at once: the second, 6 windows, the front\'s picture alone', o_state.o_setting.n_window === 6 && o_state.s_sheet__picture === 'front' && o_state.o_setting.o_picture__back === null && !(await f_o_project()).b_dirty, o_state.s_sheet__picture);
+    f_check('without changes another project opens at once: the second, 6 windows, the front\'s picture alone', o_state.o_setting.n_window === 6 && o_state.s_sheet__picture === 'front' && o_state.o_setting.a_o_picture__back.length === 0 && !(await f_o_project()).b_dirty, o_state.s_sheet__picture);
     // names that will not do
     await f_show_projects();
     await o_page.f_fill('el_project_name', 'a/b');
@@ -813,7 +960,7 @@ try{
     f_check('the open project deleted: gone from the folder, still on screen, and Save brings it back', String(await f_a_s_file('.')) === '' && o_project.s_state === 'Deleted “Second”. Save brings it back.' && o_project.s_title === 'not saved' && o_project.s_name === 'Second' && (await f_o_state()).s_sheet__picture === 'front', o_project);
     await f_press('Save');
     await f_until_state('All changes saved');
-    f_check('saved again: its folder with its picture', String(await f_a_s_file('Second')) === 'front.png,project.json' && (await f_o_kept('Second')).o_setting.n_window === 6 && (await f_o_project()).s_title === 'Second', await f_a_s_file('Second'));
+    f_check('saved again: its folder with its picture', await f_b_folder('Second', 1) && (await f_o_kept('Second')).o_setting.n_window === 6 && (await f_o_project()).s_title === 'Second', await f_a_s_file('Second'));
     // deleted behind the page's back, as another window would
     await Deno.remove(`${s_path__project}/Second`, { recursive: true });
     await o_page.f_click(await f_a_n__px([138.5, 95]));
@@ -822,6 +969,14 @@ try{
     f_check('a project deleted elsewhere: said when the panel opens', (await f_o_project()).s_state === '“Second” is not among the saved projects any more. Save brings it back.' && (await f_o_project()).s_title === 'not saved', (await f_o_project()).s_state);
     await f_press('Save');
     await f_until_state('All changes saved');
+    // its picture split in two: two pictures in its settings, one file in its folder
+    await o_page.f_click(await f_a_n__px([138.5, 95]));
+    await o_page.f_fill('split__n_column', 2);
+    await o_page.f_fill('split__n_row', 1);
+    await o_page.f_click_on('#el_split');
+    await o_page.f_key('s', 2);
+    await f_until(`document.getElementById('el_project_title').dataset.state === 'clean'`);
+    f_check('a picture split in two and saved: two pictures in the project\'s settings, their one file in its folder', (await f_o_kept('Second')).o_setting.a_o_picture__front.length === 2 && await f_b_folder('Second', 1) && await f_b_same_file(await f_s_path__kept('Second', 'front'), s_path__other), await f_a_s_file('Second'));
 
     // the server, spoken to without the page
     let f_o_answer = async function(s_path, o_option = {}){
@@ -846,34 +1001,51 @@ try{
         (await f_o_answer('/api/project/By%20hand', o_option__json)).n_status === 409 && (await f_o_answer('/api/project/Nowhere', { ...o_option__json, method: 'PUT' })).n_status === 404
         && (await f_o_answer('/api/project/By%20hand', { ...o_option__json, method: 'PUT', body: '{"o_setting":[]}' })).n_status === 400 && (await f_o_answer('/api/project/By%20hand', { ...o_option__json, method: 'PUT', body: 'x' })).n_status === 400);
     let a_n__picture = await Deno.readFile(s_path__back);
+    o_answer = await f_o_answer('/api/project/By%20hand', { ...o_option__json, method: 'PUT', body: JSON.stringify({ o_setting: { a_o_picture__front: [{ s_file: 'back' }, { s_file: 'other_1' }, { s_file: 'back' }, { s_file: '../x' }], a_o_picture__back: 'none' } }) });
+    f_check('a save answers with the picture files its settings name and the folder has not got', o_answer.n_status === 200 && String(o_answer.v.a_s_file__missing) === 'back,other_1', o_answer.v);
     f_check('a picture file by PUT and GET: the same bytes, of its kind', (await f_o_answer('/api/project/By%20hand/back', { method: 'PUT', headers: { 'content-type': 'image/png' }, body: a_n__picture })).n_status === 200
         && String((await f_o_answer('/api/project/By%20hand/back')).a_n) === String(a_n__picture) && (await f_o_answer('/api/project/By%20hand/back')).s_type === 'image/png' && String(await f_a_s_file('By hand')) === 'back.png,project.json');
     f_check('a picture of another kind takes its place', (await f_o_answer('/api/project/By%20hand/back', { method: 'PUT', headers: { 'content-type': 'image/jpeg' }, body: new Uint8Array([1, 2, 3]) })).n_status === 200
         && String(await f_a_s_file('By hand')) === 'back.jpg,project.json' && (await f_o_answer('/api/project/By%20hand/back')).s_type === 'image/jpeg', await f_a_s_file('By hand'));
-    o_answer = await f_o_answer('/api/project/By%20hand/front', { method: 'PUT', headers: { 'content-type': 'text/plain' }, body: 'no picture' });
-    f_check('a file that is no picture is not kept', o_answer.n_status === 415 && o_answer.v.s_message.startsWith('The front sheet’s picture is of a kind a project does not keep.') && String(await f_a_s_file('By hand')) === 'back.jpg,project.json', [o_answer.n_status, o_answer.v]);
-    f_check('a picture deleted, one that is not there asked for, one of a project that is not there', (await f_o_answer('/api/project/By%20hand/back', { method: 'DELETE' })).n_status === 200 && String(await f_a_s_file('By hand')) === 'project.json'
-        && (await f_o_answer('/api/project/By%20hand/back')).n_status === 404 && (await f_o_answer('/api/project/Nowhere/back')).n_status === 404);
-    f_check('a project\'s files are not served as pages', (await f_o_answer('/project/By%20hand/project.json')).n_status === 404 && (await f_o_answer('/project/Second/front.png')).n_status === 404);
+    o_answer = await f_o_answer('/api/project/By%20hand/other_1', { method: 'PUT', headers: { 'content-type': 'text/plain' }, body: 'no picture' });
+    f_check('a file that is no picture is not kept', o_answer.n_status === 415 && o_answer.v.s_message.startsWith('One of the pictures is a file of a kind a project does not keep.') && String(await f_a_s_file('By hand')) === 'back.jpg,project.json', [o_answer.n_status, o_answer.v]);
+    f_check('a picture file\'s name that could leave the folder is refused', (await f_o_answer('/api/project/By%20hand/a.b', { method: 'PUT', headers: { 'content-type': 'image/png' }, body: a_n__picture })).n_status === 400
+        && (await f_o_answer('/api/project/By%20hand/..%2Fx', { method: 'PUT', headers: { 'content-type': 'image/png' }, body: a_n__picture })).n_status === 400 && (await f_o_answer('/api/project/By%20hand/project')).n_status === 404 && String(await f_a_s_file('.')) === 'By hand,Second');
+    o_answer = await f_o_answer('/api/project/By%20hand', { ...o_option__json, method: 'PUT' });
+    f_check('saved with settings that name it no longer: the picture file leaves the folder; asked for, it is not there, nor is one of a project that is not there', o_answer.n_status === 200 && String(o_answer.v.a_s_file__missing) === '' && String(await f_a_s_file('By hand')) === 'project.json'
+        && (await f_o_answer('/api/project/By%20hand/back')).n_status === 404 && (await f_o_answer('/api/project/Nowhere/back')).n_status === 404, await f_a_s_file('By hand'));
+    f_check('a project\'s files are not served as pages', (await f_o_answer('/project/By%20hand/project.json')).n_status === 404 && (await f_o_answer(`/project/Second/${(await f_a_s_file('Second')).find(function(s){ return s.endsWith('.png'); })}`)).n_status === 404);
     f_check('deleted: its folder is gone; a second time: not there', (await f_o_answer('/api/project/By%20hand', { method: 'DELETE' })).n_status === 204 && (await f_a_s_file('By hand')) === null && (await f_o_answer('/api/project/By%20hand', { method: 'DELETE' })).n_status === 404);
 
     // ---- a new project, then the print: a one-coloured picture, measured from Chrome's PDF at 300 dots per inch
+    await f_show_projects();
     await f_press('New');
     await f_until(`!document.querySelector('.sheet.has_picture')`);
     o_state = await f_o_state();
     o_project = await f_o_project();
     f_check('New, without changes at once: the first step, the settings of the first start, no pictures, no name, the panel closed', o_state.s_step__open === 'paper' && o_state.s_sheet === 'front' && JSON.stringify(o_state.o_setting) === JSON.stringify(o_setting__default) && o_state.s_sheet__has === ''
         && o_project.s_title === 'new' && !o_project.b_dirty && o_project.s_name === '' && !o_project.b_shown, [o_state.s_step__open, o_project]);
-    f_check('the project that was open stays as saved', (await f_o_kept('Second')).o_setting.n_window === 6 && String(await f_a_s_file('Second')) === 'front.png,project.json');
+    f_check('the project that was open stays as saved', (await f_o_kept('Second')).o_setting.n_window === 6 && await f_b_folder('Second', 1) && (await f_o_kept('Second')).o_setting.a_o_picture__front.length === 2);
     await o_page.f_fill('n_window', 10);
     await f_show_projects();
     o_project = await f_o_project();
-    f_check('a new project changed: Not saved yet; the saved one is in the list, not marked', o_project.s_state === 'Not saved yet' && o_project.s_title === 'not saved' && String(o_project.a_s_row) === 'Second | 6 windows · 277 × 190 mm · front picture', o_project);
+    f_check('a new project changed: Not saved yet; the saved one is in the list, not marked', o_project.s_state === 'Not saved yet' && o_project.s_title === 'not saved' && String(o_project.a_s_row) === 'Second | 6 windows · 277 × 190 mm · pictures: 2 front', o_project);
     await f_press('New');
     f_check('New over it: asks first', (await f_o_project()).s_question === 'This project is not saved yet.');
     await f_press('Discard');
     await f_until(`document.getElementById('el_project_title').textContent === 'new'`);
     f_check('Discard: the settings of the first start again', JSON.stringify((await f_o_state()).o_setting) === JSON.stringify(o_setting__default));
+    await f_show_projects();
+    await f_press('open', 'Second');
+    await f_until(`document.getElementById('el_project_title').textContent === 'Second' && Boolean(document.querySelector('.sheet.has_picture'))`);
+    o_state = await f_o_state();
+    f_check('the project with the split picture opened: both pieces on screen, drawn from the one file, no changes', o_state.o_setting.a_o_picture__front.length === 2 && o_state.o_setting.a_o_picture__front[0].s_file === o_state.o_setting.a_o_picture__front[1].s_file && !(await f_o_project()).b_dirty
+        && await o_page.f_v(`document.querySelectorAll('#el_sheet__front defs image').length + ' ' + document.querySelectorAll('#el_sheet__front use').length`) === '1 2', o_state.o_setting.a_o_picture__front);
+    await f_show_projects();
+    await f_press('New');
+    await f_until(`!document.querySelector('.sheet.has_picture')`);
+    await o_page.f_wait(200);
+    f_check('New again: the first step, nothing of the project left', (await f_o_state()).s_step__open === 'paper' && JSON.stringify((await f_o_state()).o_setting) === JSON.stringify(o_setting__default) && await f_n_file() === 0, await f_n_file());
     let s_path__green = await f_s_path__picture('green.png', 600, 400, `o_context.fillStyle = '#00a050'; o_context.fillRect(0, 0, n_px__x, n_px__y);`);
     // the picture's green, not the green of the dots in the paper's corners
     let f_b_green = function(n_r, n_g, n_b){ return n_r < 40 && n_g > 135 && n_g < 185 && n_b > 60 && n_b < 100; };
@@ -942,6 +1114,36 @@ try{
         f_check(`Back ${s_type.toUpperCase()}, no picture: the back's cut lines, the calendar's edge 9.9 to 287.1 and 9.9 to 200.1`, Boolean(o_file) && f_b_near(a_n__red, [9.9, 9.9, 287.1, 200.1], 0.1) && !f_a_n__box(o_file, f_b_green), f_a_n__round(a_n__red ?? []));
         console.log(`     the edge in the ${s_type.toUpperCase()}: ${f_a_n__round(a_n__red ?? [])}`);
     }
+    // the picture split into 3 x 2 pieces, and a second picture on it: the files show both, the pieces as one picture
+    let s_path__magenta = await f_s_path__picture('magenta.png', 600, 400, `o_context.fillStyle = '#ff00ff'; o_context.fillRect(0, 0, n_px__x, n_px__y);`);
+    let f_b_magenta = function(n_r, n_g, n_b){ return n_r > 200 && n_g < 110 && n_b > 200; };
+    await f_step('picture');
+    await o_page.f_fill('split__n_column', 3);
+    await o_page.f_fill('split__n_row', 2);
+    await o_page.f_click_on('#el_split');
+    await o_page.f_choose('#el_picture_file', [s_path__magenta]);
+    await f_until(`JSON.parse(localStorage.getItem('paper_advent_calendar')).a_o_picture__front.length === 7`);
+    await f_step('output');
+    a_o_print = await o_page.f_a_o_print();
+    f_check('six pieces and a picture on them, in the print: the pieces as the one picture they were, 8 to 289 and 8 to 202 around the other, which lies 102.3 to 194.7 and 74.2 to 135.8', f_b_near(f_a_n__box(a_o_print[0], f_b_green), [8, 8, 289, 202], 0.1) && f_b_near(f_a_n__box(a_o_print[0], f_b_magenta), [102.33, 74.22, 194.67, 135.78], 0.1), [f_a_n__round(f_a_n__box(a_o_print[0], f_b_green)), f_a_n__round(f_a_n__box(a_o_print[0], f_b_magenta) ?? [])]);
+    for(let s_type of ['pdf', 'png']){
+        let o_file = await f_o_print__file('front', s_type);
+        // dots of the calendar that are neither picture: where two pieces meet the paper must not show
+        let n_other = 0;
+        for(let n_y = Math.round(12 / 25.4 * 300); n_y < Math.round(198 / 25.4 * 300); n_y++){
+            for(let n_x = Math.round(12 / 25.4 * 300); n_x < Math.round(285 / 25.4 * 300); n_x++){
+                let n_at = 3 * (n_y * o_file.n_px__x + n_x);
+                if(!f_b_green(o_file.a_n__rgb[n_at], o_file.a_n__rgb[n_at + 1], o_file.a_n__rgb[n_at + 2]) && !f_b_magenta(o_file.a_n__rgb[n_at], o_file.a_n__rgb[n_at + 1], o_file.a_n__rgb[n_at + 2]) && Math.abs(n_x - 102.33 / 25.4 * 300) > 3 && Math.abs(n_x - 194.67 / 25.4 * 300) > 3 && Math.abs(n_y - 74.22 / 25.4 * 300) > 3 && Math.abs(n_y - 135.78 / 25.4 * 300) > 3){ n_other++; }
+            }
+        }
+        f_check(`and in the ${s_type.toUpperCase()}`, f_b_near(f_a_n__box(o_file, f_b_green), [8, 8, 289, 202], 0.1) && f_b_near(f_a_n__box(o_file, f_b_magenta), [102.33, 74.22, 194.67, 135.78], 0.15), [f_a_n__round(f_a_n__box(o_file, f_b_green)), f_a_n__round(f_a_n__box(o_file, f_b_magenta) ?? [])]);
+        console.log(`     the pieces in the ${s_type.toUpperCase()}: ${n_other} dots of the calendar where two pieces meet are neither picture's colour`);
+    }
+    // the one-coloured picture alone again
+    await f_step('picture');
+    await f_load(s_path__green, 'front');
+    await f_until(`JSON.parse(localStorage.getItem('paper_advent_calendar')).a_o_picture__front.length === 1`);
+    await f_step('output');
     f_check('the note is as before, the buttons are to be pressed again', await o_page.f_v(`document.getElementById('el_page_note').textContent`) === s_note__page && (await f_o_state()).n_page__disabled === 0);
     // what is chosen under Print holds for the files: cut lines on the picture, shifted; then the lines alone
     await o_page.f_click_on('.pick label:has([value=both])');
@@ -974,11 +1176,10 @@ try{
     let o_picture__green = await f_o_picture();
     await f_step('picture');
     await f_load(`${o_page.s_path__work}/turned.jpg`, 'front');
-    await f_until(`JSON.parse(localStorage.getItem('paper_advent_calendar')).o_picture__front.n_px__x === 600`);
+    await f_until(`JSON.parse(localStorage.getItem('paper_advent_calendar')).a_o_picture__front[0]?.n_px__x === 600`);
     await o_page.f_click_on('[data-picture=contain]');
     o_picture = await f_o_picture();
     f_check('a JPEG of 1200 × 600 that says it lies turned: taken as 600 × 1200, fitted 95 × 190 mm', o_picture.n_px__x === 600 && o_picture.n_px__y === 1200 && f_b_near(f_a_n__size(o_picture), [95, 190], 1e-9), o_picture);
-    let f_b_magenta = function(n_r, n_g, n_b){ return n_r > 200 && n_g < 110 && n_b > 200; };
     await f_step('output');
     a_o_print = await o_page.f_a_o_print();
     f_check('in the print its first corner lies top right: 148.5 to 196 and 10 to 57.5 mm', f_b_near(f_a_n__box(a_o_print[0], f_b_magenta), [148.5, 10, 196, 57.5], 0.5), f_a_n__round(f_a_n__box(a_o_print[0], f_b_magenta) ?? []));
@@ -1000,8 +1201,8 @@ try{
     // the one-coloured picture again
     await f_step('picture');
     await f_load(s_path__green, 'front');
-    await f_until(`JSON.parse(localStorage.getItem('paper_advent_calendar')).o_picture__front.n_px__y === 400`);
-    f_check('the one-coloured picture again, where it lay', JSON.stringify(await f_o_picture()) === JSON.stringify(o_picture__green), await f_o_picture());
+    await f_until(`JSON.parse(localStorage.getItem('paper_advent_calendar')).a_o_picture__front[0]?.n_px__y === 400`);
+    f_check('the one-coloured picture again, where it lay', f_b_same_picture(await f_o_picture(), o_picture__green), await f_o_picture());
     // a stretched and skewed picture in the print: 100 wide, half as high again as its shape, so 100 high, leaning by 20°, around 148.5 / 105 of the sheet
     await f_step('picture');
     for(let [s_name, n] of [['picture__n_mm__size_x', 100], ['picture__stretch', 150], ['picture__n_deg__skew', 20]]){ await o_page.f_fill(s_name, n); }

@@ -165,10 +165,6 @@ input.switch:checked::after{ background: var(--s_col__black); transform: transla
 /* a sheet that has a picture */
 .seg .has span::after{ content: ''; display: inline-block; width: 6px; height: 6px; margin-left: 7px; border-radius: 50%; background: var(--s_col__gold); vertical-align: middle; }
 #el_picture_sheet{ display: flex; margin-bottom: 12px; }
-/* one of a few under its name, as wide as the group */
-.choice{ margin-bottom: 8px; }
-.choice legend{ margin-bottom: 6px; }
-.choice .seg{ display: flex; }
 /* one of a few, each with a line about it */
 .pick{ display: grid; gap: 6px; margin-bottom: 10px; }
 .pick label{ display: flex; align-items: baseline; gap: 9px; padding: 7px 10px; border: 1px solid var(--s_col__line); border-radius: 6px; cursor: pointer; }
@@ -182,7 +178,9 @@ input.switch:checked::after{ background: var(--s_col__black); transform: transla
 .crop .right{ grid-area: 2 / 3; }
 .crop .bottom{ grid-area: 3 / 2; }
 #el_detail{ display: block; width: 100%; height: 130px; margin-bottom: 10px; background: #ffffff; border-radius: 4px; }
-#el_own button, #el_match, #el_match_undo, #el_print{ width: 100%; }
+#el_own button, #el_match, #el_match_undo, #el_print, #el_split{ width: 100%; }
+/* a switch that is on */
+button[aria-pressed=true]{ border-color: var(--s_col__gold); background: #f0b75022; }
 #el_match_undo{ margin-top: 8px; }
 
 /* The sheet: above it which one and how large. */
@@ -222,6 +220,8 @@ input.switch:checked::after{ background: var(--s_col__black); transform: transla
     .sheet .hit:hover{ fill: #f0b75030; }
     .sheet .hit.selected{ stroke: var(--s_col__gold); stroke-width: 3px; fill: #f0b75030; }
     .sheet .frame{ fill: none; stroke: var(--s_col__gold); stroke-width: 1.5px; }
+    /* its handles cut off */
+    .sheet .frame.crop{ stroke-dasharray: 6 4; }
     .sheet .handle{ fill: var(--s_col__gold); stroke: #101517; cursor: crosshair; pointer-events: all; touch-action: none; }
     .sheet .handle.side{ fill: #ffffff; }
     .sheet .handle.turn{ fill: #101517; stroke: var(--s_col__gold); stroke-width: 2px; cursor: grab; }
@@ -378,23 +378,23 @@ input.switch:checked::after{ background: var(--s_col__black); transform: transla
         </section>
 
         <section class="step" data-step="picture" hidden>
-            <p class="lead">A picture for each sheet, printed where the cuts will fall: the front's is the calendar's face, the back's shows through the opened doors.</p>
-            <fieldset class="seg" id="el_picture_sheet" aria-label="The picture of the">
+            <p class="lead">Pictures for each sheet, printed where the cuts will fall: the front's are the calendar's face, the back's show through the opened doors.</p>
+            <fieldset class="seg" id="el_picture_sheet" aria-label="The pictures of the">
                 <label><input type="radio" name="s_sheet__picture" value="front"><span>Front sheet</span></label>
                 <label><input type="radio" name="s_sheet__picture" value="back"><span>Back sheet</span></label>
             </fieldset>
             <div class="group">
-                <h2 id="el_picture_title">Picture</h2>
+                <h2 id="el_picture_title">Pictures</h2>
                 <div class="buttons">
-                    <button type="button" id="el_picture_load" title="A picture file from this computer. It fills the calendar at first">Load a picture</button>
-                    <button type="button" id="el_picture_remove">Remove it</button>
+                    <button type="button" id="el_picture_load" title="Picture files from this computer, one or many at once. A sheet's first picture fills the calendar; one more comes into the calendar's middle; several at once come to lie on the windows, the first on window 1">Load pictures</button>
+                    <button type="button" id="el_picture_remove" title="The chosen picture leaves the sheet">Remove it</button>
                 </div>
-                <input type="file" id="el_picture_file" accept="image/*" hidden>
+                <input type="file" id="el_picture_file" accept="image/*" multiple hidden>
                 <p class="note" id="el_picture_hint"></p>
             </div>
             <fieldset id="el_picture" hidden>
                 <div class="group">
-                    <h2>Place and size</h2>
+                    <h2>The chosen picture</h2>
                     <div class="tools">
                         <button type="button" data-picture="cover" title="As small as covers the calendar and the bleed around it, in the middle">Fill</button>
                         <button type="button" data-picture="contain" title="As large as fits into the calendar, in the middle">Fit</button>
@@ -404,24 +404,17 @@ input.switch:checked::after{ background: var(--s_col__black); transform: transla
                         <button type="button" data-picture="flip_x" title="Mirror: left becomes right" aria-label="Mirror left and right"><svg viewBox="0 0 20 20"><path d="M 10 3 V 17" stroke-dasharray="2 2.5"/><path d="M 7 6 L 3 10 L 7 14 Z"/><path d="M 13 6 L 17 10 L 13 14 Z"/></svg></button>
                         <button type="button" data-picture="flip_y" title="Mirror: top becomes bottom" aria-label="Mirror top and bottom"><svg viewBox="0 0 20 20"><path d="M 3 10 H 17" stroke-dasharray="2 2.5"/><path d="M 6 7 L 10 3 L 14 7 Z"/><path d="M 6 13 L 10 17 L 14 13 Z"/></svg></button>
                     </div>
+                    <div class="tools">
+                        <button type="button" id="el_crop" aria-pressed="false" title="On: the handles cut the picture off, a side's at its side, a corner's at both its sides; pulled out, what was cut off comes back. Off: they size and stretch it">Crop</button>
+                        <button type="button" data-order="front" title="Over all other pictures of the sheet">To front</button>
+                        <button type="button" data-order="back" title="Under all other pictures of the sheet">To back</button>
+                    </div>
                     <div class="row"><span title="The picture's middle, from the calendar's left edge and from its top edge">Middle</span><span class="field"><input type="number" name="picture__n_mm__x" aria-label="Picture's middle x" step="any"><b>/</b><input type="number" name="picture__n_mm__y" aria-label="Picture's middle y" step="any"><i>mm</i></span></div>
-                    <label class="row"><span title="Of what is left of the picture; its height follows, it is never stretched">Width</span><span class="field"><input type="number" name="picture__n_mm__size_x" min="5" max="5000" step="any"><i>mm</i></span></label>
-                    <label class="row"><span title="Around its middle, with the clock. Any number: 0.5 is a slight turn">Turned</span><span class="field"><input type="number" name="picture__n_deg" min="-360" max="360" step="any"><i>°</i></span></label>
-                    <fieldset class="choice">
-                        <legend title="What a drag of a handle on one of the picture's four sides does. Crop: the picture is cut off there. Stretch: the side follows the pointer, the side across stays. Skew: the side slides along itself, the side across stays">Drag a side to</legend>
-                        <div class="seg">
-                            <label><input type="radio" name="s_side" value="crop" checked><span>Crop</span></label>
-                            <label><input type="radio" name="s_side" value="stretch"><span>Stretch</span></label>
-                            <label><input type="radio" name="s_side" value="skew"><span>Skew</span></label>
-                        </div>
-                    </fieldset>
-                    <p class="note">On the sheet: drag the picture to move it, a corner to size it, the ring at its top to turn it, a side for what is chosen here. Ctrl and the wheel size it under the pointer.</p>
-                </div>
-                <div class="group">
-                    <h2>Stretch and skew</h2>
+                    <label class="row"><span title="Of what is left of the picture; its height follows from its shape">Width</span><span class="field"><input type="number" name="picture__n_mm__size_x" min="5" max="5000" step="any"><i>mm</i></span></label>
                     <label class="row"><span title="Its height in % of the height its width and its file's shape give: 100 as the file is, 150 half as high again. The width stays">Height</span><span class="field"><input type="number" name="picture__stretch" min="5" max="2000" step="any"><i>%</i></span></label>
-                    <label class="row"><span title="Its upright sides lean by this, to the right at the top; its top and bottom side lie as before">Skew</span><span class="field"><input type="number" name="picture__n_deg__skew" min="-80" max="80" step="any"><i>°</i></span></label>
-                    <p class="note">100 % and 0 °: the shape its file has.</p>
+                    <label class="row"><span title="Around its middle, with the clock. Any number: 0.5 is a slight turn">Turned</span><span class="field"><input type="number" name="picture__n_deg" min="-360" max="360" step="any"><i>°</i></span></label>
+                    <label class="row"><span title="Its upright sides lean by this, to the right at the top; its top and bottom side lie as before. Height 100 % and skew 0 °: the shape its file has">Skew</span><span class="field"><input type="number" name="picture__n_deg__skew" min="-80" max="80" step="any"><i>°</i></span></label>
+                    <p class="note">On the sheet: click a picture to choose it, drag it to move it. Its handles: a corner sizes it, with Shift out of its shape; a side stretches it, with Ctrl skews it; the ring turns it, with Shift in steps of 15°. Ctrl and the wheel size it under the pointer.</p>
                 </div>
                 <div class="group">
                     <h2 title="How much of the file is cut off at each of its sides, in % of the file. What is left stays in its place">Crop, %</h2>
@@ -432,6 +425,12 @@ input.switch:checked::after{ background: var(--s_col__black); transform: transla
                         <input type="number" class="right" name="picture__crop_2" aria-label="Crop right" min="0" max="95" step="any">
                         <input type="number" class="bottom" name="picture__crop_3" aria-label="Crop bottom" min="0" max="95" step="any">
                     </div>
+                </div>
+                <div class="group">
+                    <h2 title="One picture with many small ones on it: split, each part is a picture of its own to place">Split into pieces</h2>
+                    <div class="row"><span title="Pieces across × down, counted as the picture lies">Pieces</span><span class="field"><input type="number" name="split__n_column" aria-label="Pieces across" min="1" max="50" step="1" value="3" required><b>×</b><input type="number" name="split__n_row" aria-label="Pieces down" min="1" max="50" step="1" value="2" required><i></i></span></div>
+                    <button type="button" id="el_split" title="The chosen picture becomes that many pictures, each with its part of the file, where that part lies now. No piece smaller than 5 mm">Split</button>
+                    <p class="note">The pieces lie where they lay. Each is a picture like any other: drag it away, size it, crop it to its part.</p>
                 </div>
                 <div class="group">
                     <h2>A photo of a drawing</h2>
