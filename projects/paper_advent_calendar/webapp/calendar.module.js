@@ -51,7 +51,9 @@ let o_setting__default = {
     n_mm__bridge_distance: 25,
     n_mm__dash: 3,
     n_mm__gap: 2,
-    b_mark: true,
+    // short cuts in the back sheet that show where the windows open, for pictures drawn
+    // by hand; without them the back's file cuts the calendar's edge and not the windows
+    b_mark: false,
     n_mm__mark: 3,
     b_logo: true,
     // a sheet's pictures, see picture.module.js, the last one on top

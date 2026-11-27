@@ -436,10 +436,10 @@ Deno.test('the logo: three closed outlines of its size, dotted and mirrored in t
 let a_o_window__own = [{ n_mm__x: 40, n_mm__y: 30, n_mm__size_x: 55, n_mm__size_y: 20, s_shape: 'round', s_door: 'bottom' }, null, { s_shape: 'arch', s_door: 'top' }];
 let a_o_setting = [
     o_setting__default,
-    { ...o_setting__default, a_s_door: a_s_door, n_seed: 5, n_mm__corner: 6, a_o_window__own },
+    { ...o_setting__default, a_s_door: a_s_door, n_seed: 5, n_mm__corner: 6, a_o_window__own, b_mark: true },
     { ...o_setting__default, n_mm__calendar_x: 210, n_mm__calendar_y: 297, n_column: 4, n_window: 25, b_outline: false, b_sheet_dot: false, b_logo: false, b_mark: false, n_mm__bridge: 0 },
-    { ...o_setting__default, n_mm__calendar_x: 100.5, n_mm__calendar_y: 60, n_mm__left: 31.25, n_mm__bottom: 7, n_window: 3, n_column: 3, n_mm__margin: 5, n_mm__window_x: 20, n_mm__window_y: 30, a_s_shape: ['arch'], a_s_door: ['double'] },
-    { ...o_setting__default, b_sheet_dot: false }
+    { ...o_setting__default, b_mark: true, n_mm__calendar_x: 100.5, n_mm__calendar_y: 60, n_mm__left: 31.25, n_mm__bottom: 7, n_window: 3, n_column: 3, n_mm__margin: 5, n_mm__window_x: 20, n_mm__window_y: 30, a_s_shape: ['arch'], a_s_door: ['double'] },
+    { ...o_setting__default, b_sheet_dot: false, b_mark: true }
 ];
 
 a_o_setting.forEach(function(o_setting, n_idx__setting){
@@ -563,4 +563,20 @@ Deno.test('a file\'s box: the sheet with its dots in the file, the calendar with
     assert(String(f_a_n__box__file(o_setting, 'back').slice(2)) === '273,186', 'back without the edge');
     assert(f_a_n__box__file({ ...o_setting, b_logo: false, b_mark: false }, 'back') === null, 'an empty back');
     assert(!f_s_svg({ ...o_setting, b_logo: false, b_mark: false }, 'back').includes('<path'), 'an empty back file');
+});
+
+Deno.test('the back\'s file cuts the calendar\'s edge and not the windows, unless the marks are asked for', function(){
+    let f_s_id = function(o_more, s_sheet = 'back'){ return [...f_s_svg({ ...o_setting__default, ...o_more }, s_sheet).matchAll(/<path id="([a-z_]+)"/g)].map(function(o_found){ return o_found[1]; }).join(); };
+    assert(o_setting__default.b_mark === false, 'the marks are on by default');
+    // by default: the paper's corners, the logo's dots, the calendar's edge
+    assert(f_s_id({}) === 'back_sheet,back_logo,back_outline', f_s_id({}));
+    assert(f_s_id({ b_logo: false, b_sheet_dot: false }) === 'back_outline', f_s_id({ b_logo: false, b_sheet_dot: false }));
+    // the marks asked for: one path more, with a mark at every window
+    assert(f_s_id({ b_mark: true }) === 'back_sheet,back_mark,back_logo,back_outline', f_s_id({ b_mark: true }));
+    let n_mark = f_a_o_window(o_setting__default).reduce(function(n, o_window){ return n + f_o_door(o_window, o_setting__default).a_a_o_seg__mark.length; }, 0);
+    let s_d = f_s_svg({ ...o_setting__default, b_mark: true }, 'back').match(/<path id="back_mark"[^>]* d="([^"]*)"/)[1];
+    assert(n_mark >= 4 * 24 && (s_d.match(/M/g) || []).length === n_mark, `${(s_d.match(/M/g) || []).length} marks in the file, ${n_mark} at the windows`);
+    // the front's file is the same with and without them
+    assert(f_s_svg({ ...o_setting__default, b_mark: true }, 'front').replace('"b_mark":true', '"b_mark":false') === f_s_svg(o_setting__default, 'front'), 'the front changed with the marks');
+    assert(f_s_id({}, 'front') === 'front_sheet,front_cut,front_fold,front_outline', f_s_id({}, 'front'));
 });

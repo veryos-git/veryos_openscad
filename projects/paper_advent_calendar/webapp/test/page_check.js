@@ -526,7 +526,7 @@ try{
     f_check('Back sheet in the panel: the back sheet shown, no picture yet, the other file\'s note gone', o_state.s_sheet === 'back' && o_state.s_sheet__checked === 'back,back' && o_state.s_title === 'Pictures of the back sheet' && o_state.s_hint.startsWith('None yet.') && !o_state.b_picture, o_state);
     await f_load(s_path__back, 'back');
     o_state = await f_o_state();
-    f_check('the back\'s picture: both sheets have one, and the marks on the back are said to cut into it', o_state.s_sheet__has === 'front,back' && o_state.s_sheet__picture === 'front,back' && o_state.s_status === 'The marks on the back are cut into its picture: leave them out, under Cuts', o_state.s_status);
+    f_check('the back\'s picture: both sheets have one, and nothing is wrong: the back has no marks at its windows unless asked for', o_state.s_sheet__has === 'front,back' && o_state.s_sheet__picture === 'front,back' && o_state.s_status === '' && o_state.o_setting.b_mark === false, o_state.s_status);
     f_check('Chrome draws it on the calendar and its bleed', f_b_near(await f_a_n__image('back'), [8, 8, 289, 202], 0.05), await f_a_n__image('back'));
     await o_page.f_open();
     o_state = await f_o_state();
@@ -552,6 +552,14 @@ try{
         && o_state.o_setting.a_o_picture__back[0].n_ratio__stretch === 1 && o_state.o_setting.a_o_picture__back[0].n_deg__skew === 0 && o_state.o_setting.a_o_picture__front[0].n_ratio__stretch === 1 && !('o_picture__front' in o_state.o_setting)
         && o_state.n_handle === 9 && f_b_near(await f_a_n__image('back'), [8, 8, 289, 202], 0.05), [o_state.o_setting.a_o_picture__back, await f_a_n__image('back')]);
     await f_step('cut');
+    o_state = await f_o_state();
+    let f_s_id__back = function(o_setting){ return [...f_s_svg(o_setting, 'back').matchAll(/<path id="([a-z_]+)"/g)].map(function(o_found){ return o_found[1]; }).join(); };
+    f_check('Cuts: Marks on the back is off at first, their length grey: the back\'s file holds the paper\'s corners, the logo and the calendar\'s edge', await o_page.f_v(`!document.getElementById('el_panel').elements.b_mark.checked && document.getElementById('el_panel').elements.n_mm__mark.disabled`)
+        && f_s_id__back(o_state.o_setting) === 'back_sheet,back_logo,back_outline' && await o_page.f_v(`document.querySelectorAll('#el_sheet__back .line .cut path').length`) === 3, f_s_id__back(o_state.o_setting));
+    await o_page.f_click_on('[name=b_mark]');
+    o_state = await f_o_state();
+    f_check('switched on: the marks are in the back\'s file and on the sheet, their length can be set, and with a picture on the back it is said that they cut into it', o_state.o_setting.b_mark === true && f_s_id__back(o_state.o_setting) === 'back_sheet,back_mark,back_logo,back_outline'
+        && await o_page.f_v(`document.querySelectorAll('#el_sheet__back .line .cut path').length === 4 && !document.getElementById('el_panel').elements.n_mm__mark.disabled`) && o_state.s_status === 'The marks on the back are cut into its picture: leave them out, under Cuts', o_state.s_status);
     await o_page.f_click_on('[name=b_mark]');
     o_state = await f_o_state();
     f_check('Cuts: the marks switched off, their length with them, nothing wrong', o_state.o_setting.b_mark === false && o_state.s_status === '' && await o_page.f_v(`document.getElementById('el_panel').elements.n_mm__mark.disabled`), o_state.s_status);

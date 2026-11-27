@@ -99,8 +99,9 @@ Deno.test('what is wrong is said: over the sheet\'s edge, in the printer\'s marg
     let o_cover = f_o_picture__fitted(o_picture, f_a_n__bleed(o_setting__default), true);
     assert(f_a_s({ a_o_picture__front: [o_cover], a_o_picture__back: [o_cover], b_mark: false }).length === 0, 'pictures that cover calendar and bleed');
     // marks are for pictures drawn by hand: under a printed one they are cuts in it
-    assert(f_a_s({ a_o_picture__front: [o_cover], a_o_picture__back: [o_cover] }).join() === 'The marks on the back are cut into its picture: leave them out, under Cuts', f_a_s({ a_o_picture__back: [o_cover] }).join());
-    assert(f_a_s({ a_o_picture__front: [o_cover] }).length === 0, 'marks without a picture on the back');
+    assert(f_a_s({ a_o_picture__front: [o_cover], a_o_picture__back: [o_cover], b_mark: true }).join() === 'The marks on the back are cut into its picture: leave them out, under Cuts', f_a_s({ a_o_picture__back: [o_cover], b_mark: true }).join());
+    assert(f_a_s({ a_o_picture__front: [o_cover], b_mark: true }).length === 0, 'marks without a picture on the back');
+    assert(f_a_s({ a_o_picture__front: [o_cover], a_o_picture__back: [o_cover] }).length === 0, 'by default the back has no marks');
     // 3000 x 2000 over the calendar alone: 285 x 190, 4 over at left and right, nothing at top and bottom
     let o_edge = f_o_picture__fitted(o_picture, [0, 0, 277, 190], true);
     assert(f_a_s({ a_o_picture__front: [o_edge] }).join() === 'The front picture does not reach 2 mm over the calendar\'s edge all around: a cut beside the edge shows white', f_a_s({ a_o_picture__front: [o_edge] }).join());
