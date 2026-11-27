@@ -103,7 +103,7 @@ button.ghost:hover{ background: var(--s_col__raised); color: var(--s_col__text);
 button:disabled{ opacity: .4; cursor: default; pointer-events: none; }
 .buttons{ display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 8px; }
 .tools{ display: flex; gap: 6px; margin-bottom: 10px; }
-.tools button{ flex: 1; padding: 0; }
+.tools button{ flex: auto; padding: 0 5px; }
 .tools svg{ display: block; width: 18px; height: 18px; margin: auto; fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; pointer-events: none; }
 .next{ display: flex; justify-content: flex-end; margin: 0; }
 
@@ -132,6 +132,10 @@ input.switch:checked::after{ background: var(--s_col__black); transform: transla
 /* a sheet that has a picture */
 .seg .has span::after{ content: ''; display: inline-block; width: 6px; height: 6px; margin-left: 7px; border-radius: 50%; background: var(--s_col__gold); vertical-align: middle; }
 #el_picture_sheet{ display: flex; margin-bottom: 12px; }
+/* one of a few under its name, as wide as the group */
+.choice{ margin-bottom: 8px; }
+.choice legend{ margin-bottom: 6px; }
+.choice .seg{ display: flex; }
 /* one of a few, each with a line about it */
 .pick{ display: grid; gap: 6px; margin-bottom: 10px; }
 .pick label{ display: flex; align-items: baseline; gap: 9px; padding: 7px 10px; border: 1px solid var(--s_col__line); border-radius: 6px; cursor: pointer; }
@@ -352,6 +356,7 @@ input.switch:checked::after{ background: var(--s_col__black); transform: transla
                     <div class="tools">
                         <button type="button" data-picture="cover" title="As small as covers the calendar and the bleed around it, in the middle">Fill</button>
                         <button type="button" data-picture="contain" title="As large as fits into the calendar, in the middle">Fit</button>
+                        <button type="button" data-picture="spread" title="Stretched over the calendar and the bleed around it, in the middle: all of the picture shows, out of its shape">Stretch</button>
                         <button type="button" data-picture="turn_left" title="A quarter turn against the clock" aria-label="Turn left"><svg viewBox="0 0 20 20"><path d="M 10 4.5 A 6 6 0 1 0 16 10.5"/><path d="M 13.5 13 L 16 10.5 L 18.5 13"/></svg></button>
                         <button type="button" data-picture="turn_right" title="A quarter turn with the clock" aria-label="Turn right"><svg viewBox="0 0 20 20"><path d="M 10 4.5 A 6 6 0 1 1 4 10.5"/><path d="M 1.5 13 L 4 10.5 L 6.5 13"/></svg></button>
                         <button type="button" data-picture="flip_x" title="Mirror: left becomes right" aria-label="Mirror left and right"><svg viewBox="0 0 20 20"><path d="M 10 3 V 17" stroke-dasharray="2 2.5"/><path d="M 7 6 L 3 10 L 7 14 Z"/><path d="M 13 6 L 17 10 L 13 14 Z"/></svg></button>
@@ -360,7 +365,21 @@ input.switch:checked::after{ background: var(--s_col__black); transform: transla
                     <div class="row"><span title="The picture's middle, from the calendar's left edge and from its top edge">Middle</span><span class="field"><input type="number" name="picture__n_mm__x" aria-label="Picture's middle x" step="any"><b>/</b><input type="number" name="picture__n_mm__y" aria-label="Picture's middle y" step="any"><i>mm</i></span></div>
                     <label class="row"><span title="Of what is left of the picture; its height follows, it is never stretched">Width</span><span class="field"><input type="number" name="picture__n_mm__size_x" min="5" max="5000" step="any"><i>mm</i></span></label>
                     <label class="row"><span title="Around its middle, with the clock. Any number: 0.5 is a slight turn">Turned</span><span class="field"><input type="number" name="picture__n_deg" min="-360" max="360" step="any"><i>°</i></span></label>
-                    <p class="note">On the sheet: drag the picture to move it, a corner to size it, a side to crop it, the ring at its top to turn it. Ctrl and the wheel size it under the pointer.</p>
+                    <fieldset class="choice">
+                        <legend title="What a drag of a handle on one of the picture's four sides does. Crop: the picture is cut off there. Stretch: the side follows the pointer, the side across stays. Skew: the side slides along itself, the side across stays">Drag a side to</legend>
+                        <div class="seg">
+                            <label><input type="radio" name="s_side" value="crop" checked><span>Crop</span></label>
+                            <label><input type="radio" name="s_side" value="stretch"><span>Stretch</span></label>
+                            <label><input type="radio" name="s_side" value="skew"><span>Skew</span></label>
+                        </div>
+                    </fieldset>
+                    <p class="note">On the sheet: drag the picture to move it, a corner to size it, the ring at its top to turn it, a side for what is chosen here. Ctrl and the wheel size it under the pointer.</p>
+                </div>
+                <div class="group">
+                    <h2>Stretch and skew</h2>
+                    <label class="row"><span title="Its height in % of the height its width and its file's shape give: 100 as the file is, 150 half as high again. The width stays">Height</span><span class="field"><input type="number" name="picture__stretch" min="5" max="2000" step="any"><i>%</i></span></label>
+                    <label class="row"><span title="Its upright sides lean by this, to the right at the top; its top and bottom side lie as before">Skew</span><span class="field"><input type="number" name="picture__n_deg__skew" min="-80" max="80" step="any"><i>°</i></span></label>
+                    <p class="note">100 % and 0 °: the shape its file has.</p>
                 </div>
                 <div class="group">
                     <h2 title="How much of the file is cut off at each of its sides, in % of the file. What is left stays in its place">Crop, %</h2>

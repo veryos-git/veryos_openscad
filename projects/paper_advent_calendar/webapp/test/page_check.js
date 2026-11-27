@@ -2,8 +2,8 @@
 // deno task check
 //
 // The page in headless Chrome, used as a person uses it: the steps and what each shows,
-// the sheet's size between the bars, fields that are wrong, windows and pictures moved
-// with the pointer, a match by four points, the print measured from Chrome's PDF, the
+// the sheet's size between the bars, fields that are wrong, windows and pictures moved,
+// stretched and skewed with the pointer, a match by four points, the print measured from Chrome's PDF, the
 // cutting files. Needs google-chrome and pdftoppm; the app is served on port 8779.
 // With a folder as argument the readme's two pictures of the app are saved there:
 // deno task check .
@@ -327,6 +327,7 @@ try{
         return a_n.map(function(n){ return n / n_px__per_mm__now; });
     };
     f_check('Chrome draws it there', f_b_near(await f_a_n__image(), [3, 8, 294, 202], 0.05), await f_a_n__image());
+    f_check('with a picture\'s tools the panel needs no scrolling sideways', o_state.a_n__panel_scroll[0] <= o_state.a_n__panel_scroll[1], o_state.a_n__panel_scroll);
     a_n__from = await f_a_n__px([100, 60]);
     await o_page.f_drag(a_n__from, [a_n__from[0] + 30, a_n__from[1] - 20]);
     let o_picture__moved = await f_o_picture();
@@ -415,6 +416,56 @@ try{
     f_check('zoom 4, the sheet moved in its place: all nine handles in view', f_b_handles(a_o_handle) && (await f_o_state()).a_n__sheet[0] < -500, a_o_handle);
     await o_page.f_click_on('[name=n_zoom][value="1"] + span');
     await o_page.f_click_on('[data-picture=cover]');
+
+    // stretched and skewed: by the button, by a side's handle, by the fields. The calendar lies 10 mm from the sheet's left and top.
+    let f_a_n__on_sheet = function(o_picture, a_n__sign){ return f_a_n__handle(o_picture, a_n__sign).map(function(n){ return n + 10; }); };
+    await o_page.f_click_on('[data-picture=spread]');
+    o_picture = await f_o_picture();
+    f_check('Stretch: the picture is the calendar and its bleed, 281 × 194 mm, out of its shape, and Chrome draws it there', f_b_near(f_a_n__size(o_picture), [281, 194], 1e-9) && f_b_near([o_picture.n_mm__x, o_picture.n_mm__y], [138.5, 95], 1e-9)
+        && f_b_near(await f_a_n__image(), [8, 8, 289, 202], 0.05) && (await f_o_state()).s_status === '', [o_picture, await f_a_n__image()]);
+    f_check('its height is said in % of what its shape gives, and how fine it is at the least', f_b_near(Number(await o_page.f_v(`document.getElementById('el_panel').elements.picture__stretch.value`)), 194 / (281 / 1.5) * 100, 0.006)
+        && (await f_o_state()).s_hint === '3000 × 2000 pixels, shown 281 × 194 mm: at least 262 pixels per inch.', (await f_o_state()).s_hint);
+    await o_page.f_click_on('[data-picture=contain]');
+    o_picture = await f_o_picture();
+    f_check('Fit keeps it stretched: 190 high, as much less wide', f_b_near(f_a_n__size(o_picture), [281 * 190 / 194, 190], 1e-9), f_a_n__size(o_picture));
+    await o_page.f_click_on('[name=s_side][value=stretch] + span');
+    f_check('Drag a side to Stretch: the sides\' handles say so', await o_page.f_v(`document.querySelector('.sheet.shown .handle.side title').textContent`) === 'Drag to stretch');
+    a_n__from = await f_a_n__px(f_a_n__handle(o_picture, [1, 0]));
+    await o_page.f_drag(a_n__from, [a_n__from[0] - 60, a_n__from[1] + 15]);
+    let o_picture__stretched = await f_o_picture();
+    f_check('a side stretches it: the right side follows the pointer, the left side and the height stay, nothing is cut off', f_b_near(f_a_n__size(o_picture__stretched), [f_a_n__size(o_picture)[0] - 60 / n_px__per_mm, 190], 0.03)
+        && f_b_near(f_a_n__handle(o_picture__stretched, [-1, 0]), f_a_n__handle(o_picture, [-1, 0]), 0.02) && String(o_picture__stretched.a_n_ratio__crop) === '0,0,0,0', o_picture__stretched);
+    f_check('Chrome draws it so', f_b_near(await f_a_n__image(), [...f_a_n__on_sheet(o_picture__stretched, [-1, -1]), ...f_a_n__on_sheet(o_picture__stretched, [1, 1])], 0.05), await f_a_n__image());
+    await o_page.f_click_on('[name=s_side][value=skew] + span');
+    a_n__from = await f_a_n__px(f_a_n__handle(o_picture__stretched, [0, -1]));
+    await o_page.f_drag(a_n__from, [a_n__from[0] + 80, a_n__from[1] - 10]);
+    let o_picture__skewed = await f_o_picture();
+    let n_deg__skew = Math.atan(80 / n_px__per_mm / 190) * 180 / Math.PI;
+    f_check('Drag a side to Skew: the top side slides as far as the pointer goes along it, the bottom side stays, the upright sides lean to the right', f_b_near(o_picture__skewed.n_deg__skew, n_deg__skew, 0.02) && n_deg__skew > 5
+        && f_b_near(f_a_n__handle(o_picture__skewed, [-1, 1]), f_a_n__handle(o_picture__stretched, [-1, 1]), 0.02) && f_b_near(f_a_n__handle(o_picture__skewed, [1, 1]), f_a_n__handle(o_picture__stretched, [1, 1]), 0.02)
+        && f_b_near(f_a_n__size(o_picture__skewed), f_a_n__size(o_picture__stretched), 0.02) && o_picture__skewed.n_deg === 0, [o_picture__skewed, n_deg__skew]);
+    f_check('Chrome draws it leaning: its box reaches from its bottom left corner to its top right one', f_b_near(await f_a_n__image(), [f_a_n__on_sheet(o_picture__skewed, [-1, 1])[0], f_a_n__on_sheet(o_picture__skewed, [1, -1])[1], f_a_n__on_sheet(o_picture__skewed, [1, -1])[0], f_a_n__on_sheet(o_picture__skewed, [-1, 1])[1]], 0.05), await f_a_n__image());
+    // the right side, which leans now: 40 pixels down the screen are 40 cos of the lean along it
+    a_n__from = await f_a_n__px(f_a_n__handle(o_picture__skewed, [1, 0]));
+    await o_page.f_drag(a_n__from, [a_n__from[0], a_n__from[1] + 40]);
+    let o_picture__leaning = await f_o_picture();
+    let n_rad__skew = o_picture__skewed.n_deg__skew * Math.PI / 180;
+    let n_mm__along = 40 / n_px__per_mm * Math.cos(n_rad__skew);
+    f_check('the right side slid along itself: the left side stays, the right side\'s ends go that far along it, top and bottom lean', f_b_near(f_a_n__handle(o_picture__leaning, [-1, -1]), f_a_n__handle(o_picture__skewed, [-1, -1]), 0.03) && f_b_near(f_a_n__handle(o_picture__leaning, [-1, 1]), f_a_n__handle(o_picture__skewed, [-1, 1]), 0.03)
+        && f_b_near(f_a_n__handle(o_picture__leaning, [1, -1]), [f_a_n__handle(o_picture__skewed, [1, -1])[0] - n_mm__along * Math.sin(n_rad__skew), f_a_n__handle(o_picture__skewed, [1, -1])[1] + n_mm__along * Math.cos(n_rad__skew)], 0.03)
+        && f_b_near(f_a_n__handle(o_picture__leaning, [1, 1]), [f_a_n__handle(o_picture__skewed, [1, 1])[0] - n_mm__along * Math.sin(n_rad__skew), f_a_n__handle(o_picture__skewed, [1, 1])[1] + n_mm__along * Math.cos(n_rad__skew)], 0.03)
+        && o_picture__leaning.n_deg > 1, o_picture__leaning);
+    a_o_handle = await f_a_o_handle();
+    f_check('skewed, it has its nine handles', f_b_handles(a_o_handle), a_o_handle);
+    await o_page.f_fill('picture__n_deg__skew', 85);
+    f_check('a skew of 85°: said, not taken', (await f_o_state()).s_status.startsWith('Picture, Skew: ') && (await f_o_picture()).n_deg__skew === o_picture__leaning.n_deg__skew, (await f_o_state()).s_status);
+    await o_page.f_fill('picture__n_deg__skew', 0);
+    await o_page.f_fill('picture__stretch', 100);
+    await o_page.f_fill('picture__n_deg', 0);
+    o_picture = await f_o_picture();
+    f_check('Height 100 % and Skew 0°: the shape its file has', o_picture.n_ratio__stretch === 1 && o_picture.n_deg__skew === 0 && f_b_near(f_a_n__size(o_picture)[0] / f_a_n__size(o_picture)[1], 1.5, 1e-9) && (await f_o_state()).s_hint.endsWith('pixels per inch.'), o_picture);
+    await o_page.f_click_on('[name=s_side][value=crop] + span');
+    await o_page.f_click_on('[data-picture=cover]');
     await o_page.f_choose('#el_picture_file', [s_path__text]);
     o_state = await f_o_state();
     f_check('a file that is no picture: said, the picture stays', o_state.s_hint.startsWith('text.txt is not a picture this browser can show.') && o_state.s_sheet__picture === 'front' && o_state.o_setting.o_picture__front.n_px__x === 3000, o_state.s_hint);
@@ -436,6 +487,16 @@ try{
     o_state = await f_o_state();
     f_check('a reload keeps both pictures, their files and their places', o_state.s_sheet__picture === 'front,back' && o_state.s_step__open === 'picture' && o_state.s_sheet === 'back' && o_state.n_handle === 9 && f_b_near(o_state.o_setting.o_picture__front.n_mm__size_x, 291, 1e-9)
         && await o_page.f_v(`Promise.all([...document.querySelectorAll('.sheet image')].map(function(el){ return fetch(el.href.baseVal).then(function(o){ return o.blob(); }).then(function(o){ return o.size; }); })).then(function(a_n){ return a_n.length === 2 && a_n.every(function(n){ return n > 10000; }); })`), o_state);
+    // places as they were kept before pictures could be stretched and skewed
+    await o_page.f_v(`(function(){
+        let o_setting = JSON.parse(localStorage.getItem('paper_advent_calendar'));
+        for(let s_sheet of ['front', 'back']){ delete o_setting['o_picture__' + s_sheet].n_ratio__stretch; delete o_setting['o_picture__' + s_sheet].n_deg__skew; }
+        localStorage.setItem('paper_advent_calendar', JSON.stringify(o_setting));
+    })()`);
+    await o_page.f_open();
+    o_state = await f_o_state();
+    f_check('a picture\'s place kept before stretch and skew came: neither, and drawn where it was', o_state.s_sheet__picture === 'front,back' && o_state.o_setting.o_picture__back.n_ratio__stretch === 1 && o_state.o_setting.o_picture__back.n_deg__skew === 0
+        && o_state.o_setting.o_picture__front.n_ratio__stretch === 1 && f_b_near(await f_a_n__image('back'), [8, 8, 289, 202], 0.05), [o_state.o_setting.o_picture__back, await f_a_n__image('back')]);
     await f_step('cut');
     await o_page.f_click_on('[name=b_mark]');
     o_state = await f_o_state();
@@ -621,6 +682,30 @@ try{
     f_check('no bleed, no guides: the picture on the calendar and nothing else', f_b_near(f_a_n__box(a_o_print[0], f_b_ink), [10, 10, 287, 200], 0.1) && f_b_near(f_a_n__box(a_o_print[0], f_b_green), [10, 10, 287, 200], 0.1), f_a_n__round(f_a_n__box(a_o_print[0], f_b_ink)));
     await o_page.f_click_on('[name=b_print_guide]');
     await o_page.f_fill('n_mm__bleed', 2);
+    // a stretched and skewed picture in the print: 100 wide, half as high again as its shape, so 100 high, leaning by 20°, around 148.5 / 105 of the sheet
+    await f_step('picture');
+    for(let [s_name, n] of [['picture__n_mm__size_x', 100], ['picture__stretch', 150], ['picture__n_deg__skew', 20]]){ await o_page.f_fill(s_name, n); }
+    a_o_print = await o_page.f_a_o_print();
+    a_n__green = f_a_n__box(a_o_print[0], f_b_green);
+    let n_mm__lean = 50 * Math.tan(20 * Math.PI / 180);
+    f_check('stretched and skewed, the print\'s picture is 100 high and reaches 18.2 further to both sides: 80.3 to 216.7 and 55 to 155', f_b_near(a_n__green, [98.5 - n_mm__lean, 55, 198.5 + n_mm__lean, 155], 0.15), f_a_n__round(a_n__green));
+    // the picture's left and right end in the row of dots n_mm__y from the page's top
+    let f_a_n__row = function(n_mm__y){
+        let n_y = Math.round(n_mm__y / 25.4 * 300);
+        let a_n_x = [];
+        for(let n_x = 0; n_x < a_o_print[0].n_px__x; n_x++){
+            let n_at = 3 * (n_y * a_o_print[0].n_px__x + n_x);
+            if(f_b_green(a_o_print[0].a_n__rgb[n_at], a_o_print[0].a_n__rgb[n_at + 1], a_o_print[0].a_n__rgb[n_at + 2])){ a_n_x.push(n_x); }
+        }
+        return [a_n_x[0] * 25.4 / 300, (a_n_x[a_n_x.length - 1] + 1) * 25.4 / 300];
+    };
+    let n_mm__lean_row = 45 * Math.tan(20 * Math.PI / 180);
+    f_check('it leans to the right at the top: 100 wide in every row, 45 above its middle 16.4 further right, 45 below it as far left', f_b_near(f_a_n__row(60), [98.5 + n_mm__lean_row, 198.5 + n_mm__lean_row], 0.2) && f_b_near(f_a_n__row(150), [98.5 - n_mm__lean_row, 198.5 - n_mm__lean_row], 0.2), [f_a_n__round(f_a_n__row(60)), f_a_n__round(f_a_n__row(150))]);
+    console.log(`     stretched and skewed: ${f_a_n__round(a_n__green)}; the row at 60: ${f_a_n__round(f_a_n__row(60))}, at 150: ${f_a_n__round(f_a_n__row(150))}`);
+    await o_page.f_fill('picture__stretch', 100);
+    await o_page.f_fill('picture__n_deg__skew', 0);
+    await o_page.f_click_on('[data-picture=cover]');
+    await f_step('output');
     await o_page.f_open();
     f_check('a reload keeps what is printed', (await f_o_state()).o_setting.s_print === 'picture' && await o_page.f_v(`document.querySelector('[name=s_print]:checked').value`) === 'picture');
     // A4 standing, the calendar off its middle

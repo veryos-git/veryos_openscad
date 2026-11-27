@@ -25,7 +25,7 @@ Needs [Deno](https://deno.com) and a browser. The page does all the work itself;
 |---|---|---|
 | 1 Paper | the sheet of paper, the calendar's size and place on it | moves nothing |
 | 2 Windows | grid, shapes and doors, one window's own values | chooses and moves windows |
-| 3 Picture | the picture of the sheet shown: load, place, size, crop, match | moves, sizes, crops and turns the picture |
+| 3 Picture | the picture of the sheet shown: load, place, size, turn, stretch, skew, crop, match | moves, sizes and turns the picture; a side crops, stretches or skews it |
 | 4 Cuts | bridges, folds, marks, logo, calendar's edge, paper's corners | moves nothing |
 | 5 Print and cut | what is printed, bleed, guides, shift; `Print front and back`, `Front SVG`, `Back SVG` | moves nothing |
 
@@ -144,16 +144,21 @@ What the pointer moves follows the step that is open: windows in step 2, the pic
 |---|---|
 | `Front sheet`, `Back sheet` | the sheet whose picture is worked on; the same choice as `Front` / `Back` above the sheet. A dot marks a sheet that has a picture |
 | `Load a picture`, `Load another` | any picture file the browser shows; it fills the calendar and its bleed. A file that is no picture is said, the picture stays |
-| Under the two buttons | the file's pixels, the size shown, pixels per inch; below 150 it says coarse |
+| Under the two buttons | the file's pixels, the size shown, pixels per inch; below 150 it says coarse. Stretched: `at least`, the number of the way it is stretched more |
 | Drag on the sheet | its picture moves |
-| Drag a corner | sized, the corner across stays; never stretched |
-| Drag a side | cropped there, the rest stays in its place; pulled out, what was cut off comes back |
+| Drag a corner | sized, the corner across stays, and its shape as it is |
+| `Drag a side to` | what a drag of a side's handle does: `Crop`, `Stretch` or `Skew`. A handle says what it does when the pointer rests on it |
+| Drag a side, `Crop` | cropped there, the rest stays in its place; pulled out, what was cut off comes back |
+| Drag a side, `Stretch` | the side follows the pointer, the side across stays: stretched or pressed, nothing cut off |
+| Drag a side, `Skew` | the side slides along itself, the side across stays. Top or bottom: the upright sides lean, which is `Skew`. Left or right: top and bottom lean, which in the fields is a turn, a skew against it and another size |
 | Drag the ring at its top | turned around its middle, by as much as the pointer goes around the middle: the further from it, the finer. For a picture that lies a little askew |
 | A handle that sits out of view | drawn where the view ends: a corner's as near to the corner as that is, a side's on the part of its side that is in view. Taken there it does the same, by what the pointer moves. So with a picture larger than the sheet, and with a zoomed sheet |
 | Ctrl and the wheel | sized under the pointer |
-| `Fill`, `Fit` | as small as covers calendar and bleed, as large as fits into the calendar; in the middle |
+| `Fill`, `Fit` | as small as covers calendar and bleed, as large as fits into the calendar; in the middle, in the shape it has |
+| `Stretch` | stretched over calendar and bleed: all of it shows, out of its shape. A turned or skewed picture is stretched along its own two directions until it covers them |
 | The four buttons beside them | a quarter turn against and with the clock; mirrored left for right, top for bottom |
 | `Middle`, `Width`, `Turned` | the picture's middle from the calendar's left and top edge, its width, its turn in degrees: any number, 0.5 for a slight turn |
+| `Height`, `Skew` | its height in % of what its width and its file's shape give, 5 to 2000, the width stays; the lean of its upright sides in degrees, to the right at the top, -80 to 80. 100 % and 0 °: the shape its file has |
 | `Crop, %` | how much of the file is cut off at its top, left, right and bottom, the four fields laid out as the sides lie |
 | `Match 4 points to the cut pattern` | see Match by four points |
 | `Remove it` | the sheet's picture and its file are gone |
@@ -248,18 +253,19 @@ Not found: where Suite's zero lies and which point of a file its X and Y mean. T
 
 | Check | How | Result |
 |---|---|---|
-| Doors, grid, logo, cutting files | `deno task test`, 164 in all; `calendar.test.js`: every shape with every door in 6 sizes and 4 cut settings; grid, mix, a window's own values; the logo; both SVGs read back by a path reader written after the SVG specification; the box around a file's lines, which with the paper's corners is the sheet to the last digit | 138 pass |
-| Pictures | same, `picture.test.js`: fitted into and over boxes, sized by every corner and around a point, cut off at every side by number and by the pointer, lying straight, turned and mirrored: a pixel of the file that stays in the picture stays where it is, and the SVG puts it there too; the handles of a picture in view only in part lie in the view, eight apart; turned by the pointer, every pixel goes around the middle by as much as the pointer | 12 pass |
+| Doors, grid, logo, cutting files | `deno task test`, 167 in all; `calendar.test.js`: every shape with every door in 6 sizes and 4 cut settings; grid, mix, a window's own values; the logo; both SVGs read back by a path reader written after the SVG specification; the box around a file's lines, which with the paper's corners is the sheet to the last digit | 138 pass |
+| Pictures | same, `picture.test.js`: fitted into and over boxes, stretched over them, sized by every corner and around a point, cut off at every side by number and by the pointer, stretched and skewed by every side, lying straight, turned, mirrored, stretched and skewed: a pixel of the file that stays in the picture stays where it is, and the SVG puts it there too; a side stretched or slid leaves the side across and what the file shows there in place, a slid side's ends go as far as the pointer, and no further than leaves the sides 10° apart; the handles of a picture in view only in part lie in the view, eight apart; turned by the pointer, every pixel goes around the middle by as much as the pointer | 15 pass |
 | Match | same, `match.test.js`: the mapping takes each of four points to its place within 0.000000001 mm, and a known slant is found again from four of its points; fours that cannot be matched; the pattern's places and the snap; pixels laid anew show the colour of the place they come from, to a step of 255, straight and at a slant, and a clear pixel gives no colour | 7 pass |
 | Sheet | same, `sheet.test.js`: the calendar's place from the bottom left corner; the print's lines are the cutting file's own, at the place the file's box has for the cutter; crop marks, ruler line, what is said | 7 pass |
 | Tests notice faults | 42 faults put into copies of the four modules one at a time (a sign, a swapped side, a missing clamp, the place measured from the top, a mapping put together the wrong way round, ...); 12 more in the first version's module. Done before the paper's corners came into the files, not since | each failed a test |
-| Page | `deno task check`, `test/page_check.js`: headless Chrome, 1500 × 950, clicked and dragged with Chrome's own pointer, 125 checks in all with the print's and the match's below. Every step shows its settings alone and `Next` leads on; every setting has a field; the sheet fits its place, 20 pixels and more around it, at 1500 × 950, 1100 × 700, 800 × 600, A4 portrait and under the bar of a match; zoom 2 and 4 keep the view's middle; 400 wide: the sheet over the settings, nothing wider than the window; step and sheet kept over a reload; the legend; a field that is wrong in another step is said with its step and marks it, no print and no files meanwhile; shapes and doors by their chips | pass, no errors in the page |
+| Page | `deno task check`, `test/page_check.js`: headless Chrome, 1500 × 950, clicked and dragged with Chrome's own pointer, 141 checks in all with the print's and the match's below. Every step shows its settings alone and `Next` leads on; every setting has a field; the sheet fits its place, 20 pixels and more around it, at 1500 × 950, 1100 × 700, 800 × 600, A4 portrait and under the bar of a match; zoom 2 and 4 keep the view's middle; 400 wide: the sheet over the settings, nothing wider than the window; step and sheet kept over a reload; the legend; a field that is wrong in another step is said with its step and marks it, no print and no files meanwhile; shapes and doors by their chips | pass, no errors in the page |
 | | windows: none to take hold of in step 1; chosen, dragged in steps of 0.5 mm, its fields brought into view in a low window, chosen on the back sheet too, own size, shape and door, `Back to the grid`; Chrome's box of the close-up's lines is the window's, of the back's opening the module's | pass |
-| | pictures: loaded, dragged, sized by a corner, cropped at a side, sized by Ctrl and wheel, turned, mirrored, fitted, set by fields; the ring at its top dragged 6 pixels turns it as far as the pointer went around its middle, between 0.5 and 3°; Chrome's box of the drawn picture; the nine handles of a picture of 900 × 600 mm, and of a sheet at zoom 4 moved in its place, each whole in the view, apart from the others and the thing under the pointer there, and a corner taken at such a place sizes by what the pointer moves; a file that is no picture; a drag in step 2 leaves the picture alone; the back's picture by the panel's choice of sheet; both pictures and their files after a reload; marks and logo switched off; remove; start over; both downloads are the files the module makes of the page's settings | pass |
+| | pictures: loaded, dragged, sized by a corner, cropped at a side, sized by Ctrl and wheel, turned, mirrored, fitted, set by fields; the ring at its top dragged 6 pixels turns it as far as the pointer went around its middle, between 0.5 and 3°; Chrome's box of the drawn picture; the nine handles of a picture of 900 × 600 mm, and of a sheet at zoom 4 moved in its place, each whole in the view, apart from the others and the thing under the pointer there, and a corner taken at such a place sizes by what the pointer moves; `Stretch` makes it 281 × 194 mm; a side dragged with `Stretch` moves that side alone, with `Skew` slides it, top and right, and Chrome's box of the picture is the one reckoned from its place; a skew of 85° is said and not taken; `Height` 100 and `Skew` 0 bring the file's shape back; a place kept without stretch and skew is read as neither; a file that is no picture; a drag in step 2 leaves the picture alone; the back's picture by the panel's choice of sheet; both pictures and their files after a reload; marks and logo switched off; remove; start over; both downloads are the files the module makes of the page's settings | pass |
 | Print, measured | the same run: Chrome's PDF at 300 dots per inch, one-coloured test picture on the front. A4 landscape, calendar 277 × 190 at 10 / 10: picture with 2 of bleed expected 8 to 289 and 8 to 202 mm from the page's top left | 8.04 to 288.97, 7.96 to 202.01 |
 | | the calendar's edge, 0.2 wide, on page 2 without a picture and with `Pictures with cut lines` on page 1, expected 9.9 to 287.1 and 9.9 to 200.1 | 9.91 to 287.1, 9.91 to 200.07 |
 | | shift 1.5 right, 2.5 up: expected 9.5 to 290.5, 5.5 to 199.5 | 9.48 to 290.49, 5.42 to 199.56 |
 | | A4 portrait, calendar 150 × 200 at 12.5 / 30: edge expected 12.4 to 162.6, 66.9 to 267.1 | 12.36 to 162.56, 66.89 to 267.12 |
+| | a picture 100 wide, `Height` 150 %, `Skew` 20°, around 148.5 / 105 of the sheet: expected 80.3 to 216.7 and 55 to 155; in the row 60 from the top 114.9 to 214.9, in the row at 150 82.1 to 182.1: it leans to the right at the top | 80.35 to 216.66, 55.03 to 154.94; 114.89 to 214.8; 82.13 to 182.03 |
 | | what is on a page: no cut lines on a picture, no picture with `Cut lines only`, crop marks from 2 to 295 mm, nothing but the picture without guides and bleed; always 2 pages of the sheet's size | as expected |
 | Match, measured | the same run: a drawing of the calendar, 277 × 190 mm with two coloured squares, as a "photo" of 3000 × 2200 pixels taken at a slant; its four corners clicked, then the calendar's corners, each 1.5 mm beside it. The magenta square, drawn from 100 to 120 and 50 to 70 mm | in the new picture 99.94 to 120 and 49.96 to 70.02; in the print's PDF, 10 mm further on the sheet, 109.98 to 129.96 and 59.94 to 80.01 |
 | | the bar over the sheet, the sheet's choice locked; a click beside the picture, one point back, the ring on the corner and with Alt beside it, places in the wrong order, three points on a line, cancel by button and Esc, undo | as described above |
@@ -280,6 +286,7 @@ Not found: where Suite's zero lies and which point of a file its X and Y mean. T
 | Sheet on sheet | both sheets get the calendar's edge cut, so they are the same size; how well the back's pictures sit behind the doors depends on print and cut of both sheets |
 | Glue | where not to glue is not in the files |
 | Layout and pictures | kept in the browser only; the SVGs hold the settings in `<desc>`, but the app cannot open them |
+| Picture by handles | nothing is taken back but by hand: `Height` 100 and `Skew` 0 for the file's shape, `Turned` 0, `Crop` 0. Cropping a skewed picture cuts along its leaning sides |
 | Match | the points are clicked once and not dragged afterwards: one point back, or match the result again. The old file is gone with the page, the four points with the match |
 | Calendar's size | the first brief said "A4 290x210mm"; the second asks for less than the printer prints: 277 × 190 now |
 | `idea_veryos.jpeg`, `reference/`, `software_improvements_decoration_drawing/image.png` | the two sketches and a photo of a bought calendar, not in git |
@@ -300,7 +307,10 @@ Not found: where Suite's zero lies and which point of a file its X and Y mean. T
 | A trial print of the cut lines and a shift in mm | trust in printer and cutter |
 | Bleed, crop marks and a ruler line outside the calendar | a picture that ends at the edge, and no way to see a scaled print |
 | A picture per sheet, front and back | the front alone |
-| A picture is moved, sized, turned, mirrored and cut off, never stretched, but by a match of four points | free transforms by handles |
+| A side's handle crops, stretches or skews, as chosen in the panel | one meaning only, or a key held for the others |
+| Stretch and skew are two numbers of the picture's place, drawn by the browser | pixels laid anew, as a match does: the numbers can be taken back, and the file stays as sharp as it is |
+| One skew, of the upright sides; a left or right side slid becomes a turn, a skew and a size | a second skew for top and bottom: the two together can press a picture flat to a line |
+| The ring turns freely, to hundredths of a degree | a snap to 0 or to quarter turns, in the way of a slight turn; straight again is 0 in `Turned` |
 | A picture's handle that sits out of view is drawn where the view ends | handles cut off 20 pixels around the sheet: a picture larger than the sheet had none to size it by |
 | A match makes a new picture file, laid pixel by pixel | a slant kept as numbers and drawn by the browser: an SVG has no such transform, and a print should not depend on a trick |
 | The places of a match snap to the cut pattern | places by eye alone, never quite on a corner |

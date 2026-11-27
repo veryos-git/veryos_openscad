@@ -3,15 +3,17 @@
 // pointer on them, and the pictures' files.
 
 import { o_setting__default, n_mm__line, f_a_o_window, f_o_door, f_a_s_problem, f_s_d, f_s_svg, f_a_n__box__file } from './calendar.module.js';
-import { a_s_side, f_o_picture, f_a_n__px, f_a_n__size, f_n_dpi, f_a_n__from_px, f_a_n__to_px, f_a_n__handle, f_a_n__handle__shown, f_a_n__handle__turn, f_o_picture__fitted, f_o_picture__resized, f_o_picture__turned, f_o_picture__scaled, f_o_picture__cut, f_o_picture__cropped } from './picture.module.js';
+import { a_s_side, f_o_picture, f_a_n__px, f_a_n__size, f_n_dpi, f_a_n__from_px, f_a_n__to_px, f_a_n__handle, f_a_n__handle__shown, f_a_n__handle__turn, f_o_picture__fitted, f_o_picture__spread, f_o_picture__resized, f_o_picture__turned, f_o_picture__scaled, f_o_picture__cut, f_o_picture__cropped, f_o_picture__stretched, f_o_picture__skewed } from './picture.module.js';
 import { f_a_n__calendar, f_a_n__distance, f_a_n__bleed, f_a_s_problem__sheet, f_s_picture__sheet, f_s_line__sheet } from './sheet.module.js';
 import { f_a_n_h, f_a_n__mapped, f_s_problem__match, f_a_a_n__anchor, f_a_n__snapped, f_n_px__per_mm, f_a_n__warped } from './match.module.js';
 
 let s_key__storage = 'paper_advent_calendar';
 let a_s_sheet = ['front', 'back'];
 let a_s_name__own = ['n_mm__x', 'n_mm__y', 'n_mm__size_x', 'n_mm__size_y', 's_shape', 's_door'];
-let a_s_name__picture = ['n_mm__x', 'n_mm__y', 'n_mm__size_x', 'n_deg'];
-// a picture's handles: where on its frame, -1, 0 or 1 along x and y; corners size it, sides cut it off
+let a_s_name__picture = ['n_mm__x', 'n_mm__y', 'n_mm__size_x', 'n_deg', 'n_deg__skew'];
+// a picture's handles: where on its frame, -1, 0 or 1 along x and y; corners size it,
+// sides do what the panel's choice says, by its names
+let o_f_o_picture__side = { crop: f_o_picture__cropped, stretch: f_o_picture__stretched, skew: f_o_picture__skewed };
 let a_a_n__sign = [[-1, -1], [1, -1], [1, 1], [-1, 1], [-1, 0], [0, -1], [1, 0], [0, 1]];
 let n_px__handle = 6;
 // the handle that turns a picture: this far from the handle of the picture's top side
@@ -174,7 +176,7 @@ let f_s_screen = function(s_sheet, a_o_door, n_mm__per_px, a_n__view){
         a_s.push(`<line class="frame" x1="${a_n__top[0]}" y1="${a_n__top[1]}" x2="${a_n__turn[0]}" y2="${a_n__turn[1]}"/>`);
         a_s.push(...a_a_n__sign.map(function(a_n__sign){
             let [n_x, n_y] = f_a_n__handle__shown(o_picture, a_n__sign, a_n__box);
-            return `<circle class="handle${a_n__sign.includes(0) ? ' side' : ''}" data-sign="${a_n__sign.join(',')}" cx="${n_x}" cy="${n_y}" r="${n_px__handle * n_mm__per_px}"><title>Drag to ${a_n__sign.includes(0) ? 'crop' : 'size'}</title></circle>`;
+            return `<circle class="handle${a_n__sign.includes(0) ? ' side' : ''}" data-sign="${a_n__sign.join(',')}" cx="${n_x}" cy="${n_y}" r="${n_px__handle * n_mm__per_px}"><title>Drag to ${a_n__sign.includes(0) ? el_panel.elements.s_side.value : 'size'}</title></circle>`;
         }));
         a_s.push(`<circle class="handle turn" cx="${a_n__turn[0]}" cy="${a_n__turn[1]}" r="${n_px__handle * n_mm__per_px}"><title>Drag to turn</title></circle></g>`);
     }
@@ -327,9 +329,12 @@ let f_update = function(){
             let el = el_panel.elements[`picture__crop_${n_idx}`];
             if(el !== document.activeElement){ el.value = f_s(n_ratio * 100); }
         });
+        let el_stretch = el_panel.elements.picture__stretch;
+        if(el_stretch !== document.activeElement){ el_stretch.value = f_s(o_picture.n_ratio__stretch * 100); }
         let [n_x, n_y] = f_a_n__size(o_picture);
         let n_dpi = f_n_dpi(o_picture);
-        s_note__picture = `${o_picture.n_px__x} × ${o_picture.n_px__y} pixels, shown ${f_s(n_x)} × ${f_s(n_y)} mm: ${Math.round(n_dpi)} pixels per inch`
+        // stretched, it is finer one way than the other
+        s_note__picture = `${o_picture.n_px__x} × ${o_picture.n_px__y} pixels, shown ${f_s(n_x)} × ${f_s(n_y)} mm: ${o_picture.n_ratio__stretch === 1 ? '' : 'at least '}${Math.round(n_dpi)} pixels per inch`
             + (n_dpi < 150 ? ', coarse in print; 300 is sharp.' : '.');
     }
     document.getElementById('el_picture_hint').textContent = [s_note__file, s_note__picture].filter(Boolean).join(' ');
@@ -362,6 +367,8 @@ el_panel.addEventListener('input', function(o_event){
         if(el.name.startsWith('own__')){ f_set_own({ [el.name.slice(5)]: v }); }
         if(el.name.startsWith('picture__crop_')){
             o_setting[`o_picture__${s_sheet__shown}`] = f_o_picture__cut(o_setting[`o_picture__${s_sheet__shown}`], Number(el.name.slice(14)), v / 100);
+        } else if(el.name === 'picture__stretch'){
+            o_setting[`o_picture__${s_sheet__shown}`] = { ...o_setting[`o_picture__${s_sheet__shown}`], n_ratio__stretch: v / 100 };
         } else if(el.name.startsWith('picture__')){
             o_setting[`o_picture__${s_sheet__shown}`] = { ...o_setting[`o_picture__${s_sheet__shown}`], [el.name.slice(9)]: v };
         }
@@ -430,6 +437,7 @@ let f_n_deg = function(n_deg){ return ((n_deg + 180) % 360 + 360) % 360 - 180; }
 let o_f_o_picture = {
     cover: function(o_picture){ return f_o_picture__fitted(o_picture, f_a_n__bleed(o_setting), true); },
     contain: function(o_picture){ return f_o_picture__fitted(o_picture, [0, 0, o_setting.n_mm__calendar_x, o_setting.n_mm__calendar_y], false); },
+    spread: function(o_picture){ return f_o_picture__spread(o_picture, f_a_n__bleed(o_setting)); },
     turn_left: function(o_picture){ return { ...o_picture, n_deg: f_n_deg(o_picture.n_deg - 90) }; },
     turn_right: function(o_picture){ return { ...o_picture, n_deg: f_n_deg(o_picture.n_deg + 90) }; },
     flip_x: function(o_picture){ return { ...o_picture, b_flip_x: !o_picture.b_flip_x }; },
@@ -643,7 +651,7 @@ let f_a_n__mm = function(o_event, s_sheet){
 };
 // Step 'window': a click on a window chooses it, a drag moves it in steps of 0.5 mm.
 // Step 'picture': a drag anywhere on the sheet moves its picture, a drag of a handle
-// sizes it, cuts it off or turns it. In the other steps the pointer moves nothing.
+// sizes it, turns it, or cuts it off, stretches or skews it by a side. In the other steps the pointer moves nothing.
 el_stage.addEventListener('pointerdown', function(o_event){
     let el_sheet = o_event.target.closest('.sheet');
     if(!el_sheet){ return; }
@@ -698,16 +706,17 @@ window.addEventListener('pointermove', function(o_event){
         let o_picture;
         if(o_drag.b_turn){
             o_picture = f_o_picture__turned(o_drag.o_picture, o_drag.a_n__pointer, a_n);
-            o_picture.n_deg = Math.round(f_n_deg(o_picture.n_deg) * 100) / 100;
+            o_picture.n_deg = f_n_deg(o_picture.n_deg);
         } else if(!o_drag.a_n__sign){
             o_picture = { ...o_drag.o_picture, n_mm__x: o_drag.o_picture.n_mm__x + a_n[0] - o_drag.a_n__pointer[0], n_mm__y: o_drag.o_picture.n_mm__y + a_n[1] - o_drag.a_n__pointer[1] };
         } else if(o_drag.a_n__sign.includes(0)){
-            o_picture = f_o_picture__cropped(o_drag.o_picture, a_s_side[a_a_n__sign.findIndex(function(a_n__sign){ return String(a_n__sign) === String(o_drag.a_n__sign); }) - 4], a_n__on);
+            o_picture = o_f_o_picture__side[el_panel.elements.s_side.value](o_drag.o_picture, a_s_side[a_a_n__sign.findIndex(function(a_n__sign){ return String(a_n__sign) === String(o_drag.a_n__sign); }) - 4], a_n__on);
         } else {
             o_picture = f_o_picture__resized(o_drag.o_picture, o_drag.a_n__sign, a_n__on);
         }
-        // hundredths of a mm, and of a degree, are enough, and short in the fields
-        for(let s_name of ['n_mm__x', 'n_mm__y', 'n_mm__size_x']){ o_picture[s_name] = Math.round(o_picture[s_name] * 100) / 100; }
+        // hundredths of a mm, of a degree and of a % are enough, and short in the fields
+        for(let s_name of ['n_mm__x', 'n_mm__y', 'n_mm__size_x', 'n_deg', 'n_deg__skew']){ o_picture[s_name] = Math.round(o_picture[s_name] * 100) / 100; }
+        o_picture.n_ratio__stretch = Math.round(o_picture.n_ratio__stretch * 1e4) / 1e4;
         o_setting[`o_picture__${o_drag.s_sheet}`] = o_picture;
         f_update();
         return;
@@ -752,6 +761,8 @@ for(let s_sheet of a_s_sheet){
 // A picture's place without its file is of no use: the file may be gone with the browser's data.
 for(let s_sheet of a_s_sheet){
     if(!o_setting[`o_picture__${s_sheet}`]){ continue; }
+    // a place kept before pictures could be stretched and skewed says neither: it is neither
+    o_setting[`o_picture__${s_sheet}`] = { ...f_o_picture(0, 0), ...o_setting[`o_picture__${s_sheet}`] };
     let o_file = await f_v__stored('get', s_sheet).catch(function(o_error){ console.warn(o_error); });
     if(o_file){ o_s_url[s_sheet] = URL.createObjectURL(o_file); } else { o_setting[`o_picture__${s_sheet}`] = null; }
 }

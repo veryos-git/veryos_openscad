@@ -1,12 +1,14 @@
 // Copyright (C) [Jonas Immanuel Frey] - Licensed under GPL
 // A picture's place: what is left of its file and how large, fitted into a box and over
 // it, sized by a corner and around a point, cut off at a side by number and by the
-// pointer. Throughout, a pixel of the file that stays in the picture has to stay where
-// it is on the calendar, turned and mirrored or not; and the SVG has to put it there too.
+// pointer, stretched and skewed by a side. Throughout, a pixel of the file that stays in
+// the picture has to stay where it is on the calendar, turned, mirrored, stretched and
+// skewed or not; and the SVG has to put it there too.
 
 import {
-    a_s_side, n_mm__size_min, f_o_picture, f_a_n__px, f_a_n__size, f_n_dpi, f_a_n__calendar, f_a_n__own, f_a_n__from_px, f_a_n__to_px, f_a_n__handle, f_a_n__handle__shown, f_a_n__handle__turn,
-    f_o_picture__fitted, f_b_covered, f_o_picture__resized, f_o_picture__turned, f_o_picture__scaled, f_o_picture__cut, f_o_picture__cropped, f_s_picture
+    a_s_side, n_mm__size_min, n_deg__skew_max, f_o_picture, f_a_n__px, f_a_n__size, f_n_dpi, f_a_n__calendar, f_a_n__own, f_a_n__from_px, f_a_n__to_px, f_a_n__handle, f_a_n__handle__shown, f_a_n__handle__turn,
+    f_o_picture__fitted, f_o_picture__spread, f_b_covered, f_o_picture__resized, f_o_picture__turned, f_o_picture__scaled, f_o_picture__cut, f_o_picture__cropped,
+    f_o_picture__stretched, f_o_picture__skewed, f_s_picture
 } from '../picture.module.js';
 
 let assert = function(b, s_message = 'assertion failed'){
@@ -20,24 +22,28 @@ let f_assert_same_place = function(a_n, a_n__other, s_message, n_tolerance = 1e-
 };
 
 // Where a pixel of the file lies on the calendar, reckoned here: its place in what is
-// left of the file, mirrored, then turned around the picture's middle.
+// left of the file, a pixel higher than wide by the stretch, mirrored, pushed sideways
+// by the skew, to the right above the middle, then turned around the picture's middle.
 let f_a_n__of_px = function(o_picture, a_n__px){
     let [n_left, n_top, n_right, n_bottom] = o_picture.a_n_ratio__crop;
     let n_px__x = (1 - n_left - n_right) * o_picture.n_px__x;
     let n_px__y = (1 - n_top - n_bottom) * o_picture.n_px__y;
     let n_mm__per_px = o_picture.n_mm__size_x / n_px__x;
     let n_x = (a_n__px[0] - n_left * o_picture.n_px__x - n_px__x / 2) * n_mm__per_px * (o_picture.b_flip_x ? -1 : 1);
-    let n_y = (a_n__px[1] - n_top * o_picture.n_px__y - n_px__y / 2) * n_mm__per_px * (o_picture.b_flip_y ? -1 : 1);
+    let n_y = (a_n__px[1] - n_top * o_picture.n_px__y - n_px__y / 2) * n_mm__per_px * o_picture.n_ratio__stretch * (o_picture.b_flip_y ? -1 : 1);
+    n_x -= n_y * Math.tan(o_picture.n_deg__skew * Math.PI / 180);
     let n_rad = o_picture.n_deg * Math.PI / 180;
     return [o_picture.n_mm__x + n_x * Math.cos(n_rad) - n_y * Math.sin(n_rad), o_picture.n_mm__y + n_x * Math.sin(n_rad) + n_y * Math.cos(n_rad)];
 };
-// The same from the picture's SVG: the inner svg's box and viewBox, then the group's scale, turn and move.
+// The same from the picture's SVG: the inner svg's box and viewBox, then the group's scale, skew, turn and move.
 let f_a_n__of_px__svg = function(s_svg, a_n__px){
-    let [, n_x__move, n_y__move, n_deg, n_x__scale, n_y__scale] = s_svg.match(/<g transform="translate\(([-\d.]+) ([-\d.]+)\) rotate\(([-\d.]+)\) scale\(([-\d]+) ([-\d]+)\)">/).map(Number);
+    let [, n_x__move, n_y__move, n_deg, n_deg__skew, n_x__scale, n_y__scale] = s_svg.match(/<g transform="translate\(([-\d.]+) ([-\d.]+)\) rotate\(([-\d.]+)\) skewX\(([-\d.]+)\) scale\(([-\d]+) ([-\d]+)\)">/).map(Number);
     let [, n_x, n_y, n_w, n_h, s_box] = s_svg.match(/<svg x="([-\d.]+)" y="([-\d.]+)" width="([\d.]+)" height="([\d.]+)" viewBox="([^"]+)" preserveAspectRatio="none">/);
     let [n_x__box, n_y__box, n_w__box, n_h__box] = s_box.split(' ').map(Number);
     let n_x__own = (Number(n_x) + (a_n__px[0] - n_x__box) * Number(n_w) / n_w__box) * n_x__scale;
     let n_y__own = (Number(n_y) + (a_n__px[1] - n_y__box) * Number(n_h) / n_h__box) * n_y__scale;
+    // skewX: x grows with y by the angle's tangent
+    n_x__own += n_y__own * Math.tan(n_deg__skew * Math.PI / 180);
     let n_rad = n_deg * Math.PI / 180;
     return [n_x__move + n_x__own * Math.cos(n_rad) - n_y__own * Math.sin(n_rad), n_y__move + n_x__own * Math.sin(n_rad) + n_y__own * Math.cos(n_rad)];
 };
@@ -49,11 +55,14 @@ let a_o_picture = [
     { ...o_picture__plain, n_deg: 90 },
     { ...o_picture__plain, n_deg: -37, b_flip_x: true },
     { ...o_picture__plain, n_deg: 200, b_flip_y: true, a_n_ratio__crop: [0.1, 0.2, 0.3, 0.05], n_mm__size_x: 120 },
-    { ...o_picture__plain, b_flip_x: true, b_flip_y: true, a_n_ratio__crop: [0, 0.5, 0.25, 0], n_mm__x: -20.5, n_mm__y: 300 }
+    { ...o_picture__plain, b_flip_x: true, b_flip_y: true, a_n_ratio__crop: [0, 0.5, 0.25, 0], n_mm__x: -20.5, n_mm__y: 300 },
+    { ...o_picture__plain, n_ratio__stretch: 1.25 },
+    { ...o_picture__plain, n_deg__skew: 20 },
+    { ...o_picture__plain, n_deg: -37, b_flip_x: true, n_ratio__stretch: 0.6, n_deg__skew: -35, a_n_ratio__crop: [0.1, 0.2, 0.3, 0.05] }
 ];
 let a_a_n__px = [[1500, 1000], [1400, 700], [1800, 1250]];
 let f_s_name = function(o_picture){
-    return `turned ${o_picture.n_deg}${o_picture.b_flip_x ? ', mirrored x' : ''}${o_picture.b_flip_y ? ', mirrored y' : ''}, cut off ${o_picture.a_n_ratio__crop}`;
+    return `turned ${o_picture.n_deg}${o_picture.b_flip_x ? ', mirrored x' : ''}${o_picture.b_flip_y ? ', mirrored y' : ''}, cut off ${o_picture.a_n_ratio__crop}, stretched ${o_picture.n_ratio__stretch}, skewed ${o_picture.n_deg__skew}`;
 };
 
 Deno.test('what is left of the file, how large it is shown and how fine', function(){
@@ -64,6 +73,11 @@ Deno.test('what is left of the file, how large it is shown and how fine', functi
     assertAlmostEquals(n_y, 100, 1e-9, 'height');
     assertAlmostEquals(f_n_dpi(o_picture), 1800 / (120 / 25.4), 1e-9, 'pixels per inch');
     assert(String(f_a_n__px(o_picture__plain)) === '0,0,3000,2000' && String(f_a_n__size(o_picture__plain)) === '240,160', 'nothing cut off');
+    // stretched to 1.25 of its height: 240 x 200, and as fine as its 2000 pixels on 200 mm are; a skew changes neither
+    assert(String(f_a_n__size(a_o_picture[5])) === '240,200', String(f_a_n__size(a_o_picture[5])));
+    assertAlmostEquals(f_n_dpi(a_o_picture[5]), 254, 1e-9, 'pixels per inch, stretched');
+    assertAlmostEquals(f_n_dpi({ ...o_picture__plain, n_ratio__stretch: 0.5 }), 317.5, 1e-9, 'pixels per inch, pressed flat: the width tells');
+    assert(String(f_a_n__size(a_o_picture[6])) === '240,160', 'skewed');
 });
 
 Deno.test('the picture\'s own frame: there and back, and where its handles sit', function(){
@@ -78,6 +92,10 @@ Deno.test('the picture\'s own frame: there and back, and where its handles sit',
     f_assert_same_place(f_a_n__handle(a_o_picture[0], [1, 0]), [140 + 120, 95], 'side');
     f_assert_same_place(f_a_n__handle(a_o_picture[1], [-1, -1]), [140 + 80, 95 - 120], 'corner, turned');
     f_assert_same_place(f_a_n__handle(a_o_picture[1], [1, 0]), [140, 95 + 120], 'side, turned');
+    // skewed by 20: the top side, 80 above the middle, lies 80 tan 20 further right, the bottom side as far left; the sides' middles stay
+    f_assert_same_place(f_a_n__handle(a_o_picture[6], [-1, -1]), [20 + 80 * Math.tan(20 * Math.PI / 180), 15], 'corner, skewed');
+    f_assert_same_place(f_a_n__handle(a_o_picture[6], [1, 1]), [260 - 80 * Math.tan(20 * Math.PI / 180), 175], 'corner across, skewed');
+    f_assert_same_place(f_a_n__handle(a_o_picture[6], [1, 0]), [260, 95], 'side, skewed');
     // the handles are the corners of what is left of the file
     for(let o_picture of a_o_picture){
         let [n_x, n_y, n_w, n_h] = f_a_n__px(o_picture);
@@ -153,7 +171,7 @@ Deno.test('fitted: in the box\'s middle, as small as covers it or as large as fi
             assert(f_b_inside(o_contain), `${f_s_name(o_picture)}: does not fit into ${a_n__box}`);
             assert(!f_b_inside({ ...o_contain, n_mm__size_x: o_contain.n_mm__size_x * 1.001 }), `${f_s_name(o_picture)}: fits into ${a_n__box} with room to spare`);
             // nothing else changes
-            for(let s_name of ['n_deg', 'b_flip_x', 'b_flip_y', 'n_px__x', 'n_px__y']){ assert(o_cover[s_name] === o_picture[s_name] && o_contain[s_name] === o_picture[s_name], s_name); }
+            for(let s_name of ['n_deg', 'b_flip_x', 'b_flip_y', 'n_px__x', 'n_px__y', 'n_ratio__stretch', 'n_deg__skew']){ assert(o_cover[s_name] === o_picture[s_name] && o_contain[s_name] === o_picture[s_name], s_name); }
             assert(String(o_cover.a_n_ratio__crop) === String(o_picture.a_n_ratio__crop), 'what is cut off');
         }
     }
@@ -162,6 +180,30 @@ Deno.test('fitted: in the box\'s middle, as small as covers it or as large as fi
     assertAlmostEquals(f_o_picture__fitted(f_o_picture(3000, 2000), [0, 0, 277, 190], false).n_mm__size_x, 277, 1e-9, 'contain');
     // a quarter turned, its width stands upright: as wide as the box is high
     assertAlmostEquals(f_o_picture__fitted({ ...f_o_picture(3000, 2000), n_deg: 90 }, [0, 0, 277, 190], false).n_mm__size_x, 190, 1e-6, 'contain, a quarter turned');
+});
+
+Deno.test('spread over a box: stretched along its own two directions until it just covers the box', function(){
+    for(let o_picture of a_o_picture){
+        for(let a_n__box of [[-2, -2, 279, 192], [30, 40, 60, 200]]){
+            let o_spread = f_o_picture__spread(o_picture, a_n__box);
+            let s_name = `${f_s_name(o_picture)} over ${a_n__box}`;
+            f_assert_same_place([o_spread.n_mm__x, o_spread.n_mm__y], [(a_n__box[0] + a_n__box[2]) / 2, (a_n__box[1] + a_n__box[3]) / 2], `${s_name}: middle`);
+            assert(f_b_covered(o_spread, a_n__box), `${s_name}: does not cover it`);
+            // neither narrower nor lower would do
+            assert(!f_b_covered({ ...o_spread, n_mm__size_x: o_spread.n_mm__size_x * 0.999, n_ratio__stretch: o_spread.n_ratio__stretch / 0.999 }, a_n__box), `${s_name}: covers it with room to spare along x`);
+            assert(!f_b_covered({ ...o_spread, n_ratio__stretch: o_spread.n_ratio__stretch * 0.999 }, a_n__box), `${s_name}: covers it with room to spare along y`);
+            for(let s_name__same of ['n_deg', 'n_deg__skew', 'b_flip_x', 'b_flip_y', 'n_px__x', 'n_px__y']){ assert(o_spread[s_name__same] === o_picture[s_name__same], s_name__same); }
+            assert(String(o_spread.a_n_ratio__crop) === String(o_picture.a_n_ratio__crop), 'what is cut off');
+        }
+    }
+    // lying straight it is the box: 3000 x 2000 pixels on 281 x 194, a little higher than its shape
+    let o_spread = f_o_picture__spread(o_picture__plain, [-2, -2, 279, 192]);
+    f_assert_same_place(f_a_n__size(o_spread), [281, 194], 'the box\'s size');
+    f_assert_same_place(f_a_n__handle(o_spread, [-1, -1]), [-2, -2], 'the box\'s corner');
+    f_assert_same_place(f_a_n__handle(o_spread, [1, 1]), [279, 192], 'the box\'s corner across');
+    assertAlmostEquals(o_spread.n_ratio__stretch, 194 / (281 * 2 / 3), 1e-12, 'stretch');
+    // a quarter turned, its width stands upright: 194 wide, 281 high
+    f_assert_same_place(f_a_n__size(f_o_picture__spread(a_o_picture[1], [-2, -2, 279, 192])), [194, 281], 'a quarter turned', 1e-9);
 });
 
 Deno.test('covered: every corner of the box in the picture', function(){
@@ -300,10 +342,126 @@ Deno.test('cut off by the pointer: the side taken comes to the pointer, the side
     }
 });
 
+// The two ends of a side of the picture's frame on the calendar: the side at n_sign, -1 or 1, along the frame's axis n_axis.
+let f_a_a_n__end = function(o_picture, n_axis, n_sign){
+    return [-1, 1].map(function(n_sign__along){
+        let a_n__sign = [0, 0];
+        a_n__sign[n_axis] = n_sign;
+        a_n__sign[1 - n_axis] = n_sign__along;
+        return f_a_n__handle(o_picture, a_n__sign);
+    });
+};
+
+Deno.test('stretched by a side: the side comes to the pointer, the side across stays, along the side nothing changes', function(){
+    for(let o_picture of a_o_picture){
+        let a_n__size = f_a_n__size(o_picture);
+        a_s_side.forEach(function(s_side, n_idx){
+            let n_axis = n_idx % 2;
+            let n_sign = n_idx < 2 ? -1 : 1;
+            let a_a_n__across = f_a_a_n__end(o_picture, n_axis, -n_sign);
+            // the file's places that show at the ends of the side across, and in the picture's middle
+            let a_a_n__px = [...a_a_n__across, [o_picture.n_mm__x, o_picture.n_mm__y]].map(function(a_n){ return f_a_n__to_px(o_picture, a_n); });
+            for(let n_scale of [0.5, 1, 1.8]){
+                // the pointer: that many times the picture's size from the side across, and somewhere along the side
+                let a_n__own = [0, 0];
+                a_n__own[n_axis] = n_sign * a_n__size[n_axis] * (n_scale - 0.5);
+                a_n__own[1 - n_axis] = 7;
+                let o_stretched = f_o_picture__stretched(o_picture, s_side, f_a_n__calendar(o_picture, a_n__own));
+                let s_name = `${f_s_name(o_picture)}: ${s_side} ${n_scale}`;
+                assertAlmostEquals(f_a_n__size(o_stretched)[n_axis], a_n__size[n_axis] * n_scale, 1e-9, `${s_name}: across the side`);
+                assertAlmostEquals(f_a_n__size(o_stretched)[1 - n_axis], a_n__size[1 - n_axis], 1e-9, `${s_name}: along the side`);
+                f_a_a_n__end(o_stretched, n_axis, -n_sign).forEach(function(a_n, n_idx__end){ f_assert_same_place(a_n, a_a_n__across[n_idx__end], `${s_name}: the side across`, 1e-9); });
+                // the side taken lies under the pointer: its ends are as far across as the pointer is
+                for(let a_n of f_a_a_n__end(o_stretched, n_axis, n_sign)){ assertAlmostEquals(f_a_n__own(o_picture, a_n)[n_axis], a_n__own[n_axis], 1e-9, `${s_name}: the side taken`); }
+                // what the file shows at the side across stays there, and what was in the middle is in the middle
+                f_assert_same_place(f_a_n__of_px(o_stretched, a_a_n__px[0]), a_a_n__across[0], `${s_name}: the file at the side across`, 1e-8);
+                f_assert_same_place(f_a_n__of_px(o_stretched, a_a_n__px[1]), a_a_n__across[1], `${s_name}: the file at the side across`, 1e-8);
+                f_assert_same_place(f_a_n__of_px(o_stretched, a_a_n__px[2]), [o_stretched.n_mm__x, o_stretched.n_mm__y], `${s_name}: the file's middle`, 1e-8);
+                for(let s_name__same of ['n_deg', 'n_deg__skew', 'b_flip_x', 'b_flip_y']){ assert(o_stretched[s_name__same] === o_picture[s_name__same], `${s_name}: ${s_name__same}`); }
+                assert(String(o_stretched.a_n_ratio__crop) === String(o_picture.a_n_ratio__crop), `${s_name}: what is cut off`);
+            }
+            // pushed through the side across: n_mm__size_min is left, and the side across stays
+            let a_n__own = [0, 0];
+            a_n__own[n_axis] = -n_sign * a_n__size[n_axis] * 3;
+            let o_small = f_o_picture__stretched(o_picture, s_side, f_a_n__calendar(o_picture, a_n__own));
+            assertAlmostEquals(f_a_n__size(o_small)[n_axis], n_mm__size_min, 1e-9, 'smallest');
+            f_assert_same_place(f_a_a_n__end(o_small, n_axis, -n_sign)[0], a_a_n__across[0], 'smallest: the side across', 1e-9);
+        });
+    }
+    // the plain picture, 240 x 160 from 20 to 260: its right side pulled to 290 makes it 270 wide around 155, its height against that 160 / 180
+    let o_stretched = f_o_picture__stretched(o_picture__plain, 'right', [290, 30]);
+    assert(o_stretched.n_mm__size_x === 270 && o_stretched.n_mm__x === 155 && o_stretched.n_mm__y === 95, JSON.stringify(o_stretched));
+    assertAlmostEquals(o_stretched.n_ratio__stretch, 160 / 180, 1e-12, 'stretch');
+});
+
+Deno.test('skewed by a side: the side slides along itself as far as the pointer goes along it, the side across stays', function(){
+    for(let o_picture of a_o_picture){
+        a_s_side.forEach(function(s_side, n_idx){
+            let n_axis = n_idx % 2;
+            let n_sign = n_idx < 2 ? -1 : 1;
+            let a_a_n__across = f_a_a_n__end(o_picture, n_axis, -n_sign);
+            let a_a_n__taken = f_a_a_n__end(o_picture, n_axis, n_sign);
+            let n_mm__side = Math.hypot(a_a_n__taken[1][0] - a_a_n__taken[0][0], a_a_n__taken[1][1] - a_a_n__taken[0][1]);
+            let a_n__along = [(a_a_n__taken[1][0] - a_a_n__taken[0][0]) / n_mm__side, (a_a_n__taken[1][1] - a_a_n__taken[0][1]) / n_mm__side];
+            let a_a_n__px = a_a_n__across.map(function(a_n){ return f_a_n__to_px(o_picture, a_n); });
+            let a_n__side = [0, 0];
+            a_n__side[n_axis] = n_sign;
+            let a_n__middle = f_a_n__handle(o_picture, a_n__side);
+            // the pointer: that far along the side from its middle, and 9 off the side, which does not count
+            let f_a_n__pointer = function(n_mm){ return [a_n__middle[0] + n_mm * a_n__along[0] - 9 * a_n__along[1], a_n__middle[1] + n_mm * a_n__along[1] + 9 * a_n__along[0]]; };
+            for(let n_mm of [-30, 0, 12.5]){
+                let o_skewed = f_o_picture__skewed(o_picture, s_side, f_a_n__pointer(n_mm));
+                let s_name = `${f_s_name(o_picture)}: ${s_side} by ${n_mm}`;
+                f_a_a_n__end(o_skewed, n_axis, -n_sign).forEach(function(a_n, n_idx__end){ f_assert_same_place(a_n, a_a_n__across[n_idx__end], `${s_name}: the side across`, 1e-9); });
+                f_a_a_n__end(o_skewed, n_axis, n_sign).forEach(function(a_n, n_idx__end){
+                    f_assert_same_place(a_n, [a_a_n__taken[n_idx__end][0] + n_mm * a_n__along[0], a_a_n__taken[n_idx__end][1] + n_mm * a_n__along[1]], `${s_name}: the side taken`, 1e-9);
+                });
+                // what the file shows at the side across stays there
+                a_a_n__px.forEach(function(a_n__px, n_idx__end){ f_assert_same_place(f_a_n__of_px(o_skewed, a_n__px), a_a_n__across[n_idx__end], `${s_name}: the file at the side across`, 1e-8); });
+                for(let s_name__same of ['b_flip_x', 'b_flip_y']){ assert(o_skewed[s_name__same] === o_picture[s_name__same], `${s_name}: ${s_name__same}`); }
+                assert(String(o_skewed.a_n_ratio__crop) === String(o_picture.a_n_ratio__crop), `${s_name}: what is cut off`);
+                // top or bottom: the skew alone changes
+                if(n_axis){
+                    assertAlmostEquals(o_skewed.n_deg, o_picture.n_deg, 1e-9, `${s_name}: turn`);
+                    f_assert_same_place(f_a_n__size(o_skewed), f_a_n__size(o_picture), `${s_name}: size`, 1e-9);
+                }
+            }
+            // pulled far along: the sides lean to each other by n_deg__skew_max and no more, and the side across still stays
+            for(let n_mm of [-5000, 5000]){
+                let o_far = f_o_picture__skewed(o_picture, s_side, f_a_n__pointer(n_mm));
+                let [a_n__from, a_n__to] = f_a_a_n__end(o_far, n_axis, -n_sign);
+                let [a_n__corner] = f_a_a_n__end(o_far, n_axis, n_sign);
+                // the corner between the side across and its neighbour: 90 less n_deg__skew_max, or 90 more
+                let n_deg__corner = Math.abs(Math.atan2(
+                    (a_n__to[0] - a_n__from[0]) * (a_n__corner[1] - a_n__from[1]) - (a_n__to[1] - a_n__from[1]) * (a_n__corner[0] - a_n__from[0]),
+                    (a_n__to[0] - a_n__from[0]) * (a_n__corner[0] - a_n__from[0]) + (a_n__to[1] - a_n__from[1]) * (a_n__corner[1] - a_n__from[1])
+                )) * 180 / Math.PI;
+                assertAlmostEquals(Math.abs(n_deg__corner - 90), n_deg__skew_max, 1e-6, `${f_s_name(o_picture)}: ${s_side} pulled ${n_mm}`);
+                f_assert_same_place(a_n__from, a_a_n__across[0], `${f_s_name(o_picture)}: ${s_side} pulled ${n_mm}: the side across`, 1e-8);
+            }
+        });
+    }
+    // the plain picture, 160 high: its top side 40 to the right leans its upright sides atan(40 / 160) to the right, and moves its middle by 20
+    let o_skewed = f_o_picture__skewed(o_picture__plain, 'top', [180, 0]);
+    assertAlmostEquals(o_skewed.n_deg__skew, Math.atan(0.25) * 180 / Math.PI, 1e-9, 'top side: skew');
+    assert(o_skewed.n_deg === 0 && o_skewed.n_mm__size_x === 240 && o_skewed.n_ratio__stretch === 1 && o_skewed.n_mm__x === 160 && o_skewed.n_mm__y === 95, JSON.stringify(o_skewed));
+    // its right side 30 down: top and bottom lean by atan(30 / 240), a turn; the upright sides, still upright on the calendar, lean as far against the turn
+    o_skewed = f_o_picture__skewed(o_picture__plain, 'right', [260, 125]);
+    assertAlmostEquals(o_skewed.n_deg, Math.atan(0.125) * 180 / Math.PI, 1e-9, 'right side: turn');
+    assertAlmostEquals(o_skewed.n_deg__skew, -Math.atan(0.125) * 180 / Math.PI, 1e-9, 'right side: skew');
+    f_assert_same_place(f_a_n__size(o_skewed), [2 * Math.hypot(120, 15), 160 * Math.cos(Math.atan(0.125))], 'right side: size', 1e-9);
+    f_assert_same_place([o_skewed.n_mm__x, o_skewed.n_mm__y], [140, 110], 'right side: middle');
+});
+
 Deno.test('the SVG puts every pixel where the picture has it', function(){
     assert(
-        f_s_picture(a_o_picture[3], 'blob:a') === '<g transform="translate(140 95) rotate(200) scale(1 -1)"><svg x="-60" y="-50" width="120" height="100" viewBox="300 400 1800 1500" preserveAspectRatio="none"><image href="blob:a" width="3000" height="2000"/></svg></g>',
+        f_s_picture(a_o_picture[3], 'blob:a') === '<g transform="translate(140 95) rotate(200) skewX(0) scale(1 -1)"><svg x="-60" y="-50" width="120" height="100" viewBox="300 400 1800 1500" preserveAspectRatio="none"><image href="blob:a" width="3000" height="2000"/></svg></g>',
         f_s_picture(a_o_picture[3], 'blob:a')
+    );
+    // stretched and skewed: the inner svg as high as the stretch makes it, the skew against SVG's own sense, which leans to the left at the top
+    assert(
+        f_s_picture({ ...a_o_picture[5], n_deg__skew: 20 }, 'blob:a') === '<g transform="translate(140 95) rotate(0) skewX(-20) scale(1 1)"><svg x="-120" y="-100" width="240" height="200" viewBox="0 0 3000 2000" preserveAspectRatio="none"><image href="blob:a" width="3000" height="2000"/></svg></g>',
+        f_s_picture({ ...a_o_picture[5], n_deg__skew: 20 }, 'blob:a')
     );
     for(let o_picture of a_o_picture){
         let s_svg = f_s_picture(o_picture, 'blob:a');
