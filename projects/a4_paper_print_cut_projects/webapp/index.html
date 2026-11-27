@@ -1,0 +1,476 @@
+<!-- Copyright (C) [Jonas Immanuel Frey] - Licensed under GPL -->
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>VeryOS print and cut</title>
+<link rel="icon" href="data:,">
+<style>
+/* The VeryOS colours of the lichterkette and pucklight apps. */
+:root{
+    --s_col__black: #101517;
+    --s_col__panel: #192222;
+    --s_col__group: #1f2a2a;
+    --s_col__raised: #2a3737;
+    --s_col__line: #344040;
+    --s_col__text: #f7f2e6;
+    --s_col__muted: #b9bcb0;
+    --s_col__gold: #f0b750;
+    --s_col__warn: #ff9d3c;
+    color-scheme: dark;
+}
+*{ box-sizing: border-box; }
+/* hidden is hidden, whatever an element's own display says */
+[hidden]{ display: none !important; }
+html, body{ height: 100%; margin: 0; }
+*{ scrollbar-width: thin; scrollbar-color: #4a5959 transparent; }
+/* The page: a bar with the steps on top; under it the settings of the step that is
+   open and the sheet, each scrolling on its own. */
+body{
+    display: grid;
+    grid-template: auto minmax(0, 1fr) / minmax(0, 1fr);
+    background: var(--s_col__black);
+    color: var(--s_col__text);
+    font: 14px/1.4 system-ui, -apple-system, "Segoe UI", Roboto, Ubuntu, sans-serif;
+}
+:focus-visible{ outline: 2px solid var(--s_col__gold); outline-offset: 1px; }
+
+#el_bar{ display: flex; align-items: center; gap: 12px; padding: 0 16px; background: var(--s_col__panel); border-bottom: 1px solid var(--s_col__line); }
+#el_logo{ flex: none; width: 30px; color: var(--s_col__text); }
+h1{ margin: 0 12px 0 0; font-size: 16px; font-weight: 650; color: var(--s_col__gold); white-space: nowrap; }
+#el_step{ display: flex; flex: 1; align-self: stretch; gap: 2px; min-width: 0; overflow-x: auto; }
+#el_step button{ display: flex; align-items: center; gap: 8px; min-height: 48px; padding: 0 14px; border: 0; border-bottom: 2px solid transparent; border-radius: 0; background: none; color: var(--s_col__muted); white-space: nowrap; }
+#el_step button:hover{ background: none; color: var(--s_col__text); }
+#el_step b{ display: grid; place-items: center; width: 22px; height: 22px; border: 1px solid var(--s_col__muted); border-radius: 50%; font-size: 12px; font-weight: 650; }
+#el_step button[aria-current]{ border-bottom-color: var(--s_col__gold); color: var(--s_col__text); }
+#el_step button[aria-current] b{ border-color: var(--s_col__gold); background: var(--s_col__gold); color: var(--s_col__black); }
+/* a step with a field that is wrong */
+#el_step button.bad b{ border-color: var(--s_col__warn); background: var(--s_col__warn); color: var(--s_col__black); }
+
+/* the saved projects: in the bar the open one's name, under it, opened, the panel */
+#el_project_box{ position: relative; flex: none; }
+#el_project_box[inert]{ opacity: .4; }
+#el_project_box summary{ display: flex; align-items: baseline; gap: 8px; max-width: 260px; padding: 5px 12px; border: 1px solid var(--s_col__line); border-radius: 8px; list-style: none; white-space: nowrap; cursor: pointer; }
+#el_project_box summary::-webkit-details-marker{ display: none; }
+#el_project_box summary:hover, #el_project_box[open] summary{ border-color: var(--s_col__gold); }
+#el_project_box summary small{ color: var(--s_col__muted); font-size: 11px; text-transform: uppercase; letter-spacing: .08em; }
+#el_project_title{ overflow: hidden; text-overflow: ellipsis; }
+/* unsaved changes */
+#el_project_box summary:has([data-state=dirty])::after{ content: ''; flex: none; align-self: center; width: 6px; height: 6px; border-radius: 50%; background: var(--s_col__gold); }
+#el_project{ position: absolute; z-index: 2; top: calc(100% + 6px); right: 0; width: 320px; max-width: calc(100vw - 24px); max-height: calc(100vh - 70px); padding: 12px; overflow-y: auto; border: 1px solid var(--s_col__line); border-radius: 8px; background: var(--s_col__panel); box-shadow: 0 10px 30px #000000a0; }
+#el_project h2{ margin: 14px 0 8px; }
+#el_project_name{ width: 100%; height: 32px; padding: 0 8px; border: 1px solid var(--s_col__line); border-radius: 6px; background: var(--s_col__black); color: var(--s_col__text); font: inherit; }
+#el_project_name::placeholder{ color: var(--s_col__muted); }
+#el_project_state{ margin: 6px 0 10px; color: var(--s_col__muted); font-size: 12px; }
+#el_project_state[data-state=dirty]{ color: var(--s_col__gold); }
+#el_project_state[data-state=note]{ color: var(--s_col__warn); }
+.tool_row{ display: flex; flex-wrap: wrap; gap: 6px; }
+button.danger{ border-color: #b3261e; background: #b3261e; color: #ffffff; font-weight: 650; }
+button.danger:hover{ background: #cf3a31; }
+.question{ padding: 8px; border: 1px solid var(--s_col__warn); border-radius: 6px; }
+.question p, .project--deleting p{ margin: 0 0 8px; font-size: 13px; }
+#el_project_list, #el_project_new{ margin: 0; padding: 0; list-style: none; }
+.project_empty{ color: var(--s_col__muted); font-size: 12px; }
+.project{ display: flex; align-items: stretch; margin-bottom: 4px; border: 1px solid var(--s_col__line); border-radius: 6px; overflow: hidden; }
+.project[aria-current=true]{ border-color: var(--s_col__gold); }
+.project--deleting{ display: block; padding: 8px; border-color: var(--s_col__warn); }
+.project__open{ flex: 1; min-width: 0; min-height: 0; padding: 6px 8px; border: 0; border-radius: 0; background: none; text-align: left; }
+.project__name{ display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+/* what a project is, in full */
+.project__open small{ display: block; color: var(--s_col__muted); font-size: 11px; }
+.project__delete{ flex: none; width: 32px; min-height: 0; padding: 0; border: 0; border-left: 1px solid var(--s_col__line); border-radius: 0; background: none; color: var(--s_col__muted); font-size: 16px; }
+.project__delete:hover{ background: #b3261e; color: #ffffff; }
+
+#el_app{ display: grid; grid-template-columns: 360px minmax(0, 1fr); min-height: 0; }
+/* the settings, and under them what is wrong: there it never moves the sheet under the pointer */
+#el_side{ display: flex; flex-direction: column; min-height: 0; background: var(--s_col__panel); border-right: 1px solid var(--s_col__line); }
+#el_panel{ flex: 1; min-height: 0; padding: 16px; overflow-y: auto; }
+#el_status{ flex: none; max-height: 40%; margin: 0; padding: 10px 16px 10px 40px; overflow-y: auto; border-top: 1px solid var(--s_col__line); background: #2b2216; color: var(--s_col__warn); font-size: 13px; white-space: pre-line; text-indent: -24px; }
+#el_status::before{ content: '⚠'; display: inline-block; width: 24px; text-indent: 0; }
+#el_status:empty{ display: none; }
+.lead{ margin: 0 0 14px; color: var(--s_col__muted); font-size: 13px; }
+.group{ margin-bottom: 12px; padding: 12px; border: 1px solid var(--s_col__line); border-radius: 8px; background: var(--s_col__group); }
+.group > :last-child{ margin-bottom: 0; }
+h2{ margin: 0 0 10px; font-size: 11px; font-weight: 650; text-transform: uppercase; letter-spacing: .08em; color: var(--s_col__muted); }
+.note{ margin: 8px 0; color: var(--s_col__muted); font-size: 12px; }
+fieldset{ min-width: 0; margin: 0; padding: 0; border: 0; }
+legend{ padding: 0; }
+
+/* A setting: its name left, its field right. A name with a dotted line has more to say
+   when the pointer rests on it. */
+.row{ display: flex; align-items: center; justify-content: space-between; gap: 10px; min-height: 30px; margin-bottom: 8px; }
+.row > span[title], legend[title], h2[title]{ text-decoration: underline dotted #5d6b68; text-underline-offset: 4px; cursor: help; }
+.field{ display: flex; flex: none; align-items: center; gap: 6px; }
+.field i{ width: 22px; color: var(--s_col__muted); font-size: 12px; font-style: normal; }
+.field b{ color: var(--s_col__muted); font-weight: 400; }
+input[type=number], select{
+    height: 30px;
+    padding: 0 7px;
+    border: 1px solid var(--s_col__line);
+    border-radius: 6px;
+    background: var(--s_col__black);
+    color: var(--s_col__text);
+    font: inherit;
+}
+input[type=number]{ width: 78px; }
+/* two fields in a row: width × height, x / y */
+.field b ~ input, .field input:has(~ b){ width: 66px; }
+input:invalid{ border-color: var(--s_col__warn); }
+input[type=radio]{ accent-color: var(--s_col__gold); }
+
+button{
+    min-height: 32px;
+    padding: 0 12px;
+    border: 1px solid var(--s_col__line);
+    border-radius: 6px;
+    background: var(--s_col__raised);
+    color: var(--s_col__text);
+    font: inherit;
+    cursor: pointer;
+}
+button:hover{ background: #324141; }
+button.main{ border-color: var(--s_col__gold); background: var(--s_col__gold); color: var(--s_col__black); font-weight: 650; }
+button.main:hover{ background: #f6c872; }
+button.ghost{ border-color: transparent; background: none; color: var(--s_col__muted); }
+button.ghost:hover{ background: var(--s_col__raised); color: var(--s_col__text); }
+button:disabled{ opacity: .4; cursor: default; pointer-events: none; }
+.buttons{ display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 8px; }
+/* a pattern of one sheet has one cutting file */
+.buttons.one{ grid-template-columns: 1fr; }
+.tools{ display: flex; gap: 6px; margin-bottom: 10px; }
+.tools button{ flex: auto; padding: 0 5px; }
+.tools svg{ display: block; width: 18px; height: 18px; margin: auto; fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; pointer-events: none; }
+.next{ display: flex; justify-content: flex-end; margin: 0; }
+
+/* on or off */
+input.switch{ flex: none; appearance: none; position: relative; width: 36px; height: 20px; margin: 0; border-radius: 10px; background: var(--s_col__line); cursor: pointer; transition: background .15s; }
+input.switch::after{ content: ''; position: absolute; top: 3px; left: 3px; width: 14px; height: 14px; border-radius: 50%; background: var(--s_col__muted); transition: transform .15s; }
+input.switch:checked{ background: var(--s_col__gold); }
+input.switch:checked::after{ background: var(--s_col__black); transform: translateX(16px); }
+/* some of several: the shapes and doors that occur */
+.chips{ margin-bottom: 10px; }
+.chips legend{ margin-bottom: 6px; }
+.chips div{ display: flex; flex-wrap: wrap; gap: 6px; }
+.chips label{ display: flex; align-items: center; gap: 6px; padding: 4px 11px 4px 8px; border: 1px solid var(--s_col__line); border-radius: 16px; color: var(--s_col__muted); cursor: pointer; user-select: none; }
+.chips input{ position: absolute; opacity: 0; pointer-events: none; }
+.chips svg{ width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 1.4; }
+.chips label:has(:checked){ border-color: var(--s_col__gold); background: #f0b75022; color: var(--s_col__text); }
+.chips label:has(:focus-visible), .seg label:has(:focus-visible){ outline: 2px solid var(--s_col__gold); outline-offset: 1px; }
+/* one of a few, side by side */
+.seg{ display: inline-flex; padding: 2px; border: 1px solid var(--s_col__line); border-radius: 8px; background: var(--s_col__black); }
+.seg label{ flex: 1; border-radius: 6px; }
+.seg input{ position: absolute; opacity: 0; pointer-events: none; }
+.seg span{ display: block; padding: 4px 12px; border-radius: 6px; color: var(--s_col__muted); text-align: center; white-space: nowrap; cursor: pointer; }
+.seg span:hover{ color: var(--s_col__text); }
+.seg :checked + span{ background: var(--s_col__raised); color: var(--s_col__text); }
+.seg :disabled + span{ opacity: .4; cursor: default; }
+/* a sheet that has a picture */
+.seg .has span::after{ content: ''; display: inline-block; width: 6px; height: 6px; margin-left: 7px; border-radius: 50%; background: var(--s_col__gold); vertical-align: middle; }
+#el_picture_sheet{ display: flex; margin-bottom: 12px; }
+/* one of a few, each with a line about it */
+.pick{ display: grid; gap: 6px; margin-bottom: 10px; }
+.pick label{ display: flex; align-items: baseline; gap: 9px; padding: 7px 10px; border: 1px solid var(--s_col__line); border-radius: 6px; cursor: pointer; }
+.pick label:has(:checked){ border-color: var(--s_col__gold); background: #f0b75022; }
+.pick small{ display: block; color: var(--s_col__muted); font-size: 12px; }
+/* a picture's sides, laid out as they lie */
+.crop{ display: grid; grid-template-columns: repeat(3, 78px); grid-template-rows: repeat(3, 30px); justify-content: center; gap: 6px; }
+.crop .top{ grid-area: 1 / 2; }
+.crop .left{ grid-area: 2 / 1; }
+.crop span{ grid-area: 2 / 2; border: 1px dashed #5d6b68; border-radius: 4px; }
+.crop .right{ grid-area: 2 / 3; }
+.crop .bottom{ grid-area: 3 / 2; }
+#el_detail{ display: block; width: 100%; height: 130px; margin-bottom: 10px; background: #ffffff; border-radius: 4px; }
+#el_own button, #el_match, #el_match_undo, #el_print, #el_split{ width: 100%; }
+/* a switch that is on */
+button[aria-pressed=true]{ border-color: var(--s_col__gold); background: #f0b75022; }
+#el_match_undo{ margin-top: 8px; }
+
+/* The sheet: above it which one and how large. */
+#el_stage{ display: flex; flex-direction: column; min-width: 0; min-height: 0; }
+#el_tool{ display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; padding: 8px 16px; border-bottom: 1px solid var(--s_col__line); }
+#el_shown_note{ flex: 1; margin: 0; }
+#el_legend_box{ position: relative; }
+#el_legend_box summary{ padding: 5px 12px; border: 1px solid var(--s_col__line); border-radius: 8px; color: var(--s_col__muted); list-style: none; cursor: pointer; }
+#el_legend_box summary::-webkit-details-marker{ display: none; }
+#el_legend_box summary:hover, #el_legend_box[open] summary{ color: var(--s_col__text); }
+#el_legend{ position: absolute; z-index: 1; top: calc(100% + 6px); right: 0; width: 280px; margin: 0; padding: 12px 12px 8px; border: 1px solid var(--s_col__line); border-radius: 8px; background: var(--s_col__panel); box-shadow: 0 10px 30px #000000a0; list-style: none; font-size: 12px; color: var(--s_col__muted); }
+#el_legend li{ display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
+#el_legend svg{ width: 30px; height: 10px; flex: none; background: #ffffff; }
+/* matching by four points: what to click next, over the sheet where the clicks go */
+#el_match_bar{ display: flex; flex-wrap: wrap; align-items: center; gap: 8px; padding: 8px 16px; border-bottom: 1px solid var(--s_col__gold); background: #f0b75022; }
+#el_match_step{ flex: 1; min-width: 200px; margin: 0; font-weight: 650; }
+#el_view{ flex: 1; min-height: 0; }
+#el_scroll{ display: flex; width: 100%; height: 100%; padding: 28px; overflow: auto; }
+.sheet{ flex: none; margin: auto; background: #ffffff; }
+.sheet > svg{ display: block; }
+@media screen{
+    /* one sheet at a time, as large as fits between the bars, times the zoom; lines one pixel wide whatever the scale */
+    #el_view{ container-type: size; }
+    .sheet:not(.shown){ display: none; }
+    /* user-select: a drag on a sheet marks none of its words */
+    .sheet{ width: calc(min(100vw - 440px, (100vh - 200px) * var(--n_ratio__sheet, 1.414)) * var(--n_zoom, 1)); box-shadow: 0 10px 40px #00000080; user-select: none; }
+    .sheet{ width: calc(min(100cqw - 56px, (100cqh - 56px) * var(--n_ratio__sheet, 1.414)) * var(--n_zoom, 1)); }
+    /* a picture's handles show around the paper too */
+    .sheet > svg{ width: 100%; height: auto; overflow: visible; }
+    .sheet path, .sheet rect, .sheet polygon, .sheet circle, .sheet line{ vector-effect: non-scaling-stroke; stroke-width: 1px; }
+    /* on a picture the lines get a light rim */
+    .has_picture .cut, .has_picture .opening{ filter: drop-shadow(0 0 0.4px #ffffff) drop-shadow(0 0 0.4px #ffffff); }
+    .sheet .margin{ fill: none; stroke: #9aa0a0; stroke-dasharray: 5 4; }
+    .sheet .edge{ fill: none; stroke: #9aa0a0; }
+    .sheet .opening{ fill: none; stroke: #303838; stroke-dasharray: 4 3; }
+    .sheet .hit{ fill: transparent; stroke: none; cursor: move; pointer-events: all; touch-action: none; }
+    .sheet .hit:hover{ fill: #f0b75030; }
+    .sheet .hit.selected{ stroke: var(--s_col__gold); stroke-width: 3px; fill: #f0b75030; }
+    .sheet .frame{ fill: none; stroke: var(--s_col__gold); stroke-width: 1.5px; }
+    /* its handles cut off */
+    .sheet .frame.crop{ stroke-dasharray: 6 4; }
+    .sheet .handle{ fill: var(--s_col__gold); stroke: #101517; cursor: crosshair; pointer-events: all; touch-action: none; }
+    .sheet .handle.side{ fill: #ffffff; }
+    .sheet .handle.turn{ fill: #101517; stroke: var(--s_col__gold); stroke-width: 2px; cursor: grab; }
+    body[data-step=picture] .has_picture{ cursor: move; touch-action: none; }
+    /* matching by four points: the picture's points gold, the pattern's places white, a
+       line from each point to its place; what is not being clicked steps back */
+    .sheet .match{ pointer-events: none; }
+    .sheet circle.match.from{ fill: var(--s_col__gold); stroke: #101517; }
+    .sheet circle.match.to{ fill: #ffffff; stroke: #101517; }
+    .sheet circle.match.next{ fill: none; stroke: var(--s_col__gold); stroke-width: 2px; }
+    .sheet line.match{ stroke: var(--s_col__gold); stroke-dasharray: 4 3; }
+    .sheet text.match{ fill: #101517; font-family: system-ui, sans-serif; font-weight: 700; text-anchor: middle; dominant-baseline: central; }
+    body[data-match] .sheet.matching{ cursor: crosshair; touch-action: none; }
+    body[data-match=from] .sheet.matching .cut{ opacity: .3; }
+    body[data-match=to] .sheet.matching .picture{ opacity: .55; }
+}
+/* A narrow window: the sheet on top, the settings under it. On the screen only: a
+   printed page counts as narrow too, and a line under the sheets would make a page more. */
+@media screen and (max-width: 760px){
+    #el_bar{ flex-wrap: wrap; padding-top: 8px; }
+    h1{ flex: 1; }
+    #el_step{ order: 1; flex-basis: 100%; scrollbar-width: none; }
+    /* the projects' panel under the whole bar, as wide as the window */
+    #el_bar{ position: relative; }
+    #el_project_box{ position: static; }
+    #el_project_box summary{ max-width: 150px; }
+    #el_project{ left: 12px; right: 12px; width: auto; max-width: none; }
+    #el_step button{ min-height: 40px; padding: 0 10px; }
+    #el_app{ grid-template-columns: minmax(0, 1fr); grid-template-rows: 46vh minmax(0, 1fr); }
+    #el_stage{ order: -1; border-bottom: 1px solid var(--s_col__line); }
+    #el_side{ border-right: 0; }
+    #el_tool{ padding: 6px 12px; }
+    #el_scroll{ padding: 24px; }
+    .sheet{ width: calc(min(100cqw - 48px, (100cqh - 48px) * var(--n_ratio__sheet, 1.414)) * var(--n_zoom, 1)); }
+}
+/* Print: every sheet of paper is a page, its top left corner the page's. The page's size
+   and the print's shift are set with the settings, see f_update. What a page shows
+   follows body's data-print. */
+@media print{
+    #el_bar, #el_side, #el_tool, #el_match_bar, .screen{ display: none; }
+    body{ display: block; background: #ffffff; }
+    #el_app, #el_stage, #el_view, #el_scroll{ display: block; height: auto; padding: 0; overflow: visible; }
+    .sheet{ margin: 0; overflow: hidden; break-after: page; }
+    body[data-print=cut] .picture{ display: none; }
+    body[data-print=picture] .has_picture .cut{ display: none; }
+}
+</style>
+<style id="el_style__page"></style>
+</head>
+<body data-step="paper">
+<header id="el_bar">
+    <svg id="el_logo" viewBox="0 0 43.9095293518 31.2528266758" role="img" aria-label="VeryOS logo"><path fill="currentColor" fill-rule="evenodd" d="M 7.7528133542 9.1080260785 L 4.6193976626 1.5432914191 L 0 3.4567085809 L 11.5135290962 31.2528266758 L 32.3960002556 31.2528266758 L 43.9095293518 3.4567085809 L 39.2901316892 1.5432914191 L 36.1567159975 9.1080260785 A 15.6264133379 15.6264133379 0 0 0 7.7528133542 9.1080260785 Z M 30.9694268093 21.2528266758 A 10.6264133379 10.6264133379 0 0 0 21.9547646759 5 A 4.0632066689 4.0632066689 0 0 0 21.9547646759 13.1264133379 A 9.0632066689 9.0632066689 0 0 1 30.9694268093 21.2528266758 Z M 12.9401025425 10 A 9.0632066689 9.0632066689 0 0 0 21.9547646759 18.1264133379 A 4.0632066689 4.0632066689 0 0 1 21.9547646759 26.2528266758 A 10.6264133379 10.6264133379 0 0 1 12.9401025425 10 Z"/></svg>
+    <!-- the kind of pattern the project on screen is -->
+    <h1 id="el_kind"></h1>
+    <!-- the way to the cut paper, one step's settings at a time; any step can be opened at any time -->
+    <nav id="el_step" aria-label="Steps">
+        <button type="button" data-step="paper"><b>1</b>Paper</button>
+        <button type="button" data-step="pattern"><b>2</b><span id="el_step_name"></span></button>
+        <button type="button" data-step="picture"><b>3</b>Picture</button>
+        <button type="button" data-step="cut"><b>4</b>Cuts</button>
+        <button type="button" data-step="output"><b>5</b>Print and cut</button>
+    </nav>
+    <!-- the saved projects, see project.module.js -->
+    <details id="el_project_box">
+        <summary title="Save what is on screen under a name, open a saved project, start a new one of any kind. Ctrl and S saves"><small>Project</small><span id="el_project_title"></span></summary>
+        <div id="el_project"></div>
+    </details>
+</header>
+<main id="el_app">
+    <div id="el_side">
+    <form id="el_panel" aria-label="Settings">
+        <section class="step" data-step="paper">
+            <p class="lead" id="el_paper_lead"></p>
+            <div class="group">
+                <h2>Sheet of paper</h2>
+                <label class="row"><span>Format</span><select id="el_format">
+                    <option value="297 210">A4 landscape</option>
+                    <option value="210 297">A4 portrait</option>
+                    <option value="420 297">A3 landscape</option>
+                    <option value="297 420">A3 portrait</option>
+                    <option value="279.4 215.9">Letter landscape</option>
+                    <option value="215.9 279.4">Letter portrait</option>
+                    <option value="">Own size</option>
+                </select></label>
+                <div class="row"><span title="The paper a sheet of the pattern is printed on and cut from: width × height">Size</span><span class="field"><input type="number" name="n_mm__sheet_x" aria-label="Sheet's width" min="50" max="1500" step="0.1" required><b>×</b><input type="number" name="n_mm__sheet_y" aria-label="Sheet's height" min="50" max="1500" step="0.1" required><i>mm</i></span></div>
+                <label class="row"><span title="The border of the sheet your printer leaves blank, drawn dashed. The pattern has to lie inside it">Printer's margin</span><span class="field"><input type="number" name="n_mm__printer_margin" min="0" max="50" step="0.5" required><i>mm</i></span></label>
+            </div>
+            <div class="group">
+                <!-- the pattern by its kind's name, its size as its kind has it, and its place -->
+                <h2 id="el_place_title"></h2>
+                <div data-slot="size"></div>
+                <label class="row"><span title="From the sheet's left edge to the pattern's. The print puts the pattern there; a cutting file without the paper's corners is put at the same place in the cutter's software">From the sheet's left</span><span class="field"><input type="number" name="n_mm__left" min="0" max="1500" step="0.1" required><i>mm</i></span></label>
+                <label class="row"><span title="From the sheet's bottom edge to the pattern's">From its bottom</span><span class="field"><input type="number" name="n_mm__bottom" min="0" max="1500" step="0.1" required><i>mm</i></span></label>
+                <p class="note" id="el_place"></p>
+            </div>
+            <p class="note">Another kind of pattern: Project, in the bar on top, starts a new project of each kind.</p>
+            <p class="next"><button type="button" class="ghost" data-step="pattern" id="el_step_next"></button></p>
+        </section>
+
+        <!-- the kind's own settings, see its part of the page -->
+        <section class="step" data-step="pattern" hidden>
+            <div data-slot="pattern"></div>
+            <p class="next"><button type="button" class="ghost" data-step="picture">Next: Picture →</button></p>
+        </section>
+
+        <section class="step" data-step="picture" hidden>
+            <p class="lead" id="el_picture_lead"></p>
+            <fieldset class="seg sheet_choice" id="el_picture_sheet" aria-label="The pictures of the">
+                <label><input type="radio" name="s_sheet__picture" value="front"><span>Front sheet</span></label>
+                <label><input type="radio" name="s_sheet__picture" value="back"><span>Back sheet</span></label>
+            </fieldset>
+            <div class="group">
+                <h2 id="el_picture_title">Pictures</h2>
+                <div class="buttons">
+                    <button type="button" id="el_picture_load" title="Picture files from this computer, one or many at once. A sheet's first picture fills the pattern; one more comes into its middle; several at once are spread over it, a calendar's on its windows, the first on window 1">Load pictures</button>
+                    <button type="button" id="el_picture_remove" title="The chosen picture leaves the sheet">Remove it</button>
+                </div>
+                <input type="file" id="el_picture_file" accept="image/*" multiple hidden>
+                <p class="note" id="el_picture_hint"></p>
+            </div>
+            <fieldset id="el_picture" hidden>
+                <div class="group">
+                    <h2>The chosen picture</h2>
+                    <div class="tools">
+                        <button type="button" data-picture="cover" title="As small as covers the pattern and the bleed around it, in the middle">Fill</button>
+                        <button type="button" data-picture="contain" title="As large as fits into the pattern, in the middle">Fit</button>
+                        <button type="button" data-picture="spread" title="Stretched over the pattern and the bleed around it, in the middle: all of the picture shows, out of its shape">Stretch</button>
+                        <button type="button" data-picture="turn_left" title="A quarter turn against the clock" aria-label="Turn left"><svg viewBox="0 0 20 20"><path d="M 10 4.5 A 6 6 0 1 0 16 10.5"/><path d="M 13.5 13 L 16 10.5 L 18.5 13"/></svg></button>
+                        <button type="button" data-picture="turn_right" title="A quarter turn with the clock" aria-label="Turn right"><svg viewBox="0 0 20 20"><path d="M 10 4.5 A 6 6 0 1 1 4 10.5"/><path d="M 1.5 13 L 4 10.5 L 6.5 13"/></svg></button>
+                        <button type="button" data-picture="flip_x" title="Mirror: left becomes right" aria-label="Mirror left and right"><svg viewBox="0 0 20 20"><path d="M 10 3 V 17" stroke-dasharray="2 2.5"/><path d="M 7 6 L 3 10 L 7 14 Z"/><path d="M 13 6 L 17 10 L 13 14 Z"/></svg></button>
+                        <button type="button" data-picture="flip_y" title="Mirror: top becomes bottom" aria-label="Mirror top and bottom"><svg viewBox="0 0 20 20"><path d="M 3 10 H 17" stroke-dasharray="2 2.5"/><path d="M 6 7 L 10 3 L 14 7 Z"/><path d="M 6 13 L 10 17 L 14 13 Z"/></svg></button>
+                    </div>
+                    <div class="tools">
+                        <button type="button" id="el_crop" aria-pressed="false" title="On: the handles cut the picture off, a side's at its side, a corner's at both its sides; pulled out, what was cut off comes back. Off: they size and stretch it">Crop</button>
+                        <button type="button" data-order="front" title="Over all other pictures of the sheet">To front</button>
+                        <button type="button" data-order="back" title="Under all other pictures of the sheet">To back</button>
+                    </div>
+                    <div class="row"><span title="The picture's middle, from the left edge and from the top edge of the pattern's box">Middle</span><span class="field"><input type="number" name="picture__n_mm__x" aria-label="Picture's middle x" step="any"><b>/</b><input type="number" name="picture__n_mm__y" aria-label="Picture's middle y" step="any"><i>mm</i></span></div>
+                    <label class="row"><span title="Of what is left of the picture; its height follows from its shape">Width</span><span class="field"><input type="number" name="picture__n_mm__size_x" min="5" max="5000" step="any"><i>mm</i></span></label>
+                    <label class="row"><span title="Its height in % of the height its width and its file's shape give: 100 as the file is, 150 half as high again. The width stays">Height</span><span class="field"><input type="number" name="picture__stretch" min="5" max="2000" step="any"><i>%</i></span></label>
+                    <label class="row"><span title="Around its middle, with the clock. Any number: 0.5 is a slight turn">Turned</span><span class="field"><input type="number" name="picture__n_deg" min="-360" max="360" step="any"><i>°</i></span></label>
+                    <label class="row"><span title="Its upright sides lean by this, to the right at the top; its top and bottom side lie as before. Height 100 % and skew 0 °: the shape its file has">Skew</span><span class="field"><input type="number" name="picture__n_deg__skew" min="-80" max="80" step="any"><i>°</i></span></label>
+                    <p class="note">On the sheet: click a picture to choose it, drag it to move it. Its handles: a corner sizes it, with Shift out of its shape; a side stretches it, with Ctrl skews it; the ring turns it, with Shift in steps of 15°. Ctrl and the wheel size it under the pointer.</p>
+                </div>
+                <div class="group">
+                    <h2 title="How much of the file is cut off at each of its sides, in % of the file. What is left stays in its place">Crop, %</h2>
+                    <div class="crop">
+                        <input type="number" class="top" name="picture__crop_1" aria-label="Crop top" min="0" max="95" step="any">
+                        <input type="number" class="left" name="picture__crop_0" aria-label="Crop left" min="0" max="95" step="any">
+                        <span></span>
+                        <input type="number" class="right" name="picture__crop_2" aria-label="Crop right" min="0" max="95" step="any">
+                        <input type="number" class="bottom" name="picture__crop_3" aria-label="Crop bottom" min="0" max="95" step="any">
+                    </div>
+                </div>
+                <div class="group">
+                    <h2 title="One picture with many small ones on it: split, each part is a picture of its own to place">Split into pieces</h2>
+                    <div class="row"><span title="Pieces across × down, counted as the picture lies">Pieces</span><span class="field"><input type="number" name="split__n_column" aria-label="Pieces across" min="1" max="50" step="1" value="3" required><b>×</b><input type="number" name="split__n_row" aria-label="Pieces down" min="1" max="50" step="1" value="2" required><i></i></span></div>
+                    <button type="button" id="el_split" title="The chosen picture becomes that many pictures, each with its part of the file, where that part lies now. No piece smaller than 5 mm">Split</button>
+                    <p class="note">The pieces lie where they lay. Each is a picture like any other: drag it away, size it, crop it to its part.</p>
+                </div>
+                <div class="group">
+                    <h2>A photo of a drawing</h2>
+                    <p class="note">Taken at a slant? Four points of the picture laid on four places of the cut pattern put it right.</p>
+                    <button type="button" id="el_match" title="Click four points on the picture, then the four places of the cut pattern they belong to. The picture is laid anew so that each point lies on its place, slanted and stretched as that takes">Match 4 points to the cut pattern</button>
+                    <button type="button" id="el_match_undo" title="The picture as it was before it was matched" hidden>Undo the match</button>
+                    <p class="note" id="el_match_note"></p>
+                </div>
+            </fieldset>
+            <div class="group" id="el_matching" hidden>
+                <h2>Matching 4 points</h2>
+                <p class="note">Over the sheet: what to click next. Zoom in to hit a point. On the cut pattern a click snaps to the nearest corner or middle of the pattern and of its parts; hold Alt to place it freely.</p>
+            </div>
+            <p class="next"><button type="button" class="ghost" data-step="cut">Next: Cuts →</button></p>
+        </section>
+
+        <section class="step" data-step="cut" hidden>
+            <div data-slot="cut"></div>
+            <div class="group">
+                <h2>Cutting files</h2>
+                <label class="row"><span title="A dot, a cut of 0.2 mm, in each corner of the sheet of paper. With them a cutting file is as large as the sheet: in the cutter's software it is laid on the sheet corner on corner, and the pattern lies where the print has it. Without them a file is as large as what is cut, and is placed by distances from the sheet's left and bottom">Paper's corners in the files</span><input type="checkbox" class="switch" name="b_sheet_dot"></label>
+                <label class="row"><span title="How wide the lines are drawn, in the cutting files and where a print shows the cut lines">Line width</span><span class="field"><input type="number" name="n_mm__line" min="0.01" max="2" step="0.01" required><i>mm</i></span></label>
+            </div>
+            <p class="next"><button type="button" class="ghost" data-step="output">Next: Print and cut →</button></p>
+        </section>
+
+        <section class="step" data-step="output" hidden>
+            <p class="lead" id="el_output_lead"></p>
+            <div class="group">
+                <h2>Print</h2>
+                <fieldset class="pick" aria-label="What a sheet with a picture shows in the print">
+                    <label><input type="radio" name="s_print" value="picture"><span>The pictures<small>the real thing, on card</small></span></label>
+                    <label><input type="radio" name="s_print" value="both"><span>Pictures with cut lines<small>to see where the cuts fall on a picture</small></span></label>
+                    <label><input type="radio" name="s_print" value="cut"><span>Cut lines only<small>a trial on plain paper, to cut and compare</small></span></label>
+                </fieldset>
+                <label class="row"><span title="The picture is printed this far over the edge of the pattern's box, so that a cut a little beside the edge shows no white">Bleed</span><span class="field"><input type="number" name="n_mm__bleed" min="0" max="20" step="0.5" required><i>mm</i></span></label>
+                <label class="row"><span title="Outside the pattern's box, cut off with the rest of the sheet: marks that point along the box's edges, and a line of a known length to lay a ruler on">Crop marks and ruler line</span><input type="checkbox" class="switch" name="b_print_guide"></label>
+                <label class="row"><span title="Moves the whole print on its page. If a trial shows the print 0.5 left of the cuts: 0.5">Shift right</span><span class="field"><input type="number" name="n_mm__print_x" min="-20" max="20" step="0.1" required><i>mm</i></span></label>
+                <label class="row"><span title="If a trial shows the print 0.5 below the cuts: 0.5">Shift up</span><span class="field"><input type="number" name="n_mm__print_y" min="-20" max="20" step="0.1" required><i>mm</i></span></label>
+                <button type="button" class="main" id="el_print" title="Every sheet of the pattern on a page as large as the sheet of paper; a sheet without a picture shows its cut lines"></button>
+                <p class="note" id="el_print_note"></p>
+            </div>
+            <div class="group">
+                <h2 title="The print's pages as files, to print from another program or to send on. A PDF says the sheet's size itself; a PNG says its pixels an inch, which not every program reads">Print files</h2>
+                <!-- a PDF and a PNG for each sheet of the pattern, see f_place_kind -->
+                <div class="buttons" id="el_page"></div>
+                <p class="note" id="el_page_note"></p>
+            </div>
+            <div class="group">
+                <h2>Cutting files</h2>
+                <!-- an SVG for each sheet of the pattern -->
+                <div class="buttons" id="el_download"></div>
+                <p class="note" id="el_file"></p>
+            </div>
+        </section>
+    </form>
+    <p id="el_status" role="status"></p>
+    </div>
+    <section id="el_stage" aria-label="The sheets">
+        <div id="el_tool">
+            <fieldset class="seg sheet_choice" aria-label="The sheet shown">
+                <label><input type="radio" name="s_sheet__shown" value="front" checked><span>Front</span></label>
+                <label><input type="radio" name="s_sheet__shown" value="back"><span>Back</span></label>
+            </fieldset>
+            <p class="note" id="el_shown_note"></p>
+            <fieldset class="seg" aria-label="Zoom" title="Larger, to place a picture exactly">
+                <label><input type="radio" name="n_zoom" value="1" checked><span>Fit</span></label>
+                <label><input type="radio" name="n_zoom" value="2"><span>2 ×</span></label>
+                <label><input type="radio" name="n_zoom" value="4"><span>4 ×</span></label>
+            </fieldset>
+            <details id="el_legend_box">
+                <summary>Line colours</summary>
+                <!-- the kind's lines, the paper's corners and the printer's margin, see f_place_kind -->
+                <ul id="el_legend"></ul>
+            </details>
+        </div>
+        <div id="el_match_bar" hidden>
+            <p id="el_match_step" role="status"></p>
+            <button type="button" id="el_match_back" title="Takes the last point away, to click it again">One point back</button>
+            <button type="button" id="el_match_cancel" title="Leaves the picture as it was; also the Esc key">Cancel</button>
+        </div>
+        <div id="el_view"><div id="el_scroll">
+            <div class="sheet" id="el_sheet__front" data-sheet="front"><svg xmlns="http://www.w3.org/2000/svg"><g class="printed"><g class="picture"></g><g class="line"></g></g><g class="screen"></g></svg></div>
+            <div class="sheet" id="el_sheet__back" data-sheet="back"><svg xmlns="http://www.w3.org/2000/svg"><g class="printed"><g class="picture"></g><g class="line"></g></g><g class="screen"></g></svg></div>
+        </div></div>
+    </section>
+</main>
+<script type="module" src="page.module.js"></script>
+</body>
+</html>
