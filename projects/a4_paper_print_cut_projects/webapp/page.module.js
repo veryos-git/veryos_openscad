@@ -1,7 +1,8 @@
 // Copyright (C) [Jonas Immanuel Frey] - Licensed under GPL
-// The page: the steps and their settings, the sheets as they are drawn and printed, the
-// pointer on them, and the pictures' files. What a kind of pattern has of its own on
-// the page is its part, see calendar.page.module.js.
+// The page: the home page with the kinds of pattern and the saved projects, and the
+// project on screen: the steps and their settings, the sheets as they are drawn and
+// printed, the pointer on them, and the pictures' files. What a kind of pattern has of
+// its own on the page is its part, see calendar.page.module.js.
 
 import { f_o_picture, f_a_n__px, f_a_n__size, f_n_dpi, f_a_n__from_px, f_a_n__to_px, f_a_n__handle, f_a_n__handle__shown, f_a_n__handle__turn, f_f_b__in, f_o_picture__fitted, f_o_picture__spread, f_o_picture__resized, f_o_picture__turned, f_o_picture__scaled, f_o_picture__cut, f_o_picture__cropped, f_o_picture__stretched, f_o_picture__skewed, f_a_o_picture__split } from './picture.module.js';
 import {
@@ -11,6 +12,7 @@ import {
 import { f_a_n_h, f_a_n__mapped, f_s_problem__match, f_a_n__snapped, f_n_px__per_mm, f_a_n__warped } from './match.module.js';
 import { f_a_n__png_sized, f_a_v__pdf } from './file.module.js';
 import { f_o_panel__project, f_o_response__server, f_s_url__project } from './project.module.js';
+import { el } from './dom.module.js';
 import { a_o_kind, f_o_kind } from './kind.module.js';
 import { o_part as o_part__calendar } from './calendar.page.module.js';
 import { o_part as o_part__flextangle } from './flextangle.page.module.js';
@@ -84,6 +86,13 @@ try{
 } catch(o_error){
     console.warn(o_error);
 }
+// The home page, or the project on screen: the address says which, '#project' for the
+// project. So a reload stays where it is, the browser's back button leads home, and the
+// app's bare address opens the home page.
+let f_b_home = function(){ return location.hash !== '#project'; };
+let f_set_home = function(b_home){
+    if(b_home !== f_b_home()){ history.pushState(null, '', b_home ? location.pathname : '#project'); }
+};
 // what there is to say about the last thing done with the pictures' files, '' for nothing
 let s_note__file = '';
 // the pictures' files as addresses the page can show, by the names the files are kept under
@@ -295,6 +304,9 @@ let f_s_screen = function(s_sheet, n_mm__per_px, a_n__view){
 let f_update = function(){
     let o_part = f_o_part();
     let a_s_sheet__kind = f_a_s_sheet();
+    // the home page or the project, as the address says; the home page as things are now
+    document.body.dataset.view = f_b_home() ? 'home' : 'project';
+    if(f_b_home()){ f_draw_home(o_panel__project.f_o_state()); }
     // the step that is open and the sheet shown: first, so that a field that is wrong can be got to
     document.body.dataset.step = s_step;
     for(let el of el_panel.querySelectorAll('.step')){ el.hidden = el.dataset.step !== s_step; }
@@ -312,6 +324,7 @@ let f_update = function(){
     let el_project_box = document.getElementById('el_project_box');
     el_project_box.inert = Boolean(o_match);
     if(o_match){ el_project_box.open = false; }
+    document.getElementById('el_home_open').disabled = Boolean(o_match);
 
     let o_form = f_o_setting__form();
     o_part.f_limit(o_form);
@@ -780,6 +793,8 @@ let f_show_design = async function(o_design, s_name){
     for(let s_sheet of a_s_sheet){
         o_setting[`a_o_picture__${s_sheet}`] = f_a_o_picture(s_sheet).filter(function(o_picture){ return o_s_url[o_picture.s_file]; });
     }
+    // a design that comes on screen is what the page shows, from the home page too
+    f_set_home(false);
     f_place_kind();
     f_fill_form();
     f_update();
@@ -796,6 +811,67 @@ let f_save_files = async function(o_saved){
     }
     b_file__unsaved = false;
 };
+// A saved project in a few words: its kind, what it is in a few numbers, its pictures.
+let f_s_summary = function(o_project){
+    let o = f_o_setting__kept(o_project.o_setting);
+    let a_s = a_s_sheet.filter(function(s_sheet){ return o[`a_o_picture__${s_sheet}`].length; }).map(function(s_sheet){ return `${o[`a_o_picture__${s_sheet}`].length} ${s_sheet}`; });
+    let o_kind = f_o_kind(o.s_kind);
+    return `${o_kind.s_name} · ${o_kind.f_s_summary(o)}`
+        + (a_s.length ? ` · pictures: ${o_kind.a_o_sheet.length > 1 ? a_s.join(', ') : o.a_o_picture__front.length}` : '');
+};
+
+// ---- the home page: what is on screen, a new project of each kind, the saved projects.
+// A card for each: the pattern in small, its first sheet with its lines, a name and a
+// line about it.
+let f_el__card = function(o, s_name, s_about, f_on_click){
+    let el_card = el('button', { type: 'button', className: 'card' }, [el('b', { textContent: s_name }), el('small', { textContent: s_about })]);
+    // without the names the lines have in a cutting file: on this page those are the sheets' lines
+    el_card.insertAdjacentHTML('afterbegin', `<svg viewBox="0 0 ${o.n_mm__sheet_x} ${o.n_mm__sheet_y}" aria-hidden="true">`
+        + `${f_s_line__sheet({ ...o, b_print_guide: false }, f_o_kind(o.s_kind).a_o_sheet[0].s_sheet).replace(/ id="[^"]*"/g, '')}</svg>`);
+    el_card.addEventListener('click', f_on_click);
+    return el('li', {}, [el_card]);
+};
+// o_state: what the projects' panel has, see project.module.js.
+let f_draw_home = function(o_state){
+    // what is on screen, to go on with: a saved project, or one that is more than new
+    let b_screen = o_state.s_name__open !== null || o_state.b_dirty;
+    document.getElementById('el_home_screen').hidden = !b_screen;
+    document.getElementById('el_home_now').replaceChildren(...(b_screen ? [f_el__card(
+        o_setting, o_state.s_name__open ?? 'Not saved yet',
+        f_s_summary({ o_setting }) + (o_state.s_name__open !== null && o_state.b_dirty ? ' · unsaved changes' : ''),
+        function(){
+            f_set_home(false);
+            f_update();
+        }
+    )] : []));
+    document.getElementById('el_home_kind').replaceChildren(...a_o_kind.map(function(o_kind, n_idx){
+        return f_el__card(f_o_setting__default(o_kind.s_kind), o_kind.s_name, o_kind.s_about, function(){ o_panel__project.f_new(n_idx); });
+    }));
+    document.getElementById('el_home_note').textContent = o_state.s_note || (o_state.a_o_project.length ? '' : 'None yet. Project, in the bar of a project on screen, saves it under a name.');
+    document.getElementById('el_home_project').replaceChildren(...o_state.a_o_project.map(function(o_project){
+        return f_el__card(f_o_setting__kept(o_project.o_setting), o_project.s_name, f_s_summary(o_project), function(){
+            // the open one as it is on screen: there is nothing to open
+            if(o_project.s_name === o_state.s_name__open && !o_state.b_dirty){
+                f_set_home(false);
+                f_update();
+            } else {
+                o_panel__project.f_open(o_project.s_name);
+            }
+        });
+    }));
+};
+// The view follows the address: after Home in the bar, and after the browser's back and
+// forward. Coming home ends a match.
+let f_show_view = function(){
+    if(f_b_home()){ f_cancel_match(); }
+    f_update();
+};
+document.getElementById('el_home_open').addEventListener('click', function(){
+    f_set_home(true);
+    f_show_view();
+});
+window.addEventListener('popstate', f_show_view);
+
 let o_panel__project = f_o_panel__project({
     el_box: document.getElementById('el_project_box'),
     el_title: document.getElementById('el_project_title'),
@@ -818,17 +894,20 @@ let o_panel__project = f_o_panel__project({
     },
     f_save_extra: f_save_files,
     f_b_extra_dirty: function(){ return b_file__unsaved; },
-    f_s_summary: function(o_project){
-        let o = f_o_setting__kept(o_project.o_setting);
-        let a_s = a_s_sheet.filter(function(s_sheet){ return o[`a_o_picture__${s_sheet}`].length; }).map(function(s_sheet){ return `${o[`a_o_picture__${s_sheet}`].length} ${s_sheet}`; });
-        let o_kind = f_o_kind(o.s_kind);
-        return `${o_kind.s_name} · ${o_kind.f_s_summary(o)}`
-            + (a_s.length ? ` · pictures: ${o_kind.a_o_sheet.length > 1 ? a_s.join(', ') : o.a_o_picture__front.length}` : '');
-    },
+    f_s_summary,
     f_b_ready: function(){ return !o_match; },
     f_opened: function(s_name){
         s_name__project = s_name;
         f_update();
+    },
+    el_ask: document.getElementById('el_home_ask'),
+    // the panel opens to say something: it is in the bar of the project on screen
+    f_show: function(){
+        f_set_home(false);
+        f_update();
+    },
+    f_listed: function(o_state){
+        if(f_b_home()){ f_draw_home(o_state); }
     }
 });
 

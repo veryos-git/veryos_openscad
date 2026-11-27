@@ -59,9 +59,14 @@ let f_s_design = function(o_design){
 // f_s_summary: a saved project in a few words, for the list.
 // f_b_ready: whether what is on screen can be saved or replaced now.
 // f_opened: tells which project is open, by its name or null.
+// el_ask: a second place for the question over unsaved changes, for where the panel is
+//     out of sight: the page's home.
+// f_show: brings the panel into view, when it opens to say something.
+// f_listed: tells what the panel has, see f_o_state, whenever the saved projects, the
+//     open one or what there is to say may be another.
 let f_o_panel__project = function({
     el_box, el_title, el_root, f_o_design, f_o_design__blank, a_o_new, f_o_design__of_project, f_open_design, f_new_design,
-    f_save_extra, f_b_extra_dirty, f_s_summary, f_b_ready, f_opened
+    f_save_extra, f_b_extra_dirty, f_s_summary, f_b_ready, f_opened, el_ask, f_show, f_listed
 }){
     let a_o_project = [];
     let s_name__open = null;
@@ -96,6 +101,11 @@ let f_o_panel__project = function({
         s_name__open = s_name;
         f_opened(s_name);
     };
+    // The saved projects, the open one's name, whether what is on screen has changes
+    // that are not saved, and what there is to say.
+    let f_o_state = function(){
+        return { a_o_project, s_name__open, b_dirty: f_b_dirty(), s_note };
+    };
     let f_set_saved = function(o_saved){
         n_cnt__change++;
         a_o_project = [o_saved, ...a_o_project.filter(function(o_project){ return o_project.s_name !== o_saved.s_name; })];
@@ -126,6 +136,7 @@ let f_o_panel__project = function({
         let s_name = f_s_name();
         if(!s_name){
             s_note = 'Give this project a name first.';
+            f_show();
             el_box.open = true;
             f_render_state();
             el_name.focus();
@@ -149,6 +160,7 @@ let f_o_panel__project = function({
             await f_save_extra(o_saved);
         } catch(o_error){
             s_note = o_error.message;
+            f_show();
             el_box.open = true;
         }
         b_saving = false;
@@ -164,6 +176,7 @@ let f_o_panel__project = function({
         }
         o_question = { f_action };
         f_render_tool();
+        el_ask.scrollIntoView({ block: 'nearest' });
     };
 
     // Puts a saved project on screen, as the server has it now.
@@ -244,30 +257,35 @@ let f_o_panel__project = function({
         return el_button;
     };
 
-    let f_render_tool = function(){
-        if(o_question){
-            let f_action = o_question.f_action;
-            el_tool.replaceChildren(el('div', { className: 'question', role: 'alert' }, [
-                el('p', { textContent: f_o_project__open() ? `“${f_o_project__open().s_name}” has unsaved changes.` : 'This project is not saved yet.' }),
-                el('div', { className: 'tool_row' }, [
-                    f_el__button('Save first', async function(){
-                        if(await f_b_saved()){
-                            o_question = null;
-                            f_render_tool();
-                            f_action();
-                        }
-                    }, 'main'),
-                    f_el__button('Discard', function(){
+    // The question before an action that loses work.
+    let f_el__question = function(){
+        let f_action = o_question.f_action;
+        return el('div', { className: 'question', role: 'alert' }, [
+            el('p', { textContent: f_o_project__open() ? `“${f_o_project__open().s_name}” has unsaved changes.` : 'This project is not saved yet.' }),
+            el('div', { className: 'tool_row' }, [
+                f_el__button('Save first', async function(){
+                    if(await f_b_saved()){
                         o_question = null;
                         f_render_tool();
                         f_action();
-                    }),
-                    f_el__button('Cancel', function(){
-                        o_question = null;
-                        f_render_tool();
-                    })
-                ])
-            ]));
+                    }
+                }, 'main'),
+                f_el__button('Discard', function(){
+                    o_question = null;
+                    f_render_tool();
+                    f_action();
+                }),
+                f_el__button('Cancel', function(){
+                    o_question = null;
+                    f_render_tool();
+                })
+            ])
+        ]);
+    };
+    let f_render_tool = function(){
+        el_ask.replaceChildren(...(o_question ? [f_el__question()] : []));
+        if(o_question){
+            el_tool.replaceChildren(f_el__question());
             return;
         }
         // a new project of each kind, named with what it is
@@ -330,6 +348,7 @@ let f_o_panel__project = function({
         f_render_state();
         f_render_tool();
         f_render_list();
+        f_listed(f_o_state());
     };
 
     el_name.addEventListener('input', function(){
@@ -358,6 +377,15 @@ let f_o_panel__project = function({
     return {
         // Something on screen changed: the line under the name follows.
         f_changed: f_render_state,
+        f_o_state,
+        // From outside the panel, asked first over unsaved changes like its own buttons:
+        // a new project of the kind at n_idx of a_o_new, a saved project by its name.
+        f_new: function(n_idx){
+            if(f_b_ready()){ f_when_safe(function(){ f_new(n_idx); }); }
+        },
+        f_open: function(s_name){
+            if(f_b_ready()){ f_when_safe(function(){ f_open(s_name); }); }
+        },
         // The page starts with what it kept in the browser: the project of that name is
         // the open one, if it is still among the saved ones.
         f_start: function(s_name){

@@ -79,9 +79,12 @@ let f_o_page = async function({ n_port = 8779, n_px__x = 1500, n_px__y = 950 } =
     o_page.f_settle = function(){
         return o_page.f_v('new Promise(function(f){ requestAnimationFrame(function(){ requestAnimationFrame(function(){ setTimeout(f, 20); }); }); })');
     };
-    // Opens the app, or loads it anew; done when the page has drawn its sheets.
-    o_page.f_open = async function(){
-        await f_send('Page.navigate', { url: `http://127.0.0.1:${n_port}/` });
+    // Opens the app, or loads it anew, at its bare address or with s_at behind it; done
+    // when the page has drawn its sheets. By way of an empty page: the same address
+    // again with another '#' would be no new load.
+    o_page.f_open = async function(s_at = ''){
+        await f_send('Page.navigate', { url: 'about:blank' });
+        await f_send('Page.navigate', { url: `http://127.0.0.1:${n_port}/${s_at}` });
         for(let n_try = 0; n_try < 100; n_try++){
             await f_wait(50);
             if(await o_page.f_v('document.readyState === "complete" && Boolean(document.querySelector(".sheet .line path"))').catch(function(){ return false; })){ break; }

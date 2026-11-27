@@ -8,9 +8,9 @@
 // opened, changed and deleted, looked up in the server's folder. All that with an
 // advent calendar; then a flextangle, the other kind of pattern: its own steps and
 // fields, its one sheet, pictures, print and files, and back and forth between the
-// kinds. Needs google-chrome
+// kinds; the home page at the first start, and with a project on screen. Needs google-chrome
 // and pdftoppm; the app is served on port 8779, its projects kept in a folder of the run.
-// With a folder as argument the readme's four pictures of the app are saved there:
+// With a folder as argument the readme's five pictures of the app are saved there:
 // deno task check .
 
 import { f_a_o_window, f_o_door } from '../calendar.module.js';
@@ -88,6 +88,56 @@ try{
         await o_page.f_settle();
     };
     let f_step = function(s_step){ return o_page.f_click_on(`#el_step [data-step=${s_step}]`); };
+    // The home page, in one look. A card: its name, the line about it, and where its
+    // drawing has the pattern's lines, left, top, right, bottom as parts of the drawing,
+    // the dots in the paper's corners left out.
+    let f_o_home = function(){
+        return o_page.f_v(`(function(){
+            let f_b = function(v){ let el = typeof v === 'string' ? document.querySelector(v) : v; return Boolean(el) && el.getClientRects().length > 0; };
+            let f_a_o = function(s_id){
+                return [...document.querySelectorAll('#' + s_id + ' .card')].map(function(el){
+                    let o = el.querySelector('svg').getBoundingClientRect();
+                    let a_o = [...el.querySelectorAll('svg path:not([stroke="#008000"])')].map(function(el){ return el.getBoundingClientRect(); });
+                    return {
+                        s_name: el.querySelector('b').textContent, s_about: el.querySelector('small').textContent, a_n__card: [el.getBoundingClientRect().left, el.getBoundingClientRect().top],
+                        a_n_ratio: [(Math.min(...a_o.map(function(o_path){ return o_path.left; })) - o.left) / o.width, (Math.min(...a_o.map(function(o_path){ return o_path.top; })) - o.top) / o.height,
+                            (Math.max(...a_o.map(function(o_path){ return o_path.right; })) - o.left) / o.width, (Math.max(...a_o.map(function(o_path){ return o_path.bottom; })) - o.top) / o.height]
+                    };
+                });
+            };
+            let a_s_id = [...document.querySelectorAll('[id]')].map(function(el){ return el.id; });
+            return {
+                s_view: document.body.dataset.view,
+                s_hash: location.hash,
+                b_home: f_b('#el_home'),
+                b_app: f_b('#el_app'),
+                s_bar: [...document.querySelectorAll('#el_bar > *')].filter(f_b).map(function(el){ return el.id; }).join(),
+                s_title: document.getElementById('el_home_title').textContent,
+                b_screen: f_b('#el_home_screen'),
+                a_o_now: f_a_o('el_home_now'),
+                a_o_kind: f_a_o('el_home_kind'),
+                a_o_project: f_a_o('el_home_project'),
+                s_note: document.getElementById('el_home_note').textContent,
+                s_question: document.querySelector('#el_home_ask .question p')?.textContent ?? '',
+                s_answer: [...document.querySelectorAll('#el_home_ask button')].map(function(el){ return el.textContent; }).join(),
+                a_s_id__twice: a_s_id.filter(function(s_id, n_idx){ return a_s_id.indexOf(s_id) !== n_idx; }),
+                a_n__window: [innerWidth, document.documentElement.scrollWidth, document.getElementById('el_home').scrollWidth, document.getElementById('el_home').clientWidth]
+            };
+        })()`);
+    };
+    let f_s_card = function(o_card){ return `${o_card.s_name} | ${o_card.s_about}`; };
+    // a press on the home page: on a card by its list and its name, or on a button of the question there
+    let f_press_home = async function(s_id, s_name){
+        let a_n = await o_page.f_v(`(function(){
+            let el = [...document.querySelectorAll('#${s_id} button')].find(function(el){ return (el.querySelector('b') ?? el).textContent === ${JSON.stringify(s_name)}; });
+            el.scrollIntoView({ block: 'nearest' });
+            let o = el.getBoundingClientRect();
+            return [(o.left + o.right) / 2, (o.top + o.bottom) / 2];
+        })()`);
+        await o_page.f_click(a_n);
+    };
+    // where a pattern lies on A4 landscape, 10 mm from its left and bottom, as parts of the sheet
+    let f_a_n_ratio__box = function(n_mm__x, n_mm__y){ return [10 / 297, (200 - n_mm__y) / 210, (10 + n_mm__x) / 297, 200 / 210]; };
     // A place of the calendar, in its mm, in the window's pixels on the sheet shown; and how many pixels a mm is.
     let f_n_px__per_mm = async function(){
         let o_state = await f_o_state();
@@ -129,7 +179,19 @@ try{
         await f_until(`document.getElementById('el_sheet__${s_sheet}').classList.contains('has_picture') && Boolean(document.querySelector('#el_sheet__${s_sheet} image'))`);
     };
 
+    // ---- the first start, at the app's bare address: the home page
     await o_page.f_open();
+    await f_until(`document.getElementById('el_home_note').textContent !== ''`);
+    let o_home = await f_o_home();
+    f_check('the first start: the home page and no project, in the bar the logo and the app\'s name alone', o_home.s_view === 'home' && o_home.s_hash === '' && o_home.b_home && !o_home.b_app && o_home.s_bar === 'el_logo,el_home_title' && o_home.s_title === 'VeryOS print and cut', o_home);
+    f_check('a new project of each kind, named with what it is; nothing on screen to go on with, no saved project', String(o_home.a_o_kind.map(f_s_card)) === 'Advent calendar | Two sheets of card: a front with windows and doors, a back behind it,Flextangle | One sheet: a ring of six tetrahedra that turns through its own middle'
+        && !o_home.b_screen && o_home.a_o_now.length === 0 && o_home.a_o_project.length === 0 && o_home.s_note.startsWith('None yet.') && !o_home.s_question, o_home);
+    f_check('each kind\'s card draws its pattern where it lies on the sheet: the calendar 277 × 190, the net 248 × 100, 10 from the left and the bottom', f_b_near(o_home.a_o_kind[0].a_n_ratio, f_a_n_ratio__box(277, 190), 0.01) && f_b_near(o_home.a_o_kind[1].a_n_ratio, f_a_n_ratio__box(248, 100), 0.01), o_home.a_o_kind);
+    f_check('no name of an element twice in the page: the cards\' lines have none', o_home.a_s_id__twice.length === 0, o_home.a_s_id__twice);
+    await f_press_home('el_home_kind', 'Advent calendar');
+    o_home = await f_o_home();
+    f_check('a press on Advent calendar: a calendar on screen, at #project; in the bar Home, the kind, the steps and Project', o_home.s_view === 'project' && o_home.s_hash === '#project' && !o_home.b_home && o_home.b_app && o_home.s_bar === 'el_logo,el_home_open,el_kind,el_step,el_project_box'
+        && await o_page.f_v(`document.getElementById('el_kind').textContent`) === 'Advent calendar', o_home);
 
     // ---- the steps
     let o_state = await f_o_state();
@@ -206,7 +268,7 @@ try{
     await f_step('cut');
     o_state = await f_o_state();
     f_check('Back: the back sheet alone, said to be seen from the front', o_state.s_sheet === 'back' && o_state.s_sheet__checked === 'back,back' && await o_page.f_v(`document.getElementById('el_shown_note').textContent`) === 'as seen from the front', o_state);
-    await o_page.f_open();
+    await o_page.f_open('#project');
     o_state = await f_o_state();
     f_check('a reload keeps the step and the sheet shown', o_state.s_step__open === 'cut' && o_state.s_sheet === 'back', o_state);
     await o_page.f_click_on('[name=s_sheet__shown][value=front] + span');
@@ -536,7 +598,7 @@ try{
     o_state = await f_o_state();
     f_check('the back\'s picture: both sheets have one, and nothing is wrong: the back has no marks at its windows unless asked for', o_state.s_sheet__has === 'front,back' && o_state.s_sheet__picture === 'front,back' && o_state.s_status === '' && o_state.o_setting.b_mark === false, o_state.s_status);
     f_check('Chrome draws it on the calendar and its bleed', f_b_near(await f_a_n__image('back'), [8, 8, 289, 202], 0.05), await f_a_n__image('back'));
-    await o_page.f_open();
+    await o_page.f_open('#project');
     o_state = await f_o_state();
     f_check('a reload keeps both pictures, their files and their places', o_state.s_sheet__picture === 'front,back' && o_state.s_step__open === 'picture' && o_state.s_sheet === 'back' && o_state.n_handle === 9 && f_b_near(o_state.o_setting.a_o_picture__front[0].n_mm__size_x, 291, 1e-9)
         && await o_page.f_v(`Promise.all([...document.querySelectorAll('.sheet image')].map(function(el){ return fetch(el.href.baseVal).then(function(o){ return o.blob(); }).then(function(o){ return o.size; }); })).then(function(a_n){ return a_n.length === 2 && a_n.every(function(n){ return n > 10000; }); })`), o_state);
@@ -554,7 +616,7 @@ try{
         }
         localStorage.setItem('paper_advent_calendar', JSON.stringify(o_setting));
     })()`);
-    await o_page.f_open();
+    await o_page.f_open('#project');
     o_state = await f_o_state();
     f_check('pictures kept before a sheet could have several, and before stretch and skew: each is its sheet\'s one picture, neither stretched nor skewed, drawn where it was', o_state.s_sheet__picture === 'front,back' && o_state.o_setting.a_o_picture__back.length === 1 && o_state.o_setting.a_o_picture__back[0].s_file === 'back' && o_state.o_setting.a_o_picture__front[0].s_file === 'front'
         && o_state.o_setting.a_o_picture__back[0].n_ratio__stretch === 1 && o_state.o_setting.a_o_picture__back[0].n_deg__skew === 0 && o_state.o_setting.a_o_picture__front[0].n_ratio__stretch === 1 && !('o_picture__front' in o_state.o_setting)
@@ -642,7 +704,7 @@ try{
     let f_n_file = function(){ return o_page.f_v(`new Promise(function(f_resolve){ let o_open = indexedDB.open('paper_advent_calendar', 1); o_open.onsuccess = function(){ let o_request = o_open.result.transaction('picture').objectStore('picture').getAllKeys(); o_request.onsuccess = function(){ f_resolve(o_request.result.length); }; }; })`); };
     f_check('Remove it: the chosen one is gone, the others stay; its file has left the browser\'s database, which keeps the front\'s one and the back\'s three', o_state.o_setting.a_o_picture__back.length === 3 && o_state.o_setting.a_o_picture__back[0].n_mm__size_x === 63.33 && o_state.n_handle === 0
         && await o_page.f_v(`document.querySelectorAll('#el_sheet__back defs image').length + ' ' + document.querySelectorAll('#el_sheet__back use').length`) === '3 3' && await f_n_file() === 4, [o_state.o_setting.a_o_picture__back, await f_n_file()]);
-    await o_page.f_open();
+    await o_page.f_open('#project');
     o_state = await f_o_state();
     f_check('a reload keeps the sheet\'s pictures, their order and their files', JSON.stringify(o_state.o_setting.a_o_picture__back) === JSON.stringify(a_o_back.slice(0, 3)) && await o_page.f_v(`document.querySelectorAll('#el_sheet__back defs image').length`) === 3 && o_state.n_handle === 0, o_state.o_setting.a_o_picture__back);
     // the front's picture split into 3 x 2 pieces
@@ -891,7 +953,7 @@ try{
     await o_page.f_key('s', 2);
     await f_until_state('All changes saved');
     f_check('Ctrl and S saves it again: 12 windows in its file, the panel stays closed', (await f_o_kept('Winter 2026')).o_setting.n_window === 12 && !(await f_o_project()).b_dirty && !(await f_o_project()).b_shown && String(await f_a_s_file('.')) === 'Winter 2026', await f_a_s_file('.'));
-    await o_page.f_open();
+    await o_page.f_open('#project');
     await f_until(`document.getElementById('el_project_title').textContent === 'Winter 2026'`);
     o_project = await f_o_project();
     f_check('a reload: the same project open, no changes, its picture there', !o_project.b_dirty && o_project.s_name === 'Winter 2026' && (await f_o_state()).s_sheet__picture === 'front,back', o_project);
@@ -901,7 +963,7 @@ try{
     await f_until(`document.getElementById('el_project_title').dataset.state === 'dirty'`);
     f_check('another picture file at the same place: Unsaved changes, though nothing but the file is another', (await f_o_project()).b_dirty && f_b_same_picture((await f_o_kept('Winter 2026')).o_setting.a_o_picture__front[0], await f_o_picture())
         && (await f_o_kept('Winter 2026')).o_setting.a_o_picture__front[0].s_file !== (await f_o_picture()).s_file, await f_o_project());
-    await o_page.f_open();
+    await o_page.f_open('#project');
     await f_until(`document.getElementById('el_project_list') && document.getElementById('el_project_title').textContent === 'Winter 2026'`);
     f_check('which is kept over a reload', (await f_o_project()).b_dirty);
     await o_page.f_click_on('[name=s_sheet__picture][value=back] + span');
@@ -1253,7 +1315,7 @@ try{
     await o_page.f_fill('picture__n_deg__skew', 0);
     await o_page.f_click_on('[data-picture=cover]');
     await f_step('output');
-    await o_page.f_open();
+    await o_page.f_open('#project');
     f_check('a reload keeps what is printed', (await f_o_state()).o_setting.s_print === 'picture' && await o_page.f_v(`document.querySelector('[name=s_print]:checked').value`) === 'picture');
     // A4 standing, the calendar off its middle
     await o_page.f_click_on('.pick label:has([value=both])');
@@ -1454,9 +1516,129 @@ try{
     o_flex = await f_o_flex();
     f_check('the flextangle opened from a calendar\'s back sheet: its page, its one sheet, its settings and pictures as saved, no changes', o_flex.s_sheet === 'front' && o_flex.n_choice === 0 && JSON.stringify(o_flex.o_setting) === JSON.stringify(o_kept__flex.o_setting)
         && o_flex.s_step === '1Paper,2Shape,3Picture,4Cuts,5Print and cut' && !(await f_o_project()).b_dirty && (await f_o_project()).s_title === 'Flex', [o_flex.s_sheet, o_flex.s_step, await f_o_project()]);
-    await o_page.f_open();
+    await o_page.f_open('#project');
     o_flex = await f_o_flex();
     f_check('a reload keeps the flextangle and its project', o_flex.s_kind === 'Flextangle' && JSON.stringify(o_flex.o_setting) === JSON.stringify(o_kept__flex.o_setting) && (await f_o_project()).s_title === 'Flex' && await o_page.f_v(`document.querySelectorAll('#el_sheet__front defs image').length`) === 4, o_flex.s_kind);
+
+    // ---- the home page with a project on screen, and saved ones
+    let f_b_project = async function(){
+        let o = await f_o_home();
+        return o.s_view === 'project' && o.s_hash === '#project' && o.b_app && !o.b_home;
+    };
+    let f_b_flex__saved = async function(){
+        return (await f_o_flex()).s_kind === 'Flextangle' && JSON.stringify((await f_o_flex()).o_setting) === JSON.stringify(o_kept__flex.o_setting) && !(await f_o_project()).b_dirty && (await f_o_project()).s_title === 'Flex';
+    };
+    await f_show_projects();
+    let a_s_row = (await f_o_project()).a_s_row;
+    await o_page.f_click(await f_a_n__px__net([120, 50]));
+    await o_page.f_v(`(function(){ window.b_same_page = true; window.el_same = document.querySelector('#el_sheet__front defs image'); })()`);
+    await o_page.f_click_on('#el_home_open');
+    o_home = await f_o_home();
+    f_check('Home, in the bar: the home page at the bare address, the project out of sight', o_home.s_view === 'home' && o_home.s_hash === '' && o_home.b_home && !o_home.b_app && o_home.s_bar === 'el_logo,el_home_title', o_home);
+    f_check('on screen: the open project by its name, with its kind, size and pictures, drawn as its net lies', o_home.b_screen && String(o_home.a_o_now.map(f_s_card)) === 'Flex | Flextangle · base 40 mm · 248 × 100 mm · pictures: 4'
+        && f_b_near(o_home.a_o_now[0].a_n_ratio, f_a_n_ratio__box(248, 100), 0.01) && !o_home.s_question, o_home.a_o_now);
+    f_check('the saved projects as the panel lists them, of both kinds', a_s_row.length > 1 && String(o_home.a_o_project.map(f_s_card)) === String(a_s_row.map(function(s){ return s.replace(' | open', ''); })) && o_home.s_note === ''
+        && o_home.a_o_project.some(function(o_card){ return o_card.s_about.startsWith('Advent calendar') && f_b_near(o_card.a_n_ratio[0], 10 / 297, 0.01); }) && o_home.a_s_id__twice.length === 0, [o_home.a_o_project, a_s_row, o_home.a_s_id__twice]);
+    if(Deno.args[0]){ await o_page.f_screenshot(`${Deno.args[0]}/preview_home.png`); }
+    await o_page.f_v(`history.back()`);
+    await f_until(`document.body.dataset.view === 'project'`);
+    f_check('the browser\'s back: the project as it was, the page not loaded anew', await f_b_project() && await f_b_flex__saved() && await o_page.f_v(`window.b_same_page === true && window.el_same === document.querySelector('#el_sheet__front defs image')`));
+    await o_page.f_v(`history.forward()`);
+    await f_until(`document.body.dataset.view === 'home'`);
+    f_check('its forward: the home page again', (await f_o_home()).b_home && (await f_o_home()).s_hash === '');
+    await f_press_home('el_home_now', 'Flex');
+    f_check('a press on what is on screen: the project, nothing opened anew', await f_b_project() && await f_b_flex__saved() && await o_page.f_v(`window.el_same === document.querySelector('#el_sheet__front defs image')`));
+    await o_page.f_click_on('#el_home_open');
+    await f_press_home('el_home_project', 'Flex');
+    await o_page.f_wait(200);
+    await o_page.f_settle();
+    f_check('a press on the open project among the saved ones, without changes: the same', await f_b_project() && await f_b_flex__saved() && await o_page.f_v(`window.el_same === document.querySelector('#el_sheet__front defs image')`));
+
+    // over unsaved changes the home page asks before it replaces what is on screen
+    await f_step('pattern');
+    await o_page.f_fill('n_mm__base', 30);
+    await o_page.f_click_on('#el_home_open');
+    o_home = await f_o_home();
+    f_check('with a change: what is on screen is said to have unsaved changes, and drawn as it is now', String(o_home.a_o_now.map(f_s_card)) === 'Flex | Flextangle · base 30 mm · 188 × 75 mm · pictures: 4 · unsaved changes' && f_b_near(o_home.a_o_now[0].a_n_ratio, f_a_n_ratio__box(188, 75), 0.01), o_home.a_o_now);
+    await f_press_home('el_home_kind', 'Advent calendar');
+    o_home = await f_o_home();
+    f_check('a new project over it: asked on the home page, under what is on screen, nothing replaced', o_home.s_view === 'home' && o_home.s_question === '“Flex” has unsaved changes.' && o_home.s_answer === 'Save first,Discard,Cancel' && (await f_o_flex()).o_setting.s_kind === 'flextangle', o_home);
+    await f_press_home('el_home_ask', 'Cancel');
+    o_home = await f_o_home();
+    f_check('Cancel: no question, the home page, the flextangle still on screen', o_home.s_view === 'home' && !o_home.s_question && (await f_o_flex()).o_setting.n_mm__base === 30, o_home.s_question);
+    await f_press_home('el_home_project', 'Flex');
+    f_check('the open project pressed over its changes asks too', (await f_o_home()).s_question === '“Flex” has unsaved changes.' && (await f_o_home()).s_view === 'home', (await f_o_home()).s_question);
+    await f_press_home('el_home_ask', 'Cancel');
+    await f_press_home('el_home_kind', 'Advent calendar');
+    await f_press_home('el_home_ask', 'Discard');
+    await f_until(`document.getElementById('el_kind').textContent === 'Advent calendar'`);
+    o_state = await f_o_state();
+    f_check('Discard: a new calendar on screen, its settings of the first start, step 1; the saved flextangle as it was', await f_b_project() && JSON.stringify(o_state.o_setting) === JSON.stringify(o_setting__default) && o_state.s_step__open === 'paper'
+        && (await f_o_project()).s_title === 'new' && (await f_o_kept('Flex')).o_setting.n_mm__base === 40 && !(await f_o_home()).s_question, [o_state.s_step__open, await f_o_project()]);
+    await o_page.f_click_on('#el_home_open');
+    o_home = await f_o_home();
+    f_check('a new project as it started: nothing on screen to go on with', !o_home.b_screen && o_home.a_o_now.length === 0, o_home.a_o_now);
+    await f_press_home('el_home_project', 'Flex');
+    await f_until(`document.getElementById('el_kind').textContent === 'Flextangle' && document.querySelectorAll('#el_sheet__front defs image').length === 4`);
+    f_check('a saved project pressed: opened without a question, as it was saved', await f_b_project() && await f_b_flex__saved(), await f_o_project());
+
+    // a project that has no name yet
+    await o_page.f_click_on('#el_home_open');
+    await f_press_home('el_home_kind', 'Advent calendar');
+    await f_until(`document.getElementById('el_kind').textContent === 'Advent calendar'`);
+    await f_step('pattern');
+    await o_page.f_fill('n_window', 12);
+    await o_page.f_click_on('#el_home_open');
+    o_home = await f_o_home();
+    f_check('a changed project without a name: on screen as Not saved yet', String(o_home.a_o_now.map(f_s_card)) === 'Not saved yet | Advent calendar · 12 windows · 277 × 190 mm', o_home.a_o_now);
+    await f_press_home('el_home_kind', 'Flextangle');
+    f_check('a new project over it asks', (await f_o_home()).s_question === 'This project is not saved yet.', (await f_o_home()).s_question);
+    await f_press_home('el_home_ask', 'Save first');
+    await o_page.f_settle();
+    o_project = await f_o_project();
+    f_check('Save first without a name: the project on screen, its panel open and asking for a name, the question still there', await f_b_project() && o_project.b_shown && o_project.s_state === 'Give this project a name first.' && o_project.s_question === 'This project is not saved yet.'
+        && await o_page.f_v(`document.activeElement.id`) === 'el_project_name' && (await f_o_state()).o_setting.n_window === 12, o_project);
+    await o_page.f_type('From home');
+    await f_press('Save first');
+    await f_until(`document.getElementById('el_kind').textContent === 'Flextangle'`);
+    f_check('named, Save first: saved with its 12 windows, then the new flextangle on screen', (await f_o_kept('From home')).o_setting.n_window === 12 && await f_b_project() && JSON.stringify((await f_o_flex()).o_setting) === JSON.stringify(f_o_setting__default('flextangle')) && (await f_o_project()).s_title === 'new', await f_o_project());
+    await o_page.f_click_on('#el_home_open');
+    await f_press_home('el_home_project', 'From home');
+    await f_until(`document.getElementById('el_project_title').textContent === 'From home'`);
+    await f_step('pattern');
+    await o_page.f_fill('n_window', 10);
+    await o_page.f_click_on('#el_home_open');
+    await f_press_home('el_home_kind', 'Flextangle');
+    await f_press_home('el_home_ask', 'Save first');
+    await f_until(`document.getElementById('el_kind').textContent === 'Flextangle'`);
+    f_check('Save first of a project that has a name, from the home page: saved with the change, then the new project', (await f_o_kept('From home')).o_setting.n_window === 10 && await f_b_project() && (await f_o_project()).s_title === 'new' && !(await f_o_home()).s_question, await f_o_project());
+
+    // a match and the home page
+    await o_page.f_click_on('#el_home_open');
+    await f_press_home('el_home_project', 'Flex');
+    await f_until(`document.getElementById('el_kind').textContent === 'Flextangle' && document.querySelectorAll('#el_sheet__front defs image').length === 4`);
+    await f_step('picture');
+    await o_page.f_click(await f_a_n__px__net([120, 50]));
+    await o_page.f_click_on('#el_match');
+    f_check('while a picture is matched, Home is locked', await o_page.f_v(`document.getElementById('el_home_open').disabled && !document.getElementById('el_match_bar').hidden`));
+    await o_page.f_v(`history.back()`);
+    await f_until(`document.body.dataset.view === 'home'`);
+    await f_press_home('el_home_now', 'Flex');
+    f_check('the browser\'s back all the same: the home page, and the match is left, the pictures as they were', await f_b_project() && await o_page.f_v(`document.getElementById('el_match_bar').hidden`) && await f_b_flex__saved(), await f_o_project());
+
+    // the bare address loaded anew, the print from there, a narrow window
+    await o_page.f_open();
+    await f_until(`document.querySelectorAll('#el_home_project .card').length > 0`);
+    o_home = await f_o_home();
+    f_check('the bare address loaded anew with a project on screen: the home page, the project there to go on with, the saved ones', o_home.s_view === 'home' && o_home.b_home && !o_home.b_app && String(o_home.a_o_now.map(f_s_card)) === 'Flex | Flextangle · base 40 mm · 248 × 100 mm · pictures: 4'
+        && o_home.a_o_project.some(function(o_card){ return o_card.s_name === 'From home' && o_card.s_about === 'Advent calendar · 10 windows · 277 × 190 mm'; }), o_home);
+    a_o_print = await o_page.f_a_o_print();
+    f_check('a print from the home page is the sheet: one page, the first picture where the project has it', a_o_print.length === 1 && f_b_near(f_a_n__box(a_o_print[0], f_b_green) ?? [0, 0, 0, 0], [8, 98, 260, 202], 0.1), a_o_print.length);
+    await o_page.f_size(400, 800);
+    o_home = await f_o_home();
+    f_check('400 wide: the cards one under the other, nothing wider than the window', o_home.a_n__window[1] <= 400 && o_home.a_n__window[2] <= o_home.a_n__window[3] && o_home.a_o_project.every(function(o_card){ return o_card.a_n__card[0] === o_home.a_o_kind[0].a_n__card[0]; })
+        && o_home.a_o_kind[1].a_n__card[1] > o_home.a_o_kind[0].a_n__card[1], o_home.a_n__window);
+    await o_page.f_size(1500, 950);
 
     // what a browser kept before there were kinds of pattern: a calendar, its lines 0.2 wide
     await o_page.f_v(`(function(){
@@ -1466,7 +1648,7 @@ try{
         localStorage.setItem('paper_advent_calendar', JSON.stringify(o));
         localStorage.setItem('paper_advent_calendar__page', JSON.stringify({ s_step: 'window', s_sheet__shown: 'back', s_name__project: null }));
     })()`);
-    await o_page.f_open();
+    await o_page.f_open('#project');
     o_state = await f_o_state();
     f_check('settings kept before there were kinds: a calendar with what they had, lines 0.2 wide, the sheet that was shown; the step that is gone gives way to the first', JSON.stringify(o_state.o_setting) === JSON.stringify({ ...o_setting__default, n_window: 7 })
         && await o_page.f_v(`document.getElementById('el_kind').textContent`) === 'Advent calendar' && o_state.s_sheet === 'back' && o_state.s_step__open === 'paper', [o_state.o_setting.s_kind, o_state.o_setting.n_mm__line, o_state.s_sheet, o_state.s_step__open]);

@@ -25,8 +25,8 @@
 [hidden]{ display: none !important; }
 html, body{ height: 100%; margin: 0; }
 *{ scrollbar-width: thin; scrollbar-color: #4a5959 transparent; }
-/* The page: a bar with the steps on top; under it the settings of the step that is
-   open and the sheet, each scrolling on its own. */
+/* The page: a bar on top; under it the home page, or the project on screen: the settings
+   of the step that is open and the sheet, each scrolling on its own. */
 body{
     display: grid;
     grid-template: auto minmax(0, 1fr) / minmax(0, 1fr);
@@ -36,9 +36,12 @@ body{
 }
 :focus-visible{ outline: 2px solid var(--s_col__gold); outline-offset: 1px; }
 
-#el_bar{ display: flex; align-items: center; gap: 12px; padding: 0 16px; background: var(--s_col__panel); border-bottom: 1px solid var(--s_col__line); }
+#el_bar{ display: flex; align-items: center; gap: 12px; min-height: 49px; padding: 0 16px; background: var(--s_col__panel); border-bottom: 1px solid var(--s_col__line); }
 #el_logo{ flex: none; width: 30px; color: var(--s_col__text); }
 h1{ margin: 0 12px 0 0; font-size: 16px; font-weight: 650; color: var(--s_col__gold); white-space: nowrap; }
+/* the way home, and behind it the kind of the project on screen */
+#el_home_open{ flex: none; margin-right: -6px; }
+#el_kind::before{ content: '›'; margin-right: 12px; color: var(--s_col__muted); font-weight: 400; }
 #el_step{ display: flex; flex: 1; align-self: stretch; gap: 2px; min-width: 0; overflow-x: auto; }
 #el_step button{ display: flex; align-items: center; gap: 8px; min-height: 48px; padding: 0 14px; border: 0; border-bottom: 2px solid transparent; border-radius: 0; background: none; color: var(--s_col__muted); white-space: nowrap; }
 #el_step button:hover{ background: none; color: var(--s_col__text); }
@@ -81,6 +84,23 @@ button.danger:hover{ background: #cf3a31; }
 .project__open small{ display: block; color: var(--s_col__muted); font-size: 11px; }
 .project__delete{ flex: none; width: 32px; min-height: 0; padding: 0; border: 0; border-left: 1px solid var(--s_col__line); border-radius: 0; background: none; color: var(--s_col__muted); font-size: 16px; }
 .project__delete:hover{ background: #b3261e; color: #ffffff; }
+
+/* The home page: what is on screen, a new project of each kind, the saved projects. */
+#el_home{ min-height: 0; padding: 28px max(16px, 50% - 450px) 40px; overflow-y: auto; }
+#el_home .lead{ max-width: 640px; font-size: 14px; }
+#el_home h2{ margin: 26px 0 10px; }
+.cards{ display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px; margin: 0; padding: 0; list-style: none; }
+.card{ display: block; width: 100%; height: 100%; padding: 10px; border-radius: 8px; background: var(--s_col__group); text-align: left; }
+.card:hover{ border-color: var(--s_col__gold); }
+.card b{ display: block; font-size: 15px; font-weight: 650; overflow-wrap: anywhere; }
+.card small{ display: block; color: var(--s_col__muted); font-size: 12px; }
+/* a pattern in small: its first sheet with its lines, each a pixel wide */
+.card svg{ display: block; width: 100%; margin-bottom: 10px; border-radius: 4px; background: #ffffff; }
+.card svg *{ vector-effect: non-scaling-stroke; stroke-width: 1px; }
+#el_home_ask{ max-width: 420px; }
+#el_home_ask .question{ margin-top: 12px; }
+#el_home_note{ color: var(--s_col__warn); }
+#el_home_note:empty{ display: none; }
 
 #el_app{ display: grid; grid-template-columns: 360px minmax(0, 1fr); min-height: 0; }
 /* the settings, and under them what is wrong: there it never moves the sheet under the pointer */
@@ -205,6 +225,8 @@ button[aria-pressed=true]{ border-color: var(--s_col__gold); background: #f0b750
 .sheet{ flex: none; margin: auto; background: #ffffff; }
 .sheet > svg{ display: block; }
 @media screen{
+    /* the home page or the project on screen, see f_b_home; a print is the sheets from either */
+    body[data-view=home] :is(#el_home_open, #el_kind, #el_step, #el_project_box, #el_app), body[data-view=project] :is(#el_home_title, #el_home){ display: none; }
     /* one sheet at a time, as large as fits between the bars, times the zoom; lines one pixel wide whatever the scale */
     #el_view{ container-type: size; }
     .sheet:not(.shown){ display: none; }
@@ -264,7 +286,7 @@ button[aria-pressed=true]{ border-color: var(--s_col__gold); background: #f0b750
    and the print's shift are set with the settings, see f_update. What a page shows
    follows body's data-print. */
 @media print{
-    #el_bar, #el_side, #el_tool, #el_match_bar, .screen{ display: none; }
+    #el_bar, #el_home, #el_side, #el_tool, #el_match_bar, .screen{ display: none; }
     body{ display: block; background: #ffffff; }
     #el_app, #el_stage, #el_view, #el_scroll{ display: block; height: auto; padding: 0; overflow: visible; }
     .sheet{ margin: 0; overflow: hidden; break-after: page; }
@@ -274,10 +296,12 @@ button[aria-pressed=true]{ border-color: var(--s_col__gold); background: #f0b750
 </style>
 <style id="el_style__page"></style>
 </head>
-<body data-step="paper">
+<body data-step="paper" data-view="home">
 <header id="el_bar">
     <svg id="el_logo" viewBox="0 0 43.9095293518 31.2528266758" role="img" aria-label="VeryOS logo"><path fill="currentColor" fill-rule="evenodd" d="M 7.7528133542 9.1080260785 L 4.6193976626 1.5432914191 L 0 3.4567085809 L 11.5135290962 31.2528266758 L 32.3960002556 31.2528266758 L 43.9095293518 3.4567085809 L 39.2901316892 1.5432914191 L 36.1567159975 9.1080260785 A 15.6264133379 15.6264133379 0 0 0 7.7528133542 9.1080260785 Z M 30.9694268093 21.2528266758 A 10.6264133379 10.6264133379 0 0 0 21.9547646759 5 A 4.0632066689 4.0632066689 0 0 0 21.9547646759 13.1264133379 A 9.0632066689 9.0632066689 0 0 1 30.9694268093 21.2528266758 Z M 12.9401025425 10 A 9.0632066689 9.0632066689 0 0 0 21.9547646759 18.1264133379 A 4.0632066689 4.0632066689 0 0 1 21.9547646759 26.2528266758 A 10.6264133379 10.6264133379 0 0 1 12.9401025425 10 Z"/></svg>
-    <!-- the kind of pattern the project on screen is -->
+    <!-- on the home page the app's name; with a project on screen the way home and the kind of pattern the project is -->
+    <h1 id="el_home_title">VeryOS print and cut</h1>
+    <button type="button" class="ghost" id="el_home_open" title="The home page: a new project of each kind, and the saved projects. What is on screen stays as it is">Home</button>
     <h1 id="el_kind"></h1>
     <!-- the way to the cut paper, one step's settings at a time; any step can be opened at any time -->
     <nav id="el_step" aria-label="Steps">
@@ -293,6 +317,21 @@ button[aria-pressed=true]{ border-color: var(--s_col__gold); background: #f0b750
         <div id="el_project"></div>
     </details>
 </header>
+<!-- the home page, at the app's bare address: what to make; filled by f_draw_home -->
+<section id="el_home" aria-label="Home">
+    <p class="lead">A sheet of paper, a pattern to cut out of it, and pictures laid on the pattern: the sheet is printed, then a paper cutter cuts it by the pattern's file. Choose what to make.</p>
+    <div id="el_home_screen" hidden>
+        <h2>On screen</h2>
+        <ul class="cards" id="el_home_now"></ul>
+        <!-- the question before what is on screen is replaced, see project.module.js -->
+        <div id="el_home_ask"></div>
+    </div>
+    <h2>New project</h2>
+    <ul class="cards" id="el_home_kind"></ul>
+    <h2>Saved projects</h2>
+    <p class="note" id="el_home_note"></p>
+    <ul class="cards" id="el_home_project"></ul>
+</section>
 <main id="el_app">
     <div id="el_side">
     <form id="el_panel" aria-label="Settings">
@@ -320,7 +359,7 @@ button[aria-pressed=true]{ border-color: var(--s_col__gold); background: #f0b750
                 <label class="row"><span title="From the sheet's bottom edge to the pattern's">From its bottom</span><span class="field"><input type="number" name="n_mm__bottom" min="0" max="1500" step="0.1" required><i>mm</i></span></label>
                 <p class="note" id="el_place"></p>
             </div>
-            <p class="note">Another kind of pattern: Project, in the bar on top, starts a new project of each kind.</p>
+            <p class="note">Another kind of pattern: Home, in the bar on top, starts a new project of each kind.</p>
             <p class="next"><button type="button" class="ghost" data-step="pattern" id="el_step_next"></button></p>
         </section>
 
