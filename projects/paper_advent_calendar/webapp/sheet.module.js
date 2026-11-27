@@ -94,8 +94,8 @@ let f_s_picture__sheet = function(o_setting, s_sheet, s_href){
 };
 // A sheet's lines as SVG in the sheet's mm: the guides, crop marks and ruler line with
 // its length and the sheet's name written beside it, and the cutting file's lines at
-// the calendar's place.
-let f_s_line__sheet = function(o_setting, s_sheet){
+// the calendar's place; without b_cut the guides alone.
+let f_s_line__sheet = function(o_setting, s_sheet, b_cut = true){
     let f_s_xy = function(a_n){ return `${f_s_n(a_n[0])} ${f_s_n(a_n[1])}`; };
     let s_guide = '';
     if(o_setting.b_print_guide){
@@ -110,10 +110,23 @@ let f_s_line__sheet = function(o_setting, s_sheet){
         s_guide = `<g class="guide"><path fill="none" stroke="#000000" stroke-width="${n_mm__line}" d="${a_a_a_n.map(function(a_a_n){ return `M ${f_s_xy(a_a_n[0])} L ${f_s_xy(a_a_n[1])}`; }).join(' ')}"/>`
             + `<text x="${f_s_n(n_x + o_ruler.n_mm + 2)}" y="${f_s_n(n_y + 1)}" font-family="sans-serif" font-size="3" fill="#000000">${o_ruler.n_mm} mm, ${s_sheet}</text></g>`;
     }
-    return `${s_guide}<g class="cut" transform="translate(${f_s_xy(f_a_n__calendar(o_setting))})">${f_a_s_path(o_setting, s_sheet).join('')}</g>`;
+    return s_guide + (b_cut ? `<g class="cut" transform="translate(${f_s_xy(f_a_n__calendar(o_setting))})">${f_a_s_path(o_setting, s_sheet).join('')}</g>` : '');
+};
+// A sheet's page of the print as an SVG of its own, n_px__per_mm pixels a mm: the sheet
+// of paper, white, with what a print shows of it by the settings, shifted as the print
+// is. s_href: the picture's file as an address that holds it, '' without one.
+let f_s_svg__page = function(o_setting, s_sheet, s_href, n_px__per_mm){
+    let s_picture = f_s_picture__sheet(o_setting, s_sheet, s_href);
+    // a sheet without a picture shows its cut lines whatever is chosen
+    let b_cut = o_setting.s_print !== 'picture' || !s_picture;
+    return `<svg xmlns="http://www.w3.org/2000/svg" width="${Math.round(o_setting.n_mm__sheet_x * n_px__per_mm)}" height="${Math.round(o_setting.n_mm__sheet_y * n_px__per_mm)}"`
+        + ` viewBox="0 0 ${o_setting.n_mm__sheet_x} ${o_setting.n_mm__sheet_y}" preserveAspectRatio="none">`
+        + `<rect width="${o_setting.n_mm__sheet_x}" height="${o_setting.n_mm__sheet_y}" fill="#ffffff"/>`
+        + `<g transform="translate(${f_s_n(o_setting.n_mm__print_x)} ${f_s_n(-o_setting.n_mm__print_y)})">`
+        + `${o_setting.s_print === 'cut' ? '' : s_picture}${f_s_line__sheet(o_setting, s_sheet, b_cut)}</g></svg>`;
 };
 
 export {
     n_mm__crop, n_mm__crop_gap, f_a_n__calendar, f_a_n__distance, f_a_n__bleed, f_a_a_a_n__crop, f_o_ruler,
-    f_a_s_problem__sheet, f_s_picture__sheet, f_s_line__sheet
+    f_a_s_problem__sheet, f_s_picture__sheet, f_s_line__sheet, f_s_svg__page
 };

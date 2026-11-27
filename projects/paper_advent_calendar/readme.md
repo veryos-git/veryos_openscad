@@ -27,7 +27,7 @@ Needs [Deno](https://deno.com) and a browser. The page does all the work itself;
 | 2 Windows | grid, shapes and doors, one window's own values | chooses and moves windows |
 | 3 Picture | the picture of the sheet shown: load, place, size, turn, stretch, skew, crop, match | moves, sizes and turns the picture; a side crops, stretches or skews it |
 | 4 Cuts | bridges, folds, marks, logo, calendar's edge, paper's corners | moves nothing |
-| 5 Print and cut | what is printed, bleed, guides, shift; `Print front and back`, `Front SVG`, `Back SVG` | moves nothing |
+| 5 Print and cut | what is printed, bleed, guides, shift; `Print front and back`; the print's pages as PDF and PNG files; `Front SVG`, `Back SVG` | moves nothing |
 
 - The step and the sheet shown are kept over a reload, like the settings.
 - A name with a dotted line under it says more when the pointer rests on it.
@@ -102,6 +102,7 @@ Print and cut meet if both put the calendar at the same place of the sheet of pa
 | Crop marks and ruler line | on | | outside the calendar, see Print |
 | Shift right, shift up | 0, 0 mm | -20 to 20 | moves the whole print on its page, to make up for where printer and cutter put it |
 | `Print front and back` | | | see Print; below it what to set in the print dialog, with the sheet's size |
+| `Front PDF`, `Back PDF`, `Front PNG`, `Back PNG` | | | see Print files; below them the files' size in mm and pixels |
 | `Front SVG`, `Back SVG` | | | see SVG; below them each file's size and place for the cutter's software |
 
 Step 3, Picture: see Windows and pictures on the sheet. `Start over`, in the bar on top: all settings as at the first start, the pictures removed, step 1.
@@ -209,6 +210,18 @@ Four points of the picture are laid on four places of the cut pattern, and the r
 - All of these lie outside the calendar or under the cuts, but for the picture: nothing of them stays on the calendar.
 - Crop marks reach into the printer's margin where the calendar lies close to it; what the printer leaves out there is no loss.
 
+## Print files
+
+`Front PDF`, `Back PDF`, `Front PNG`, `Back PNG` → `advent_calendar_front_veryos.pdf` and so on: one sheet's page of the print as a file, to print from another program or to send on.
+
+| | |
+|---|---|
+| Shows | what the print shows of that sheet: as chosen under `What is printed`, with bleed, guides and shift; a sheet without a picture its cut lines |
+| Size | the sheet of paper, as one picture at 300 pixels per inch: A4 is 3508 × 2480. A sheet longer than 693 mm: 8192 pixels along its longer side, fewer per inch; the note under the buttons says the numbers |
+| PDF | one page of the sheet's size, the picture on all of it, packed without loss; print it at 100 %, without margins |
+| PNG | the same pixels; the file says its pixels per metre (`pHYs`), which a program may read or not: where it does not, set 300 per inch or the sheet's size there |
+| The picture | laid anew in pixels as it lies on the sheet: turned, stretched, skewed, cropped; its own file is not in the PDF |
+
 ## SVG
 
 `Front SVG` → `advent_calendar_front_veryos.svg`, `Back SVG` → `advent_calendar_back_veryos.svg`. They hold cut lines only, no picture and no guides.
@@ -253,12 +266,13 @@ Not found: where Suite's zero lies and which point of a file its X and Y mean. T
 
 | Check | How | Result |
 |---|---|---|
-| Doors, grid, logo, cutting files | `deno task test`, 167 in all; `calendar.test.js`: every shape with every door in 6 sizes and 4 cut settings; grid, mix, a window's own values; the logo; both SVGs read back by a path reader written after the SVG specification; the box around a file's lines, which with the paper's corners is the sheet to the last digit | 138 pass |
+| Doors, grid, logo, cutting files | `deno task test`, 171 in all; `calendar.test.js`: every shape with every door in 6 sizes and 4 cut settings; grid, mix, a window's own values; the logo; both SVGs read back by a path reader written after the SVG specification; the box around a file's lines, which with the paper's corners is the sheet to the last digit | 138 pass |
 | Pictures | same, `picture.test.js`: fitted into and over boxes, stretched over them, sized by every corner and around a point, cut off at every side by number and by the pointer, stretched and skewed by every side, lying straight, turned, mirrored, stretched and skewed: a pixel of the file that stays in the picture stays where it is, and the SVG puts it there too; a side stretched or slid leaves the side across and what the file shows there in place, a slid side's ends go as far as the pointer, and no further than leaves the sides 10° apart; the handles of a picture in view only in part lie in the view, eight apart; turned by the pointer, every pixel goes around the middle by as much as the pointer | 15 pass |
 | Match | same, `match.test.js`: the mapping takes each of four points to its place within 0.000000001 mm, and a known slant is found again from four of its points; fours that cannot be matched; the pattern's places and the snap; pixels laid anew show the colour of the place they come from, to a step of 255, straight and at a slant, and a clear pixel gives no colour | 7 pass |
-| Sheet | same, `sheet.test.js`: the calendar's place from the bottom left corner; the print's lines are the cutting file's own, at the place the file's box has for the cutter; crop marks, ruler line, what is said | 7 pass |
+| Sheet | same, `sheet.test.js`: the calendar's place from the bottom left corner; the print's lines are the cutting file's own, at the place the file's box has for the cutter; crop marks, ruler line, what is said; a page of the print as an SVG of its own shows what the print shows for each of the three choices, with and without a picture | 8 pass |
+| Print files | same, `file.test.js`: the PNG's check sum against known ones and against one counted bit by bit; the chunk with the size sits behind the first, every chunk's sum is right, the rest is unchanged; the PDF's table names where each part starts, A4 is 841.89 × 595.276 points, the pixels unpack to what went in | 3 pass |
 | Tests notice faults | 42 faults put into copies of the four modules one at a time (a sign, a swapped side, a missing clamp, the place measured from the top, a mapping put together the wrong way round, ...); 12 more in the first version's module. Done before the paper's corners came into the files, not since | each failed a test |
-| Page | `deno task check`, `test/page_check.js`: headless Chrome, 1500 × 950, clicked and dragged with Chrome's own pointer, 141 checks in all with the print's and the match's below. Every step shows its settings alone and `Next` leads on; every setting has a field; the sheet fits its place, 20 pixels and more around it, at 1500 × 950, 1100 × 700, 800 × 600, A4 portrait and under the bar of a match; zoom 2 and 4 keep the view's middle; 400 wide: the sheet over the settings, nothing wider than the window; step and sheet kept over a reload; the legend; a field that is wrong in another step is said with its step and marks it, no print and no files meanwhile; shapes and doors by their chips | pass, no errors in the page |
+| Page | `deno task check`, `test/page_check.js`: headless Chrome, 1500 × 950, clicked and dragged with Chrome's own pointer, 161 checks in all with the print's, the files' and the match's below. Every step shows its settings alone and `Next` leads on; every setting has a field; the sheet fits its place, 20 pixels and more around it, at 1500 × 950, 1100 × 700, 800 × 600, A4 portrait and under the bar of a match; zoom 2 and 4 keep the view's middle; 400 wide: the sheet over the settings, nothing wider than the window; step and sheet kept over a reload; the legend; a field that is wrong in another step is said with its step and marks it, no print and no files meanwhile; shapes and doors by their chips | pass, no errors in the page |
 | | windows: none to take hold of in step 1; chosen, dragged in steps of 0.5 mm, its fields brought into view in a low window, chosen on the back sheet too, own size, shape and door, `Back to the grid`; Chrome's box of the close-up's lines is the window's, of the back's opening the module's | pass |
 | | pictures: loaded, dragged, sized by a corner, cropped at a side, sized by Ctrl and wheel, turned, mirrored, fitted, set by fields; the ring at its top dragged 6 pixels turns it as far as the pointer went around its middle, between 0.5 and 3°; Chrome's box of the drawn picture; the nine handles of a picture of 900 × 600 mm, and of a sheet at zoom 4 moved in its place, each whole in the view, apart from the others and the thing under the pointer there, and a corner taken at such a place sizes by what the pointer moves; `Stretch` makes it 281 × 194 mm; a side dragged with `Stretch` moves that side alone, with `Skew` slides it, top and right, and Chrome's box of the picture is the one reckoned from its place; a skew of 85° is said and not taken; `Height` 100 and `Skew` 0 bring the file's shape back; a place kept without stretch and skew is read as neither; a file that is no picture; a drag in step 2 leaves the picture alone; the back's picture by the panel's choice of sheet; both pictures and their files after a reload; marks and logo switched off; remove; start over; both downloads are the files the module makes of the page's settings | pass |
 | Print, measured | the same run: Chrome's PDF at 300 dots per inch, one-coloured test picture on the front. A4 landscape, calendar 277 × 190 at 10 / 10: picture with 2 of bleed expected 8 to 289 and 8 to 202 mm from the page's top left | 8.04 to 288.97, 7.96 to 202.01 |
@@ -267,10 +281,15 @@ Not found: where Suite's zero lies and which point of a file its X and Y mean. T
 | | A4 portrait, calendar 150 × 200 at 12.5 / 30: edge expected 12.4 to 162.6, 66.9 to 267.1 | 12.36 to 162.56, 66.89 to 267.12 |
 | | a picture 100 wide, `Height` 150 %, `Skew` 20°, around 148.5 / 105 of the sheet: expected 80.3 to 216.7 and 55 to 155; in the row 60 from the top 114.9 to 214.9, in the row at 150 82.1 to 182.1: it leans to the right at the top | 80.35 to 216.66, 55.03 to 154.94; 114.89 to 214.8; 82.13 to 182.03 |
 | | what is on a page: no cut lines on a picture, no picture with `Cut lines only`, crop marks from 2 to 295 mm, nothing but the picture without guides and bleed; always 2 pages of the sheet's size | as expected |
+| Print files, measured | the same run, the files the buttons hand over: the PDF read by `pdftoppm` at 300 dots per inch, the PNG by a reader written after the PNG specification. Both 3508 × 2480, the PDF one page of A4, the PNG says 11811 pixels per metre. The picture expected 8 to 289 and 8 to 202 | PDF 8.04 to 288.97, 8.04 to 202.01; PNG 8.04 to 288.97, 8.04 to 201.93; each within 0.1 of the print's |
+| | the back without a picture: its cut lines, the edge expected 9.9 to 287.1 and 9.9 to 200.1 | PDF 9.91 to 287.1, 9.91 to 200.15; PNG 9.91 to 287.1, 9.91 to 200.07 |
+| | `Pictures with cut lines` and a shift of 1.5 / 2.5: picture and edge moved as in the print; `Cut lines only`: no picture | as expected |
+| | a JPEG of 1200 × 600 that says it lies turned (Exif orientation 6): taken as 600 × 1200, its first corner top right in the print, in the PDF and in the PNG | as expected, within 0.5 mm |
+| | a sheet of 1500 × 1000 mm: the PNG is 8192 × 5461 and says 5461 pixels per metre | as expected |
 | Match, measured | the same run: a drawing of the calendar, 277 × 190 mm with two coloured squares, as a "photo" of 3000 × 2200 pixels taken at a slant; its four corners clicked, then the calendar's corners, each 1.5 mm beside it. The magenta square, drawn from 100 to 120 and 50 to 70 mm | in the new picture 99.94 to 120 and 49.96 to 70.02; in the print's PDF, 10 mm further on the sheet, 109.98 to 129.96 and 59.94 to 80.01 |
 | | the bar over the sheet, the sheet's choice locked; a click beside the picture, one point back, the ring on the corner and with Alt beside it, places in the wrong order, three points on a line, cancel by button and Esc, undo | as described above |
-| Before the page was laid out in steps, not since | a match laid with Alt; a matched picture after a reload; a picture that ends on the calendar; a JPEG of 400 × 200 that says it lies turned, shown 200 × 400 with its corner where it belongs; the box Chrome draws around all of a file's lines | passed then, 72 and 24 checks by scripts that are not kept |
-| Not checked | a print on paper; a cut; the files in Bambu Suite; Firefox; a touch screen; a picture of 20 megapixels and more | |
+| Before the page was laid out in steps, not since | a match laid with Alt; a matched picture after a reload; a picture that ends on the calendar; the box Chrome draws around all of a file's lines | passed then, 72 and 24 checks by scripts that are not kept |
+| Not checked | a print on paper; a cut; the files in Bambu Suite; Firefox; a touch screen; a picture of 20 megapixels and more; the print files made in another browser than Chrome, printed, or opened in Bambu Suite | |
 
 - Chrome's PDF of an A4 page is 297.01 × 209.89 mm, 0.11 short in height; places are reckoned from the top left corner, so a sheet's bottom edge may be off by that much.
 
@@ -286,6 +305,7 @@ Not found: where Suite's zero lies and which point of a file its X and Y mean. T
 | Sheet on sheet | both sheets get the calendar's edge cut, so they are the same size; how well the back's pictures sit behind the doors depends on print and cut of both sheets |
 | Glue | where not to glue is not in the files |
 | Layout and pictures | kept in the browser only; the SVGs hold the settings in `<desc>`, but the app cannot open them |
+| Print files | the browser draws the page from an SVG with the picture inside it; Chrome does, other browsers are untried. Whether the program a PNG goes to reads its size is not known for any |
 | Picture by handles | nothing is taken back but by hand: `Height` 100 and `Skew` 0 for the file's shape, `Turned` 0, `Crop` 0. Cropping a skewed picture cuts along its leaning sides |
 | Match | the points are clicked once and not dragged afterwards: one point back, or match the result again. The old file is gone with the page, the four points with the match |
 | Calendar's size | the first brief said "A4 290x210mm"; the second asks for less than the printer prints: 277 × 190 now |
@@ -305,6 +325,9 @@ Not found: where Suite's zero lies and which point of a file its X and Y mean. T
 | The dots run from the corners into the sheet | a round dot on each corner: half of it would lie beside the paper and make the file larger than the sheet |
 | The print's page is the sheet of paper, the picture at its place on it | a picture file of the calendar's size, placed by the print dialog |
 | A trial print of the cut lines and a shift in mm | trust in printer and cutter |
+| A print file is the print's page: the sheet of paper with the picture at its place | the picture alone, as large as the calendar: it would have to be placed by hand again where it is printed |
+| A print file is one picture of the page at 300 pixels per inch, PDF and PNG the same pixels, without loss | a PDF with the picture's own file and drawn lines, which the browser's print dialog already gives as "Save as PDF" |
+| A file per sheet | front and back as two pages of one PDF: the two are printed on two sheets of card |
 | Bleed, crop marks and a ruler line outside the calendar | a picture that ends at the edge, and no way to see a scaled print |
 | A picture per sheet, front and back | the front alone |
 | A side's handle crops, stretches or skews, as chosen in the panel | one meaning only, or a key held for the others |

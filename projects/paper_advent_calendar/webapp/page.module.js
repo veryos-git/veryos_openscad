@@ -4,8 +4,9 @@
 
 import { o_setting__default, n_mm__line, f_a_o_window, f_o_door, f_a_s_problem, f_s_d, f_s_svg, f_a_n__box__file } from './calendar.module.js';
 import { a_s_side, f_o_picture, f_a_n__px, f_a_n__size, f_n_dpi, f_a_n__from_px, f_a_n__to_px, f_a_n__handle, f_a_n__handle__shown, f_a_n__handle__turn, f_o_picture__fitted, f_o_picture__spread, f_o_picture__resized, f_o_picture__turned, f_o_picture__scaled, f_o_picture__cut, f_o_picture__cropped, f_o_picture__stretched, f_o_picture__skewed } from './picture.module.js';
-import { f_a_n__calendar, f_a_n__distance, f_a_n__bleed, f_a_s_problem__sheet, f_s_picture__sheet, f_s_line__sheet } from './sheet.module.js';
+import { f_a_n__calendar, f_a_n__distance, f_a_n__bleed, f_a_s_problem__sheet, f_s_picture__sheet, f_s_line__sheet, f_s_svg__page } from './sheet.module.js';
 import { f_a_n_h, f_a_n__mapped, f_s_problem__match, f_a_a_n__anchor, f_a_n__snapped, f_n_px__per_mm, f_a_n__warped } from './match.module.js';
+import { f_a_n__png_sized, f_a_v__pdf } from './file.module.js';
 
 let s_key__storage = 'paper_advent_calendar';
 let a_s_sheet = ['front', 'back'];
@@ -28,6 +29,8 @@ let n_px__snap = 8;
 // side, and no finer than a print can show
 let n_px__work = 4096;
 let n_px__per_mm__print = 300 / 25.4;
+// a page of the print as a file is as fine as that, and no larger than this along its longer side
+let n_px__page = 8192;
 let el_panel = document.getElementById('el_panel');
 let el_stage = document.getElementById('el_stage');
 
@@ -69,6 +72,9 @@ let o_match = null;
 // the picture a match took the place of, to bring it back: its sheet, file and place
 let o_undo = null;
 let o_s_svg = { front: '', back: '' };
+// a page of the print as a file: whether one is being made, and what there is to say about the last
+let b_busy__page = false;
+let s_note__page = '';
 
 // The pictures' files are too large for the settings' place: they are kept in the
 // browser's database, a sheet's under the sheet's name. s_do: 'get', 'put' or 'delete'.
@@ -114,6 +120,10 @@ let f_o_setting__form = function(){
     return o;
 };
 let f_s = function(n){ return String(+n.toFixed(2)); };
+// How fine a sheet's page is as a file, in pixels a mm: as a print shows, less for a very large sheet.
+let f_n_px__per_mm__page = function(){
+    return Math.min(n_px__per_mm__print, n_px__page / Math.max(o_setting.n_mm__sheet_x, o_setting.n_mm__sheet_y));
+};
 // A field's name as the page shows it: its step, and its own name or its row's.
 let f_s_name = function(el){
     let s_step__field = el.closest('.step').dataset.step;
@@ -211,6 +221,7 @@ let f_update = function(){
     for(let s_id of ['el_print', 'el_download__front', 'el_download__back']){
         document.getElementById(s_id).disabled = Boolean(s_bad);
     }
+    for(let el of document.querySelectorAll('[data-page]')){ el.disabled = Boolean(s_bad) || b_busy__page; }
     if(s_bad){
         document.getElementById('el_status').textContent = s_bad;
         return;
@@ -344,6 +355,10 @@ let f_update = function(){
         + `@media print{ .sheet, .sheet > svg{ width: ${o_setting.n_mm__sheet_x}mm; height: ${o_setting.n_mm__sheet_y}mm; }`
         + ` .printed{ transform: translate(${o_setting.n_mm__print_x}px, ${-o_setting.n_mm__print_y}px); } }`;
     document.getElementById('el_print_note').textContent = `In the print dialog: paper ${f_s(o_setting.n_mm__sheet_x)} × ${f_s(o_setting.n_mm__sheet_y)} mm, scale 100 %, margins none; and no fitting to the page in the printer's own settings.`;
+    let n_px__per_mm__page = f_n_px__per_mm__page();
+    document.getElementById('el_page_note').textContent = `A file is one sheet's page of the print, with what is chosen under Print: the sheet of paper, ${f_s(o_setting.n_mm__sheet_x)} × ${f_s(o_setting.n_mm__sheet_y)} mm, `
+        + `as a picture of ${Math.round(o_setting.n_mm__sheet_x * n_px__per_mm__page)} × ${Math.round(o_setting.n_mm__sheet_y * n_px__per_mm__page)} pixels, ${Math.round(n_px__per_mm__page * 25.4)} an inch. Print it at 100 %, without margins.`
+        + (s_note__page ? ` ${s_note__page}` : '');
 
     let n_row = Math.ceil(o_setting.n_window / o_setting.n_column);
     document.getElementById('el_size').textContent = `${o_setting.n_window} windows in ${n_row} ${n_row === 1 ? 'row' : 'rows'}, `
@@ -748,13 +763,83 @@ el_stage.addEventListener('wheel', function(o_event){
 }, { passive: false });
 
 document.getElementById('el_print').addEventListener('click', function(){ window.print(); });
+let f_download = function(o_blob, s_name){
+    let el_a = document.createElement('a');
+    el_a.href = URL.createObjectURL(o_blob);
+    el_a.download = s_name;
+    el_a.click();
+    setTimeout(function(){ URL.revokeObjectURL(el_a.href); }, 1000);
+};
 for(let s_sheet of a_s_sheet){
     document.getElementById(`el_download__${s_sheet}`).addEventListener('click', function(){
-        let el_a = document.createElement('a');
-        el_a.href = URL.createObjectURL(new Blob([o_s_svg[s_sheet]], { type: 'image/svg+xml' }));
-        el_a.download = `advent_calendar_${s_sheet}_veryos.svg`;
-        el_a.click();
-        setTimeout(function(){ URL.revokeObjectURL(el_a.href); }, 1000);
+        f_download(new Blob([o_s_svg[s_sheet]], { type: 'image/svg+xml' }), `advent_calendar_${s_sheet}_veryos.svg`);
+    });
+}
+
+// A sheet's page of the print as a file, a PDF or a PNG. The browser draws the page's
+// SVG; the picture's file goes into it as text, since an SVG drawn as a picture sees no
+// other file.
+let f_el_canvas__page = async function(s_sheet){
+    let s_href = '';
+    if(o_s_url[s_sheet]){
+        let o_file = await (await fetch(o_s_url[s_sheet])).blob();
+        s_href = await new Promise(function(f_resolve, f_reject){
+            let o_reader = new FileReader();
+            o_reader.onload = function(){ f_resolve(o_reader.result); };
+            o_reader.onerror = function(){ f_reject(o_reader.error); };
+            o_reader.readAsDataURL(o_file);
+        });
+    }
+    let s_url = URL.createObjectURL(new Blob([f_s_svg__page(o_setting, s_sheet, s_href, f_n_px__per_mm__page())], { type: 'image/svg+xml' }));
+    try{
+        let el_img = new Image();
+        await new Promise(function(f_resolve, f_reject){
+            el_img.onload = f_resolve;
+            el_img.onerror = f_reject;
+            el_img.src = s_url;
+        });
+        let el_canvas = document.createElement('canvas');
+        el_canvas.width = el_img.naturalWidth;
+        el_canvas.height = el_img.naturalHeight;
+        el_canvas.getContext('2d').drawImage(el_img, 0, 0);
+        return el_canvas;
+    } finally {
+        URL.revokeObjectURL(s_url);
+    }
+};
+let f_o_blob__page = async function(s_sheet, s_type){
+    let el_canvas = await f_el_canvas__page(s_sheet);
+    if(s_type === 'png'){
+        let o_blob = await new Promise(function(f_resolve){ el_canvas.toBlob(f_resolve, 'image/png'); });
+        return new Blob([f_a_n__png_sized(new Uint8Array(await o_blob.arrayBuffer()), el_canvas.width / o_setting.n_mm__sheet_x)], { type: 'image/png' });
+    }
+    // the PDF holds the same pixels, without loss: red, green and blue of each, packed
+    let a_n__rgba = el_canvas.getContext('2d').getImageData(0, 0, el_canvas.width, el_canvas.height).data;
+    let a_n__rgb = new Uint8Array(a_n__rgba.length / 4 * 3);
+    for(let n_at = 0, n_to = 0; n_at < a_n__rgba.length; n_at += 4, n_to += 3){
+        a_n__rgb[n_to] = a_n__rgba[n_at];
+        a_n__rgb[n_to + 1] = a_n__rgba[n_at + 1];
+        a_n__rgb[n_to + 2] = a_n__rgba[n_at + 2];
+    }
+    let a_n__flate = new Uint8Array(await new Response(new Blob([a_n__rgb]).stream().pipeThrough(new CompressionStream('deflate'))).arrayBuffer());
+    return new Blob(f_a_v__pdf({ n_mm__x: o_setting.n_mm__sheet_x, n_mm__y: o_setting.n_mm__sheet_y, n_px__x: el_canvas.width, n_px__y: el_canvas.height, a_n__flate }), { type: 'application/pdf' });
+};
+for(let el of document.querySelectorAll('[data-page]')){
+    el.addEventListener('click', async function(){
+        b_busy__page = true;
+        s_note__page = 'Making the file …';
+        f_update();
+        // the words first, then the work
+        await new Promise(function(f_resolve){ setTimeout(f_resolve, 30); });
+        try{
+            f_download(await f_o_blob__page(el.dataset.page, el.dataset.type), `advent_calendar_${el.dataset.page}_veryos.${el.dataset.type}`);
+            s_note__page = '';
+        } catch(o_error){
+            console.warn(o_error);
+            s_note__page = 'The file could not be made.';
+        }
+        b_busy__page = false;
+        f_update();
     });
 }
 

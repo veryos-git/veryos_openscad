@@ -4,13 +4,14 @@
 // The page in headless Chrome, used as a person uses it: the steps and what each shows,
 // the sheet's size between the bars, fields that are wrong, windows and pictures moved,
 // stretched and skewed with the pointer, a match by four points, the print measured from Chrome's PDF, the
-// cutting files. Needs google-chrome and pdftoppm; the app is served on port 8779.
+// print's pages as PDF and PNG files read back, the cutting files. Needs google-chrome
+// and pdftoppm; the app is served on port 8779.
 // With a folder as argument the readme's two pictures of the app are saved there:
 // deno task check .
 
 import { o_setting__default, f_a_o_window, f_o_door, f_a_n__box as f_a_n__box__path, f_s_svg } from '../calendar.module.js';
 import { f_a_n__from_px, f_a_n__to_px, f_a_n__handle, f_a_n__size } from '../picture.module.js';
-import { f_o_page, f_a_n__box } from './chrome.js';
+import { f_o_page, f_a_n__box, f_o_print__png } from './chrome.js';
 
 let n_check = 0;
 let a_s_failed = [];
@@ -59,6 +60,7 @@ try{
                 s_match__body: document.body.dataset.match ?? '',
                 b_undo: f_b('#el_match_undo'),
                 b_disabled: document.getElementById('el_print').disabled && document.getElementById('el_download__front').disabled && document.getElementById('el_download__back').disabled,
+                n_page__disabled: [...document.querySelectorAll('[data-page]')].filter(function(el){ return el.disabled; }).length,
                 a_n__window: [innerWidth, innerHeight, document.documentElement.scrollWidth, document.documentElement.scrollHeight],
                 a_n__view: f_a_n('#el_view'),
                 a_n__sheet: f_a_n('.sheet.shown'),
@@ -201,12 +203,12 @@ try{
     await f_step('paper');
     await o_page.f_fill('n_mm__margin', 500);
     o_state = await f_o_state();
-    f_check('a field that is wrong in another step: said with its step, the step marked, no print and no files', o_state.s_status.startsWith('Windows, Margin: ') && o_state.s_step__bad === 'window' && o_state.b_disabled, o_state.s_status);
+    f_check('a field that is wrong in another step: said with its step, the step marked, no print and no files', o_state.s_status.startsWith('Windows, Margin: ') && o_state.s_step__bad === 'window' && o_state.b_disabled && o_state.n_page__disabled === 4, o_state.s_status);
     await f_step('output');
     f_check('the steps still open with it', (await f_o_state()).s_step__open === 'output');
     await o_page.f_fill('n_mm__margin', 15);
     o_state = await f_o_state();
-    f_check('put right: nothing said, nothing marked', o_state.s_status === '' && o_state.s_step__bad === '' && !o_state.b_disabled && !o_state.b_status, o_state.s_status);
+    f_check('put right: nothing said, nothing marked', o_state.s_status === '' && o_state.s_step__bad === '' && !o_state.b_disabled && o_state.n_page__disabled === 0 && !o_state.b_status, o_state.s_status);
     await o_page.f_fill('n_mm__sheet_x', 10);
     f_check('one of two fields in a row is named by itself', (await f_o_state()).s_status.startsWith('Paper, Sheet\'s width: '), (await f_o_state()).s_status);
     await o_page.f_fill('n_mm__sheet_x', 297);
@@ -682,6 +684,93 @@ try{
     f_check('no bleed, no guides: the picture on the calendar and nothing else', f_b_near(f_a_n__box(a_o_print[0], f_b_ink), [10, 10, 287, 200], 0.1) && f_b_near(f_a_n__box(a_o_print[0], f_b_green), [10, 10, 287, 200], 0.1), f_a_n__round(f_a_n__box(a_o_print[0], f_b_ink)));
     await o_page.f_click_on('[name=b_print_guide]');
     await o_page.f_fill('n_mm__bleed', 2);
+
+    // ---- the print's pages as files: read back, the PDF by pdftoppm, the PNG by a reader of its own
+    let f_o_print__file = async function(s_sheet, s_type){
+        let s_name = `advent_calendar_${s_sheet}_veryos.${s_type}`;
+        let a_n = await o_page.f_a_n__download(`[data-page=${s_sheet}][data-type=${s_type}]`, s_name);
+        if(!a_n){ return null; }
+        if(s_type === 'png'){ return f_o_print__png(a_n); }
+        let a_o_page = await o_page.f_a_o_print__pdf(`${o_page.s_path__work}/${s_name}`);
+        return { ...a_o_page[0], n_page: a_o_page.length };
+    };
+    let s_note__page = 'A file is one sheet\'s page of the print, with what is chosen under Print: the sheet of paper, 297 × 210 mm, as a picture of 3508 × 2480 pixels, 300 an inch. Print it at 100 %, without margins.';
+    f_check('Print files: four buttons, and what a file is', await o_page.f_v(`[...document.querySelectorAll('[data-page]')].map(function(el){ return el.textContent; }).join()`) === 'Front PDF,Back PDF,Front PNG,Back PNG'
+        && await o_page.f_v(`document.getElementById('el_page_note').textContent`) === s_note__page, await o_page.f_v(`document.getElementById('el_page_note').textContent`));
+    a_o_print = await o_page.f_a_o_print();
+    for(let s_type of ['pdf', 'png']){
+        let o_file = await f_o_print__file('front', s_type);
+        f_check(`Front ${s_type.toUpperCase()}: the sheet at 300 pixels an inch, 3508 × 2480` + (s_type === 'pdf' ? ', one page of 297 × 210 mm' : ', and the file says 11811 pixels a metre'), Boolean(o_file) && f_b_near([o_file.n_px__x, o_file.n_px__y], [3508, 2480], s_type === 'pdf' ? 2 : 0)
+            && (s_type === 'pdf' ? o_file.n_page === 1 : String(o_file.a_n__per_m) === '11811,11811,1'), o_file && [o_file.n_px__x, o_file.n_px__y, o_file.n_page, o_file.a_n__per_m]);
+        a_n__green = f_a_n__box(o_file, f_b_green);
+        f_check(`Front ${s_type.toUpperCase()}: the picture with 2 of bleed, 8 to 289 and 8 to 202 mm, no cut line on it, crop marks and ruler line from 2 to 295`, f_b_near(a_n__green, [8, 8, 289, 202], 0.1) && !f_a_n__box(o_file, f_b_red) && f_b_near(f_a_n__box(o_file, f_b_ink), [2, 2, 295, 208], 0.3), [f_a_n__round(a_n__green), f_a_n__round(f_a_n__box(o_file, f_b_ink))]);
+        f_check(`Front ${s_type.toUpperCase()}: the picture where the print has it, within 0.1 mm`, f_b_near(a_n__green, f_a_n__box(a_o_print[0], f_b_green), 0.1), [f_a_n__round(a_n__green), f_a_n__round(f_a_n__box(a_o_print[0], f_b_green))]);
+        console.log(`     the picture in the ${s_type.toUpperCase()}: ${f_a_n__round(a_n__green)}`);
+        o_file = await f_o_print__file('back', s_type);
+        a_n__red = f_a_n__box(o_file, f_b_red);
+        f_check(`Back ${s_type.toUpperCase()}, no picture: the back's cut lines, the calendar's edge 9.9 to 287.1 and 9.9 to 200.1`, Boolean(o_file) && f_b_near(a_n__red, [9.9, 9.9, 287.1, 200.1], 0.1) && !f_a_n__box(o_file, f_b_green), f_a_n__round(a_n__red ?? []));
+        console.log(`     the edge in the ${s_type.toUpperCase()}: ${f_a_n__round(a_n__red ?? [])}`);
+    }
+    f_check('the note is as before, the buttons are to be pressed again', await o_page.f_v(`document.getElementById('el_page_note').textContent`) === s_note__page && (await f_o_state()).n_page__disabled === 0);
+    // what is chosen under Print holds for the files: cut lines on the picture, shifted; then the lines alone
+    await o_page.f_click_on('.pick label:has([value=both])');
+    await o_page.f_fill('n_mm__print_x', 1.5);
+    await o_page.f_fill('n_mm__print_y', 2.5);
+    for(let s_type of ['pdf', 'png']){
+        let o_file = await f_o_print__file('front', s_type);
+        f_check(`Front ${s_type.toUpperCase()}, pictures with cut lines, shift 1.5 right, 2.5 up: the picture 9.5 to 290.5 and 5.5 to 199.5, the edge 11.4 to 288.6 and 7.4 to 197.6`, f_b_near(f_a_n__box(o_file, f_b_green), [9.5, 5.5, 290.5, 199.5], 0.1) && f_b_near(f_a_n__box(o_file, f_b_red), [11.4, 7.4, 288.6, 197.6], 0.1), [f_a_n__round(f_a_n__box(o_file, f_b_green)), f_a_n__round(f_a_n__box(o_file, f_b_red) ?? [])]);
+    }
+    await o_page.f_fill('n_mm__print_x', 0);
+    await o_page.f_fill('n_mm__print_y', 0);
+    await o_page.f_click_on('.pick label:has([value=cut])');
+    let o_file__cut = await f_o_print__file('front', 'png');
+    f_check('Front PNG, cut lines only: no picture', !f_a_n__box(o_file__cut, f_b_green) && f_b_near(f_a_n__box(o_file__cut, f_b_red), [9.9, 9.9, 287.1, 200.1], 0.1));
+    await o_page.f_click_on('.pick label:has([value=picture])');
+    // a photo that says it lies turned, as a phone's does: 1200 × 600 in the file, a quarter turn with the clock to show it, so its first corner comes to lie top right
+    let s_url__turned = await o_page.f_v(`(function(){
+        let el_canvas = document.createElement('canvas');
+        el_canvas.width = 1200;
+        el_canvas.height = 600;
+        let o_context = el_canvas.getContext('2d');
+        o_context.fillStyle = '#00a050'; o_context.fillRect(0, 0, 1200, 600);
+        o_context.fillStyle = '#ff00ff'; o_context.fillRect(0, 0, 300, 300);
+        return el_canvas.toDataURL('image/jpeg', 1);
+    })()`);
+    let a_n__jpeg = Uint8Array.from(atob(s_url__turned.split(',')[1]), function(s){ return s.charCodeAt(0); });
+    // behind the file's first two bytes: Exif, with the one entry "orientation 6"
+    let a_n__exif = [0xFF, 0xE1, 0x00, 0x22, 0x45, 0x78, 0x69, 0x66, 0x00, 0x00, 0x4D, 0x4D, 0x00, 0x2A, 0x00, 0x00, 0x00, 0x08, 0x00, 0x01, 0x01, 0x12, 0x00, 0x03, 0x00, 0x00, 0x00, 0x01, 0x00, 0x06, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00];
+    await Deno.writeFile(`${o_page.s_path__work}/turned.jpg`, Uint8Array.from([...a_n__jpeg.subarray(0, 2), ...a_n__exif, ...a_n__jpeg.subarray(2)]));
+    let o_picture__green = await f_o_picture();
+    await f_step('picture');
+    await f_load(`${o_page.s_path__work}/turned.jpg`, 'front');
+    await f_until(`JSON.parse(localStorage.getItem('paper_advent_calendar')).o_picture__front.n_px__x === 600`);
+    await o_page.f_click_on('[data-picture=contain]');
+    o_picture = await f_o_picture();
+    f_check('a JPEG of 1200 × 600 that says it lies turned: taken as 600 × 1200, fitted 95 × 190 mm', o_picture.n_px__x === 600 && o_picture.n_px__y === 1200 && f_b_near(f_a_n__size(o_picture), [95, 190], 1e-9), o_picture);
+    let f_b_magenta = function(n_r, n_g, n_b){ return n_r > 200 && n_g < 110 && n_b > 200; };
+    await f_step('output');
+    a_o_print = await o_page.f_a_o_print();
+    f_check('in the print its first corner lies top right: 148.5 to 196 and 10 to 57.5 mm', f_b_near(f_a_n__box(a_o_print[0], f_b_magenta), [148.5, 10, 196, 57.5], 0.5), f_a_n__round(f_a_n__box(a_o_print[0], f_b_magenta) ?? []));
+    for(let s_type of ['pdf', 'png']){
+        let o_file = await f_o_print__file('front', s_type);
+        f_check(`and in the ${s_type.toUpperCase()}, the picture 101 to 196 and 10 to 200`, f_b_near(f_a_n__box(o_file, f_b_magenta), [148.5, 10, 196, 57.5], 0.5) && f_b_near(f_a_n__box(o_file, function(n_r, n_g, n_b){ return f_b_green(n_r, n_g, n_b) || f_b_magenta(n_r, n_g, n_b); }), [101, 10, 196, 200], 0.5), f_a_n__round(f_a_n__box(o_file, f_b_magenta) ?? []));
+    }
+    // a sheet too large for 300 pixels an inch
+    await f_step('paper');
+    await o_page.f_fill('n_mm__sheet_x', 1500);
+    await o_page.f_fill('n_mm__sheet_y', 1000);
+    await f_step('output');
+    f_check('a sheet of 1500 × 1000 mm: its file is 8192 pixels wide, 139 an inch, and says so', (await o_page.f_v(`document.getElementById('el_page_note').textContent`)).includes('1500 × 1000 mm, as a picture of 8192 × 5461 pixels, 139 an inch.'), await o_page.f_v(`document.getElementById('el_page_note').textContent`));
+    let a_n__large = await o_page.f_a_n__download('[data-page=back][data-type=png]', 'advent_calendar_back_veryos.png');
+    let o_view__large = a_n__large && new DataView(a_n__large.buffer);
+    f_check('Back PNG of that sheet: 8192 × 5461 pixels, 5461 a metre', Boolean(a_n__large) && o_view__large.getUint32(16) === 8192 && o_view__large.getUint32(20) === 5461 && o_view__large.getUint32(41) === 5461, a_n__large && [o_view__large.getUint32(16), o_view__large.getUint32(20), o_view__large.getUint32(41)]);
+    await f_step('paper');
+    await o_page.f_fill('el_format', '297 210');
+    // the one-coloured picture again
+    await f_step('picture');
+    await f_load(s_path__green, 'front');
+    await f_until(`JSON.parse(localStorage.getItem('paper_advent_calendar')).o_picture__front.n_px__y === 400`);
+    f_check('the one-coloured picture again, where it lay', JSON.stringify(await f_o_picture()) === JSON.stringify(o_picture__green), await f_o_picture());
     // a stretched and skewed picture in the print: 100 wide, half as high again as its shape, so 100 high, leaning by 20°, around 148.5 / 105 of the sheet
     await f_step('picture');
     for(let [s_name, n] of [['picture__n_mm__size_x', 100], ['picture__stretch', 150], ['picture__n_deg__skew', 20]]){ await o_page.f_fill(s_name, n); }

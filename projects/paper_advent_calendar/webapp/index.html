@@ -447,6 +447,16 @@ input.switch:checked::after{ background: var(--s_col__black); transform: transla
                 <p class="note" id="el_print_note"></p>
             </div>
             <div class="group">
+                <h2 title="The print's pages as files, to print from another program or to send on. A PDF says the sheet's size itself; a PNG says its pixels an inch, which not every program reads">Print files</h2>
+                <div class="buttons">
+                    <button type="button" data-page="front" data-type="pdf">Front PDF</button>
+                    <button type="button" data-page="back" data-type="pdf">Back PDF</button>
+                    <button type="button" data-page="front" data-type="png">Front PNG</button>
+                    <button type="button" data-page="back" data-type="png">Back PNG</button>
+                </div>
+                <p class="note" id="el_page_note"></p>
+            </div>
+            <div class="group">
                 <h2>Cutting files</h2>
                 <div class="buttons">
                     <button type="button" class="main" id="el_download__front">Front SVG</button>

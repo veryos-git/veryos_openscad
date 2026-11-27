@@ -142,15 +142,13 @@ let f_o_page = async function({ n_port = 8779, n_px__x = 1500, n_px__y = 950 } =
         let { data: s_base64 } = await f_send('Page.captureScreenshot', { format: 'png' });
         await Deno.writeFile(s_path, Uint8Array.from(atob(s_base64), function(s){ return s.charCodeAt(0); }));
     };
-    // The print as Chrome makes it, at 300 dots per inch: a page each with n_px__x,
-    // n_px__y and a_n__rgb, three numbers per dot. Needs pdftoppm.
-    o_page.f_a_o_print = async function(){
-        let { data: s_base64 } = await f_send('Page.printToPDF', { preferCSSPageSize: true, printBackground: true });
-        await Deno.writeFile(`${s_path__work}/print.pdf`, Uint8Array.from(atob(s_base64), function(s){ return s.charCodeAt(0); }));
+    // A PDF's pages at 300 dots per inch: a page each with n_px__x, n_px__y and
+    // a_n__rgb, three numbers per dot. Needs pdftoppm.
+    o_page.f_a_o_print__pdf = async function(s_path){
         for await(let o_entry of Deno.readDir(s_path__work)){
             if(o_entry.name.endsWith('.ppm')){ await Deno.remove(`${s_path__work}/${o_entry.name}`); }
         }
-        await new Deno.Command('pdftoppm', { args: ['-r', '300', `${s_path__work}/print.pdf`, `${s_path__work}/print`] }).output();
+        await new Deno.Command('pdftoppm', { args: ['-r', '300', s_path, `${s_path__work}/print`] }).output();
         let a_s_name = [];
         for await(let o_entry of Deno.readDir(s_path__work)){
             if(o_entry.name.endsWith('.ppm')){ a_s_name.push(o_entry.name); }
@@ -170,6 +168,28 @@ let f_o_page = async function({ n_port = 8779, n_px__x = 1500, n_px__y = 950 } =
             a_o_print.push({ n_px__x: Number(a_s[1]), n_px__y: Number(a_s[2]), a_n__rgb: a_n.subarray(n_at) });
         }
         return a_o_print;
+    };
+    // The print as Chrome makes it.
+    o_page.f_a_o_print = async function(){
+        let { data: s_base64 } = await f_send('Page.printToPDF', { preferCSSPageSize: true, printBackground: true });
+        await Deno.writeFile(`${s_path__work}/print.pdf`, Uint8Array.from(atob(s_base64), function(s){ return s.charCodeAt(0); }));
+        return o_page.f_a_o_print__pdf(`${s_path__work}/print.pdf`);
+    };
+    // The file a click on an element makes the page hand over, by its name: its bytes,
+    // null if none comes.
+    o_page.f_a_n__download = async function(s_selector, s_name){
+        // Chrome gives a second file of a name another name
+        await Deno.remove(`${s_path__work}/${s_name}`).catch(function(){});
+        await o_page.f_click_on(s_selector);
+        for(let n_try = 0; n_try < 600; n_try++){
+            await f_wait(50);
+            let a_n = await Deno.readFile(`${s_path__work}/${s_name}`).catch(function(){ return null; });
+            if(a_n){
+                await o_page.f_settle();
+                return a_n;
+            }
+        }
+        return null;
     };
     o_page.f_close = async function(){
         o_socket.close();
@@ -201,4 +221,57 @@ let f_a_n__box = function(o_print, f_b){
     return n_right < 0 ? null : [n_left * n_mm__per_px, n_top * n_mm__per_px, (n_right + 1) * n_mm__per_px, (n_bottom + 1) * n_mm__per_px];
 };
 
-export { f_o_page, f_a_n__box, f_wait };
+// A PNG read after the PNG specification, not by a browser: n_px__x, n_px__y and
+// a_n__rgb as a printed page has them, and a_n__per_m, what the file says of its size on
+// paper: pixels a metre along x and y, and 1 for the metre; undefined if it says none.
+// For 8 bits a colour, with or without alpha, not interlaced: what a canvas gives.
+let f_o_print__png = async function(a_n){
+    let o_view = new DataView(a_n.buffer, a_n.byteOffset, a_n.byteLength);
+    let o_print = {};
+    let n_channel = 0;
+    let a_a_n__data = [];
+    for(let n_at = 8; n_at < a_n.length;){
+        let n_length = o_view.getUint32(n_at);
+        let s_name = String.fromCharCode(...a_n.subarray(n_at + 4, n_at + 8));
+        if(s_name === 'IHDR'){
+            o_print.n_px__x = o_view.getUint32(n_at + 8);
+            o_print.n_px__y = o_view.getUint32(n_at + 12);
+            n_channel = { 2: 3, 6: 4 }[a_n[n_at + 17]];
+            if(a_n[n_at + 16] !== 8 || !n_channel || a_n[n_at + 20] !== 0){ throw new Error('a PNG of a kind this reader does not read'); }
+        }
+        if(s_name === 'pHYs'){ o_print.a_n__per_m = [o_view.getUint32(n_at + 8), o_view.getUint32(n_at + 12), a_n[n_at + 16]]; }
+        if(s_name === 'IDAT'){ a_a_n__data.push(a_n.subarray(n_at + 8, n_at + 8 + n_length)); }
+        n_at += 12 + n_length;
+    }
+    let a_n__row = new Uint8Array(await new Response(new Blob(a_a_n__data).stream().pipeThrough(new DecompressionStream('deflate'))).arrayBuffer());
+    // every row: a byte that says how it is told, then its bytes as differences to the
+    // byte a pixel to the left, the one above, or both
+    let n_scl__row = 1 + o_print.n_px__x * n_channel;
+    o_print.a_n__rgb = new Uint8Array(o_print.n_px__x * o_print.n_px__y * 3);
+    for(let n_y = 0; n_y < o_print.n_px__y; n_y++){
+        let n_from = n_y * n_scl__row + 1;
+        let n_filter = a_n__row[n_from - 1];
+        for(let n = 0; n < n_scl__row - 1; n++){
+            let n_left = n >= n_channel ? a_n__row[n_from + n - n_channel] : 0;
+            let n_up = n_y ? a_n__row[n_from + n - n_scl__row] : 0;
+            let n_up_left = n_y && n >= n_channel ? a_n__row[n_from + n - n_scl__row - n_channel] : 0;
+            let n_guess = 0;
+            if(n_filter === 1){ n_guess = n_left; }
+            if(n_filter === 2){ n_guess = n_up; }
+            if(n_filter === 3){ n_guess = (n_left + n_up) >> 1; }
+            if(n_filter === 4){
+                // of the three the one nearest to left + up - up left
+                let n_p = n_left + n_up - n_up_left;
+                let [n_a, n_b, n_c] = [Math.abs(n_p - n_left), Math.abs(n_p - n_up), Math.abs(n_p - n_up_left)];
+                n_guess = n_a <= n_b && n_a <= n_c ? n_left : n_b <= n_c ? n_up : n_up_left;
+            }
+            a_n__row[n_from + n] = (a_n__row[n_from + n] + n_guess) & 0xFF;
+        }
+        for(let n_x = 0; n_x < o_print.n_px__x; n_x++){
+            for(let n = 0; n < 3; n++){ o_print.a_n__rgb[3 * (n_y * o_print.n_px__x + n_x) + n] = a_n__row[n_from + n_x * n_channel + n]; }
+        }
+    }
+    return o_print;
+};
+
+export { f_o_page, f_a_n__box, f_o_print__png, f_wait };

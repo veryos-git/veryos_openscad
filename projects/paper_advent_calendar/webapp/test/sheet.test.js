@@ -1,13 +1,14 @@
 // Copyright (C) [Jonas Immanuel Frey] - Licensed under GPL
 // The sheet of paper: the calendar's place on it from the bottom left corner, the same
 // for the print and for the cutting file; crop marks and ruler line outside the
-// calendar; what is said when the place or a picture does not fit; the print's SVG.
+// calendar; what is said when the place or a picture does not fit; the print's SVG,
+// and a page of the print as an SVG of its own, for a file.
 
 import { o_setting__default, f_a_s_path, f_a_n__box__file } from '../calendar.module.js';
 import { f_o_picture, f_o_picture__fitted, f_s_picture } from '../picture.module.js';
 import {
     n_mm__crop, n_mm__crop_gap, f_a_n__calendar, f_a_n__distance, f_a_n__bleed, f_a_a_a_n__crop, f_o_ruler,
-    f_a_s_problem__sheet, f_s_picture__sheet, f_s_line__sheet
+    f_a_s_problem__sheet, f_s_picture__sheet, f_s_line__sheet, f_s_svg__page
 } from '../sheet.module.js';
 
 let assert = function(b, s_message = 'assertion failed'){
@@ -132,4 +133,29 @@ Deno.test('the print\'s lines: guides when asked for, with the ruler\'s length a
         for(let [a_n_p, a_n_q] of f_a_a_a_n__crop(o_setting__default)){ assert(s_d.includes(`M ${a_n_p.join(' ')} L ${a_n_q.join(' ')}`), `crop mark ${a_n_p}`); }
         assert(f_s_line__sheet({ ...o_setting__default, b_print_guide: false }, s_sheet).startsWith('<g class="cut" transform="translate(10 10)"><path id="'), 'without guides');
     }
+});
+
+Deno.test('a page of the print as a file: the sheet in pixels, white, with what the print shows by the settings', function(){
+    let o_picture = f_o_picture__fitted(f_o_picture(3000, 2000), f_a_n__bleed(o_setting__default), true);
+    let o_setting = { ...o_setting__default, o_picture__front: o_picture };
+    let s_picture = f_s_picture__sheet(o_setting, 'front', 'data:a');
+    let s_head = '<svg xmlns="http://www.w3.org/2000/svg" width="3508" height="2480" viewBox="0 0 297 210" preserveAspectRatio="none"><rect width="297" height="210" fill="#ffffff"/><g transform="translate(0 0)">';
+    let f_s = function(o_more, s_sheet = 'front', s_href = 'data:a'){ return f_s_svg__page({ ...o_setting, ...o_more }, s_sheet, s_href, 300 / 25.4); };
+    // the pictures: the picture and the guides, no cut line on it
+    assert(f_s({}) === `${s_head}${s_picture}${f_s_line__sheet(o_setting, 'front', false)}</g></svg>`, f_s({}).slice(0, 300));
+    assert(f_s({}).includes('<image href="data:a"') && f_s({}).includes('class="guide"') && !f_s({}).includes('class="cut"'), 'the pictures');
+    // with cut lines, and the lines alone
+    assert(f_s({ s_print: 'both' }) === `${s_head}${s_picture}${f_s_line__sheet(o_setting, 'front')}</g></svg>`, 'pictures with cut lines');
+    assert(f_s({ s_print: 'cut' }) === `${s_head}${f_s_line__sheet(o_setting, 'front')}</g></svg>` && !f_s({ s_print: 'cut' }).includes('<image'), 'cut lines only');
+    // a sheet without a picture, or without its file, shows its cut lines whatever is chosen
+    for(let s_print of ['picture', 'both', 'cut']){
+        assert(f_s({ s_print }, 'back') === `${s_head}${f_s_line__sheet(o_setting, 'back')}</g></svg>`, `the back, ${s_print}`);
+        assert(f_s({ s_print }, 'front', '') === `${s_head}${f_s_line__sheet(o_setting, 'front')}</g></svg>`, `no file, ${s_print}`);
+    }
+    assert(!f_s({ b_print_guide: false }).includes('class="guide"') && f_s({ b_print_guide: false }).endsWith('</svg></g></g></g></g></svg>'), 'without guides the picture alone');
+    // the shift: to the right and up, as the print's
+    assert(f_s({ n_mm__print_x: 1.5, n_mm__print_y: 2.5 }).includes('fill="#ffffff"/><g transform="translate(1.5 -2.5)"><clipPath'), 'shifted');
+    // another sheet, coarser
+    assert(f_s_svg__page(o_setting__upright, 'front', '', 4).startsWith('<svg xmlns="http://www.w3.org/2000/svg" width="840" height="1188" viewBox="0 0 210 297" preserveAspectRatio="none"><rect width="210" height="297" fill="#ffffff"/>'), 'A4 standing at 4 pixels a mm');
+    assert(!/NaN|undefined|Infinity/.test(f_s({ s_print: 'both' })), 'a number is missing');
 });
