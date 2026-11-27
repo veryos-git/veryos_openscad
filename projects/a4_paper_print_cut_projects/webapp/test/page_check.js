@@ -80,9 +80,11 @@ try{
             };
         })()`);
     };
+    // Waits for something to hold in the page, and for the projects' panel to be done
+    // with what it does: a saved project's files sent, an opened one's taken in.
     let f_until = async function(s_expression){
         for(let n_try = 0; n_try < 200; n_try++){
-            if(await o_page.f_v(s_expression)){ break; }
+            if(await o_page.f_v(`Boolean(${s_expression}) && !document.querySelector('[aria-busy=true]')`)){ break; }
             await o_page.f_wait(50);
         }
         await o_page.f_settle();
@@ -1011,7 +1013,8 @@ try{
     await f_show_projects();
     await f_press('open', 'Winter 2026');
     await f_press('Discard');
-    await f_until(`document.querySelectorAll('.sheet.has_picture').length === 2`);
+    // the panel closes when all of the project is on screen
+    await f_until(`document.querySelectorAll('.sheet.has_picture').length === 2 && !document.getElementById('el_project_box').open`);
     o_state = await f_o_state();
     f_check('the open project opened again, Discard: as it was saved, the removed picture back', o_state.o_setting.n_window === 12 && o_state.s_sheet__picture === 'front,back' && !(await f_o_project()).b_dirty && await f_b_folder('Winter 2026', 2), o_state.s_sheet__picture);
     await f_show_projects();
@@ -1202,6 +1205,99 @@ try{
         f_check(`Back ${s_type.toUpperCase()}, no picture: the back's cut lines, the calendar's edge 9.9 to 287.1 and 9.9 to 200.1`, Boolean(o_file) && f_b_near(a_n__red, [9.9, 9.9, 287.1, 200.1], 0.1) && !f_a_n__box(o_file, f_b_green), f_a_n__round(a_n__red ?? []));
         console.log(`     the edge in the ${s_type.toUpperCase()}: ${f_a_n__round(a_n__red ?? [])}`);
     }
+    // ---- light and colour: the chosen picture's sliders, on the screen, in the print and in the print's files
+    // What a colour comes to: lightness, then contrast around middle grey, then saturation
+    // around the colour's grey, each cut off at black and white.
+    let f_a_n__look = function(a_n__rgb, n_light, n_contrast, n_saturation){
+        let f_n = function(n){ return Math.min(255, Math.max(0, n)); };
+        let a_n = a_n__rgb.map(function(n){ return f_n(n * n_light); }).map(function(n){ return f_n((n - 127.5) * n_contrast + 127.5); });
+        let n_grey = 0.213 * a_n[0] + 0.715 * a_n[1] + 0.072 * a_n[2];
+        return a_n.map(function(n){ return f_n(n_grey + (n - n_grey) * n_saturation); });
+    };
+    // a page's dot at a place in mm, and the screen's at a place of the window
+    let f_a_n__dot = function(o_print, a_n__mm){
+        let n_at = 3 * (Math.round(a_n__mm[1] / 25.4 * 300) * o_print.n_px__x + Math.round(a_n__mm[0] / 25.4 * 300));
+        return [...o_print.a_n__rgb.subarray(n_at, n_at + 3)];
+    };
+    let f_a_n__screen = async function(a_n){
+        await o_page.f_screenshot(`${o_page.s_path__work}/screen.png`);
+        let o_screen = await f_o_print__png(await Deno.readFile(`${o_page.s_path__work}/screen.png`));
+        let n_at = 3 * (Math.round(a_n[1]) * o_screen.n_px__x + Math.round(a_n[0]));
+        return [...o_screen.a_n__rgb.subarray(n_at, n_at + 3)];
+    };
+    let f_o_look = function(){
+        return o_page.f_v(`(function(){
+            let el_panel = document.getElementById('el_panel');
+            return {
+                s_slider: ['light', 'contrast', 'saturation'].map(function(s){ let el = el_panel.elements['look__n_ratio__' + s]; return el.value + ' ' + el.nextElementSibling.textContent; }).join(),
+                b_plain: !document.getElementById('el_look_plain').disabled,
+                s_filter: [...document.querySelectorAll('#el_sheet__front filter')].map(function(el){ return el.id + ' ' + [...el.children].map(function(el){ return el.tagName; }).join('+'); }).join(),
+                o_picture: JSON.parse(localStorage.getItem('paper_advent_calendar')).a_o_picture__front[0]
+            };
+        })()`);
+    };
+    let f_set_look = async function(a_n){
+        for(let [n_idx, s_name] of ['light', 'contrast', 'saturation'].entries()){ await o_page.f_fill(`look__n_ratio__${s_name}`, a_n[n_idx]); }
+    };
+    let a_n__file = [0, 160, 80];
+    // a place of the calendar that no cut line crosses: in its margin, before the windows
+    let a_n__plain = [6, 6];
+    await f_step('picture');
+    let o_look = await f_o_look();
+    f_check('Light and colour: three sliders at 100 %, nothing for As the file is to do, the picture drawn without a filter', o_look.s_slider === '100 100 %,100 100 %,100 100 %' && !o_look.b_plain && o_look.s_filter === ''
+        && o_look.o_picture.n_ratio__light === 1 && o_look.o_picture.n_ratio__contrast === 1 && o_look.o_picture.n_ratio__saturation === 1, o_look);
+    let a_n__seen = await f_a_n__screen(await f_a_n__px(a_n__plain));
+    f_check('the screen shows the file\'s colour there', f_b_near(a_n__seen, a_n__file, 1), a_n__seen);
+    let a_s_seen = [];
+    let b_look = true;
+    for(let a_n of [[150, 100, 100], [30, 100, 100], [100, 50, 100], [100, 180, 100], [100, 100, 0], [100, 100, 170], [125, 80, 50]]){
+        await f_set_look(a_n);
+        o_look = await f_o_look();
+        a_n__seen = await f_a_n__screen(await f_a_n__px(a_n__plain));
+        let a_n__meant = f_a_n__look(a_n__file, a_n[0] / 100, a_n[1] / 100, a_n[2] / 100);
+        a_s_seen.push(`${a_n.join(' / ')}: ${a_n__seen} for ${a_n__meant.map(Math.round)}`);
+        b_look = b_look && f_b_near(a_n__seen, a_n__meant, 2) && o_look.s_slider === a_n.map(function(n){ return `${n} ${n} %`; }).join() && o_look.b_plain
+            && String([o_look.o_picture.n_ratio__light, o_look.o_picture.n_ratio__contrast, o_look.o_picture.n_ratio__saturation]) === String(a_n.map(function(n){ return n / 100; }));
+    }
+    f_check('lightness 150 and 30, contrast 50 and 180, saturation 0 and 170, and 125 / 80 / 50 together: the picture has the numbers, the sliders say them, the screen shows each colour as reckoned, to 2 of 255', b_look, a_s_seen);
+    console.log(`     light and colour on the screen:\n       ${a_s_seen.join('\n       ')}`);
+    f_check('drawn through one filter of its own: lightness, contrast, saturation', o_look.s_filter === 'front_look_0 feComponentTransfer+feComponentTransfer+feColorMatrix', o_look.s_filter);
+    // in the print and in the files: the same colour, the picture as large and as sharp at its edge as without
+    let a_n__meant = f_a_n__look(a_n__file, 1.25, 0.8, 0.5);
+    let f_b_meant = function(n_r, n_g, n_b){ return f_b_near([n_r, n_g, n_b], a_n__meant, 12); };
+    await f_step('output');
+    a_o_print = await o_page.f_a_o_print();
+    a_n__seen = f_a_n__dot(a_o_print[0], [148.5, 105]);
+    f_check('125 / 80 / 50 in the print: the sheet\'s middle has the colour reckoned, to 6 of 255, and the picture reaches from 8 to 289 and 8 to 202 mm as before', f_b_near(a_n__seen, a_n__meant, 6) && f_b_near(f_a_n__box(a_o_print[0], f_b_meant) ?? [0, 0, 0, 0], [8, 8, 289, 202], 0.1) && !f_a_n__box(a_o_print[0], f_b_green),
+        [a_n__seen, a_n__meant.map(Math.round), f_a_n__round(f_a_n__box(a_o_print[0], f_b_meant) ?? [])]);
+    console.log(`     125 / 80 / 50 in the print: ${a_n__seen} for ${a_n__meant.map(Math.round)}, the picture ${f_a_n__round(f_a_n__box(a_o_print[0], f_b_meant) ?? [])}`);
+    for(let s_type of ['pdf', 'png']){
+        let o_file = await f_o_print__file('front', s_type);
+        a_n__seen = f_a_n__dot(o_file, [148.5, 105]);
+        f_check(`and in the ${s_type.toUpperCase()}: the colour to ${s_type === 'pdf' ? 6 : 2} of 255, the picture where the print has it`, f_b_near(a_n__seen, a_n__meant, s_type === 'pdf' ? 6 : 2) && f_b_near(f_a_n__box(o_file, f_b_meant) ?? [0, 0, 0, 0], [8, 8, 289, 202], 0.1), [a_n__seen, f_a_n__round(f_a_n__box(o_file, f_b_meant) ?? [])]);
+        console.log(`     125 / 80 / 50 in the ${s_type.toUpperCase()}: ${a_n__seen}, the picture ${f_a_n__round(f_a_n__box(o_file, f_b_meant) ?? [])}`);
+    }
+    // kept over a reload; laid anew by a match and after its undo; taken back
+    await o_page.f_open('#project');
+    await f_step('picture');
+    o_look = await f_o_look();
+    f_check('a reload keeps it: the sliders, the filter, the colour on the screen', o_look.s_slider === '125 125 %,80 80 %,50 50 %' && o_look.s_filter.startsWith('front_look_0 ') && f_b_near(await f_a_n__screen(await f_a_n__px(a_n__plain)), a_n__meant, 2), o_look);
+    let o_picture__look = o_look.o_picture;
+    await o_page.f_click_on('#el_match');
+    for(let a_n of [[40, 30], [240, 30], [240, 160], [40, 160], [40, 30], [240, 30], [240, 160], [40, 160]]){ await o_page.f_click(await f_a_n__px(a_n), 1); }
+    await f_until(`document.getElementById('el_match_bar').hidden`);
+    o_look = await f_o_look();
+    f_check('matched by four points: a new file, laid anew from the file as it is, with the picture\'s light and colour still its own', o_look.o_picture.s_file !== o_picture__look.s_file && o_look.s_slider === '125 125 %,80 80 %,50 50 %'
+        && String([o_look.o_picture.n_ratio__light, o_look.o_picture.n_ratio__contrast, o_look.o_picture.n_ratio__saturation]) === '1.25,0.8,0.5' && f_b_near(await f_a_n__screen(await f_a_n__px([138.5, 6])), a_n__meant, 2), [o_look, await f_a_n__screen(await f_a_n__px([138.5, 6]))]);
+    await o_page.f_click_on('#el_match_undo');
+    o_look = await f_o_look();
+    f_check('Undo the match: the picture as it was, light and colour too', JSON.stringify(o_look.o_picture) === JSON.stringify(o_picture__look), o_look.o_picture);
+    await o_page.f_click_on('#el_look_plain');
+    o_look = await f_o_look();
+    f_check('As the file is: the sliders at 100 again, no filter, the file\'s colour on the screen', o_look.s_slider === '100 100 %,100 100 %,100 100 %' && !o_look.b_plain && o_look.s_filter === '' && o_look.o_picture.n_ratio__light === 1 && o_look.o_picture.n_ratio__contrast === 1 && o_look.o_picture.n_ratio__saturation === 1
+        && f_b_near(await f_a_n__screen(await f_a_n__px(a_n__plain)), a_n__file, 1), o_look);
+    await f_step('output');
+
     // the picture split into 3 x 2 pieces, and a second picture on it: the files show both, the pieces as one picture
     let s_path__magenta = await f_s_path__picture('magenta.png', 600, 400, `o_context.fillStyle = '#ff00ff'; o_context.fillRect(0, 0, n_px__x, n_px__y);`);
     let f_b_magenta = function(n_r, n_g, n_b){ return n_r > 200 && n_g < 110 && n_b > 200; };
@@ -1512,7 +1608,7 @@ try{
     f_check('its back sheet is shown again, with its lines', (await f_o_state()).s_sheet === 'back' && await o_page.f_v(`[...document.querySelectorAll('.sheet.shown .cut path')].map(function(el){ return el.id; }).join()`) === 'back_sheet,back_logo,back_outline');
     await f_show_projects();
     await f_press('open', 'Flex');
-    await f_until(`document.getElementById('el_kind').textContent === 'Flextangle' && document.querySelectorAll('#el_sheet__front defs image').length === 4`);
+    await f_until(`document.getElementById('el_kind').textContent === 'Flextangle' && document.querySelectorAll('#el_sheet__front defs image').length === 4 && document.getElementById('el_project_title').textContent === 'Flex'`);
     o_flex = await f_o_flex();
     f_check('the flextangle opened from a calendar\'s back sheet: its page, its one sheet, its settings and pictures as saved, no changes', o_flex.s_sheet === 'front' && o_flex.n_choice === 0 && JSON.stringify(o_flex.o_setting) === JSON.stringify(o_kept__flex.o_setting)
         && o_flex.s_step === '1Paper,2Shape,3Picture,4Cuts,5Print and cut' && !(await f_o_project()).b_dirty && (await f_o_project()).s_title === 'Flex', [o_flex.s_sheet, o_flex.s_step, await f_o_project()]);
@@ -1571,7 +1667,7 @@ try{
     await f_press_home('el_home_ask', 'Cancel');
     await f_press_home('el_home_kind', 'Advent calendar');
     await f_press_home('el_home_ask', 'Discard');
-    await f_until(`document.getElementById('el_kind').textContent === 'Advent calendar'`);
+    await f_until(`document.getElementById('el_kind').textContent === 'Advent calendar' && document.getElementById('el_project_title').textContent === 'new'`);
     o_state = await f_o_state();
     f_check('Discard: a new calendar on screen, its settings of the first start, step 1; the saved flextangle as it was', await f_b_project() && JSON.stringify(o_state.o_setting) === JSON.stringify(o_setting__default) && o_state.s_step__open === 'paper'
         && (await f_o_project()).s_title === 'new' && (await f_o_kept('Flex')).o_setting.n_mm__base === 40 && !(await f_o_home()).s_question, [o_state.s_step__open, await f_o_project()]);
@@ -1579,13 +1675,13 @@ try{
     o_home = await f_o_home();
     f_check('a new project as it started: nothing on screen to go on with', !o_home.b_screen && o_home.a_o_now.length === 0, o_home.a_o_now);
     await f_press_home('el_home_project', 'Flex');
-    await f_until(`document.getElementById('el_kind').textContent === 'Flextangle' && document.querySelectorAll('#el_sheet__front defs image').length === 4`);
+    await f_until(`document.getElementById('el_kind').textContent === 'Flextangle' && document.querySelectorAll('#el_sheet__front defs image').length === 4 && document.getElementById('el_project_title').textContent === 'Flex'`);
     f_check('a saved project pressed: opened without a question, as it was saved', await f_b_project() && await f_b_flex__saved(), await f_o_project());
 
     // a project that has no name yet
     await o_page.f_click_on('#el_home_open');
     await f_press_home('el_home_kind', 'Advent calendar');
-    await f_until(`document.getElementById('el_kind').textContent === 'Advent calendar'`);
+    await f_until(`document.getElementById('el_kind').textContent === 'Advent calendar' && document.getElementById('el_project_title').textContent === 'new'`);
     await f_step('pattern');
     await o_page.f_fill('n_window', 12);
     await o_page.f_click_on('#el_home_open');
@@ -1600,7 +1696,7 @@ try{
         && await o_page.f_v(`document.activeElement.id`) === 'el_project_name' && (await f_o_state()).o_setting.n_window === 12, o_project);
     await o_page.f_type('From home');
     await f_press('Save first');
-    await f_until(`document.getElementById('el_kind').textContent === 'Flextangle'`);
+    await f_until(`document.getElementById('el_kind').textContent === 'Flextangle' && document.getElementById('el_project_title').textContent === 'new'`);
     f_check('named, Save first: saved with its 12 windows, then the new flextangle on screen', (await f_o_kept('From home')).o_setting.n_window === 12 && await f_b_project() && JSON.stringify((await f_o_flex()).o_setting) === JSON.stringify(f_o_setting__default('flextangle')) && (await f_o_project()).s_title === 'new', await f_o_project());
     await o_page.f_click_on('#el_home_open');
     await f_press_home('el_home_project', 'From home');
@@ -1610,13 +1706,13 @@ try{
     await o_page.f_click_on('#el_home_open');
     await f_press_home('el_home_kind', 'Flextangle');
     await f_press_home('el_home_ask', 'Save first');
-    await f_until(`document.getElementById('el_kind').textContent === 'Flextangle'`);
+    await f_until(`document.getElementById('el_kind').textContent === 'Flextangle' && document.getElementById('el_project_title').textContent === 'new'`);
     f_check('Save first of a project that has a name, from the home page: saved with the change, then the new project', (await f_o_kept('From home')).o_setting.n_window === 10 && await f_b_project() && (await f_o_project()).s_title === 'new' && !(await f_o_home()).s_question, await f_o_project());
 
     // a match and the home page
     await o_page.f_click_on('#el_home_open');
     await f_press_home('el_home_project', 'Flex');
-    await f_until(`document.getElementById('el_kind').textContent === 'Flextangle' && document.querySelectorAll('#el_sheet__front defs image').length === 4`);
+    await f_until(`document.getElementById('el_kind').textContent === 'Flextangle' && document.querySelectorAll('#el_sheet__front defs image').length === 4 && document.getElementById('el_project_title').textContent === 'Flex'`);
     await f_step('picture');
     await o_page.f_click(await f_a_n__px__net([120, 50]));
     await o_page.f_click_on('#el_match');

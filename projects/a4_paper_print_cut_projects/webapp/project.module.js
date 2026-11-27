@@ -106,6 +106,11 @@ let f_o_panel__project = function({
     let f_o_state = function(){
         return { a_o_project, s_name__open, b_dirty: f_b_dirty(), s_note };
     };
+    // Busy: while a project is saved, opened or started, and until the saved projects are
+    // listed for the first time. Said in the page, for whoever waits for the panel.
+    let f_set_busy = function(b_busy){
+        el_box.setAttribute('aria-busy', String(b_busy));
+    };
     let f_set_saved = function(o_saved){
         n_cnt__change++;
         a_o_project = [o_saved, ...a_o_project.filter(function(o_project){ return o_project.s_name !== o_saved.s_name; })];
@@ -143,6 +148,7 @@ let f_o_panel__project = function({
             return false;
         }
         b_saving = true;
+        f_set_busy(true);
         try{
             let o_saved = null;
             if(s_name === s_name__open){
@@ -164,6 +170,7 @@ let f_o_panel__project = function({
             el_box.open = true;
         }
         b_saving = false;
+        f_set_busy(false);
         f_render_all();
         return !s_note;
     };
@@ -184,6 +191,7 @@ let f_o_panel__project = function({
         s_note = '';
         o_question = null;
         s_name__deleting = null;
+        f_set_busy(true);
         try{
             let o_project = await f_v_fetched(f_s_url__project(s_name));
             await f_open_design(o_project);
@@ -194,6 +202,7 @@ let f_o_panel__project = function({
         } catch(o_error){
             s_note = o_error.message;
         }
+        f_set_busy(false);
         f_render_all();
     };
 
@@ -202,9 +211,11 @@ let f_o_panel__project = function({
         o_question = null;
         s_name__deleting = null;
         el_name.value = '';
+        f_set_busy(true);
         await f_new_design(n_idx);
         f_set_open(null);
         el_box.open = false;
+        f_set_busy(false);
         f_render_all();
     };
 
@@ -391,7 +402,7 @@ let f_o_panel__project = function({
         f_start: function(s_name){
             s_name__open = s_name;
             el_name.value = s_name ?? '';
-            return f_refresh();
+            return f_refresh().finally(function(){ f_set_busy(false); });
         }
     };
 };

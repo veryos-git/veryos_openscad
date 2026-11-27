@@ -55,6 +55,11 @@ let f_o_page = async function({ n_port = 8779, n_px__x = 1500, n_px__y = 950 } =
     s_session = (await f_send('Target.attachToTarget', { targetId: s_target, flatten: true })).sessionId;
 
     let o_page = { a_s_error: [], s_path__work, s_url: `http://127.0.0.1:${n_port}`, f_send, f_wait };
+    // what goes wrong in the page is also said at once, between the checks it happens at
+    o_page.a_s_error.push = function(s_error){
+        console.log(`     in the page: ${s_error}`);
+        return Array.prototype.push.call(o_page.a_s_error, s_error);
+    };
     // a confirm() is answered with yes
     a_f__event.push(function(o_message){
         let o_param = o_message.params;
@@ -80,14 +85,14 @@ let f_o_page = async function({ n_port = 8779, n_px__x = 1500, n_px__y = 950 } =
         return o_page.f_v('new Promise(function(f){ requestAnimationFrame(function(){ requestAnimationFrame(function(){ setTimeout(f, 20); }); }); })');
     };
     // Opens the app, or loads it anew, at its bare address or with s_at behind it; done
-    // when the page has drawn its sheets. By way of an empty page: the same address
+    // when the page has drawn its sheets and nothing in it says it is busy. By way of an empty page: the same address
     // again with another '#' would be no new load.
     o_page.f_open = async function(s_at = ''){
         await f_send('Page.navigate', { url: 'about:blank' });
         await f_send('Page.navigate', { url: `http://127.0.0.1:${n_port}/${s_at}` });
         for(let n_try = 0; n_try < 100; n_try++){
             await f_wait(50);
-            if(await o_page.f_v('document.readyState === "complete" && Boolean(document.querySelector(".sheet .line path"))').catch(function(){ return false; })){ break; }
+            if(await o_page.f_v('document.readyState === "complete" && Boolean(document.querySelector(".sheet .line path")) && !document.querySelector("[aria-busy=true]")').catch(function(){ return false; })){ break; }
         }
         await o_page.f_settle();
     };

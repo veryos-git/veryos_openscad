@@ -4,7 +4,7 @@
 // printed, the pointer on them, and the pictures' files. What a kind of pattern has of
 // its own on the page is its part, see calendar.page.module.js.
 
-import { f_o_picture, f_a_n__px, f_a_n__size, f_n_dpi, f_a_n__from_px, f_a_n__to_px, f_a_n__handle, f_a_n__handle__shown, f_a_n__handle__turn, f_f_b__in, f_o_picture__fitted, f_o_picture__spread, f_o_picture__resized, f_o_picture__turned, f_o_picture__scaled, f_o_picture__cut, f_o_picture__cropped, f_o_picture__stretched, f_o_picture__skewed, f_a_o_picture__split } from './picture.module.js';
+import { f_o_picture, f_a_n__px, f_a_n__size, f_n_dpi, f_a_n__from_px, f_a_n__to_px, f_a_n__handle, f_a_n__handle__shown, f_a_n__handle__turn, f_f_b__in, f_o_picture__fitted, f_o_picture__spread, f_o_picture__resized, f_o_picture__turned, f_o_picture__scaled, f_o_picture__cut, f_o_picture__cropped, f_o_picture__stretched, f_o_picture__skewed, f_a_o_picture__split, a_s_name__look, f_b_look } from './picture.module.js';
 import {
     f_o_setting__default, f_a_n__size__pattern, f_a_n__pattern, f_a_n__distance, f_a_n__bleed, f_a_n__box__file, f_s_svg, f_a_s_problem, f_a_a_n__anchor, f_a_a_n__spot,
     f_s_picture__sheet, f_s_line__sheet, f_s_svg__page
@@ -444,6 +444,13 @@ let f_update = function(){
         });
         let el_stretch = el_panel.elements.picture__stretch;
         if(el_stretch !== document.activeElement){ el_stretch.value = f_s(o_picture.n_ratio__stretch * 100); }
+        // its light and colour: a slider each, in % of the file's
+        for(let s_name of a_s_name__look){
+            let el = el_panel.elements[`look__${s_name}`];
+            el.value = Math.round(o_picture[s_name] * 100);
+            el.nextElementSibling.textContent = `${el.value} %`;
+        }
+        document.getElementById('el_look_plain').disabled = !f_b_look(o_picture);
         let [n_x, n_y] = f_a_n__size(o_picture);
         let n_dpi = f_n_dpi(o_picture);
         // stretched, it is finer one way than the other
@@ -481,6 +488,8 @@ el_panel.addEventListener('input', function(o_event){
             f_set_chosen(f_o_picture__cut(o_picture, Number(el.name.slice(14)), v / 100));
         } else if(el.name === 'picture__stretch'){
             f_set_chosen({ ...o_picture, n_ratio__stretch: v / 100 });
+        } else if(el.name.startsWith('look__')){
+            f_set_chosen({ ...o_picture, [el.name.slice(6)]: v / 100 });
         } else if(el.name.startsWith('picture__')){
             f_set_chosen({ ...o_picture, [el.name.slice(9)]: v });
         }
@@ -583,7 +592,9 @@ let o_f_o_picture = {
     turn_left: function(o_picture){ return { ...o_picture, n_deg: f_n_deg(o_picture.n_deg - 90) }; },
     turn_right: function(o_picture){ return { ...o_picture, n_deg: f_n_deg(o_picture.n_deg + 90) }; },
     flip_x: function(o_picture){ return { ...o_picture, b_flip_x: !o_picture.b_flip_x }; },
-    flip_y: function(o_picture){ return { ...o_picture, b_flip_y: !o_picture.b_flip_y }; }
+    flip_y: function(o_picture){ return { ...o_picture, b_flip_y: !o_picture.b_flip_y }; },
+    // light and colour as its file has them
+    plain: function(o_picture){ return { ...o_picture, ...Object.fromEntries(a_s_name__look.map(function(s_name){ return [s_name, 1]; })) }; }
 };
 document.getElementById('el_picture').addEventListener('click', function(o_event){
     let f_o_picture__changed = o_f_o_picture[o_event.target.dataset.picture];
@@ -738,7 +749,8 @@ let f_add_match = async function(a_n){
     try{
         let o_matched = await f_o_matched(f_o_picture__chosen(), a_a_n__px, a_a_n__mm);
         let o_picture__file = await f_o_picture__of_file(o_matched.o_file);
-        f_set_chosen({ ...o_matched.o_picture, s_file: o_picture__file.s_file });
+        // laid anew from the file as it is: its light and colour stay with the picture
+        f_set_chosen({ ...o_matched.o_picture, s_file: o_picture__file.s_file, ...Object.fromEntries(a_s_name__look.map(function(s_name){ return [s_name, o_match.o_picture[s_name]]; })) });
         o_undo = {
             s_sheet, s_file: o_picture__file.s_file, o_picture: o_match.o_picture,
             s_note: `Matched by four points${o_matched.b_covered ? '.' : `; the picture does not reach all of the ${f_o_kind__shown().s_noun}, which stays blank where it ends.`}`
@@ -776,11 +788,6 @@ let f_show_design = async function(o_design, s_name){
         else if(o_response.status === 404){ a_o_file.push(null); }
         else { throw new Error('A picture of the project could not be read.'); }
     }
-    o_setting = o_design.o_setting;
-    n_idx__picture = null;
-    o_undo = null;
-    s_note__file = '';
-    b_file__unsaved = false;
     // the files that were on screen leave; the project's come under the names it has for them
     for(let s_file of Object.keys(o_s_url)){
         URL.revokeObjectURL(o_s_url[s_file]);
@@ -789,6 +796,14 @@ let f_show_design = async function(o_design, s_name){
     for(let n_idx = 0; n_idx < a_s_file.length; n_idx++){
         if(a_o_file[n_idx]){ await f_o_picture__of_file(a_o_file[n_idx], a_s_file[n_idx]); }
     }
+    // the settings, their kind's part of the page and the form's fields without a wait
+    // between them: drawn in between, the page would read the new settings from the
+    // fields of the old
+    o_setting = o_design.o_setting;
+    n_idx__picture = null;
+    o_undo = null;
+    s_note__file = '';
+    b_file__unsaved = false;
     // a picture without its file, or with a file that is no picture, is of no use
     for(let s_sheet of a_s_sheet){
         o_setting[`a_o_picture__${s_sheet}`] = f_a_o_picture(s_sheet).filter(function(o_picture){ return o_s_url[o_picture.s_file]; });
@@ -886,11 +901,11 @@ let o_panel__project = f_o_panel__project({
     // a new project, of the kind chosen by its place in a_o_new, starts with that kind's
     // settings of the first start, at the first step
     f_new_design: async function(n_idx){
-        await f_show_design({ o_setting: f_o_setting__kept({ s_kind: a_o_kind[n_idx].s_kind }) }, null);
+        // the step first: the project comes on screen at it, and a press that follows at once is not taken back
         s_step = 'paper';
         s_sheet__shown = 'front';
-        f_update();
         el_panel.scrollTop = 0;
+        await f_show_design({ o_setting: f_o_setting__kept({ s_kind: a_o_kind[n_idx].s_kind }) }, null);
     },
     f_save_extra: f_save_files,
     f_b_extra_dirty: function(){ return b_file__unsaved; },
@@ -1149,6 +1164,10 @@ document.getElementById('el_page').addEventListener('click', async function(o_ev
     }
 });
 
+// the kind's part of the page and the fields first: from here on the page can be drawn
+// at any time, as while the pictures' files are fetched
+f_place_kind();
+f_fill_form();
 // A picture without its file is of no use: the file may be gone with the browser's data.
 for(let s_sheet of a_s_sheet){
     for(let { s_file } of f_a_o_picture(s_sheet)){
@@ -1158,8 +1177,6 @@ for(let s_sheet of a_s_sheet){
     }
     o_setting[`a_o_picture__${s_sheet}`] = f_a_o_picture(s_sheet).filter(function(o_picture){ return o_s_url[o_picture.s_file]; });
 }
-f_place_kind();
-f_fill_form();
 f_update();
 // the saved projects come when the server answers; the page does not wait for them
 o_panel__project.f_start(s_name__project);

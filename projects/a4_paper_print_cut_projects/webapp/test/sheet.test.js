@@ -171,6 +171,12 @@ Deno.test('the print\'s picture: at the calendar\'s place, cut off bleed beyond 
     assert(s_svg.includes('<defs><image id="back_file_a" href="blob:a" width="3000" height="2000"/><image id="back_file_b" href="blob:b" width="400" height="300"/></defs>'), s_svg);
     assert(s_svg.endsWith(`<g transform="translate(12.5 67)">${f_s_picture(o_picture, '#back_file_a', true)}${f_s_picture(o_other, '#back_file_b', true)}${f_s_picture(o_piece, '#back_file_a', true)}</g></g>`), 'in their order, without the one whose file is not there');
     assert((s_svg.match(/blob:/g) || []).length === 2, 'a file more than once');
+    // light and colour: a picture with another than its file's is drawn through a filter of its own name, by its place among those drawn
+    let o_light = { ...o_other, n_ratio__light: 1.5 };
+    let o_grey = { ...o_piece, n_ratio__saturation: 0 };
+    s_svg = f_s_picture__sheet({ ...o_setting__upright, a_o_picture__back: [o_picture, o_light, o_gone, o_grey] }, 'back', { a: 'blob:a', b: 'blob:b' });
+    assert(s_svg.endsWith(`<g transform="translate(12.5 67)">${f_s_picture(o_picture, '#back_file_a', true)}${f_s_picture(o_light, '#back_file_b', true, 'back_look_1')}${f_s_picture(o_grey, '#back_file_a', true, 'back_look_2')}</g></g>`), s_svg);
+    assert(s_svg.includes('<filter id="back_look_1" ') && s_svg.includes('<g filter="url(#back_look_2)" ') && !s_svg.includes('back_look_0'), 'a filter for each of the two, none for the picture as its file is');
     // one of them alone
     assert(f_s_picture__sheet(o_setting, 'back', { a: 'blob:a', b: 'blob:b' }, 1).endsWith(`<defs><image id="back_file_b" href="blob:b" width="400" height="300"/></defs><g clip-path="url(#back_clip)"><g transform="translate(12.5 67)">${f_s_picture(o_other, '#back_file_b', true)}</g></g>`), 'the second alone');
 });

@@ -207,7 +207,8 @@ let f_a_a_n__spot = function(o_setting, n_picture){
 // A sheet's pictures as SVG in the sheet's mm, one over the other in their order, cut
 // off beyond the bleed. o_s_href: the files' addresses by the files' names; a picture
 // whose file has none is left out. Every file stands once, whatever number of pictures
-// show it. n_idx__only: that picture of the sheet alone. Empty without a picture.
+// show it. A picture with another light or colour than its file's has a filter of its
+// own. n_idx__only: that picture of the sheet alone. Empty without a picture.
 let f_s_picture__sheet = function(o_setting, s_sheet, o_s_href, n_idx__only = null){
     let a_o_picture = o_setting[`a_o_picture__${s_sheet}`].filter(function(o_picture, n_idx){
         return o_s_href[o_picture.s_file] && (n_idx__only === null || n_idx === n_idx__only);
@@ -221,7 +222,7 @@ let f_s_picture__sheet = function(o_setting, s_sheet, o_s_href, n_idx__only = nu
     return `<clipPath id="${s_sheet}_clip"><rect x="${f_s_n(n_x + n_left)}" y="${f_s_n(n_y + n_top)}" width="${f_s_n(n_right - n_left)}" height="${f_s_n(n_bottom - n_top)}"/></clipPath>`
         + `<defs>${a_o_picture__file.map(function(o_picture){ return `<image id="${s_sheet}_file_${o_picture.s_file}" href="${o_s_href[o_picture.s_file]}" width="${o_picture.n_px__x}" height="${o_picture.n_px__y}"/>`; }).join('')}</defs>`
         + `<g clip-path="url(#${s_sheet}_clip)"><g transform="translate(${f_s_n(n_x)} ${f_s_n(n_y)})">`
-        + `${a_o_picture.map(function(o_picture){ return f_s_picture(o_picture, `#${s_sheet}_file_${o_picture.s_file}`, true); }).join('')}</g></g>`;
+        + `${a_o_picture.map(function(o_picture, n_idx){ return f_s_picture(o_picture, `#${s_sheet}_file_${o_picture.s_file}`, true, `${s_sheet}_look_${n_idx}`); }).join('')}</g></g>`;
 };
 // A sheet's lines as SVG in the sheet's mm: the guides, crop marks and ruler line with
 // its length and, where the pattern has two sheets, the sheet's name written beside

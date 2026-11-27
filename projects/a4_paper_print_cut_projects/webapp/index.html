@@ -134,6 +134,9 @@ input[type=number], select{
     font: inherit;
 }
 input[type=number]{ width: 78px; }
+/* a slider, its value behind it */
+input[type=range]{ width: 130px; margin: 0; accent-color: var(--s_col__gold); }
+.field output{ width: 44px; color: var(--s_col__muted); font-size: 12px; text-align: right; }
 /* two fields in a row: width × height, x / y */
 .field b ~ input, .field input:has(~ b){ width: 66px; }
 input:invalid{ border-color: var(--s_col__warn); }
@@ -201,7 +204,7 @@ input.switch:checked::after{ background: var(--s_col__black); transform: transla
 .crop .right{ grid-area: 2 / 3; }
 .crop .bottom{ grid-area: 3 / 2; }
 #el_detail{ display: block; width: 100%; height: 130px; margin-bottom: 10px; background: #ffffff; border-radius: 4px; }
-#el_own button, #el_match, #el_match_undo, #el_print, #el_split{ width: 100%; }
+#el_own button, #el_match, #el_match_undo, #el_print, #el_split, #el_look_plain{ width: 100%; }
 /* a switch that is on */
 button[aria-pressed=true]{ border-color: var(--s_col__gold); background: #f0b75022; }
 #el_match_undo{ margin-top: 8px; }
@@ -312,7 +315,8 @@ button[aria-pressed=true]{ border-color: var(--s_col__gold); background: #f0b750
         <button type="button" data-step="output"><b>5</b>Print and cut</button>
     </nav>
     <!-- the saved projects, see project.module.js -->
-    <details id="el_project_box">
+    <!-- busy until the page has all it kept and the saved projects are listed -->
+    <details id="el_project_box" aria-busy="true">
         <summary title="Save what is on screen under a name, open a saved project, start a new one of any kind. Ctrl and S saves"><small>Project</small><span id="el_project_title"></span></summary>
         <div id="el_project"></div>
     </details>
@@ -417,6 +421,14 @@ button[aria-pressed=true]{ border-color: var(--s_col__gold); background: #f0b750
                         <input type="number" class="right" name="picture__crop_2" aria-label="Crop right" min="0" max="95" step="any">
                         <input type="number" class="bottom" name="picture__crop_3" aria-label="Crop bottom" min="0" max="95" step="any">
                     </div>
+                </div>
+                <div class="group">
+                    <h2 title="The chosen picture lighter, darker, with more or less contrast and colour: on the screen, in the print and in the print's files. Its file stays as it is; 100 at each is the file">Light and colour</h2>
+                    <label class="row"><span title="100: as the file is. Less is darker, 0 black. More is lighter: 200 doubles every colour, and what is light already turns white">Lightness</span><span class="field"><input type="range" name="look__n_ratio__light" min="0" max="200" step="1"><output></output></span></label>
+                    <label class="row"><span title="100: as the file is. Less brings light and dark closer to middle grey, 0 is grey all over. More drives them apart: 200 turns the lighter quarter white and the darker quarter black">Contrast</span><span class="field"><input type="range" name="look__n_ratio__contrast" min="0" max="200" step="1"><output></output></span></label>
+                    <label class="row"><span title="100: as the file is. Less is paler, 0 black and white. More is stronger in colour">Saturation</span><span class="field"><input type="range" name="look__n_ratio__saturation" min="0" max="200" step="1"><output></output></span></label>
+                    <button type="button" id="el_look_plain" data-picture="plain" title="Lightness, contrast and saturation at 100 again">As the file is</button>
+                    <p class="note">Lightness first, then contrast, then saturation. An arrow key moves a slider by 1.</p>
                 </div>
                 <div class="group">
                     <h2 title="One picture with many small ones on it: split, each part is a picture of its own to place">Split into pieces</h2>

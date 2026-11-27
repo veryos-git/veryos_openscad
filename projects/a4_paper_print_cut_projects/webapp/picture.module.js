@@ -12,6 +12,9 @@
 //   n_deg                 turned around its middle, clockwise
 //   n_deg__skew           skewed: its upright sides lean by this, to the right at the top; top and bottom lie as before
 //   b_flip_x, b_flip_y    mirrored left to right, top to bottom
+//   n_ratio__light        lighter or darker: every colour times this, 1 as the file is, 0 black
+//   n_ratio__contrast     light and dark this many times as far from middle grey, 1 as the file is, 0 grey
+//   n_ratio__saturation   the colours this many times as far from their grey, 1 as the file is, 0 black and white
 //
 // The picture's own frame: x and y from its middle, as it lies turned: x along its top
 // side, y the distance from top to bottom, which a skew leaves as it is.
@@ -26,10 +29,15 @@ let n_mm__size_min = 5;
 let n_deg__skew_max = 80;
 // Whether several pictures cover a box between them is looked up at points this far apart at most.
 let n_mm__grid = 2;
+// What changes a picture's light and colour; the file stays as it is.
+let a_s_name__look = ['n_ratio__light', 'n_ratio__contrast', 'n_ratio__saturation'];
 
 // A picture of a file's size, nothing cut off; to be fitted.
 let f_o_picture = function(n_px__x, n_px__y){
-    return { n_px__x, n_px__y, a_n_ratio__crop: [0, 0, 0, 0], n_mm__x: 0, n_mm__y: 0, n_mm__size_x: n_px__x, n_ratio__stretch: 1, n_deg: 0, n_deg__skew: 0, b_flip_x: false, b_flip_y: false };
+    return {
+        n_px__x, n_px__y, a_n_ratio__crop: [0, 0, 0, 0], n_mm__x: 0, n_mm__y: 0, n_mm__size_x: n_px__x, n_ratio__stretch: 1, n_deg: 0, n_deg__skew: 0, b_flip_x: false, b_flip_y: false,
+        n_ratio__light: 1, n_ratio__contrast: 1, n_ratio__saturation: 1
+    };
 };
 // What is left of the file, in its pixels: left, top, width, height.
 let f_a_n__px = function(o_picture){
@@ -349,13 +357,35 @@ let f_a_o_picture__split = function(o_picture, n_column, n_row){
     return a_o_picture;
 };
 
+// Whether a picture's light or colour is another than its file's.
+let f_b_look = function(o_picture){
+    return a_s_name__look.some(function(s_name){ return o_picture[s_name] !== 1; });
+};
+// A picture's light and colour as an SVG filter named s_id: lightness first, then
+// contrast, then saturation, each cut off at black and white before the next, reckoned
+// in the colours' own numbers as CSS's brightness(), contrast() and saturate() are. It
+// reaches over the picture's frame and 1 mm around it, where nothing is drawn.
+let f_s_filter = function(o_picture, s_id){
+    let [n_x, n_y] = f_a_n__size(o_picture);
+    let f_s_linear = function(n_slope, n_intercept){
+        return `<feComponentTransfer>${['R', 'G', 'B'].map(function(s){ return `<feFunc${s} type="linear" slope="${f_s_n(n_slope)}" intercept="${f_s_n(n_intercept)}"/>`; }).join('')}</feComponentTransfer>`;
+    };
+    return `<filter id="${s_id}" filterUnits="userSpaceOnUse" x="${f_s_n(-n_x / 2 - 1)}" y="${f_s_n(-n_y / 2 - 1)}" width="${f_s_n(n_x + 2)}" height="${f_s_n(n_y + 2)}" color-interpolation-filters="sRGB">`
+        + (o_picture.n_ratio__light === 1 ? '' : f_s_linear(o_picture.n_ratio__light, 0))
+        + (o_picture.n_ratio__contrast === 1 ? '' : f_s_linear(o_picture.n_ratio__contrast, (1 - o_picture.n_ratio__contrast) / 2))
+        + (o_picture.n_ratio__saturation === 1 ? '' : `<feColorMatrix type="saturate" values="${f_s_n(o_picture.n_ratio__saturation)}"/>`)
+        + '</filter>';
+};
 // The picture as SVG in the pattern's mm; s_href its file's address. The inner svg
 // shows the part of the file that is left, stretched to its size, and hides the rest.
 // With b_use s_href names a picture file drawn elsewhere in the SVG, as '#' and its id:
-// pieces of one file then hold the file once.
-let f_s_picture = function(o_picture, s_href, b_use = false){
+// pieces of one file then hold the file once. s_id: a name for the picture's filter,
+// free in the SVG; with it a picture of another light or colour than its file's is
+// drawn through that filter, without it as its file is.
+let f_s_picture = function(o_picture, s_href, b_use = false, s_id = ''){
     let [n_x, n_y] = f_a_n__size(o_picture);
-    return `<g transform="translate(${f_s_n(o_picture.n_mm__x)} ${f_s_n(o_picture.n_mm__y)}) rotate(${f_s_n(o_picture.n_deg)}) skewX(${f_s_n(-o_picture.n_deg__skew)}) scale(${o_picture.b_flip_x ? -1 : 1} ${o_picture.b_flip_y ? -1 : 1})">`
+    let b_filter = Boolean(s_id) && f_b_look(o_picture);
+    return (b_filter ? f_s_filter(o_picture, s_id) : '') + `<g${b_filter ? ` filter="url(#${s_id})"` : ''} transform="translate(${f_s_n(o_picture.n_mm__x)} ${f_s_n(o_picture.n_mm__y)}) rotate(${f_s_n(o_picture.n_deg)}) skewX(${f_s_n(-o_picture.n_deg__skew)}) scale(${o_picture.b_flip_x ? -1 : 1} ${o_picture.b_flip_y ? -1 : 1})">`
         + `<svg x="${f_s_n(-n_x / 2)}" y="${f_s_n(-n_y / 2)}" width="${f_s_n(n_x)}" height="${f_s_n(n_y)}" viewBox="${f_a_n__px(o_picture).map(f_s_n).join(' ')}" preserveAspectRatio="none">`
         + (b_use ? `<use href="${s_href}"/>` : `<image href="${s_href}" width="${o_picture.n_px__x}" height="${o_picture.n_px__y}"/>`) + '</svg></g>';
 };
@@ -363,5 +393,5 @@ let f_s_picture = function(o_picture, s_href, b_use = false){
 export {
     a_s_side, n_mm__size_min, n_deg__skew_max, f_o_picture, f_a_n__px, f_a_n__size, f_n_dpi, f_a_n__pattern, f_a_n__own, f_a_n__from_px, f_a_n__to_px, f_a_n__handle, f_a_n__handle__shown, f_a_n__handle__turn,
     f_f_b__in, f_o_picture__fitted, f_o_picture__spread, f_b_covered, f_b_covered__together, f_o_picture__resized, f_o_picture__turned, f_o_picture__scaled, f_o_picture__cut, f_o_picture__cropped,
-    f_o_picture__stretched, f_o_picture__skewed, f_a_o_picture__split, f_s_picture
+    f_o_picture__stretched, f_o_picture__skewed, f_a_o_picture__split, a_s_name__look, f_b_look, f_s_picture
 };

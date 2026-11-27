@@ -8,7 +8,7 @@
 import {
     a_s_side, n_mm__size_min, n_deg__skew_max, f_o_picture, f_a_n__px, f_a_n__size, f_n_dpi, f_a_n__pattern, f_a_n__own, f_a_n__from_px, f_a_n__to_px, f_a_n__handle, f_a_n__handle__shown, f_a_n__handle__turn,
     f_f_b__in, f_o_picture__fitted, f_o_picture__spread, f_b_covered, f_o_picture__resized, f_o_picture__turned, f_o_picture__scaled, f_o_picture__cut, f_o_picture__cropped,
-    f_o_picture__stretched, f_o_picture__skewed, f_a_o_picture__split, f_s_picture
+    f_o_picture__stretched, f_o_picture__skewed, f_a_o_picture__split, a_s_name__look, f_b_look, f_s_picture
 } from '../picture.module.js';
 
 let assert = function(b, s_message = 'assertion failed'){
@@ -540,4 +540,40 @@ Deno.test('the SVG of a piece names its file instead of holding it', function(){
     let s_svg = f_s_picture(o_picture, '#front_file_abc', true);
     assert(s_svg === f_s_picture(o_picture, 'x').replace('<image href="x" width="3000" height="2000"/>', '<use href="#front_file_abc"/>'), s_svg);
     assert(f_s_picture(o_picture, 'x').includes('<image href="x" width="3000" height="2000"/>'), 'without it the file\'s address');
+});
+
+Deno.test('light and colour: a filter over the picture\'s frame, its steps in their order, none for a picture as its file is', function(){
+    let o_picture = a_o_picture[3];
+    let s_plain = f_s_picture(o_picture, '#front_file_abc', true);
+    assert(String(a_s_name__look) === 'n_ratio__light,n_ratio__contrast,n_ratio__saturation' && a_s_name__look.every(function(s_name){ return f_o_picture(10, 10)[s_name] === 1; }), 'a new picture is as its file is');
+    assert(!f_b_look(o_picture) && f_s_picture(o_picture, '#front_file_abc', true, 'front_look_0') === s_plain, 'as its file is: no filter, whatever name there is for one');
+    // each alone: its one step; the picture is drawn through the filter and is the same otherwise
+    let f_s_step = function(n_slope, n_intercept){ return `<feComponentTransfer>${['R', 'G', 'B'].map(function(s){ return `<feFunc${s} type="linear" slope="${n_slope}" intercept="${n_intercept}"/>`; }).join('')}</feComponentTransfer>`; };
+    // the frame of that picture is 120 x 100 mm around its middle; the filter reaches 1 mm further
+    let s_head = '<filter id="front_look_0" filterUnits="userSpaceOnUse" x="-61" y="-51" width="122" height="102" color-interpolation-filters="sRGB">';
+    for(let [s_name, n_ratio, s_step] of [
+        ['n_ratio__light', 1.5, f_s_step(1.5, 0)],
+        ['n_ratio__light', 0, f_s_step(0, 0)],
+        // contrast turns around middle grey: 0.5 stays 0.5
+        ['n_ratio__contrast', 0.5, f_s_step(0.5, 0.25)],
+        ['n_ratio__contrast', 2, f_s_step(2, -0.5)],
+        ['n_ratio__saturation', 0, '<feColorMatrix type="saturate" values="0"/>'],
+        ['n_ratio__saturation', 1.3, '<feColorMatrix type="saturate" values="1.3"/>']
+    ]){
+        let o_changed = { ...o_picture, [s_name]: n_ratio };
+        let s_svg = f_s_picture(o_changed, '#front_file_abc', true, 'front_look_0');
+        assert(f_b_look(o_changed), `${s_name} ${n_ratio}: not as its file is`);
+        assert(s_svg === `${s_head}${s_step}</filter>${s_plain.replace('<g ', '<g filter="url(#front_look_0)" ')}`, s_svg);
+        // without a name for the filter: as its file is
+        assert(f_s_picture(o_changed, '#front_file_abc', true) === s_plain, `${s_name}: a filter without a name`);
+    }
+    // all three: lightness, then contrast, then saturation
+    let s_svg = f_s_picture({ ...o_picture, n_ratio__light: 1.2, n_ratio__contrast: 0.8, n_ratio__saturation: 0.5 }, '#front_file_abc', true, 'back_look_7');
+    assert(s_svg.startsWith(`${s_head.replace('front_look_0', 'back_look_7')}${f_s_step(1.2, 0)}${f_s_step(0.8, 0.1)}<feColorMatrix type="saturate" values="0.5"/></filter><g filter="url(#back_look_7)" transform=`), s_svg);
+    // a picture of another size, stretched: the filter follows its frame
+    let o_other = { ...a_o_picture[5], n_ratio__light: 0.5 };
+    let [n_x, n_y] = f_a_n__size(o_other);
+    assert(f_s_picture(o_other, 'blob:a', false, 'a').startsWith(`<filter id="a" filterUnits="userSpaceOnUse" x="${-n_x / 2 - 1}" y="${-n_y / 2 - 1}" width="${n_x + 2}" height="${n_y + 2}" `), f_s_picture(o_other, 'blob:a', false, 'a'));
+    // pieces of a split picture keep its light and colour
+    assert(f_a_o_picture__split({ ...o_picture__plain, n_ratio__contrast: 1.4 }, 2, 2).every(function(o_piece){ return o_piece.n_ratio__contrast === 1.4 && o_piece.n_ratio__light === 1; }), 'pieces');
 });
