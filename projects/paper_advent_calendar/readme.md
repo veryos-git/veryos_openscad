@@ -6,18 +6,18 @@ A webapp for a paper advent calendar of two sheets of card: it makes the cutting
 
 | Start | |
 |---|---|
-| `deno task start` in `paper_advent_calendar/`, then http://127.0.0.1:8778 | the app; reachable from this computer only |
+| `deno task start` in `paper_advent_calendar/`, then http://127.0.0.1:8778 | the app; reachable from this computer only. A server started before projects came has to be stopped and started again |
 | `deno task start 8779` | on another port |
 | `deno task test` | the checks of the geometry, see Checks |
 | `deno task check` | the checks of the page in headless Chrome, on port 8779; needs `google-chrome` and `pdftoppm`. `deno task check .` also saves `preview.png` and `match.png` anew |
 
-Needs [Deno](https://deno.com) and a browser. The page does all the work itself; `webapp/` runs from any static web server. Settings and pictures stay in the browser (local storage, IndexedDB): a reload keeps them, another browser does not have them.
+Needs [Deno](https://deno.com) and a browser. The page does all the work itself but for the saved projects, which the app's server keeps as folders in `webapp/project/`; from any other static web server `webapp/` runs without them. What is on screen stays in the browser as well (local storage, IndexedDB): a reload keeps it, saved or not.
 
 ## Page
 
 | Part | Shows |
 |---|---|
-| Bar on top | the five steps; any step opens at any time, `Next` at a step's end leads on; a step with a field that is wrong is marked orange. `Start over` |
+| Bar on top | the five steps; any step opens at any time, `Next` at a step's end leads on; a step with a field that is wrong is marked orange. `Project`: the open project's name, and the saved projects, see Projects |
 | Left | the settings of the open step alone; under them, always in view, what is wrong |
 | Right | one sheet, as large as fits. Above it: `Front` / `Back`; zoom `Fit`, `2 ×`, `4 ×`, what was in the middle stays there; `Line colours`, the legend |
 
@@ -32,6 +32,29 @@ Needs [Deno](https://deno.com) and a browser. The page does all the work itself;
 - The step and the sheet shown are kept over a reload, like the settings.
 - A name with a dotted line under it says more when the pointer rests on it.
 - A window narrower than 760 pixels: the sheet on top, the settings under it.
+
+## Projects
+
+A project is the calendar as it is on screen, saved under a name: all settings, the windows' own values, the pictures' places and both picture files. `Project`, at the right of the bar, shows the open project's name, `new` or `not saved`, with a dot while there are unsaved changes; a click opens the panel.
+
+| In the panel | Does |
+|---|---|
+| The name | letters, digits, spaces, `_` and `-`, 64 at most |
+| `Save`, Enter in the name, Ctrl + S anywhere | what is on screen is saved under the name: the open project again, or a new project under a name that is new, and the open one stays as it was saved. Another saved project's name is refused |
+| `New` | the settings of the first start, no pictures, step 1 |
+| A saved project in the list | opens it; under its name its windows, the calendar's size and which sheets have a picture. The open one is framed: a click on it brings back what was saved |
+| `×` | deletes it with its folder, after `Delete`. The open one stays on screen, and `Save` brings it back |
+| With unsaved changes | opening another and `New` ask first: `Save first`, `Discard`, `Cancel` |
+
+| Kept | Where |
+|---|---|
+| A project | `webapp/project/<name>/`: `project.json` with the settings, and the pictures as `front.png`, `back.jpg` and the like, the files as they were loaded, or as a match laid them anew. PNG, JPEG, WebP, GIF, AVIF, SVG, BMP; 100 MB a file at most. For git to track, or not |
+| What is on screen | in the browser as before, saved or not, with the open project's name: a reload shows the same, and says `Unsaved changes` if there are some |
+
+- The list is the server's of the moment the panel opens: a project saved or deleted in another window shows then.
+- While a picture is matched by four points, the panel is closed.
+- Another web server, or the app's own started before projects came: the panel says so, the rest of the app works.
+- Not there: a new name for a saved project (save it under the new name, delete the old), a project as one file to send.
 
 ## Calendar
 
@@ -105,7 +128,7 @@ Print and cut meet if both put the calendar at the same place of the sheet of pa
 | `Front PDF`, `Back PDF`, `Front PNG`, `Back PNG` | | | see Print files; below them the files' size in mm and pixels |
 | `Front SVG`, `Back SVG` | | | see SVG; below them each file's size and place for the cutter's software |
 
-Step 3, Picture: see Windows and pictures on the sheet. `Start over`, in the bar on top: all settings as at the first start, the pictures removed, step 1.
+Step 3, Picture: see Windows and pictures on the sheet. `New`, under `Project` in the bar on top: all settings as at the first start, the pictures removed, step 1.
 
 Default calendar: cells 41.2 × 40 mm, 9.2 and 8 mm of card between windows; 99 bridges, 123 fold dashes, 192 marks; without the edge the lines add up to 2.6 m on the front and 0.8 m on the back.
 
@@ -272,9 +295,11 @@ Not found: where Suite's zero lies and which point of a file its X and Y mean. T
 | Sheet | same, `sheet.test.js`: the calendar's place from the bottom left corner; the print's lines are the cutting file's own, at the place the file's box has for the cutter; crop marks, ruler line, what is said; a page of the print as an SVG of its own shows what the print shows for each of the three choices, with and without a picture | 8 pass |
 | Print files | same, `file.test.js`: the PNG's check sum against known ones and against one counted bit by bit; the chunk with the size sits behind the first, every chunk's sum is right, the rest is unchanged; the PDF's table names where each part starts, A4 is 841.89 × 595.276 points, the pixels unpack to what went in | 3 pass |
 | Tests notice faults | 42 faults put into copies of the four modules one at a time (a sign, a swapped side, a missing clamp, the place measured from the top, a mapping put together the wrong way round, ...); 12 more in the first version's module. Done before the paper's corners came into the files, not since | each failed a test |
-| Page | `deno task check`, `test/page_check.js`: headless Chrome, 1500 × 950, clicked and dragged with Chrome's own pointer, 161 checks in all with the print's, the files' and the match's below. Every step shows its settings alone and `Next` leads on; every setting has a field; the sheet fits its place, 20 pixels and more around it, at 1500 × 950, 1100 × 700, 800 × 600, A4 portrait and under the bar of a match; zoom 2 and 4 keep the view's middle; 400 wide: the sheet over the settings, nothing wider than the window; step and sheet kept over a reload; the legend; a field that is wrong in another step is said with its step and marks it, no print and no files meanwhile; shapes and doors by their chips | pass, no errors in the page |
+| Page | `deno task check`, `test/page_check.js`: headless Chrome, 1500 × 950, clicked and dragged with Chrome's own pointer, 211 checks in all with the projects', the print's, the files' and the match's below. Every step shows its settings alone and `Next` leads on; every setting has a field; the sheet fits its place, 20 pixels and more around it, at 1500 × 950, 1100 × 700, 800 × 600, A4 portrait and under the bar of a match; zoom 2 and 4 keep the view's middle; 400 wide: the sheet over the settings, nothing wider than the window; step and sheet kept over a reload; the legend; a field that is wrong in another step is said with its step and marks it, no print and no files meanwhile; shapes and doors by their chips | pass, no errors in the page |
 | | windows: none to take hold of in step 1; chosen, dragged in steps of 0.5 mm, its fields brought into view in a low window, chosen on the back sheet too, own size, shape and door, `Back to the grid`; Chrome's box of the close-up's lines is the window's, of the back's opening the module's | pass |
-| | pictures: loaded, dragged, sized by a corner, cropped at a side, sized by Ctrl and wheel, turned, mirrored, fitted, set by fields; the ring at its top dragged 6 pixels turns it as far as the pointer went around its middle, between 0.5 and 3°; Chrome's box of the drawn picture; the nine handles of a picture of 900 × 600 mm, and of a sheet at zoom 4 moved in its place, each whole in the view, apart from the others and the thing under the pointer there, and a corner taken at such a place sizes by what the pointer moves; `Stretch` makes it 281 × 194 mm; a side dragged with `Stretch` moves that side alone, with `Skew` slides it, top and right, and Chrome's box of the picture is the one reckoned from its place; a skew of 85° is said and not taken; `Height` 100 and `Skew` 0 bring the file's shape back; a place kept without stretch and skew is read as neither; a file that is no picture; a drag in step 2 leaves the picture alone; the back's picture by the panel's choice of sheet; both pictures and their files after a reload; marks and logo switched off; remove; start over; both downloads are the files the module makes of the page's settings | pass |
+| | pictures: loaded, dragged, sized by a corner, cropped at a side, sized by Ctrl and wheel, turned, mirrored, fitted, set by fields; the ring at its top dragged 6 pixels turns it as far as the pointer went around its middle, between 0.5 and 3°; Chrome's box of the drawn picture; the nine handles of a picture of 900 × 600 mm, and of a sheet at zoom 4 moved in its place, each whole in the view, apart from the others and the thing under the pointer there, and a corner taken at such a place sizes by what the pointer moves; `Stretch` makes it 281 × 194 mm; a side dragged with `Stretch` moves that side alone, with `Skew` slides it, top and right, and Chrome's box of the picture is the one reckoned from its place; a skew of 85° is said and not taken; `Height` 100 and `Skew` 0 bring the file's shape back; a place kept without stretch and skew is read as neither; a file that is no picture; a drag in step 2 leaves the picture alone; the back's picture by the panel's choice of sheet; both pictures and their files after a reload; marks and logo switched off; remove; both downloads are the files the module makes of the page's settings | pass |
+| Projects | the same run, with a folder of its own for the server, looked into after every step: saved under a name, `project.json` holds the settings as the page has them and `front.png` is the file that was loaded, byte for byte; a changed setting says `Unsaved changes`, Ctrl + S saves it; a reload keeps the open project and its state; another picture file at the same place counts as a change though the settings are the saved ones; a second name makes a second folder with both pictures; opening over changes asks, `Cancel`, `Save first`, `Discard`; an opened project puts its settings and both its files on screen; the open one opened again goes back to what was saved; a name with a slash and another project's name are refused, nothing written; `×` asks, `Keep`, `Delete` removes the folder; the open one deleted stays on screen and is saved again; one deleted behind the page's back is said; `New` gives the settings of the first start and no pictures, and asks over changes; closed while a picture is matched | pass |
+| | the server alone, by requests of the check: the list; a request from another address 403; five names that could leave the folder or are too long 400; POST keeps the settings and nothing else; a second POST 409, PUT of a missing one 404, a body without settings 400; a picture by PUT and GET is the same bytes, one of another kind takes its place, a text file 415, deleted and missing 404; a project's files are not served as pages | pass |
 | Print, measured | the same run: Chrome's PDF at 300 dots per inch, one-coloured test picture on the front. A4 landscape, calendar 277 × 190 at 10 / 10: picture with 2 of bleed expected 8 to 289 and 8 to 202 mm from the page's top left | 8.04 to 288.97, 7.96 to 202.01 |
 | | the calendar's edge, 0.2 wide, on page 2 without a picture and with `Pictures with cut lines` on page 1, expected 9.9 to 287.1 and 9.9 to 200.1 | 9.91 to 287.1, 9.91 to 200.07 |
 | | shift 1.5 right, 2.5 up: expected 9.5 to 290.5, 5.5 to 199.5 | 9.48 to 290.49, 5.42 to 199.56 |
@@ -304,7 +329,7 @@ Not found: where Suite's zero lies and which point of a file its X and Y mean. T
 | Fold dash 3 / gap 2 | read off the same photo; untried in 250 g card |
 | Sheet on sheet | both sheets get the calendar's edge cut, so they are the same size; how well the back's pictures sit behind the doors depends on print and cut of both sheets |
 | Glue | where not to glue is not in the files |
-| Layout and pictures | kept in the browser only; the SVGs hold the settings in `<desc>`, but the app cannot open them |
+| Projects | a project is a folder on this computer, not one file: to pass one on, pass its folder into the other `webapp/project/`. Two windows with the same project open do not know of each other: the one that saves last wins. The SVGs hold the settings in `<desc>`, but the app cannot open them |
 | Print files | the browser draws the page from an SVG with the picture inside it; Chrome does, other browsers are untried. Whether the program a PNG goes to reads its size is not known for any |
 | Picture by handles | nothing is taken back but by hand: `Height` 100 and `Skew` 0 for the file's shape, `Turned` 0, `Crop` 0. Cropping a skewed picture cuts along its leaning sides |
 | Match | the points are clicked once and not dragged afterwards: one point back, or match the result again. The old file is gone with the page, the four points with the match |
@@ -316,6 +341,10 @@ Not found: where Suite's zero lies and which point of a file its X and Y mean. T
 | Chosen | Instead of |
 |---|---|
 | One step's settings at a time, five steps in the order of the work | all settings in one long list, print and files at its end |
+| Projects are folders the app's server keeps, as in the pucklight lamp and paper light box apps, with the pictures as files beside the settings | projects in the browser's own storage: gone with the browser's data, and in no other browser |
+| What is on screen stays in the browser too, and `Save` is a press | a page that forgets unsaved work on a reload, or one that saves every change into the project |
+| `New` in the projects' panel | `Start over` beside it in the bar: the same thing twice, and under an open project a `Save` away from writing an empty calendar over it |
+| The projects' panel opens from the bar | a sixth step, or a part of every step's settings |
 | What the pointer moves follows the step: windows in step 2, the picture in step 3 | a switch above the sheets |
 | One sheet at a time, as large as fits, `Front` / `Back` above it | both sheets one under the other |
 | What is wrong under the settings, always in view | at the end of the list; nor under the sheet, where words coming and going would move the sheet under a drag |

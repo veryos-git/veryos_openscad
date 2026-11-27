@@ -1,6 +1,6 @@
 // Copyright (C) [Jonas Immanuel Frey] - Licensed under GPL
 // Headless Chrome for the page's checks, see page_check.js: the app's server on a port
-// of its own, a browser with an empty profile, and one page spoken to over Chrome's
+// of its own with a folder of its own for the projects, a browser with an empty profile, and one page spoken to over Chrome's
 // DevTools protocol. The pointer's presses and moves are Chrome's own, at places of the
 // window in pixels.
 
@@ -11,7 +11,7 @@ let f_wait = function(n_ms){ return new Promise(function(f_resolve){ setTimeout(
 let f_o_page = async function({ n_port = 8779, n_px__x = 1500, n_px__y = 950 } = {}){
     let s_path__work = await Deno.makeTempDir({ prefix: 'paper_advent_calendar_' });
     let o_server = new Deno.Command(Deno.execPath(), {
-        args: ['run', '--allow-net=127.0.0.1', '--allow-read', new URL('../serve.js', import.meta.url).pathname, String(n_port)],
+        args: ['run', '--allow-net=127.0.0.1', '--allow-read', `--allow-write=${s_path__work}/project`, new URL('../serve.js', import.meta.url).pathname, String(n_port), `${s_path__work}/project`],
         stdout: 'null', stderr: 'null'
     }).spawn();
     let o_chrome = new Deno.Command('google-chrome', {
@@ -54,7 +54,7 @@ let f_o_page = async function({ n_port = 8779, n_px__x = 1500, n_px__y = 950 } =
     let { targetId: s_target } = await f_send('Target.createTarget', { url: 'about:blank' });
     s_session = (await f_send('Target.attachToTarget', { targetId: s_target, flatten: true })).sessionId;
 
-    let o_page = { a_s_error: [], s_path__work, f_send, f_wait };
+    let o_page = { a_s_error: [], s_path__work, s_url: `http://127.0.0.1:${n_port}`, f_send, f_wait };
     // a confirm() is answered with yes
     a_f__event.push(function(o_message){
         let o_param = o_message.params;
@@ -128,6 +128,17 @@ let f_o_page = async function({ n_port = 8779, n_px__x = 1500, n_px__y = 950 } =
             el.dispatchEvent(new Event('input', { bubbles: true }));
             el.dispatchEvent(new Event('change', { bubbles: true }));
         })()`);
+        await o_page.f_settle();
+    };
+    // Text typed where the keyboard is, and a key pressed: n_modifier 2 Ctrl.
+    o_page.f_type = async function(s_text){
+        await f_send('Input.insertText', { text: s_text });
+        await o_page.f_settle();
+    };
+    o_page.f_key = async function(s_key, n_modifier = 0){
+        for(let s_type of ['keyDown', 'keyUp']){
+            await f_send('Input.dispatchKeyEvent', { type: s_type, key: s_key, code: `Key${s_key.toUpperCase()}`, windowsVirtualKeyCode: s_key.toUpperCase().charCodeAt(0), modifiers: n_modifier });
+        }
         await o_page.f_settle();
     };
     // Files chosen in a file field.

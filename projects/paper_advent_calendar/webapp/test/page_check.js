@@ -4,8 +4,9 @@
 // The page in headless Chrome, used as a person uses it: the steps and what each shows,
 // the sheet's size between the bars, fields that are wrong, windows and pictures moved,
 // stretched and skewed with the pointer, a match by four points, the print measured from Chrome's PDF, the
-// print's pages as PDF and PNG files read back, the cutting files. Needs google-chrome
-// and pdftoppm; the app is served on port 8779.
+// print's pages as PDF and PNG files read back, the cutting files; projects saved,
+// opened, changed and deleted, looked up in the server's folder. Needs google-chrome
+// and pdftoppm; the app is served on port 8779, its projects kept in a folder of the run.
 // With a folder as argument the readme's two pictures of the app are saved there:
 // deno task check .
 
@@ -547,7 +548,7 @@ try{
     o_state = await f_o_state();
     o_picture = o_state.o_setting.o_picture__front;
     f_check('Match 4 points: a bar over the sheet says what to click, the picture is fitted into the calendar, the sheets stay', o_state.b_bar && o_state.s_match === 'Point 1 of 4: click it on the picture, on the front sheet.' && o_state.b_matching && !o_state.b_picture && o_state.s_match__body === 'from'
-        && f_b_near(f_a_n__size(o_picture), [190 * 3000 / 2200, 190], 1e-6) && await o_page.f_v(`[...document.querySelectorAll('[name=s_sheet__shown], [name=s_sheet__picture], #el_picture_load, #el_picture_remove')].every(function(el){ return el.disabled; })`), o_state);
+        && f_b_near(f_a_n__size(o_picture), [190 * 3000 / 2200, 190], 1e-6) && await o_page.f_v(`[...document.querySelectorAll('[name=s_sheet__shown], [name=s_sheet__picture], #el_picture_load, #el_picture_remove')].every(function(el){ return el.disabled; }) && document.getElementById('el_project_box').inert`), o_state);
     await f_check_fit('with the bar over it', 297 / 210);
     await o_page.f_click(await f_a_n__px([2, 95]));
     f_check('a click beside the picture is no point', (await f_o_state()).s_match === 'Point 1 of 4: click it on the picture, on the front sheet. That is beside the picture.');
@@ -638,11 +639,241 @@ try{
     o_state = await f_o_state();
     f_check('Esc cancels too', !o_state.b_bar && JSON.stringify(o_state.o_setting.o_picture__front) === JSON.stringify(o_picture__photo), o_state);
 
-    // ---- start over, then the print: a one-coloured picture, measured from Chrome's PDF at 300 dots per inch
-    await o_page.f_click_on('#el_reset');
+    // ---- projects: what is on screen saved under a name by the app's server, opened again, changed, deleted
+    let s_path__project = `${o_page.s_path__work}/project`;
+    // the panel in the bar, in one look
+    let f_o_project = function(){
+        return o_page.f_v(`(function(){
+            let el_state = document.getElementById('el_project_state');
+            return {
+                // a closed panel still has a place when asked for one
+                b_shown: document.getElementById('el_project_box').open,
+                s_title: document.getElementById('el_project_title').textContent,
+                b_dirty: document.getElementById('el_project_title').dataset.state === 'dirty',
+                s_name: document.getElementById('el_project_name').value,
+                s_state: el_state.textContent,
+                s_kind: el_state.dataset.state,
+                s_tool: [...document.querySelectorAll('#el_project_tool button')].map(function(el){ return el.textContent; }).join(),
+                s_question: document.querySelector('#el_project_tool .question p')?.textContent ?? '',
+                a_s_row: [...document.querySelectorAll('#el_project_list li')].map(function(el){
+                    return [...el.querySelectorAll('.project__name, small, p')].map(function(el){ return el.textContent; }).join(' | ') + (el.getAttribute('aria-current') ? ' | open' : '') || el.textContent;
+                })
+            };
+        })()`);
+    };
+    // the panel opened, with the server's list of the moment
+    let f_show_projects = async function(){
+        if(!(await f_o_project()).b_shown){ await o_page.f_click_on('#el_project_box summary'); }
+        await o_page.f_wait(150);
+        await o_page.f_settle();
+    };
+    // a press on the panel's button of that name; s_project: on that saved project's row, 'open' it or 'delete' it
+    let f_press = async function(s_text, s_project = ''){
+        let a_n = await o_page.f_v(`(function(){
+            let el_within = ${JSON.stringify(s_project)} ? [...document.querySelectorAll('#el_project_list li')].find(function(el){ return el.querySelector('.project__name')?.textContent === ${JSON.stringify(s_project)}; }) : document.getElementById('el_project');
+            let el = ['open', 'delete'].includes(${JSON.stringify(s_text)}) ? el_within.querySelector('.project__' + ${JSON.stringify(s_text)}) : [...el_within.querySelectorAll('button')].find(function(el){ return el.textContent === ${JSON.stringify(s_text)}; });
+            el.scrollIntoView({ block: 'nearest' });
+            let o = el.getBoundingClientRect();
+            return [(o.left + o.right) / 2, (o.top + o.bottom) / 2];
+        })()`);
+        await o_page.f_click(a_n);
+    };
+    let f_until_state = function(s_state){ return f_until(`document.getElementById('el_project_state').textContent === ${JSON.stringify(s_state)}`); };
+    // a saved project in the server's folder: its files' names, and what its settings' file holds
+    let f_a_s_file = async function(s_name){
+        let a_s = [];
+        try{
+            for await(let o_entry of Deno.readDir(`${s_path__project}/${s_name}`)){ a_s.push(o_entry.name); }
+        } catch(o_error){
+            return null;
+        }
+        return a_s.sort();
+    };
+    let f_o_kept = async function(s_name){ return JSON.parse(await Deno.readTextFile(`${s_path__project}/${s_name}/project.json`)); };
+    let f_b_same_file = async function(s_path, s_path__other){ return String(await Deno.readFile(s_path)) === String(await Deno.readFile(s_path__other)); };
+
+    let o_project = await f_o_project();
+    f_check('in the bar: Project, not saved, marked as having changes; its panel closed', o_project.s_title === 'not saved' && o_project.b_dirty && !o_project.b_shown && await o_page.f_v(`document.querySelector('#el_project_box summary').textContent`) === 'Projectnot saved', o_project);
+    await f_show_projects();
+    o_project = await f_o_project();
+    f_check('opened: a name to give, Save and New, no saved projects yet', o_project.b_shown && o_project.s_name === '' && o_project.s_state === 'Not saved yet' && o_project.s_tool === 'Save,New' && String(o_project.a_s_row) === 'None yet.', o_project);
+    let a_n__panel_box = await o_page.f_v(`(function(){ let o = document.getElementById('el_project').getBoundingClientRect(); return [o.left, o.top, o.right, o.bottom]; })()`);
+    f_check('the panel lies in the window', a_n__panel_box[0] >= 0 && a_n__panel_box[2] <= 1500 && a_n__panel_box[3] <= 950 && a_n__panel_box[3] - a_n__panel_box[1] > 100, a_n__panel_box);
+    await f_press('Save');
+    o_project = await f_o_project();
+    f_check('Save without a name: asks for one, nothing saved', o_project.s_state === 'Give this project a name first.' && o_project.s_kind === 'note' && (await f_a_s_file('.')).length === 0, o_project);
+    await o_page.f_click_on('#el_project_name');
+    await o_page.f_type('Winter 2026');
+    await f_press('Save');
+    await f_until_state('All changes saved');
+    o_project = await f_o_project();
+    o_state = await f_o_state();
+    f_check('named and saved: a folder of that name with the settings as the page has them and the front\'s picture, the file that was loaded', String(await f_a_s_file('Winter 2026')) === 'front.png,project.json'
+        && JSON.stringify((await f_o_kept('Winter 2026')).o_setting) === JSON.stringify(o_state.o_setting) && Object.keys(await f_o_kept('Winter 2026')).join() === 'o_setting' && await f_b_same_file(`${s_path__project}/Winter 2026/front.png`, s_path__photo), await f_a_s_file('Winter 2026'));
+    f_check('the bar names it, no changes; it is in the list, marked as the open one', o_project.s_title === 'Winter 2026' && !o_project.b_dirty && o_project.s_kind === 'clean' && String(o_project.a_s_row) === 'Winter 2026 | 24 windows · 277 × 190 mm · front picture | open', o_project);
+    await o_page.f_fill('n_window', 12);
+    o_project = await f_o_project();
+    f_check('a setting changed: Unsaved changes, marked in the bar', o_project.s_state === 'Unsaved changes' && o_project.s_kind === 'dirty' && o_project.b_dirty && (await f_o_kept('Winter 2026')).o_setting.n_window === 24, o_project);
+    await o_page.f_click(await f_a_n__px([138.5, 95]));
+    f_check('a press beside the panel closes it', !(await f_o_project()).b_shown);
+    await o_page.f_key('s', 2);
+    await f_until_state('All changes saved');
+    f_check('Ctrl and S saves it again: 12 windows in its file, the panel stays closed', (await f_o_kept('Winter 2026')).o_setting.n_window === 12 && !(await f_o_project()).b_dirty && !(await f_o_project()).b_shown && String(await f_a_s_file('.')) === 'Winter 2026', await f_a_s_file('.'));
+    await o_page.f_open();
+    await f_until(`document.getElementById('el_project_title').textContent === 'Winter 2026'`);
+    o_project = await f_o_project();
+    f_check('a reload: the same project open, no changes, its picture there', !o_project.b_dirty && o_project.s_name === 'Winter 2026' && (await f_o_state()).s_sheet__picture === 'front', o_project);
+    // another picture file of the same size comes to lie at the same place: the settings are the saved ones, the file is not
+    let s_path__other = await f_s_path__picture('other.png', 3000, 2200, `o_context.fillStyle = '#804020'; o_context.fillRect(0, 0, n_px__x, n_px__y);`);
+    await f_load(s_path__other, 'front');
+    await f_until(`document.getElementById('el_project_title').dataset.state === 'dirty'`);
+    f_check('another picture file at the same place: Unsaved changes, though the settings are the saved ones', (await f_o_project()).b_dirty && JSON.stringify((await f_o_kept('Winter 2026')).o_setting) === JSON.stringify((await f_o_state()).o_setting), await f_o_project());
+    await o_page.f_open();
+    await f_until(`document.getElementById('el_project_list') && document.getElementById('el_project_title').textContent === 'Winter 2026'`);
+    f_check('which is kept over a reload', (await f_o_project()).b_dirty);
+    await o_page.f_click_on('[name=s_sheet__picture][value=back] + span');
+    await f_load(s_path__back, 'back');
+    await o_page.f_key('s', 2);
+    await f_until(`document.getElementById('el_project_title').dataset.state === 'clean'`);
+    f_check('saved: the front\'s new file and the back\'s picture in the folder', String(await f_a_s_file('Winter 2026')) === 'back.png,front.png,project.json' && await f_b_same_file(`${s_path__project}/Winter 2026/front.png`, s_path__other) && await f_b_same_file(`${s_path__project}/Winter 2026/back.png`, s_path__back)
+        && (await f_o_kept('Winter 2026')).o_setting.o_picture__back.n_px__x === 2810, await f_a_s_file('Winter 2026'));
+    // under another name: a second project, the first stays
+    await f_show_projects();
+    await o_page.f_fill('el_project_name', 'Second');
+    o_project = await f_o_project();
+    f_check('another name typed: Save will make a new project', o_project.s_state === 'Save makes a new project, “Winter 2026” stays as saved', o_project.s_state);
+    await f_press('Save');
+    await f_until_state('All changes saved');
+    o_project = await f_o_project();
+    f_check('saved under it: two projects, each with both pictures, the second the open one', String(await f_a_s_file('.')) === 'Second,Winter 2026' && String(await f_a_s_file('Second')) === 'back.png,front.png,project.json' && await f_b_same_file(`${s_path__project}/Second/front.png`, s_path__other)
+        && String(o_project.a_s_row) === 'Second | 12 windows · 277 × 190 mm · front and back picture | open,Winter 2026 | 12 windows · 277 × 190 mm · front and back picture' && o_project.s_title === 'Second', o_project);
+    // the second changed: no back picture, 6 windows; the first opened over it
+    await o_page.f_click_on('#el_picture_remove');
+    await f_until(`!document.getElementById('el_sheet__back').classList.contains('has_picture')`);
+    await o_page.f_fill('n_window', 6);
+    await f_show_projects();
+    await f_press('open', 'Winter 2026');
+    o_project = await f_o_project();
+    f_check('another project opened over unsaved changes: asks first', o_project.s_question === '“Second” has unsaved changes.' && o_project.s_tool === 'Save first,Discard,Cancel' && o_project.s_title === 'Second', o_project);
+    await f_press('Cancel');
+    o_project = await f_o_project();
+    f_check('Cancel: all as it was', o_project.s_tool === 'Save,New' && o_project.s_title === 'Second' && o_project.b_dirty && (await f_o_state()).o_setting.n_window === 6, o_project);
+    await f_press('open', 'Winter 2026');
+    await f_press('Save first');
+    await f_until(`document.getElementById('el_project_title').textContent === 'Winter 2026' && document.querySelectorAll('.sheet.has_picture').length === 2`);
+    o_project = await f_o_project();
+    o_state = await f_o_state();
+    f_check('Save first: the second is saved as it was, without its back picture, 6 windows', String(await f_a_s_file('Second')) === 'front.png,project.json' && (await f_o_kept('Second')).o_setting.n_window === 6 && (await f_o_kept('Second')).o_setting.o_picture__back === null, await f_a_s_file('Second'));
+    f_check('and the first is on screen: its settings, both its pictures, the panel closed, the step as it was', o_project.s_title === 'Winter 2026' && !o_project.b_dirty && !o_project.b_shown && JSON.stringify(o_state.o_setting) === JSON.stringify((await f_o_kept('Winter 2026')).o_setting)
+        && o_state.o_setting.n_window === 12 && o_state.s_sheet__picture === 'front,back' && o_state.s_step__open === 'picture' && o_state.n_hit === 0, [o_project, o_state.s_sheet__picture]);
+    f_check('the pictures on screen are the project\'s files', await o_page.f_v(`Promise.all(['front', 'back'].map(function(s_sheet){ return fetch(document.querySelector('#el_sheet__' + s_sheet + ' image').href.baseVal).then(function(o){ return o.blob(); }).then(function(o){ return o.size + ' ' + o.type; }); })).then(String)`)
+        === `${(await Deno.stat(s_path__other)).size} image/png,${(await Deno.stat(s_path__back)).size} image/png`);
+    // changed and opened again: back to what was saved
+    await o_page.f_fill('n_window', 20);
+    await o_page.f_click_on('[name=s_sheet__picture][value=front] + span');
+    await o_page.f_click_on('#el_picture_remove');
+    await f_until(`!document.getElementById('el_sheet__front').classList.contains('has_picture')`);
+    await f_show_projects();
+    await f_press('open', 'Winter 2026');
+    await f_press('Discard');
+    await f_until(`document.querySelectorAll('.sheet.has_picture').length === 2`);
+    o_state = await f_o_state();
+    f_check('the open project opened again, Discard: as it was saved, the removed picture back', o_state.o_setting.n_window === 12 && o_state.s_sheet__picture === 'front,back' && !(await f_o_project()).b_dirty && String(await f_a_s_file('Winter 2026')) === 'back.png,front.png,project.json', o_state.s_sheet__picture);
+    await f_show_projects();
+    await f_press('open', 'Second');
+    await f_until(`document.getElementById('el_project_title').textContent === 'Second'`);
+    o_state = await f_o_state();
+    f_check('without changes another project opens at once: the second, 6 windows, the front\'s picture alone', o_state.o_setting.n_window === 6 && o_state.s_sheet__picture === 'front' && o_state.o_setting.o_picture__back === null && !(await f_o_project()).b_dirty, o_state.s_sheet__picture);
+    // names that will not do
+    await f_show_projects();
+    await o_page.f_fill('el_project_name', 'a/b');
+    await f_press('Save');
+    await f_until(`document.getElementById('el_project_state').dataset.state === 'note'`);
+    f_check('a name with a slash: said, nothing saved', (await f_o_project()).s_state === '“a/b” is not a valid name: use letters, digits, spaces, _ and -, 64 at most.' && String(await f_a_s_file('.')) === 'Second,Winter 2026', (await f_o_project()).s_state);
+    await o_page.f_fill('el_project_name', 'Winter 2026');
+    f_check('the name of another saved project: said', (await f_o_project()).s_state === '“Winter 2026” is another project’s name', (await f_o_project()).s_state);
+    await f_press('Save');
+    await f_until(`document.getElementById('el_project_state').dataset.state === 'note'`);
+    f_check('and Save does not write over that one', (await f_o_project()).s_state === 'A project “Winter 2026” already exists.' && (await f_o_kept('Winter 2026')).o_setting.n_window === 12, (await f_o_project()).s_state);
+    await o_page.f_fill('el_project_name', 'Second');
+    // delete
+    await f_press('delete', 'Winter 2026');
+    o_project = await f_o_project();
+    f_check('the cross on a saved project: asks first', o_project.a_s_row[1] === 'Delete “Winter 2026” for good, with its folder?' && Boolean(await f_a_s_file('Winter 2026')), o_project.a_s_row);
+    await f_press('Keep');
+    f_check('Keep: it stays', (await f_o_project()).a_s_row.length === 2 && (await f_o_project()).a_s_row[1].startsWith('Winter 2026 | ') && Boolean(await f_a_s_file('Winter 2026')));
+    await f_press('delete', 'Winter 2026');
+    await f_press('Delete');
+    await f_until(`document.querySelectorAll('#el_project_list li').length === 1`);
+    f_check('Delete: its folder is gone, the open project stays', String(await f_a_s_file('.')) === 'Second' && (await f_o_project()).s_title === 'Second' && !(await f_o_project()).b_dirty, await f_a_s_file('.'));
+    await f_press('delete', 'Second');
+    await f_press('Delete');
+    await f_until(`document.getElementById('el_project_state').dataset.state === 'note'`);
+    o_project = await f_o_project();
+    f_check('the open project deleted: gone from the folder, still on screen, and Save brings it back', String(await f_a_s_file('.')) === '' && o_project.s_state === 'Deleted “Second”. Save brings it back.' && o_project.s_title === 'not saved' && o_project.s_name === 'Second' && (await f_o_state()).s_sheet__picture === 'front', o_project);
+    await f_press('Save');
+    await f_until_state('All changes saved');
+    f_check('saved again: its folder with its picture', String(await f_a_s_file('Second')) === 'front.png,project.json' && (await f_o_kept('Second')).o_setting.n_window === 6 && (await f_o_project()).s_title === 'Second', await f_a_s_file('Second'));
+    // deleted behind the page's back, as another window would
+    await Deno.remove(`${s_path__project}/Second`, { recursive: true });
+    await o_page.f_click(await f_a_n__px([138.5, 95]));
+    await f_show_projects();
+    await f_until(`document.getElementById('el_project_state').dataset.state === 'note'`);
+    f_check('a project deleted elsewhere: said when the panel opens', (await f_o_project()).s_state === '“Second” is not among the saved projects any more. Save brings it back.' && (await f_o_project()).s_title === 'not saved', (await f_o_project()).s_state);
+    await f_press('Save');
+    await f_until_state('All changes saved');
+
+    // the server, spoken to without the page
+    let f_o_answer = async function(s_path, o_option = {}){
+        let o_response = await fetch(`${o_page.s_url}${s_path}`, o_option);
+        let a_n = new Uint8Array(await o_response.arrayBuffer());
+        let v = null;
+        try{ v = JSON.parse(new TextDecoder().decode(a_n)); } catch(o_error){ /* no JSON */ }
+        return { n_status: o_response.status, s_type: o_response.headers.get('content-type'), a_n, v };
+    };
+    let o_option__json = { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ o_setting: { n_window: 3 }, s_more: 'not kept' }) };
+    let o_answer = await f_o_answer('/api/project');
+    f_check('the server lists the saved projects with their settings', o_answer.n_status === 200 && o_answer.v.length === 1 && o_answer.v[0].s_name === 'Second' && o_answer.v[0].o_setting.n_window === 6, o_answer.v);
+    o_answer = await f_o_answer('/api/project/Second', { headers: { origin: 'http://127.0.0.1:9999' } });
+    f_check('a page of another address is turned away', o_answer.n_status === 403 && o_answer.v.s_message === 'Only the app itself can use this.', [o_answer.n_status, o_answer.v]);
+    for(let s_name of ['..%2F..%2Fserve', '.hidden', 'a%2Fb', '%20x', 'x'.repeat(65)]){
+        o_answer = await f_o_answer(`/api/project/${s_name}`, o_option__json);
+        f_check(`a name that could leave the folder or is too long is refused: ${s_name.slice(0, 20)}`, o_answer.n_status === 400 && o_answer.v.s_message.includes('is not a valid name'), [o_answer.n_status, o_answer.v]);
+    }
+    o_answer = await f_o_answer('/api/project/By%20hand', o_option__json);
+    f_check('a new project by POST: its settings alone are kept', o_answer.n_status === 201 && JSON.stringify(await f_o_kept('By hand')) === '{"o_setting":{"n_window":3}}', [o_answer.n_status, o_answer.v]);
+    f_check('a second POST of the name, a PUT of a name that is not there, a body without settings: refused',
+        (await f_o_answer('/api/project/By%20hand', o_option__json)).n_status === 409 && (await f_o_answer('/api/project/Nowhere', { ...o_option__json, method: 'PUT' })).n_status === 404
+        && (await f_o_answer('/api/project/By%20hand', { ...o_option__json, method: 'PUT', body: '{"o_setting":[]}' })).n_status === 400 && (await f_o_answer('/api/project/By%20hand', { ...o_option__json, method: 'PUT', body: 'x' })).n_status === 400);
+    let a_n__picture = await Deno.readFile(s_path__back);
+    f_check('a picture file by PUT and GET: the same bytes, of its kind', (await f_o_answer('/api/project/By%20hand/back', { method: 'PUT', headers: { 'content-type': 'image/png' }, body: a_n__picture })).n_status === 200
+        && String((await f_o_answer('/api/project/By%20hand/back')).a_n) === String(a_n__picture) && (await f_o_answer('/api/project/By%20hand/back')).s_type === 'image/png' && String(await f_a_s_file('By hand')) === 'back.png,project.json');
+    f_check('a picture of another kind takes its place', (await f_o_answer('/api/project/By%20hand/back', { method: 'PUT', headers: { 'content-type': 'image/jpeg' }, body: new Uint8Array([1, 2, 3]) })).n_status === 200
+        && String(await f_a_s_file('By hand')) === 'back.jpg,project.json' && (await f_o_answer('/api/project/By%20hand/back')).s_type === 'image/jpeg', await f_a_s_file('By hand'));
+    o_answer = await f_o_answer('/api/project/By%20hand/front', { method: 'PUT', headers: { 'content-type': 'text/plain' }, body: 'no picture' });
+    f_check('a file that is no picture is not kept', o_answer.n_status === 415 && o_answer.v.s_message.startsWith('The front sheet’s picture is of a kind a project does not keep.') && String(await f_a_s_file('By hand')) === 'back.jpg,project.json', [o_answer.n_status, o_answer.v]);
+    f_check('a picture deleted, one that is not there asked for, one of a project that is not there', (await f_o_answer('/api/project/By%20hand/back', { method: 'DELETE' })).n_status === 200 && String(await f_a_s_file('By hand')) === 'project.json'
+        && (await f_o_answer('/api/project/By%20hand/back')).n_status === 404 && (await f_o_answer('/api/project/Nowhere/back')).n_status === 404);
+    f_check('a project\'s files are not served as pages', (await f_o_answer('/project/By%20hand/project.json')).n_status === 404 && (await f_o_answer('/project/Second/front.png')).n_status === 404);
+    f_check('deleted: its folder is gone; a second time: not there', (await f_o_answer('/api/project/By%20hand', { method: 'DELETE' })).n_status === 204 && (await f_a_s_file('By hand')) === null && (await f_o_answer('/api/project/By%20hand', { method: 'DELETE' })).n_status === 404);
+
+    // ---- a new project, then the print: a one-coloured picture, measured from Chrome's PDF at 300 dots per inch
+    await f_press('New');
     await f_until(`!document.querySelector('.sheet.has_picture')`);
     o_state = await f_o_state();
-    f_check('Start over: the first step, the settings of the first start, no pictures', o_state.s_step__open === 'paper' && o_state.s_sheet === 'front' && JSON.stringify(o_state.o_setting) === JSON.stringify(o_setting__default) && o_state.s_sheet__has === '', o_state);
+    o_project = await f_o_project();
+    f_check('New, without changes at once: the first step, the settings of the first start, no pictures, no name, the panel closed', o_state.s_step__open === 'paper' && o_state.s_sheet === 'front' && JSON.stringify(o_state.o_setting) === JSON.stringify(o_setting__default) && o_state.s_sheet__has === ''
+        && o_project.s_title === 'new' && !o_project.b_dirty && o_project.s_name === '' && !o_project.b_shown, [o_state.s_step__open, o_project]);
+    f_check('the project that was open stays as saved', (await f_o_kept('Second')).o_setting.n_window === 6 && String(await f_a_s_file('Second')) === 'front.png,project.json');
+    await o_page.f_fill('n_window', 10);
+    await f_show_projects();
+    o_project = await f_o_project();
+    f_check('a new project changed: Not saved yet; the saved one is in the list, not marked', o_project.s_state === 'Not saved yet' && o_project.s_title === 'not saved' && String(o_project.a_s_row) === 'Second | 6 windows · 277 × 190 mm · front picture', o_project);
+    await f_press('New');
+    f_check('New over it: asks first', (await f_o_project()).s_question === 'This project is not saved yet.');
+    await f_press('Discard');
+    await f_until(`document.getElementById('el_project_title').textContent === 'new'`);
+    f_check('Discard: the settings of the first start again', JSON.stringify((await f_o_state()).o_setting) === JSON.stringify(o_setting__default));
     let s_path__green = await f_s_path__picture('green.png', 600, 400, `o_context.fillStyle = '#00a050'; o_context.fillRect(0, 0, n_px__x, n_px__y);`);
     // the picture's green, not the green of the dots in the paper's corners
     let f_b_green = function(n_r, n_g, n_b){ return n_r < 40 && n_g > 135 && n_g < 185 && n_b > 60 && n_b < 100; };
@@ -821,7 +1052,8 @@ try{
         f_check(`${s_sheet} SVG: the file the module makes of the page's settings, the sheet's size`, s_svg === f_s_svg(o_state.o_setting, s_sheet) && s_svg.includes('width="210mm" height="297mm"'), s_svg.slice(0, 200));
     }
 
-    f_check('nothing went wrong in the page', o_page.a_s_error.length === 0, o_page.a_s_error);
+    // the two saves the server was to refuse stand in Chrome's log as requests that failed
+    f_check('nothing went wrong in the page but those two', o_page.a_s_error.length === 2 && o_page.a_s_error.every(function(s){ return /^Failed to load resource: the server responded with a status of (400|409) /.test(s); }), o_page.a_s_error);
 } finally {
     await o_page.f_close();
 }

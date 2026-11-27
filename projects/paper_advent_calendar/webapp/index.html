@@ -48,6 +48,39 @@ h1{ margin: 0 12px 0 0; font-size: 16px; font-weight: 650; color: var(--s_col__g
 /* a step with a field that is wrong */
 #el_step button.bad b{ border-color: var(--s_col__warn); background: var(--s_col__warn); color: var(--s_col__black); }
 
+/* the saved projects: in the bar the open one's name, under it, opened, the panel */
+#el_project_box{ position: relative; flex: none; }
+#el_project_box[inert]{ opacity: .4; }
+#el_project_box summary{ display: flex; align-items: baseline; gap: 8px; max-width: 260px; padding: 5px 12px; border: 1px solid var(--s_col__line); border-radius: 8px; list-style: none; white-space: nowrap; cursor: pointer; }
+#el_project_box summary::-webkit-details-marker{ display: none; }
+#el_project_box summary:hover, #el_project_box[open] summary{ border-color: var(--s_col__gold); }
+#el_project_box summary small{ color: var(--s_col__muted); font-size: 11px; text-transform: uppercase; letter-spacing: .08em; }
+#el_project_title{ overflow: hidden; text-overflow: ellipsis; }
+/* unsaved changes */
+#el_project_box summary:has([data-state=dirty])::after{ content: ''; flex: none; align-self: center; width: 6px; height: 6px; border-radius: 50%; background: var(--s_col__gold); }
+#el_project{ position: absolute; z-index: 2; top: calc(100% + 6px); right: 0; width: 320px; max-width: calc(100vw - 24px); max-height: calc(100vh - 70px); padding: 12px; overflow-y: auto; border: 1px solid var(--s_col__line); border-radius: 8px; background: var(--s_col__panel); box-shadow: 0 10px 30px #000000a0; }
+#el_project h2{ margin: 14px 0 8px; }
+#el_project_name{ width: 100%; height: 32px; padding: 0 8px; border: 1px solid var(--s_col__line); border-radius: 6px; background: var(--s_col__black); color: var(--s_col__text); font: inherit; }
+#el_project_name::placeholder{ color: var(--s_col__muted); }
+#el_project_state{ margin: 6px 0 10px; color: var(--s_col__muted); font-size: 12px; }
+#el_project_state[data-state=dirty]{ color: var(--s_col__gold); }
+#el_project_state[data-state=note]{ color: var(--s_col__warn); }
+.tool_row{ display: flex; flex-wrap: wrap; gap: 6px; }
+button.danger{ border-color: #b3261e; background: #b3261e; color: #ffffff; font-weight: 650; }
+button.danger:hover{ background: #cf3a31; }
+.question{ padding: 8px; border: 1px solid var(--s_col__warn); border-radius: 6px; }
+.question p, .project--deleting p{ margin: 0 0 8px; font-size: 13px; }
+#el_project_list{ margin: 0; padding: 0; list-style: none; }
+.project_empty{ color: var(--s_col__muted); font-size: 12px; }
+.project{ display: flex; align-items: stretch; margin-bottom: 4px; border: 1px solid var(--s_col__line); border-radius: 6px; overflow: hidden; }
+.project[aria-current=true]{ border-color: var(--s_col__gold); }
+.project--deleting{ display: block; padding: 8px; border-color: var(--s_col__warn); }
+.project__open{ flex: 1; min-width: 0; min-height: 0; padding: 6px 8px; border: 0; border-radius: 0; background: none; text-align: left; }
+.project__name, .project__open small{ display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.project__open small{ color: var(--s_col__muted); font-size: 11px; }
+.project__delete{ flex: none; width: 32px; min-height: 0; padding: 0; border: 0; border-left: 1px solid var(--s_col__line); border-radius: 0; background: none; color: var(--s_col__muted); font-size: 16px; }
+.project__delete:hover{ background: #b3261e; color: #ffffff; }
+
 #el_app{ display: grid; grid-template-columns: 360px minmax(0, 1fr); min-height: 0; }
 /* the settings, and under them what is wrong: there it never moves the sheet under the pointer */
 #el_side{ display: flex; flex-direction: column; min-height: 0; background: var(--s_col__panel); border-right: 1px solid var(--s_col__line); }
@@ -211,6 +244,11 @@ input.switch:checked::after{ background: var(--s_col__black); transform: transla
     #el_bar{ flex-wrap: wrap; padding-top: 8px; }
     h1{ flex: 1; }
     #el_step{ order: 1; flex-basis: 100%; scrollbar-width: none; }
+    /* the projects' panel under the whole bar, as wide as the window */
+    #el_bar{ position: relative; }
+    #el_project_box{ position: static; }
+    #el_project_box summary{ max-width: 150px; }
+    #el_project{ left: 12px; right: 12px; width: auto; max-width: none; }
     #el_step button{ min-height: 40px; padding: 0 10px; }
     #el_app{ grid-template-columns: minmax(0, 1fr); grid-template-rows: 46vh minmax(0, 1fr); }
     #el_stage{ order: -1; border-bottom: 1px solid var(--s_col__line); }
@@ -245,7 +283,11 @@ input.switch:checked::after{ background: var(--s_col__black); transform: transla
         <button type="button" data-step="cut"><b>4</b>Cuts</button>
         <button type="button" data-step="output"><b>5</b>Print and cut</button>
     </nav>
-    <button type="button" class="ghost" id="el_reset" title="All settings as at the first start; windows moved or changed alone go back to the grid; the pictures are removed">Start over</button>
+    <!-- the saved projects, see project.module.js -->
+    <details id="el_project_box">
+        <summary title="Save this calendar under a name, open a saved one, start a new one. Ctrl and S saves"><small>Project</small><span id="el_project_title"></span></summary>
+        <div id="el_project"></div>
+    </details>
 </header>
 <main id="el_app">
     <div id="el_side">

@@ -7,6 +7,7 @@ import { a_s_side, f_o_picture, f_a_n__px, f_a_n__size, f_n_dpi, f_a_n__from_px,
 import { f_a_n__calendar, f_a_n__distance, f_a_n__bleed, f_a_s_problem__sheet, f_s_picture__sheet, f_s_line__sheet, f_s_svg__page } from './sheet.module.js';
 import { f_a_n_h, f_a_n__mapped, f_s_problem__match, f_a_a_n__anchor, f_a_n__snapped, f_n_px__per_mm, f_a_n__warped } from './match.module.js';
 import { f_a_n__png_sized, f_a_v__pdf } from './file.module.js';
+import { f_o_panel__project, f_o_response__server, f_s_url__project } from './project.module.js';
 
 let s_key__storage = 'paper_advent_calendar';
 let a_s_sheet = ['front', 'back'];
@@ -34,13 +35,23 @@ let n_px__page = 8192;
 let el_panel = document.getElementById('el_panel');
 let el_stage = document.getElementById('el_stage');
 
-// The settings as the page last left them; they stay in this browser.
-let o_setting = structuredClone(o_setting__default);
-try{
-    let o_stored = JSON.parse(localStorage.getItem(s_key__storage)) ?? {};
-    for(let s_name of Object.keys(o_setting__default)){
-        if(s_name in o_stored){ o_setting[s_name] = o_stored[s_name]; }
+// Settings as they were kept, in this browser or in a project: what has come to the
+// settings since is as at the first start, what has left them is left out.
+let f_o_setting__kept = function(o_kept){
+    let o = structuredClone(o_setting__default);
+    for(let s_name of Object.keys(o)){
+        if(o_kept && typeof o_kept === 'object' && s_name in o_kept){ o[s_name] = structuredClone(o_kept[s_name]); }
     }
+    for(let s_sheet of a_s_sheet){
+        // a place kept before pictures could be stretched and skewed says neither: it is neither
+        if(o[`o_picture__${s_sheet}`]){ o[`o_picture__${s_sheet}`] = { ...f_o_picture(0, 0), ...o[`o_picture__${s_sheet}`] }; }
+    }
+    return o;
+};
+// The settings as the page last left them; they stay in this browser.
+let o_setting = f_o_setting__kept(null);
+try{
+    o_setting = f_o_setting__kept(JSON.parse(localStorage.getItem(s_key__storage)));
 } catch(o_error){
     console.warn(o_error);
 }
@@ -51,10 +62,16 @@ let n_idx__selected = null;
 let s_step = 'paper';
 // the sheet shown, 'front' or 'back': the step 'picture' is about its picture
 let s_sheet__shown = 'front';
+// the saved project that is open, by its name, null for none; and the sheets whose
+// picture file is another than the one that project keeps
+let s_name__project = null;
+let o_b_unsaved = { front: false, back: false };
 try{
     let o_stored = JSON.parse(localStorage.getItem(`${s_key__storage}__page`)) ?? {};
     if(document.querySelector(`.step[data-step="${o_stored.s_step}"]`)){ s_step = o_stored.s_step; }
     if(a_s_sheet.includes(o_stored.s_sheet__shown)){ s_sheet__shown = o_stored.s_sheet__shown; }
+    if(typeof o_stored.s_name__project === 'string'){ s_name__project = o_stored.s_name__project; }
+    for(let s_sheet of a_s_sheet){ o_b_unsaved[s_sheet] = Boolean(o_stored.o_b_unsaved?.[s_sheet]); }
 } catch(o_error){
     console.warn(o_error);
 }
@@ -205,7 +222,11 @@ let f_update = function(){
     }
     for(let s_sheet of a_s_sheet){ document.getElementById(`el_sheet__${s_sheet}`).classList.toggle('shown', s_sheet === s_sheet__shown); }
     document.getElementById('el_shown_note').textContent = s_sheet__shown === 'back' ? 'as seen from the front' : '';
-    try{ localStorage.setItem(`${s_key__storage}__page`, JSON.stringify({ s_step, s_sheet__shown })); } catch(o_error){ console.warn(o_error); }
+    try{ localStorage.setItem(`${s_key__storage}__page`, JSON.stringify({ s_step, s_sheet__shown, s_name__project, o_b_unsaved })); } catch(o_error){ console.warn(o_error); }
+    // while a picture is matched, what is on screen is neither saved nor replaced
+    let el_project_box = document.getElementById('el_project_box');
+    el_project_box.inert = Boolean(o_match);
+    if(o_match){ el_project_box.open = false; }
 
     let o_form = f_o_setting__form();
     el_panel.elements.n_mm__margin.max = Math.floor(Math.min(o_form.n_mm__calendar_x, o_form.n_mm__calendar_y) / 2 - 1);
@@ -224,6 +245,7 @@ let f_update = function(){
     for(let el of document.querySelectorAll('[data-page]')){ el.disabled = Boolean(s_bad) || b_busy__page; }
     if(s_bad){
         document.getElementById('el_status').textContent = s_bad;
+        o_panel__project.f_changed();
         return;
     }
     Object.assign(o_setting, o_form);
@@ -368,6 +390,7 @@ let f_update = function(){
     let a_s_problem = [...f_a_s_problem__sheet(o_setting), ...f_a_s_problem(o_setting)];
     document.getElementById('el_status').textContent = a_s_problem.slice(0, 4).join('\n')
         + (a_s_problem.length > 4 ? `\nand ${a_s_problem.length - 4} more` : '');
+    o_panel__project.f_changed();
 };
 
 // What the chosen window has of its own, kept beside the grid's settings.
@@ -406,8 +429,9 @@ document.getElementById('el_own_reset').addEventListener('click', function(){
 });
 
 // A sheet's picture: its file goes into the browser's database, its place into the
-// settings. Without a place given it fills the calendar and its bleed.
-let f_set_picture = async function(s_sheet, o_file, o_picture__given = null){
+// settings. Without a place given it fills the calendar and its bleed. Says whether the
+// file was taken: one that is no picture is not.
+let f_b_set_picture = async function(s_sheet, o_file, o_picture__given = null){
     let s_url = o_file ? URL.createObjectURL(o_file) : '';
     let o_picture = null;
     if(o_file){
@@ -420,7 +444,7 @@ let f_set_picture = async function(s_sheet, o_file, o_picture__given = null){
             URL.revokeObjectURL(s_url);
             s_note__file = `${o_file.name} is not a picture this browser can show.`;
             f_update();
-            return;
+            return false;
         }
         o_picture = o_picture__given ?? f_o_picture__fitted(f_o_picture(el_img.naturalWidth, el_img.naturalHeight), f_a_n__bleed(o_setting), true);
     }
@@ -433,8 +457,10 @@ let f_set_picture = async function(s_sheet, o_file, o_picture__given = null){
     URL.revokeObjectURL(o_s_url[s_sheet]);
     o_s_url[s_sheet] = s_url;
     o_setting[`o_picture__${s_sheet}`] = o_picture;
+    o_b_unsaved[s_sheet] = true;
     s_note__file = '';
     f_update();
+    return true;
 };
 document.getElementById('el_picture_load').addEventListener('click', function(){ document.getElementById('el_picture_file').click(); });
 document.getElementById('el_picture_file').addEventListener('change', async function(o_event){
@@ -442,11 +468,11 @@ document.getElementById('el_picture_file').addEventListener('change', async func
     o_event.target.value = '';
     if(!o_file){ return; }
     if(o_undo?.s_sheet === s_sheet__shown){ o_undo = null; }
-    await f_set_picture(s_sheet__shown, o_file);
+    await f_b_set_picture(s_sheet__shown, o_file);
 });
 document.getElementById('el_picture_remove').addEventListener('click', function(){
     if(o_undo?.s_sheet === s_sheet__shown){ o_undo = null; }
-    f_set_picture(s_sheet__shown, null);
+    f_b_set_picture(s_sheet__shown, null);
 });
 let f_n_deg = function(n_deg){ return ((n_deg + 180) % 360 + 360) % 360 - 180; };
 let o_f_o_picture = {
@@ -589,7 +615,7 @@ let f_add_match = async function(a_n){
             s_note: `Matched by four points${o_matched.b_covered ? '.' : '; the picture does not reach all of the calendar, which stays blank where it ends.'}`
         };
         o_match = null;
-        await f_set_picture(s_sheet, o_matched.o_file, o_matched.o_picture);
+        await f_b_set_picture(s_sheet, o_matched.o_file, o_matched.o_picture);
     } catch(o_error){
         console.warn(o_error);
         o_match.b_busy = false;
@@ -600,19 +626,80 @@ let f_add_match = async function(a_n){
 document.getElementById('el_match_undo').addEventListener('click', async function(){
     let { s_sheet, o_file, o_picture } = o_undo;
     o_undo = null;
-    await f_set_picture(s_sheet, o_file, o_picture);
+    await f_b_set_picture(s_sheet, o_file, o_picture);
 });
 
-document.getElementById('el_reset').addEventListener('click', async function(){
-    if(!confirm('Start over with the settings of the first start? Windows moved or changed alone go back to the grid, and the pictures are removed.')){ return; }
-    o_setting = structuredClone(o_setting__default);
+// ---- the saved projects, see project.module.js. What is on screen stays in this
+// browser as before; a project is that, saved under a name by the app's server.
+
+// Puts settings on screen, a saved project's with its pictures, s_name its name, or
+// those of a new one, null, which has no pictures.
+let f_show_design = async function(o_design, s_name){
+    // the pictures first: if the server does not answer, the screen stays as it is
+    let o_o_file = { front: null, back: null };
+    for(let s_sheet of a_s_sheet){
+        if(s_name === null || !o_design.o_setting[`o_picture__${s_sheet}`]){ continue; }
+        let o_response = await f_o_response__server(`${f_s_url__project(s_name)}/${s_sheet}`);
+        if(o_response.ok){ o_o_file[s_sheet] = await o_response.blob(); }
+        else if(o_response.status !== 404){ throw new Error(`The ${s_sheet} sheet’s picture could not be read.`); }
+    }
+    o_setting = o_design.o_setting;
     n_idx__selected = null;
-    s_step = 'paper';
-    s_sheet__shown = 'front';
-    o_match = null;
     o_undo = null;
     f_fill_form();
-    for(let s_sheet of a_s_sheet){ await f_set_picture(s_sheet, null); }
+    for(let s_sheet of a_s_sheet){
+        // a place without its file, or with a file that is no picture, is of no use
+        if(!o_o_file[s_sheet] || !await f_b_set_picture(s_sheet, o_o_file[s_sheet], o_setting[`o_picture__${s_sheet}`])){ await f_b_set_picture(s_sheet, null); }
+        o_b_unsaved[s_sheet] = false;
+    }
+    f_update();
+};
+// A project keeps its sheets' pictures beside its settings: the files that are others
+// than it has, all of them for a project that is new.
+let f_save_picture = async function(s_name, b_all){
+    for(let s_sheet of a_s_sheet){
+        if(b_all){ o_b_unsaved[s_sheet] = true; }
+    }
+    for(let s_sheet of a_s_sheet){
+        if(!o_b_unsaved[s_sheet]){ continue; }
+        let s_url = `${f_s_url__project(s_name)}/${s_sheet}`;
+        let o_response = o_s_url[s_sheet]
+            ? await f_o_response__server(s_url, { method: 'PUT', body: await (await fetch(o_s_url[s_sheet])).blob() })
+            : await f_o_response__server(s_url, { method: 'DELETE' });
+        if(!o_response.ok){ throw new Error((await o_response.json()).s_message); }
+        o_b_unsaved[s_sheet] = false;
+    }
+    f_update();
+};
+let o_panel__project = f_o_panel__project({
+    el_box: document.getElementById('el_project_box'),
+    el_title: document.getElementById('el_project_title'),
+    el_root: document.getElementById('el_project'),
+    f_o_design: function(){ return { o_setting }; },
+    f_o_design__blank: function(){ return { o_setting: f_o_setting__kept(null) }; },
+    f_o_design__of_project: function(o_project){ return { o_setting: f_o_setting__kept(o_project.o_setting) }; },
+    f_open_design: function(o_project){ return f_show_design({ o_setting: f_o_setting__kept(o_project.o_setting) }, o_project.s_name); },
+    // a new project starts as the app did at its first start, at the first step
+    f_new_design: async function(){
+        await f_show_design({ o_setting: f_o_setting__kept(null) }, null);
+        s_step = 'paper';
+        s_sheet__shown = 'front';
+        f_update();
+        el_panel.scrollTop = 0;
+    },
+    f_save_extra: f_save_picture,
+    f_b_extra_dirty: function(){ return a_s_sheet.some(function(s_sheet){ return o_b_unsaved[s_sheet]; }); },
+    f_s_summary: function(o_project){
+        let o = f_o_setting__kept(o_project.o_setting);
+        let a_s_sheet__picture = a_s_sheet.filter(function(s_sheet){ return o[`o_picture__${s_sheet}`]; });
+        return `${o.n_window} ${o.n_window === 1 ? 'window' : 'windows'} · ${o.n_mm__calendar_x} × ${o.n_mm__calendar_y} mm`
+            + (a_s_sheet__picture.length ? ` · ${a_s_sheet__picture.join(' and ')} picture` : '');
+    },
+    f_b_ready: function(){ return !o_match; },
+    f_opened: function(s_name){
+        s_name__project = s_name;
+        f_update();
+    }
 });
 
 // The steps: the bar's buttons, and at each step's end the one to the next.
@@ -651,10 +738,12 @@ for(let el of document.querySelectorAll('[name=n_zoom]')){
 new ResizeObserver(function(){ requestAnimationFrame(f_update); }).observe(document.getElementById('el_view'));
 // A picture's handles stay in view: they follow where a zoomed sheet is moved to.
 document.getElementById('el_scroll').addEventListener('scroll', function(){ f_update(); });
-// The lines' legend closes with a press beside it.
+// The lines' legend and the projects close with a press beside them.
 window.addEventListener('pointerdown', function(o_event){
-    let el_legend_box = document.getElementById('el_legend_box');
-    if(!el_legend_box.contains(o_event.target)){ el_legend_box.open = false; }
+    for(let s_id of ['el_legend_box', 'el_project_box']){
+        let el_box = document.getElementById(s_id);
+        if(!el_box.contains(o_event.target)){ el_box.open = false; }
+    }
 });
 
 // Where the pointer is on a sheet, in the calendar's mm.
@@ -846,10 +935,10 @@ for(let el of document.querySelectorAll('[data-page]')){
 // A picture's place without its file is of no use: the file may be gone with the browser's data.
 for(let s_sheet of a_s_sheet){
     if(!o_setting[`o_picture__${s_sheet}`]){ continue; }
-    // a place kept before pictures could be stretched and skewed says neither: it is neither
-    o_setting[`o_picture__${s_sheet}`] = { ...f_o_picture(0, 0), ...o_setting[`o_picture__${s_sheet}`] };
     let o_file = await f_v__stored('get', s_sheet).catch(function(o_error){ console.warn(o_error); });
     if(o_file){ o_s_url[s_sheet] = URL.createObjectURL(o_file); } else { o_setting[`o_picture__${s_sheet}`] = null; }
 }
 f_fill_form();
 f_update();
+// the saved projects come when the server answers; the page does not wait for them
+o_panel__project.f_start(s_name__project);
