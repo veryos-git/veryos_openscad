@@ -1,0 +1,70 @@
+[
+ {
+  "name": "Part 1",
+  "state": "IN_PROGRESS",
+  "description": null,
+  "revision": null,
+  "isHidden": true,
+  "defaultColorHash": "FUm1e8Nbky3su1s_0_0",
+  "ordinal": 0,
+  "thumbnailConfigurationId": "",
+  "isMesh": false,
+  "partNumber": null,
+  "elementId": "2fe52ecee89893a8d1e58d59",
+  "partId": "JHD",
+  "bodyType": "solid",
+  "microversionId": "1c955556485dfaf86b8eb567",
+  "isFlattenedBody": false,
+  "partQuery": "query=qCompressed(1.0,\"%B5$QueryM5S12$disambiguationDataA1M2S12$disambiguationTypeS13$ORIGINAL_DEPENDENCYS9$originalsA1C0M5Sa$entityTypeBa$EntityTypeS4$EDGESb$historyTypeS8$CREATIONSb$operationIdB2$IdA1S11.6$F56wWUZAQ8w8tIJ_0wireOpS9$queryTypeSd$SKETCH_ENTITYSe$sketchEntityIdSc$wjW6tPFh2bp3R4C6S4$BODYR6R7R8CbA1S11.9$FUm1e8Nbky3su1s_0opExtrudeRbSa$SWEPT_BODY\",id);",
+  "partIdentity": null,
+  "meshState": "NO_MESH",
+  "configurationId": "",
+  "propertySourceTypes": {
+   "57f3fb8efa3416c06701d60d": 0
+  },
+  "metadataMicroversion": "a7cd2039bedbcd13abd6724d",
+  "appearance": {
+   "color": {
+    "red": 157,
+    "green": 207,
+    "blue": 237
+   },
+   "isGenerated": true,
+   "opacity": 255
+  }
+ },
+ {
+  "name": "Part 2",
+  "state": "IN_PROGRESS",
+  "description": null,
+  "revision": null,
+  "isHidden": false,
+  "defaultColorHash": "FjEBVBeyiXYnynC_2_0",
+  "ordinal": 1,
+  "thumbnailConfigurationId": "",
+  "isMesh": false,
+  "partNumber": null,
+  "elementId": "2fe52ecee89893a8d1e58d59",
+  "partId": "JTD",
+  "bodyType": "solid",
+  "microversionId": "1c955556485dfaf86b8eb567",
+  "isFlattenedBody": false,
+  "partQuery": "query=qCompressed(1.0,\"&1f3$eJx9UUtzgjAQ/jPbq2N4KBx5BKVFwITxcWKCpBqrgBBU+usLOtNLxx5393vt7putw7LldbfQKVIgFw07Z2LfMinKwmWSWWih/J0kXcUpUiEi/swPrSB1cYxDF4fOlppQ1mIvCnZqLN0Z98IMeCGF7AaWzQD/FlQD7M4wzeAgGlnWz6YBDsFW4kdhPygrXj8s/dxWwM8tRBEaTcCbr9bl0rhep0FgmGqq3ETNo6p3vwzrPIRyoB84ceYpDhM/2VIOzReXu8MzgJ/THbBCbs4kjhE6PbISjehkQqbEIIxkZEcGkHfy+DuJPXWja69AIzTSwKx1+m3Q4LBolfGJf8p/0Aims716nZXVnaorpL50v+j9H47z8u7eWqI5k/5oduRunzgnex7EBO+I7ZXNO7HZFl3hpEpZ4bus25yTrP8AXeM4SQfiD1qon/g=\",id);",
+  "partIdentity": null,
+  "meshState": "NO_MESH",
+  "configurationId": "",
+  "propertySourceTypes": {
+   "57f3fb8efa3416c06701d60d": 0
+  },
+  "metadataMicroversion": "a7cd2039bedbcd13abd6724d",
+  "appearance": {
+   "color": {
+    "red": 59,
+    "green": 97,
+    "blue": 180
+   },
+   "isGenerated": true,
+   "opacity": 255
+  }
+ }
+]

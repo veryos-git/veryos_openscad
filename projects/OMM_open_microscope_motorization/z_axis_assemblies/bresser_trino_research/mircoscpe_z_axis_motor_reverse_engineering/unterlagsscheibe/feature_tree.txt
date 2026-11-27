@@ -1,0 +1,64 @@
+Onshape feature tree of part studio "unterlagsscheibe" (all lengths in mm unless noted; sketch entity coords in mm, sketch-local)
+E = sketch entity, C = dimension constraint, Q(...) = Onshape geometry query ids
+
+unterlagsscheibe
+
+# Sketch 1 [newSketch]
+  sketchPlane=Q(JDC)
+  disableImprinting=false
+  E 2N2AeUBxTIJd Curve/Circle radius=1.75 xCenter=0 yCenter=0 xDir=1000 yDir=0
+  E VLWvwKUbQ4HA Curve/Circle radius=3.5 xCenter=0 yCenter=0 xDir=1000 yDir=0
+  C DIAMETER 2N2AeUBxTIJd length=3.5 mm labelRatio=4.714900832174474 labelAngle=0.2182721057672542*rad
+  C DIAMETER VLWvwKUbQ4HA length=7 mm labelRatio=2.9177825557162698 labelAngle=0.6706403175803625*rad
+
+# Extrude 1 [extrude]
+  domain=MODEL
+  bodyType=SOLID
+  operationType=NEW
+  surfaceOperationType=NEW
+  flatOperationType=REMOVE
+  entities=Q(JGG)
+  surfaceEntities=Q()
+  wallShape=Q()
+  midplane=false
+  thickness1=5 mm
+  flipWall=false
+  thickness2=0 mm
+  thickness=5 mm
+  endBound=BLIND
+  oppositeDirection=false
+  depth=1 mm
+  endBoundEntityFace=Q()
+  endBoundEntityBody=Q()
+  endBoundEntityVertex=Q()
+  hasOffset=false
+  offsetDistance=25 mm
+  offsetOppositeDirection=false
+  hasExtrudeDirection=false
+  extrudeDirection=Q()
+  startOffset=false
+  startOffsetBound=BLIND
+  startOffsetDistance=25 mm
+  startOffsetOppositeDirection=false
+  startOffsetEntity=Q()
+  symmetric=false
+  hasDraft=false
+  draftAngle=3 deg
+  draftPullDirection=false
+  hasSecondDirection=false
+  secondDirectionBound=BLIND
+  secondDirectionOppositeDirection=true
+  secondDirectionDepth=25 mm
+  secondDirectionBoundEntityFace=Q()
+  secondDirectionBoundEntityBody=Q()
+  secondDirectionBoundEntityVertex=Q()
+  hasSecondDirectionOffset=false
+  secondDirectionOffsetDistance=25 mm
+  secondDirectionOffsetOppositeDirection=false
+  hasSecondDirectionDraft=false
+  secondDirectionDraftAngle=3 deg
+  secondDirectionDraftPullDirection=false
+  defaultScope=false
+  booleanScope=Q()
+  defaultSurfaceScope=true
+  booleanSurfaceScope=Q()

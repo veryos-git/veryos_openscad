@@ -1,0 +1,36 @@
+[
+ {
+  "name": "Part 1",
+  "state": "IN_PROGRESS",
+  "description": null,
+  "revision": null,
+  "partNumber": null,
+  "elementId": "89afc20b2c393119db4ce2b4",
+  "partId": "JHD",
+  "bodyType": "solid",
+  "microversionId": "1c955556485dfaf86b8eb567",
+  "isFlattenedBody": false,
+  "partQuery": "query=qCompressed(1.0,\"&119f$eJyF10tv2kAYheE/M10GYWNuS7Dd1GoD6dhSRTdoPuwQq+FS26jNv6+ZT2otVUdnB8xj3mFxFnxYT83XW9W8P03zIDRl3bqT1Meb6+rLOXGdWwVP4f8nxfu1yoOJ2drsMdusvuyT9DndJOkm3uVLc2nqY312b+1q/hKP+292pjp3dfd+f2ztTPr3TR6ZNHlMczGvddtdGv1wYWKbropsu+kPLteq8c2sXIcmK1dBHgQjN5qZj+PSvWQ2+X4ro+jU7sfHyjX5j6o7vP6qm2p77a/y8/7b/JeWJv+cFvGnfbopsmKXV6b1VC+TlX3VlWV1Lm+n+51tZKd2Zud2YZ0Ve7Blf1fXHAJwuDTt9a0+Vw+OCkHCB0IaoEKQ8IEJDVAhSPhARANUCBI+MKUBKgQJH5jRABWChA/MaYAKQcIHFjRAhSDhA0saoEKQmPqhjcGp+7c0SgQSbaAlDhqUCCTaQGMcNCgRSLSB9jhoUCKQaANNctCgRCDRBlrloEGJQKINNMxBgxKBRBtom4MGJQKJNtA8Bw1KBBJtoIUOGpQIJL4R8p1zIpBog++cE4FEG3znnAgk2uA750Qg0QbfOScCiTb4zjkRSLTBd86JQKINvnNOBBJt8J1zIpBog++cE4HENyZ855wIJNrgO+dEINEG3zknAok2+M45EUi0wXfOiUCiDb5zTgQSbfCdcyKQaIPvnBOBRBt855wIJNrgO+dEIPGNiO+cE4FEG3znnAgk2uA750Si0EbxrP/LtN4mO1WxrIL84TBajJam+t01t7IKLtdUX1npH86/pc/F/v7EH1PHYQU=\",id);",
+  "partIdentity": null,
+  "meshState": "NO_MESH",
+  "isHidden": false,
+  "configurationId": "",
+  "thumbnailConfigurationId": "",
+  "metadataMicroversion": "7344b98f122bd7ba71e01a49",
+  "defaultColorHash": "F0dafIRDZud44ms_0_0",
+  "ordinal": 0,
+  "isMesh": false,
+  "propertySourceTypes": {
+   "57f3fb8efa3416c06701d60d": 0
+  },
+  "appearance": {
+   "color": {
+    "red": 157,
+    "green": 207,
+    "blue": 237
+   },
+   "isGenerated": true,
+   "opacity": 255
+  }
+ }
+]

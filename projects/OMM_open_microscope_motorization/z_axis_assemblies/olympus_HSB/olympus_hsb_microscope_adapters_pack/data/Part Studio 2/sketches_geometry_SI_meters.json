@@ -1,0 +1,113 @@
+{
+ "sketches": [
+  {
+   "sketch": "Sketch 1",
+   "featureId": "FX1lhe1vY886pTL_1",
+   "transformMatrix": [
+    1,
+    0,
+    0,
+    0,
+    0,
+    0,
+    -1,
+    -0.007,
+    0,
+    1,
+    0,
+    0,
+    0,
+    0,
+    0,
+    1
+   ],
+   "featuresUsed": [
+    "Extrude 1"
+   ],
+   "geomEntities": [
+    {
+     "id": "v6JWEypXXS4O",
+     "entityType": "circle",
+     "center": [
+      0,
+      0
+     ],
+     "radius": 0.0026000000000000003
+    },
+    {
+     "id": "v6JWEypXXS4O.center",
+     "entityType": "point",
+     "point": [
+      0,
+      0
+     ],
+     "isConstruction": true
+    },
+    {
+     "id": "gKsc65BNsUHg.start",
+     "entityType": "point",
+     "point": [
+      -0.00204939015319192,
+      0.0016
+     ]
+    },
+    {
+     "id": "gKsc65BNsUHg.end",
+     "entityType": "point",
+     "point": [
+      0.00204939015319192,
+      0.0016
+     ]
+    },
+    {
+     "id": "gKsc65BNsUHg",
+     "entityType": "lineSegment",
+     "startPoint": [
+      -0.00204939015319192,
+      0.0016
+     ],
+     "endPoint": [
+      0.00204939015319192,
+      0.0016
+     ],
+     "endPointIds": [
+      "gKsc65BNsUHg.start",
+      "gKsc65BNsUHg.end"
+     ]
+    },
+    {
+     "id": "GOtDF1jqqJrc0.MirrorCS.start",
+     "entityType": "point",
+     "point": [
+      -0.00204939015319192,
+      -0.0016
+     ]
+    },
+    {
+     "id": "GOtDF1jqqJrc0.MirrorCS.end",
+     "entityType": "point",
+     "point": [
+      0.00204939015319192,
+      -0.0016
+     ]
+    },
+    {
+     "id": "GOtDF1jqqJrc0.MirrorCS",
+     "entityType": "lineSegment",
+     "startPoint": [
+      -0.00204939015319192,
+      -0.0016
+     ],
+     "endPoint": [
+      0.00204939015319192,
+      -0.0016
+     ],
+     "endPointIds": [
+      "GOtDF1jqqJrc0.MirrorCS.start",
+      "GOtDF1jqqJrc0.MirrorCS.end"
+     ]
+    }
+   ]
+  }
+ ]
+}

@@ -1,0 +1,104 @@
+[
+ {
+  "name": "screw",
+  "state": "IN_PROGRESS",
+  "description": null,
+  "revision": null,
+  "partNumber": null,
+  "elementId": "6991b28f896842d9dcaaac4b",
+  "partId": "JHD",
+  "bodyType": "solid",
+  "microversionId": "1c955556485dfaf86b8eb567",
+  "isFlattenedBody": false,
+  "partQuery": "query=qCompressed(1.0,\"%B5$QueryM5S12$disambiguationDataA1M2S12$disambiguationTypeS13$ORIGINAL_DEPENDENCYS9$originalsA1C0M5Sa$entityTypeBa$EntityTypeS4$EDGESb$historyTypeS8$CREATIONSb$operationIdB2$IdA1S11.6$FcDLncWOiOdyqq4_0wireOpS9$queryTypeSd$SKETCH_ENTITYSe$sketchEntityIdSc$3gfMOATuNK16R4C6S4$BODYR6R7R8CbA1S11.9$FL196T5v6n7t8Ai_0opExtrudeRbSa$SWEPT_BODY\",id);",
+  "partIdentity": null,
+  "meshState": "NO_MESH",
+  "isHidden": false,
+  "configurationId": "",
+  "thumbnailConfigurationId": "",
+  "propertySourceTypes": {
+   "57f3fb8efa3416c06701d60d": 3
+  },
+  "metadataMicroversion": "bc1288ac7b95c5454ba1544a",
+  "defaultColorHash": "FL196T5v6n7t8Ai_0_0",
+  "ordinal": 0,
+  "isMesh": false,
+  "appearance": {
+   "color": {
+    "red": 157,
+    "green": 207,
+    "blue": 237
+   },
+   "isGenerated": true,
+   "opacity": 255
+  }
+ },
+ {
+  "name": "screw_thread",
+  "state": "IN_PROGRESS",
+  "description": null,
+  "revision": null,
+  "partNumber": null,
+  "elementId": "6991b28f896842d9dcaaac4b",
+  "partId": "JZD",
+  "bodyType": "solid",
+  "microversionId": "1c955556485dfaf86b8eb567",
+  "isFlattenedBody": false,
+  "partQuery": "query=qCompressed(1.0,\"%B5$QueryM5S12$disambiguationDataA1M2S12$disambiguationTypeS13$ORIGINAL_DEPENDENCYS9$originalsA2C0M5Sa$entityTypeBa$EntityTypeS4$EDGESb$historyTypeS8$CREATIONSb$operationIdB2$IdA1S11.6$FcDLncWOiOdyqq4_0wireOpS9$queryTypeSd$SKETCH_ENTITYSe$sketchEntityIdSc$hGMyEkiczqQFC0M5R4R5R6R7R8RaRbRcRdSc$kMzhOHD5B471R4C6S4$BODYR6R7R8CbA1S11.9$FjdEyvGiUmeCiZY_1opExtrudeRbSa$SWEPT_BODY\",id);",
+  "partIdentity": null,
+  "meshState": "NO_MESH",
+  "isHidden": true,
+  "configurationId": "",
+  "thumbnailConfigurationId": "",
+  "propertySourceTypes": {
+   "57f3fb8efa3416c06701d60d": 3
+  },
+  "metadataMicroversion": "bc1288ac7b95c5454ba1544a",
+  "defaultColorHash": "FjdEyvGiUmeCiZY_1_0",
+  "ordinal": 1,
+  "isMesh": false,
+  "appearance": {
+   "color": {
+    "red": 165,
+    "green": 165,
+    "blue": 165
+   },
+   "isGenerated": true,
+   "opacity": 255
+  }
+ },
+ {
+  "name": "screwthread_subtractor",
+  "state": "IN_PROGRESS",
+  "description": null,
+  "revision": null,
+  "partNumber": null,
+  "elementId": "6991b28f896842d9dcaaac4b",
+  "partId": "JsD",
+  "bodyType": "solid",
+  "microversionId": "1c955556485dfaf86b8eb567",
+  "isFlattenedBody": false,
+  "partQuery": "query=qCompressed(1.0,\"%B5$QueryM5S12$disambiguationDataA1M2S12$disambiguationTypeS13$ORIGINAL_DEPENDENCYS9$originalsA1C0M5Sa$entityTypeBa$EntityTypeS4$EDGESb$historyTypeS8$CREATIONSb$operationIdB2$IdA1S11.6$FcDLncWOiOdyqq4_0wireOpS9$queryTypeSd$SKETCH_ENTITYSe$sketchEntityIdSc$kMzhOHD5B471R4C6S4$BODYR6R7R8CbA1S11.9$F95jqJNfpl0zoG6_2opExtrudeRbSa$SWEPT_BODY\",id);",
+  "partIdentity": null,
+  "meshState": "NO_MESH",
+  "isHidden": true,
+  "configurationId": "",
+  "thumbnailConfigurationId": "",
+  "propertySourceTypes": {
+   "57f3fb8efa3416c06701d60d": 3
+  },
+  "metadataMicroversion": "bc1288ac7b95c5454ba1544a",
+  "defaultColorHash": "F95jqJNfpl0zoG6_2_0",
+  "ordinal": 2,
+  "isMesh": false,
+  "appearance": {
+   "color": {
+    "red": 59,
+    "green": 97,
+    "blue": 180
+   },
+   "isGenerated": true,
+   "opacity": 255
+  }
+ }
+]

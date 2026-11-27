@@ -1,0 +1,42 @@
+[
+ {
+  "variableStudioReference": null,
+  "variables": [
+   {
+    "type": "ANGLE",
+    "name": "comp_angle",
+    "value": null,
+    "expression": "2 deg",
+    "description": ""
+   },
+   {
+    "type": "LENGTH",
+    "name": "thick",
+    "value": null,
+    "expression": "6 mm",
+    "description": ""
+   },
+   {
+    "type": "LENGTH",
+    "name": "stol",
+    "value": null,
+    "expression": "0.2 mm",
+    "description": ""
+   },
+   {
+    "type": "LENGTH",
+    "name": "dia_screw",
+    "value": null,
+    "expression": "5 mm",
+    "description": ""
+   },
+   {
+    "type": "LENGTH",
+    "name": "screwtol",
+    "value": null,
+    "expression": "0.5 mm",
+    "description": ""
+   }
+  ]
+ }
+]

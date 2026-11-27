@@ -1,0 +1,26 @@
+{
+  "s_kind": "object",
+  "s_brand": "veryos",
+  "o_setting": {
+    "n_mm__wall": 0.8,
+    "n_mm__stem": 4,
+    "n_mm__voxel": 0.6,
+    "s_file": "amanitalamp 2v2 (3).obj",
+    "b_object": true,
+    "b_color": true,
+    "o_place": {
+      "a_n_trn": [
+        1.5975707286106449,
+        1.0840577093748038,
+        39.46142317013348
+      ],
+      "a_n_rot": [
+        0.7070714830860835,
+        0,
+        0,
+        0.7071420775250518
+      ],
+      "n_scl": 81.61402296397553
+    }
+  }
+}

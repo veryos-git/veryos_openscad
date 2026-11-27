@@ -1,0 +1,45 @@
+{
+  "o_setting": {
+    "s_kind": "flextangle",
+    "n_mm__sheet_x": 297,
+    "n_mm__sheet_y": 210,
+    "n_mm__printer_margin": 5,
+    "n_mm__left": 10,
+    "n_mm__bottom": 10,
+    "b_sheet_dot": true,
+    "n_mm__line": 0.2,
+    "a_o_picture__front": [
+      {
+        "n_px__x": 1876,
+        "n_px__y": 775,
+        "a_n_ratio__crop": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "n_mm__x": 136.75,
+        "n_mm__y": 55.66,
+        "n_mm__size_x": 276.4,
+        "n_ratio__stretch": 0.9484,
+        "n_deg": 0,
+        "n_deg__skew": 0,
+        "b_flip_x": false,
+        "b_flip_y": false,
+        "s_file": "p9yqgejrg"
+      }
+    ],
+    "a_o_picture__back": [],
+    "s_print": "picture",
+    "n_mm__bleed": 2,
+    "b_print_guide": true,
+    "n_mm__print_x": 0,
+    "n_mm__print_y": 0,
+    "n_mm__base": 44.5,
+    "n_ratio__height": 1,
+    "n_mm__tab": 8,
+    "n_mm__dash": 0.5,
+    "n_mm__gap": 4,
+    "b_logo": false
+  }
+}

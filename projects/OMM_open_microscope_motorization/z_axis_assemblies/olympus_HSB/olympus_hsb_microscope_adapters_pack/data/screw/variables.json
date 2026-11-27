@@ -1,0 +1,35 @@
+[
+ {
+  "variableStudioReference": null,
+  "variables": [
+   {
+    "type": "LENGTH",
+    "name": "screwtol",
+    "value": null,
+    "expression": "0.5 mm",
+    "description": ""
+   },
+   {
+    "type": "LENGTH",
+    "name": "dia_screw",
+    "value": null,
+    "expression": "7 mm",
+    "description": ""
+   },
+   {
+    "type": "LENGTH",
+    "name": "extr",
+    "value": null,
+    "expression": "10 mm",
+    "description": ""
+   },
+   {
+    "type": "LENGTH",
+    "name": "pitch",
+    "value": null,
+    "expression": "2 mm",
+    "description": ""
+   }
+  ]
+ }
+]

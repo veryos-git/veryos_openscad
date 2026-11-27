@@ -1,0 +1,47 @@
+Part Studio 2
+ - Spur Gear (#teeth teeth) [SpurGear] id: FpmPbVGZUTBhCPh_0
+      teeth: 10
+      numTeeth: 10
+      GearInputType: module
+      module: 1 mm
+      diametralPitch: 25.400000000000002
+      circularPitch: 3.141592653589793*mm
+      pitchCircleDiameter: 10.0*mm
+      pressureAngle: 20 deg
+      centerHoleDia: 10 mm
+      keyWidth: 3 mm
+      keyHeight: 3 mm
+      center: <geometry ref>
+      gearDepth: 7 mm
+ - Sketch 1 [newSketch] id: FX1lhe1vY886pTL_1
+      sketchPlane: <geometry ref>
+ - Extrude 1 [extrude] id: FRq6pEpQjyybBFq_1
+      domain: MODEL
+      bodyType: SOLID
+      operationType: REMOVE
+      surfaceOperationType: NEW
+      flatOperationType: REMOVE
+      surfaceEntities: <geometry ref>
+      wallShape: <geometry ref>
+      thickness1: 5 mm
+      thickness: 5 mm
+      endBound: BLIND
+      oppositeDirection: true
+      depth: 25 mm
+      endBoundEntityFace: <geometry ref>
+      endBoundEntityBody: <geometry ref>
+      endBoundEntityVertex: <geometry ref>
+      offsetDistance: 25 mm
+      extrudeDirection: <geometry ref>
+      startOffsetBound: BLIND
+      startOffsetDistance: 25 mm
+      startOffsetOppositeDirection: false ;
+ - Chamfer 1 [chamfer] id: FUiCF4FvPTxRKrC_1
+      chamferMethod: FACE_OFFSET
+      chamferType: OFFSET_ANGLE
+      width: 0.2 mm
+      width1: 5 mm
+      width2: 5 mm
+      angle: 45 deg
+      directionOverrides: <geometry ref>
+      tangentPropagation: true

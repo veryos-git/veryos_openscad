@@ -1,0 +1,158 @@
+screw
+ - ###name :  #value [assignVariable] id: FW6unzhYFNh7J7A_0
+      initEntities: <geometry ref>
+      mode: ASSIGNED
+      variableType: LENGTH
+      measurementMode: DISTANCE
+      name: screwtol
+      lengthValue: 0.5 mm
+      value: 0.5 mm
+      entityCouple: <geometry ref>
+      ex
+ - ###name :  #value [assignVariable] id: FTeazcd4zA4GSBQ_0
+      initEntities: <geometry ref>
+      mode: ASSIGNED
+      variableType: LENGTH
+      measurementMode: DISTANCE
+      name: dia_screw
+      lengthValue: 7 mm
+      value: 7 mm
+      entityCouple: <geometry ref>
+      exten
+ - Sketch 1 [newSketch] id: FcDLncWOiOdyqq4_0
+      sketchPlane: <geometry ref>
+ - ###name :  #value [assignVariable] id: FZyLLQfPrkWIQxQ_3
+      initEntities: <geometry ref>
+      mode: ASSIGNED
+      variableType: LENGTH
+      measurementMode: DISTANCE
+      name: extr
+      lengthValue: 10 mm
+      value: 10 mm
+      entityCouple: <geometry ref>
+      extendEn
+ - Extrude 1 [extrude] id: FL196T5v6n7t8Ai_0
+      domain: MODEL
+      bodyType: SOLID
+      operationType: NEW
+      surfaceOperationType: NEW
+      flatOperationType: REMOVE
+      surfaceEntities: <geometry ref>
+      wallShape: <geometry ref>
+      thickness1: 5 mm
+      thickness: 5 mm
+      endBound: BLIND
+      depth: #extr
+      endBoundEntityFace: <geometry ref>
+      endBoundEntityBody: <geometry ref>
+      endBoundEntityVertex: <geometry ref>
+      offsetDistance: 25 mm
+      extrudeDirection: <geometry ref>
+      startOffsetBound: BLIND
+      startOffsetDistance: 25 mm
+      s
+ - ###name :  #value [assignVariable] id: F9FjPJstNPJduEn_1
+      initEntities: <geometry ref>
+      mode: ASSIGNED
+      variableType: LENGTH
+      measurementMode: DISTANCE
+      name: pitch
+      lengthValue: 2 mm
+      value: 2 mm
+      entityCouple: <geometry ref>
+      extendEnt
+ - Plastic Thread 45 1 [plasticThreads45] id: Fj4jBL9lHjA7yDC_1
+      selectedFaces: <geometry ref>
+      pitchBoolean: true
+      pitch: #pitch
+      numberStarts: 1
+      threadLength: 25 mm
+      layerThickness: 0.003937007874015749 in
+      tightToleranceBoolean: true
+      debugRevolveT
+ - Extrude 2 [extrude] id: FjdEyvGiUmeCiZY_1
+      domain: MODEL
+      bodyType: SOLID
+      operationType: NEW
+      surfaceOperationType: NEW
+      flatOperationType: REMOVE
+      surfaceEntities: <geometry ref>
+      wallShape: <geometry ref>
+      thickness1: 5 mm
+      thickness: 5 mm
+      endBound: BLIND
+      depth: #extr
+      endBoundEntityFace: <geometry ref>
+      endBoundEntityBody: <geometry ref>
+      endBoundEntityVertex: <geometry ref>
+      offsetDistance: 25 mm
+      extrudeDirection: <geometry ref>
+      startOffsetBound: BLIND
+      startOffsetDistance: 25 mm
+      s
+ - Plastic Thread 45 2 [plasticThreads45] id: FW2rgPcvnDPkygD_2
+      selectedFaces: <geometry ref>
+      pitchBoolean: true
+      pitch: #pitch
+      numberStarts: 1
+      threadLength: 25 mm
+      layerThickness: 0.003937007874015749 in
+      debugRevolve
+ - Extrude 3 [extrude] id: F95jqJNfpl0zoG6_2
+      domain: MODEL
+      bodyType: SOLID
+      operationType: NEW
+      surfaceOperationType: NEW
+      flatOperationType: REMOVE
+      surfaceEntities: <geometry ref>
+      wallShape: <geometry ref>
+      thickness1: 5 mm
+      thickness: 5 mm
+      endBound: BLIND
+      depth: #extr
+      endBoundEntityFace: <geometry ref>
+      endBoundEntityBody: <geometry ref>
+      endBoundEntityVertex: <geometry ref>
+      offsetDistance: 25 mm
+      extrudeDirection: <geometry ref>
+      startOffsetBound: BLIND
+      startOffsetDistance: 25 mm
+      s
+ - Sketch 2 [newSketch] id: FMrO97M6FFaQ0ud_3
+      sketchPlane: <geometry ref>
+ - Extrude 4 [extrude] id: F6I6wu61ceKmWsW_3
+      domain: MODEL
+      bodyType: SOLID
+      operationType: NEW
+      surfaceOperationType: NEW
+      flatOperationType: REMOVE
+      surfaceEntities: <geometry ref>
+      wallShape: <geometry ref>
+      thickness1: 5 mm
+      thickness: 5 mm
+      endBound: BLIND
+      oppositeDirection: true
+      depth: 5 mm
+      endBoundEntityFace: <geometry ref>
+      endBoundEntityBody: <geometry ref>
+      endBoundEntityVertex: <geometry ref>
+      offsetDistance: 25 mm
+      extrudeDirection: <geometry ref>
+      startOffsetBound: BLIND
+      startOffsetDistance: 25 mm
+      sta
+ - Chamfer 1 [chamfer] id: F3qN1wZJeWD3v3q_4
+      chamferMethod: FACE_OFFSET
+      chamferType: OFFSET_ANGLE
+      width: 1 mm
+      width1: 5 mm
+      width2: 5 mm
+      angle: 45 deg
+      directionOverrides: <geometry ref>
+      tangentPropagation: true
+ - Boolean 1 [booleanBodies] id: F7U3g0sVHIjUtXz_4
+      operationType: UNION
+      tools: <geometry ref>
+      targets: <geometry ref>
+      entitiesToOffset: <geometry ref>
+      offsetDistance: 5 mm

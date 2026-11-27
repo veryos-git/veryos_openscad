@@ -1,0 +1,110 @@
+{
+ "sketches": [
+  {
+   "sketch": "Sketch 3",
+   "featureId": "F6rtOR3hulYI7nF_1",
+   "transformMatrix": [
+    1,
+    0,
+    0,
+    0,
+    0,
+    0,
+    -1,
+    -0.005,
+    0,
+    1,
+    0,
+    0,
+    0,
+    0,
+    0,
+    1
+   ],
+   "featuresUsed": [
+    "Extrude 1",
+    "Extrude 2"
+   ],
+   "geomEntities": [
+    {
+     "id": "uv31e2noIoCy",
+     "entityType": "circle",
+     "center": [
+      0,
+      0
+     ],
+     "radius": 0.01765
+    },
+    {
+     "id": "uv31e2noIoCy.center",
+     "entityType": "point",
+     "point": [
+      0,
+      0
+     ],
+     "isConstruction": true
+    },
+    {
+     "id": "dZRm2z0MyqPa",
+     "entityType": "circle",
+     "center": [
+      0,
+      0
+     ],
+     "radius": 0.01715
+    },
+    {
+     "id": "dZRm2z0MyqPa.center",
+     "entityType": "point",
+     "point": [
+      0,
+      0
+     ],
+     "isConstruction": true
+    },
+    {
+     "id": "O7S4aQhtOWTq",
+     "entityType": "circle",
+     "center": [
+      2.5265838293579156e-25,
+      0.017735169999999998
+     ],
+     "radius": 0.0005
+    },
+    {
+     "id": "O7S4aQhtOWTq.center",
+     "entityType": "point",
+     "point": [
+      2.5265838293579156e-25,
+      0.017735169999999998
+     ],
+     "isConstruction": true
+    }
+   ]
+  },
+  {
+   "sketch": "Sketch 2",
+   "featureId": "FczWpWTkTIvsFiQ_1",
+   "transformMatrix": [
+    1,
+    0,
+    0,
+    0,
+    0,
+    0,
+    -1,
+    -0.005,
+    0,
+    1,
+    0,
+    0,
+    0,
+    0,
+    0,
+    1
+   ],
+   "featuresUsed": [],
+   "geomEntities": []
+  }
+ ]
+}

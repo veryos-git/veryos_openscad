@@ -1,0 +1,506 @@
+{
+  "document": "mircoscpe_z_axis_motor",
+  "onshape_url": "https://cad.onshape.com/documents/acb0a715b4095e1eb5d9bb23/w/7bf92694a325635dc56b8d01",
+  "exported": "2026-11-27T00:13:20.147Z",
+  "units": "bounding boxes in mm",
+  "part_studios": {
+    "bracket2": {
+      "element_id": "039c5026d82f0d66e673a354",
+      "sketches": [
+        {
+          "sketch": "Sketch 1",
+          "featureId": "FJg5SkxlVmkQ0hN_0",
+          "file": "bracket2/dxf/sketch_Sketch_1.dxf",
+          "entities": 9,
+          "skipped": {},
+          "transformMatrix_world_from_sketch_meters": [
+            1,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            1
+          ]
+        },
+        {
+          "sketch": "Sketch 2",
+          "featureId": "FIWk9ymizH7NgTr_1",
+          "file": "bracket2/dxf/sketch_Sketch_2.dxf",
+          "entities": 1,
+          "skipped": {},
+          "transformMatrix_world_from_sketch_meters": [
+            1,
+            0,
+            0,
+            0,
+            0,
+            0,
+            -1,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            0,
+            1
+          ]
+        },
+        {
+          "sketch": "Sketch 4",
+          "featureId": "FFNk97cbFNW2PQK_1",
+          "file": "bracket2/dxf/sketch_Sketch_4.dxf",
+          "entities": 14,
+          "skipped": {},
+          "transformMatrix_world_from_sketch_meters": [
+            1,
+            0,
+            5.343579008429153e-16,
+            3.5935330513857647e-17,
+            5.343579008429153e-16,
+            0,
+            -1,
+            -0.06724955401084548,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            0,
+            1
+          ]
+        },
+        {
+          "sketch": "Sketch 3",
+          "featureId": "F7PkBWoSww5xun3_1",
+          "file": "bracket2/dxf/sketch_Sketch_3.dxf",
+          "entities": 14,
+          "skipped": {},
+          "transformMatrix_world_from_sketch_meters": [
+            1,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            1
+          ]
+        }
+      ],
+      "bounding_box_mm": {
+        "min": [
+          -43.773,
+          -67.25,
+          -40
+        ],
+        "max": [
+          25.717,
+          30.136,
+          20
+        ]
+      },
+      "parts": [
+        {
+          "id": "JHD",
+          "name": "Part 1"
+        }
+      ],
+      "bodies": {
+        "JHD": {
+          "volume_mm3": 91391.02,
+          "surface_area_mm2": 21155.96
+        }
+      }
+    },
+    "gear_medium": {
+      "element_id": "fb3ab05f9c6e164faf455e7f",
+      "sketches": [
+        {
+          "sketch": "Sketch 1",
+          "featureId": "F67ycBD2l1fKpXO_1",
+          "file": null,
+          "entities": 0,
+          "skipped": {},
+          "transformMatrix_world_from_sketch_meters": [
+            1,
+            0,
+            0,
+            0,
+            0,
+            0,
+            -1,
+            -0.01,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            0,
+            1
+          ]
+        },
+        {
+          "sketch": "Sketch 2",
+          "featureId": "FTOxr82UsCvYCov_1",
+          "file": "gear_medium/dxf/sketch_Sketch_2.dxf",
+          "entities": 1,
+          "skipped": {},
+          "transformMatrix_world_from_sketch_meters": [
+            1,
+            0,
+            0,
+            0,
+            0,
+            0,
+            -1,
+            -0.01,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            0,
+            1
+          ]
+        }
+      ],
+      "bounding_box_mm": {
+        "min": [
+          -21.964,
+          -10,
+          -22
+        ],
+        "max": [
+          21.964,
+          0,
+          22
+        ]
+      },
+      "parts": [
+        {
+          "id": "JHD",
+          "name": "Part 1"
+        }
+      ],
+      "bodies": {
+        "JHD": {
+          "volume_mm3": 3453.43,
+          "surface_area_mm2": 4339.82
+        }
+      }
+    },
+    "gear_olympus": {
+      "element_id": "4e412e422d6caba57a72018a",
+      "sketches": [
+        {
+          "sketch": "Sketch 1",
+          "featureId": "F67ycBD2l1fKpXO_1",
+          "file": null,
+          "entities": 0,
+          "skipped": {},
+          "transformMatrix_world_from_sketch_meters": [
+            1,
+            0,
+            0,
+            0,
+            0,
+            0,
+            -1,
+            -0.01,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            0,
+            1
+          ]
+        },
+        {
+          "sketch": "Sketch 2",
+          "featureId": "FTOxr82UsCvYCov_1",
+          "file": "gear_olympus/dxf/sketch_Sketch_2.dxf",
+          "entities": 1,
+          "skipped": {},
+          "transformMatrix_world_from_sketch_meters": [
+            1,
+            0,
+            0,
+            0,
+            0,
+            0,
+            -1,
+            -0.01,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            0,
+            1
+          ]
+        }
+      ],
+      "bounding_box_mm": {
+        "min": [
+          -16.95,
+          -10,
+          -16.95
+        ],
+        "max": [
+          16.95,
+          0,
+          16.95
+        ]
+      },
+      "parts": [
+        {
+          "id": "JHD",
+          "name": "Part 1"
+        }
+      ],
+      "bodies": {
+        "JHD": {
+          "volume_mm3": 5496.81,
+          "surface_area_mm2": 3591.93
+        }
+      }
+    },
+    "gear_byj48": {
+      "element_id": "70e848b17951deab2a7a2943",
+      "sketches": [
+        {
+          "sketch": "Sketch 1",
+          "featureId": "FzOaXFm22AbJBF5_1",
+          "file": "gear_byj48/dxf/sketch_Sketch_1.dxf",
+          "entities": 3,
+          "skipped": {},
+          "transformMatrix_world_from_sketch_meters": [
+            1,
+            0,
+            0,
+            0,
+            0,
+            0,
+            -1,
+            -0.01,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            0,
+            1
+          ]
+        }
+      ],
+      "bounding_box_mm": {
+        "min": [
+          -6.835,
+          -10,
+          -6.835
+        ],
+        "max": [
+          6.835,
+          0,
+          6.835
+        ]
+      },
+      "parts": [
+        {
+          "id": "JHD",
+          "name": "Part 1"
+        }
+      ],
+      "bodies": {
+        "JHD": {
+          "volume_mm3": 932.53,
+          "surface_area_mm2": 1088.7
+        }
+      }
+    },
+    "unterlagsscheibe": {
+      "element_id": "cddd89549a428f59745f35b9",
+      "sketches": [
+        {
+          "sketch": "Sketch 1",
+          "featureId": "FtDNCgoDADuMQqX_0",
+          "file": "unterlagsscheibe/dxf/sketch_Sketch_1.dxf",
+          "entities": 2,
+          "skipped": {},
+          "transformMatrix_world_from_sketch_meters": [
+            1,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            1
+          ]
+        }
+      ],
+      "bounding_box_mm": {
+        "min": [
+          -3.5,
+          -3.5,
+          0
+        ],
+        "max": [
+          3.5,
+          3.5,
+          1
+        ]
+      },
+      "parts": [
+        {
+          "id": "JHD",
+          "name": "Part 1"
+        }
+      ],
+      "bodies": {
+        "JHD": {
+          "volume_mm3": 28.86,
+          "surface_area_mm2": 90.71
+        }
+      }
+    },
+    "screw_long": {
+      "element_id": "92df6d87c17a123bd98eeb3f",
+      "sketches": [
+        {
+          "sketch": "Sketch 1",
+          "featureId": "FMv3HMRKZyyC6JT_0",
+          "file": "screw_long/dxf/sketch_Sketch_1.dxf",
+          "entities": 8,
+          "skipped": {},
+          "transformMatrix_world_from_sketch_meters": [
+            1,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            1
+          ]
+        },
+        {
+          "sketch": "Sketch 2",
+          "featureId": "Fwp70XrrIncVV5D_1",
+          "file": "screw_long/dxf/sketch_Sketch_2.dxf",
+          "entities": 1,
+          "skipped": {},
+          "transformMatrix_world_from_sketch_meters": [
+            1,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            1
+          ]
+        }
+      ],
+      "bounding_box_mm": {
+        "min": [
+          -5.894,
+          -5.104,
+          -6
+        ],
+        "max": [
+          5.894,
+          5.104,
+          50.927
+        ]
+      },
+      "parts": [
+        {
+          "id": "JHD",
+          "name": "screw"
+        },
+        {
+          "id": "JMD",
+          "name": "subtractr"
+        },
+        {
+          "id": "JvD",
+          "name": "Part 3"
+        },
+        {
+          "id": "JyD",
+          "name": "holesubtractor"
+        }
+      ],
+      "bodies": {
+        "JMD": {
+          "volume_mm3": 1514.75,
+          "surface_area_mm2": 1677.6
+        },
+        "JyD": {
+          "volume_mm3": 2838.55,
+          "surface_area_mm2": 1620.37
+        },
+        "JHD": {
+          "volume_mm3": 1697.35,
+          "surface_area_mm2": 1468.21
+        },
+        "JvD": {
+          "volume_mm3": 1447.23,
+          "surface_area_mm2": 1622.99
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,451 @@
+Onshape feature tree of part studio "bracket2" (all lengths in mm unless noted; sketch entity coords in mm, sketch-local)
+E = sketch entity, C = dimension constraint, Q(...) = Onshape geometry query ids
+
+bracket2
+
+# ###name = #value [assignVariable]
+  initEntities=Q()
+  mode=ASSIGNED
+  variableType=LENGTH
+  measurementMode=DISTANCE
+  name="thick"
+  lengthValue=9 mm
+  angleValue=0 deg
+  numberValue=0
+  anyValue=0
+  value=9 mm
+  csv={"namespace":""}
+  rowAccessType=INDEX
+  rowIndex=0
+  rowValue=""
+  rowRegexp=false
+  rowMinIndex=0
+  rowMaxIndex=0
+  rowResult=SINGLE
+  rowLabelIndex=0
+  columnAccessType=INDEX
+  columnIndex=0
+  columnValue=""
+  columnRegexp=false
+  columnMinIndex=0
+  columnMaxIndex=0
+  columnResult=SINGLE
+  columnLabelIndex=0
+  useConversionFactor=false
+  conversionFactor=0
+  entityCouple=Q()
+  minmax=MINIMUM
+  extendEntities=false
+  measureFromAxis=false
+  distance=0 mm
+  xOffset=0 mm
+  yOffset=0 mm
+  zOffset=0 mm
+  componentSelector=DISTANCE
+  customDirection=Q()
+  customOffset=0 mm
+  lengthEntities=Q()
+  radius=false
+  diameterEntity=Q()
+  description=""
+
+# ###name = #value [assignVariable]
+  initEntities=Q()
+  mode=ASSIGNED
+  variableType=ANGLE
+  measurementMode=DISTANCE
+  name="angcomp"
+  lengthValue=0 mm
+  angleValue=1 deg
+  numberValue=0
+  anyValue=0
+  value=1 deg
+  csv={"namespace":""}
+  rowAccessType=INDEX
+  rowIndex=0
+  rowValue=""
+  rowRegexp=false
+  rowMinIndex=0
+  rowMaxIndex=0
+  rowResult=SINGLE
+  rowLabelIndex=0
+  columnAccessType=INDEX
+  columnIndex=0
+  columnValue=""
+  columnRegexp=false
+  columnMinIndex=0
+  columnMaxIndex=0
+  columnResult=SINGLE
+  columnLabelIndex=0
+  useConversionFactor=false
+  conversionFactor=0
+  entityCouple=Q()
+  minmax=MINIMUM
+  extendEntities=false
+  measureFromAxis=false
+  distance=0 mm
+  xOffset=0 mm
+  yOffset=0 mm
+  zOffset=0 mm
+  componentSelector=DISTANCE
+  customDirection=Q()
+  customOffset=0 mm
+  lengthEntities=Q()
+  radius=false
+  diameterEntity=Q()
+  description=""
+
+# Sketch 1 [newSketch]
+  sketchPlane=Q(JDC)
+  disableImprinting=false
+  E jliUjbF5UR6u CurveSegment/Line pntX=21.217 pntY=13.031 dirX=0 dirY=1 sp=-0.0130 ep=0.0109
+  E b5Kh54Nm2OSQ CurveSegment/Line pntX=-9.596 pntY=24.46 dirX=-0.9998 dirY=0.0175 sp=-0.0308 ep=0.0297
+  E 2r9vS1ubF0jW.0.startCap CurveSegment/Circle radius=4.5 xCenter=21.217 yCenter=0 xDir=1000 yDir=0 sp=-6.2832 ep=-3.1416
+  E 2r9vS1ubF0jW.0.left CurveSegment/Line pntX=16.717 pntY=13.031 dirX=0 dirY=1 sp=-0.0130 ep=0.0065
+  E 2r9vS1ubF0jW.0.right CurveSegment/Line pntX=25.717 pntY=13.031 dirX=0 dirY=1 sp=-0.0130 ep=0.0109
+  E 2r9vS1ubF0jW.1.endCap CurveSegment/Circle radius=4.5 xCenter=-39.273 yCenter=24.978 xDir=999.426 yDir=33.868 sp=-4.6611 ep=-1.5195
+  E 2r9vS1ubF0jW.1.right CurveSegment/Line pntX=-9.518 pntY=28.959 dirX=-0.9998 dirY=0.0175 sp=-0.0308 ep=0.0297
+  E 2r9vS1ubF0jW.1.left.bb.0 CurveSegment/Line pntX=-9.675 pntY=19.961 dirX=-0.9998 dirY=0.0175 sp=-0.0264 ep=0.0297
+  E 2r9vS1ubF0jW.0.endCap.bb.0 CurveSegment/Circle radius=4.5 xCenter=21.217 yCenter=23.922 xDir=999.426 yDir=33.868 sp=-1.5195 ep=0.0339
+  C DIAMETER 2r9vS1ubF0jW.0.startCap length=9.0*mm labelRatio=8.888888888888888 labelAngle=1.5707963267948966*rad SLOT
+  C ANGLE b5Kh54Nm2OSQ angle=#angcomp labelAngle=-0.0335981424143841*rad labelDistance=0.15233618934129697*m
+  C LENGTH 2r9vS1ubF0jW.0.left MINIMUM length=39 mm/2 ALIGNED labelRatio=0.6204856146795489 labelDistance=-0.009010512992548958*m
+  C DISTANCE 2r9vS1ubF0jW.1.endCap jliUjbF5UR6u.end MINIMUM length=65 mm LEFT labelRatio=0.9360539875635924 labelDistance=0.01901716134160381*m
+
+# Extrude 1 [extrude]
+  domain=MODEL
+  bodyType=SOLID
+  operationType=NEW
+  surfaceOperationType=NEW
+  flatOperationType=REMOVE
+  entities=Q(JGC)
+  surfaceEntities=Q()
+  wallShape=Q()
+  midplane=false
+  thickness1=5 mm
+  flipWall=false
+  thickness2=0 mm
+  thickness=5 mm
+  endBound=BLIND
+  oppositeDirection=false
+  depth=20 mm
+  endBoundEntityFace=Q()
+  endBoundEntityBody=Q()
+  endBoundEntityVertex=Q()
+  hasOffset=false
+  offsetDistance=25 mm
+  offsetOppositeDirection=false
+  hasExtrudeDirection=false
+  extrudeDirection=Q()
+  startOffset=false
+  startOffsetBound=BLIND
+  startOffsetDistance=25 mm
+  startOffsetOppositeDirection=false
+  startOffsetEntity=Q()
+  symmetric=false
+  hasDraft=false
+  draftAngle=3 deg
+  draftPullDirection=false
+  hasSecondDirection=false
+  secondDirectionBound=BLIND
+  secondDirectionOppositeDirection=true
+  secondDirectionDepth=25 mm
+  secondDirectionBoundEntityFace=Q()
+  secondDirectionBoundEntityBody=Q()
+  secondDirectionBoundEntityVertex=Q()
+  hasSecondDirectionOffset=false
+  secondDirectionOffsetDistance=25 mm
+  secondDirectionOffsetOppositeDirection=false
+  hasSecondDirectionDraft=false
+  secondDirectionDraftAngle=3 deg
+  secondDirectionDraftPullDirection=false
+  defaultScope=false
+  booleanScope=Q()
+  defaultSurfaceScope=true
+  booleanSurfaceScope=Q()
+
+# Mirror 1 [mirror]
+  patternType=PART
+  operationType=ADD
+  entities=Q(JHD)
+  faces=Q()
+  instanceFunction=BTMParameterFeatureList
+  mirrorPlane=Q(JCC)
+  defaultScope=false
+  booleanScope=Q(JHD)
+  fullFeaturePattern=false
+
+# Sketch 2 [newSketch]
+  sketchPlane=Q(JCC)
+  disableImprinting=false
+  E UpykF5IXUWkV Curve/Circle radius=3.5 xCenter=-35.695 yCenter=10.048 xDir=1000 yDir=0
+  C DIAMETER UpykF5IXUWkV length=7 mm labelRatio=4.068094103838194 labelAngle=0.6967134952799878*rad
+
+# Derived 1 [importDerived]
+  newUI=true
+  partStudio={"standardContentParametersId":"","namespace":"e92df6d87c17a123bd98eeb3f::md7be2c1f44207dfa5fd80d67"}
+  preserveActiveSheetMetal=false
+  location=Q()
+  placement=AT_ORIGIN
+  mateConnectorIndex=-1
+  mateConnectorId=0
+  mateConnectorIndexInFeature=-1
+  includeMateConnectors=true
+  includeProperties=true
+  parts=Q()
+  buildFunction=BTMParameterDerived
+
+# Boolean 1 [booleanBodies] SUPPRESSED
+  operationType=SUBTRACTION
+  tools=Q(?)
+  targets=Q()
+  offset=false
+  offsetAll=false
+  entitiesToOffset=Q()
+  offsetDistance=5 mm
+  oppositeDirection=false
+  reFillet=false
+  keepTools=false
+
+# Chamfer 1 [chamfer] SUPPRESSED
+  entities=Q(?,?)
+  chamferMethod=FACE_OFFSET
+  chamferType=OFFSET_ANGLE
+  width=0.3 mm
+  width1=5 mm
+  oppositeDirection=false
+  width2=5 mm
+  angle=45 deg
+  directionOverrides=Q()
+  tangentPropagation=true
+
+# Transform 2 [transform]
+  entities=Q(QBB,J/H,J/D)
+  transformType=TRANSFORM_MATE_CONNECTORS
+  oppositeDirectionEntity=false
+  transformLine=Q()
+  transformAxis=Q()
+  transformDirection=Q()
+  distance=25 mm
+  uniform=true
+  scale=1
+  scaleX=1
+  scaleY=1
+  scaleZ=1
+  baseConnector=Q(RBBD)
+  destinationConnector=Q(RCBD)
+  oppositeDirectionMateAxis=false
+  secondaryAxisType=PLUS_X
+  angle=30 deg
+  oppositeDirection=false
+  dx=0 mm
+  dy=0 mm
+  dz=0 mm
+  scalePoint=Q()
+  makeCopy=false
+
+# Transform 1 [transform]
+  entities=Q(J/H)
+  transformType=TRANSLATION_DISTANCE
+  oppositeDirectionEntity=false
+  transformLine=Q()
+  transformAxis=Q()
+  transformDirection=Q(JCC)
+  distance=40 mm
+  uniform=true
+  scale=1
+  scaleX=1
+  scaleY=1
+  scaleZ=1
+  baseConnector=Q()
+  destinationConnector=Q()
+  oppositeDirectionMateAxis=false
+  secondaryAxisType=PLUS_X
+  angle=30 deg
+  oppositeDirection=false
+  dx=0 mm
+  dy=0 mm
+  dz=0 mm
+  scalePoint=Q()
+  makeCopy=false
+
+# Boolean 2 [booleanBodies]
+  operationType=SUBTRACTION
+  tools=Q(J/D,J/H)
+  targets=Q(JHD)
+  offset=false
+  offsetAll=false
+  entitiesToOffset=Q()
+  offsetDistance=5 mm
+  oppositeDirection=false
+  reFillet=false
+  keepTools=false
+
+# Sketch 3 [newSketch]
+  sketchPlane=Q(JDC)
+  disableImprinting=false
+  E Yghrdrm38EaH CurveSegment/Line pntX=-26.225 pntY=-49.264 dirX=0 dirY=-1 sp=-0.0290 ep=0.0180
+  E S2wddjWFKHAz CurveSegment/Line pntX=-1.999 pntY=-67.25 dirX=1 dirY=0 sp=-0.0242 ep=0.0277
+  E WP2Aln0dW843 CurveSegment/Line pntX=25.717 pntY=-47.463 dirX=0 dirY=1 sp=-0.0198 ep=0.0308
+  E 0v0AG39lW516.0 CurveSegment/Line pntX=-11.317 pntY=-19.989 dirX=-0.9998 dirY=-0.0175 sp=-0.0280 ep=0.0280
+  E EmlMXywB5g4m.0.0 CurveSegment/Line pntX=16.717 pntY=9.75 dirX=0 dirY=-1 sp=-0.0097 ep=0.0292
+  E EmlMXywB5g4m.0.1 CurveSegment/Line pntX=-11.317 pntY=-19.989 dirX=-0.9998 dirY=-0.0175 sp=-0.0280 ep=0.0280
+  E EmlMXywB5g4m.0.2 CurveSegment/Circle radius=4.5 xCenter=-39.273 yCenter=-24.978 xDir=1000 yDir=0 sp=-4.6949 ep=-1.5533
+  E EmlMXywB5g4m.0.3 CurveSegment/Line pntX=-8.95 pntY=-28.949 dirX=0.9998 dirY=0.0175 sp=-0.0303 ep=0.0302
+  E EmlMXywB5g4m.0.4 CurveSegment/Circle radius=4.5 xCenter=21.217 yCenter=-23.922 xDir=1000 yDir=0 sp=-1.5533 ep=0.0000
+  E EmlMXywB5g4m.0.5 CurveSegment/Line pntX=25.717 pntY=11.961 dirX=0 dirY=1 sp=-0.0359 ep=0.0120
+  E EmlMXywB5g4m.0.6 CurveSegment/Circle radius=4.5 xCenter=21.217 yCenter=23.922 xDir=1000 yDir=0 sp=0.0000 ep=1.5533
+  E EmlMXywB5g4m.0.7 CurveSegment/Line pntX=-8.95 pntY=28.949 dirX=-0.9998 dirY=0.0175 sp=-0.0302 ep=0.0303
+  E EmlMXywB5g4m.0.8 CurveSegment/Circle radius=4.5 xCenter=-39.273 yCenter=24.978 xDir=1000 yDir=0 sp=-4.7298 ep=-1.5882
+  E EmlMXywB5g4m.0.9 CurveSegment/Line pntX=-11.317 pntY=19.989 dirX=0.9998 dirY=-0.0175 sp=-0.0280 ep=0.0280
+  C LENGTH Yghrdrm38EaH MINIMUM length=47 mm ALIGNED labelRatio=0.7848934410951319 labelDistance=0.01763370669395378*m
+
+# Extrude 2 [extrude]
+  domain=MODEL
+  bodyType=SOLID
+  operationType=ADD
+  surfaceOperationType=NEW
+  flatOperationType=REMOVE
+  entities=Q(RHBG)
+  surfaceEntities=Q()
+  wallShape=Q()
+  midplane=false
+  thickness1=5 mm
+  flipWall=false
+  thickness2=0 mm
+  thickness=5 mm
+  endBound=UP_TO_SURFACE
+  oppositeDirection=false
+  depth=25 mm
+  endBoundEntityFace=Q(JJG)
+  endBoundEntityBody=Q()
+  endBoundEntityVertex=Q()
+  hasOffset=false
+  offsetDistance=25 mm
+  offsetOppositeDirection=false
+  hasExtrudeDirection=false
+  extrudeDirection=Q()
+  startOffset=false
+  startOffsetBound=BLIND
+  startOffsetDistance=25 mm
+  startOffsetOppositeDirection=false
+  startOffsetEntity=Q()
+  symmetric=false
+  hasDraft=false
+  draftAngle=3 deg
+  draftPullDirection=false
+  hasSecondDirection=false
+  secondDirectionBound=BLIND
+  secondDirectionOppositeDirection=true
+  secondDirectionDepth=25 mm
+  secondDirectionBoundEntityFace=Q()
+  secondDirectionBoundEntityBody=Q()
+  secondDirectionBoundEntityVertex=Q()
+  hasSecondDirectionOffset=false
+  secondDirectionOffsetDistance=25 mm
+  secondDirectionOffsetOppositeDirection=false
+  hasSecondDirectionDraft=false
+  secondDirectionDraftAngle=3 deg
+  secondDirectionDraftPullDirection=false
+  defaultScope=false
+  booleanScope=Q(JHD)
+  defaultSurfaceScope=true
+  booleanSurfaceScope=Q()
+
+# Sketch 4 [newSketch]
+  sketchPlane=Q(RIBO)
+  disableImprinting=false
+  E 2TnbeVztR077 CurveSegment/Line pntX=11.717 pntY=-16.813 dirX=0 dirY=-1 sp=-0.0168 ep=0.0182
+  E CDuFAjWrhXlV CurveSegment/Line pntX=5.024 pntY=0 dirX=-1 dirY=0 sp=-0.0117 ep=0.0333
+  E OfpuG0griIt0 CurveSegment/Line pntX=-5.783 pntY=-13.113 dirX=0 dirY=-1 sp=-0.0131 ep=0.0131
+  E In5IceBkj38y.0.startCap CurveSegment/Circle radius=5 xCenter=11.717 yCenter=0 xDir=1000 yDir=0 sp=-3.1416 ep=-0.0000
+  E In5IceBkj38y.0.endCap CurveSegment/Circle radius=5 xCenter=11.717 yCenter=-35 xDir=1000 yDir=0 sp=-6.2832 ep=-3.1416
+  E In5IceBkj38y.0.left CurveSegment/Line pntX=16.717 pntY=-16.813 dirX=0 dirY=-1 sp=-0.0168 ep=0.0182
+  E In5IceBkj38y.0.right CurveSegment/Line pntX=6.717 pntY=-16.813 dirX=0 dirY=-1 sp=-0.0168 ep=0.0182
+  E 75e8I2SszOnF.0.startCap CurveSegment/Circle radius=2 xCenter=11.717 yCenter=0 xDir=1000 yDir=0 sp=-3.1416 ep=-0.0000
+  E 75e8I2SszOnF.0.endCap CurveSegment/Circle radius=2 xCenter=11.717 yCenter=-35 xDir=1000 yDir=0 sp=-6.2832 ep=-3.1416
+  E 75e8I2SszOnF.0.left CurveSegment/Line pntX=13.717 pntY=-16.813 dirX=0 dirY=-1 sp=-0.0168 ep=0.0182
+  E 75e8I2SszOnF.0.right CurveSegment/Line pntX=9.717 pntY=-16.813 dirX=0 dirY=-1 sp=-0.0168 ep=0.0182
+  E dq33SP9UJ7uK CurveSegment/Line pntX=-5.783 pntY=-30.611 dirX=0 dirY=-1 sp=-0.0044 ep=0.0044
+  E s9K3oJCW2Lve CurveSegment/Line pntX=0.46 pntY=-35 dirX=1 dirY=0 sp=-0.0062 ep=0.0063
+  E wGyNMoq26yvZ Curve/Circle radius=12.5 xCenter=-5.783 yCenter=-35 xDir=1000 yDir=0
+  C LENGTH CDuFAjWrhXlV MINIMUM length=45 mm ALIGNED labelRatio=0.8435586949936338 labelDistance=-0.015127507969737053*m
+  C DIAMETER In5IceBkj38y.0.endCap length=10.0*mm labelRatio=10.350152147842104 labelAngle=0.9930595599673929*rad SLOT
+  C DIAMETER 75e8I2SszOnF.0.endCap length=4.0*mm labelRatio=22.19311720385239 labelAngle=0.7380770253687251*rad SLOT
+  C DISTANCE 2TnbeVztR077 OfpuG0griIt0 MINIMUM length=(35/2) mm RIGHT LEFT labelRatio=0.0938997362170063 labelDistance=0.07036741477641616*m
+  C LENGTH 2TnbeVztR077 MINIMUM length=35 mm ALIGNED labelRatio=0.45685573371816984 labelDistance=-0.02474539495506071*m
+
+# Extrude 3 [extrude]
+  domain=MODEL
+  bodyType=SOLID
+  operationType=NEW
+  surfaceOperationType=NEW
+  flatOperationType=REMOVE
+  entities=Q(RLBa,RLBW,RLBe)
+  surfaceEntities=Q()
+  wallShape=Q()
+  midplane=false
+  thickness1=5 mm
+  flipWall=false
+  thickness2=0 mm
+  thickness=5 mm
+  endBound=BLIND
+  oppositeDirection=true
+  depth=5 mm
+  endBoundEntityFace=Q()
+  endBoundEntityBody=Q()
+  endBoundEntityVertex=Q()
+  hasOffset=false
+  offsetDistance=25 mm
+  offsetOppositeDirection=false
+  hasExtrudeDirection=false
+  extrudeDirection=Q()
+  startOffset=false
+  startOffsetBound=BLIND
+  startOffsetDistance=25 mm
+  startOffsetOppositeDirection=false
+  startOffsetEntity=Q()
+  symmetric=false
+  hasDraft=false
+  draftAngle=3 deg
+  draftPullDirection=false
+  hasSecondDirection=false
+  secondDirectionBound=BLIND
+  secondDirectionOppositeDirection=true
+  secondDirectionDepth=25 mm
+  secondDirectionBoundEntityFace=Q()
+  secondDirectionBoundEntityBody=Q()
+  secondDirectionBoundEntityVertex=Q()
+  hasSecondDirectionOffset=false
+  secondDirectionOffsetDistance=25 mm
+  secondDirectionOffsetOppositeDirection=false
+  hasSecondDirectionDraft=false
+  secondDirectionDraftAngle=3 deg
+  secondDirectionDraftPullDirection=false
+  defaultScope=false
+  booleanScope=Q(JHD)
+  defaultSurfaceScope=true
+  booleanSurfaceScope=Q()
+
+# Mirror 2 [mirror]
+  patternType=PART
+  operationType=ADD
+  entities=Q(RMBD)
+  faces=Q()
+  instanceFunction=BTMParameterFeatureList
+  mirrorPlane=Q(RNBD)
+  defaultScope=false
+  booleanScope=Q(JHD)
+  fullFeaturePattern=false
+
+# Chamfer 2 [chamfer]
+  entities=Q(RPB9,RPB5)
+  chamferMethod=FACE_OFFSET
+  chamferType=OFFSET_ANGLE
+  width=30 mm
+  width1=5 mm
+  oppositeDirection=false
+  width2=5 mm
+  angle=45 deg
+  directionOverrides=Q()
+  tangentPropagation=true

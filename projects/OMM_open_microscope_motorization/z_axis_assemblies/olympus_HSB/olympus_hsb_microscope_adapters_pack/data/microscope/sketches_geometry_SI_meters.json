@@ -1,0 +1,1426 @@
+{
+ "sketches": [
+  {
+   "sketch": "microscope_outline",
+   "featureId": "F56wWUZAQ8w8tIJ_0",
+   "transformMatrix": [
+    1,
+    0,
+    0,
+    0,
+    0,
+    0,
+    -1,
+    0,
+    0,
+    1,
+    0,
+    0,
+    0,
+    0,
+    0,
+    1
+   ],
+   "featuresUsed": [
+    "Extrude 1"
+   ],
+   "geomEntities": [
+    {
+     "id": "j7QjwFZ6ZxAi",
+     "entityType": "circle",
+     "center": [
+      0,
+      0
+     ],
+     "radius": 0.0085
+    },
+    {
+     "id": "j7QjwFZ6ZxAi.center",
+     "entityType": "point",
+     "point": [
+      0,
+      0
+     ],
+     "isConstruction": true
+    },
+    {
+     "id": "wjW6tPFh2bp3.0.internal",
+     "entityType": "point",
+     "point": [
+      -0.03102285973727703,
+      0.07150803506374359
+     ]
+    },
+    {
+     "id": "wjW6tPFh2bp3.1.internal",
+     "entityType": "point",
+     "point": [
+      -0.01721566915512085,
+      0.07072649151086807
+     ]
+    },
+    {
+     "id": "wjW6tPFh2bp3.2.internal",
+     "entityType": "point",
+     "point": [
+      -0.01617361605167389,
+      0.06681879609823227
+     ]
+    },
+    {
+     "id": "wjW6tPFh2bp3.3.internal",
+     "entityType": "point",
+     "point": [
+      0.005709477700293064,
+      0.05509571358561516
+     ]
+    },
+    {
+     "id": "wjW6tPFh2bp3.4.internal",
+     "entityType": "point",
+     "point": [
+      0.03540796414017677,
+      0.01940542832016945
+     ]
+    },
+    {
+     "id": "wjW6tPFh2bp3.5.internal",
+     "entityType": "point",
+     "point": [
+      0.05312285199761391,
+      -0.035562824457883835
+     ]
+    },
+    {
+     "id": "wjW6tPFh2bp3.6.internal",
+     "entityType": "point",
+     "point": [
+      0.035147443413734436,
+      -0.11059057712554932
+     ]
+    },
+    {
+     "id": "wjW6tPFh2bp3.7.internal",
+     "entityType": "point",
+     "point": [
+      0.021079739555716515,
+      -0.0884469673037529
+     ]
+    },
+    {
+     "id": "wjW6tPFh2bp3.8.internal",
+     "entityType": "point",
+     "point": [
+      0.011701270006597042,
+      -0.08141311258077621
+     ]
+    },
+    {
+     "id": "wjW6tPFh2bp3.9.internal",
+     "entityType": "point",
+     "point": [
+      0.01691153086721897,
+      -0.07490029186010361
+     ]
+    },
+    {
+     "id": "wjW6tPFh2bp3.10.internal",
+     "entityType": "point",
+     "point": [
+      0.024987434968352318,
+      -0.04963052272796631
+     ]
+    },
+    {
+     "id": "wjW6tPFh2bp3.11.internal",
+     "entityType": "point",
+     "point": [
+      0.024205897003412247,
+      -0.021495118737220764
+     ]
+    },
+    {
+     "id": "wjW6tPFh2bp3.12.internal",
+     "entityType": "point",
+     "point": [
+      0.008054086938500404,
+      -0.013419213704764843
+     ]
+    },
+    {
+     "id": "wjW6tPFh2bp3.13.internal",
+     "entityType": "point",
+     "point": [
+      -0.010442337952554226,
+      -0.019932037219405174
+     ]
+    },
+    {
+     "id": "wjW6tPFh2bp3.14.internal",
+     "entityType": "point",
+     "point": [
+      -0.03805672004818916,
+      -0.01732690818607807
+     ]
+    },
+    {
+     "id": "wjW6tPFh2bp3.15.internal",
+     "entityType": "point",
+     "point": [
+      -0.04066185653209686,
+      -0.058748483657836914
+     ]
+    },
+    {
+     "id": "wjW6tPFh2bp3.16.internal",
+     "entityType": "point",
+     "point": [
+      -0.058116231113672256,
+      -0.060311563313007355
+     ]
+    },
+    {
+     "id": "wjW6tPFh2bp3.17.internal",
+     "entityType": "point",
+     "point": [
+      -0.06046084687113762,
+      -0.03165512904524803
+     ]
+    },
+    {
+     "id": "wjW6tPFh2bp3.18.internal",
+     "entityType": "point",
+     "point": [
+      -0.06905777752399445,
+      -0.02748691849410534
+     ]
+    },
+    {
+     "id": "wjW6tPFh2bp3.19.internal",
+     "entityType": "point",
+     "point": [
+      -0.0836465060710907,
+      -0.036604877561330795
+     ]
+    },
+    {
+     "id": "wjW6tPFh2bp3.20.internal",
+     "entityType": "point",
+     "point": [
+      -0.09563010185956955,
+      -0.022797685116529465
+     ]
+    },
+    {
+     "id": "wjW6tPFh2bp3.21.internal",
+     "entityType": "point",
+     "point": [
+      -0.08833574503660202,
+      -0.009251005947589874
+     ]
+    },
+    {
+     "id": "wjW6tPFh2bp3.22.internal",
+     "entityType": "point",
+     "point": [
+      -0.0927644595503807,
+      0
+     ]
+    },
+    {
+     "id": "wjW6tPFh2bp3.23.internal",
+     "entityType": "point",
+     "point": [
+      -0.08859625458717346,
+      0
+     ]
+    },
+    {
+     "id": "wjW6tPFh2bp3.24.internal",
+     "entityType": "point",
+     "point": [
+      -0.07062085717916489,
+      -0.005864335224032402
+     ]
+    },
+    {
+     "id": "wjW6tPFh2bp3.25.internal",
+     "entityType": "point",
+     "point": [
+      -0.06827623397111893,
+      0.027741843834519386
+     ]
+    },
+    {
+     "id": "wjW6tPFh2bp3.26.internal",
+     "entityType": "point",
+     "point": [
+      -0.0700998306274414,
+      0.07749982923269272
+     ]
+    },
+    {
+     "id": "wjW6tPFh2bp3.27.internal",
+     "entityType": "point",
+     "point": [
+      -0.06150289624929428,
+      0.08140753209590912
+     ]
+    },
+    {
+     "id": "wjW6tPFh2bp3.28.internal",
+     "entityType": "point",
+     "point": [
+      -0.0596793033182621,
+      0.1350732147693634
+     ]
+    },
+    {
+     "id": "wjW6tPFh2bp3.29.internal",
+     "entityType": "point",
+     "point": [
+      -0.03753569722175598,
+      0.13559424877166748
+     ]
+    },
+    {
+     "id": "wjW6tPFh2bp3.30.internal",
+     "entityType": "point",
+     "point": [
+      -0.0370146706700325,
+      0.08140753209590912
+     ]
+    },
+    {
+     "id": "wjW6tPFh2bp3",
+     "entityType": "interpolatedSpline",
+     "periodic": true,
+     "startHandle": [
+      0,
+      0
+     ],
+     "endHandle": [
+      0,
+      0
+     ],
+     "startDerivative": [
+      0,
+      0
+     ],
+     "endDerivative": [
+      0,
+      0
+     ],
+     "interpolationPoints": [
+      [
+       -0.03102285973727703,
+       0.07150803506374359
+      ],
+      [
+       -0.01721566915512085,
+       0.07072649151086807
+      ],
+      [
+       -0.01617361605167389,
+       0.06681879609823227
+      ],
+      [
+       0.005709477700293064,
+       0.05509571358561516
+      ],
+      [
+       0.03540796414017677,
+       0.01940542832016945
+      ],
+      [
+       0.05312285199761391,
+       -0.035562824457883835
+      ],
+      [
+       0.035147443413734436,
+       -0.11059057712554932
+      ],
+      [
+       0.021079739555716515,
+       -0.0884469673037529
+      ],
+      [
+       0.011701270006597042,
+       -0.08141311258077621
+      ],
+      [
+       0.01691153086721897,
+       -0.07490029186010361
+      ],
+      [
+       0.024987434968352318,
+       -0.04963052272796631
+      ],
+      [
+       0.024205897003412247,
+       -0.021495118737220764
+      ],
+      [
+       0.008054086938500404,
+       -0.013419213704764843
+      ],
+      [
+       -0.010442337952554226,
+       -0.019932037219405174
+      ],
+      [
+       -0.03805672004818916,
+       -0.01732690818607807
+      ],
+      [
+       -0.04066185653209686,
+       -0.058748483657836914
+      ],
+      [
+       -0.058116231113672256,
+       -0.060311563313007355
+      ],
+      [
+       -0.06046084687113762,
+       -0.03165512904524803
+      ],
+      [
+       -0.06905777752399445,
+       -0.02748691849410534
+      ],
+      [
+       -0.0836465060710907,
+       -0.036604877561330795
+      ],
+      [
+       -0.09563010185956955,
+       -0.022797685116529465
+      ],
+      [
+       -0.08833574503660202,
+       -0.009251005947589874
+      ],
+      [
+       -0.0927644595503807,
+       0
+      ],
+      [
+       -0.08859625458717346,
+       0
+      ],
+      [
+       -0.07062085717916489,
+       -0.005864335224032402
+      ],
+      [
+       -0.06827623397111893,
+       0.027741843834519386
+      ],
+      [
+       -0.0700998306274414,
+       0.07749982923269272
+      ],
+      [
+       -0.06150289624929428,
+       0.08140753209590912
+      ],
+      [
+       -0.0596793033182621,
+       0.1350732147693634
+      ],
+      [
+       -0.03753569722175598,
+       0.13559424877166748
+      ],
+      [
+       -0.0370146706700325,
+       0.08140753209590912
+      ]
+     ]
+    }
+   ]
+  },
+  {
+   "sketch": "Sketch 2",
+   "featureId": "FKGc8KaNO9CDpJ8_1",
+   "transformMatrix": [
+    1,
+    0,
+    0,
+    0,
+    0,
+    0,
+    -1,
+    0,
+    0,
+    1,
+    0,
+    0,
+    0,
+    0,
+    0,
+    1
+   ],
+   "featuresUsed": [
+    "Extrude 2",
+    "Extrude 3",
+    "Mirror 1"
+   ],
+   "geomEntities": [
+    {
+     "id": "IY36MDNgq7lt.start",
+     "entityType": "point",
+     "point": [
+      -0.010085884481668465,
+      0.04225438833236694
+     ]
+    },
+    {
+     "id": "IY36MDNgq7lt.end",
+     "entityType": "point",
+     "point": [
+      0.016974515210340286,
+      0.05879129750324209
+     ]
+    },
+    {
+     "id": "IY36MDNgq7lt",
+     "entityType": "lineSegment",
+     "startPoint": [
+      -0.010085884481668465,
+      0.04225438833236694
+     ],
+     "endPoint": [
+      0.016974515210340275,
+      0.058791297503242086
+     ],
+     "endPointIds": [
+      "IY36MDNgq7lt.start",
+      "IY36MDNgq7lt.end"
+     ]
+    },
+    {
+     "id": "dx1kxYlnmHag.start",
+     "entityType": "point",
+     "point": [
+      0.01697451521034029,
+      0.05879129750324209
+     ]
+    },
+    {
+     "id": "dx1kxYlnmHag.end",
+     "entityType": "point",
+     "point": [
+      0.03078038325540546,
+      0.036199874672392496
+     ]
+    },
+    {
+     "id": "dx1kxYlnmHag",
+     "entityType": "lineSegment",
+     "startPoint": [
+      0.01697451521034029,
+      0.05879129750324209
+     ],
+     "endPoint": [
+      0.03078038325540546,
+      0.036199874672392496
+     ],
+     "endPointIds": [
+      "dx1kxYlnmHag.start",
+      "dx1kxYlnmHag.end"
+     ]
+    },
+    {
+     "id": "IiJEF1VcMEVH.start",
+     "entityType": "point",
+     "point": [
+      0.030780383255405455,
+      0.036199874672392496
+     ]
+    },
+    {
+     "id": "IiJEF1VcMEVH.end",
+     "entityType": "point",
+     "point": [
+      0.0037123524214111112,
+      0.019658302026353554
+     ]
+    },
+    {
+     "id": "IiJEF1VcMEVH",
+     "entityType": "lineSegment",
+     "startPoint": [
+      0.030780383255405455,
+      0.036199874672392496
+     ],
+     "endPoint": [
+      0.0037123524214111112,
+      0.019658302026353554
+     ],
+     "endPointIds": [
+      "IiJEF1VcMEVH.start",
+      "IiJEF1VcMEVH.end"
+     ]
+    },
+    {
+     "id": "mivFF4Qfu1hc.start",
+     "entityType": "point",
+     "point": [
+      0.003712352421411112,
+      0.019658302026353554
+     ]
+    },
+    {
+     "id": "mivFF4Qfu1hc.end",
+     "entityType": "point",
+     "point": [
+      -0.010085884481668469,
+      0.04225438833236694
+     ]
+    },
+    {
+     "id": "mivFF4Qfu1hc",
+     "entityType": "lineSegment",
+     "startPoint": [
+      0.003712352421411112,
+      0.019658302026353554
+     ],
+     "endPoint": [
+      -0.010085884481668469,
+      0.04225438833236694
+     ],
+     "endPointIds": [
+      "mivFF4Qfu1hc.start",
+      "mivFF4Qfu1hc.end"
+     ]
+    },
+    {
+     "id": "432dA1w4xdaZ.start",
+     "entityType": "point",
+     "point": [
+      0.01697451521034029,
+      0.05879129750324209
+     ]
+    },
+    {
+     "id": "432dA1w4xdaZ.end",
+     "entityType": "point",
+     "point": [
+      0.02481222571124833,
+      0.06358100896856855
+     ]
+    },
+    {
+     "id": "432dA1w4xdaZ",
+     "entityType": "lineSegment",
+     "startPoint": [
+      0.01697451521034029,
+      0.05879129750324209
+     ],
+     "endPoint": [
+      0.02481222571124833,
+      0.06358100896856855
+     ],
+     "endPointIds": [
+      "432dA1w4xdaZ.start",
+      "432dA1w4xdaZ.end"
+     ]
+    },
+    {
+     "id": "NsOVIMFq9PPd.start",
+     "entityType": "point",
+     "point": [
+      0.024812225711248328,
+      0.06358100896856855
+     ]
+    },
+    {
+     "id": "NsOVIMFq9PPd.end",
+     "entityType": "point",
+     "point": [
+      0.038618093756313504,
+      0.04098958613771894
+     ]
+    },
+    {
+     "id": "NsOVIMFq9PPd",
+     "entityType": "lineSegment",
+     "startPoint": [
+      0.024812225711248328,
+      0.06358100896856855
+     ],
+     "endPoint": [
+      0.038618093756313504,
+      0.04098958613771894
+     ],
+     "endPointIds": [
+      "NsOVIMFq9PPd.start",
+      "NsOVIMFq9PPd.end"
+     ]
+    },
+    {
+     "id": "HecuqTZxYUFp.start",
+     "entityType": "point",
+     "point": [
+      0.038618093756313504,
+      0.04098958613771895
+     ]
+    },
+    {
+     "id": "HecuqTZxYUFp.end",
+     "entityType": "point",
+     "point": [
+      0.03078038325540546,
+      0.036199874672392496
+     ]
+    },
+    {
+     "id": "HecuqTZxYUFp",
+     "entityType": "lineSegment",
+     "startPoint": [
+      0.038618093756313504,
+      0.04098958613771895
+     ],
+     "endPoint": [
+      0.03078038325540546,
+      0.036199874672392496
+     ],
+     "endPointIds": [
+      "HecuqTZxYUFp.start",
+      "HecuqTZxYUFp.end"
+     ]
+    }
+   ]
+  },
+  {
+   "sketch": "Sketch 1",
+   "featureId": "FZLeTqs396Cj36M_1",
+   "transformMatrix": [
+    1,
+    0,
+    0,
+    0,
+    0,
+    0,
+    -1,
+    0,
+    0,
+    1,
+    0,
+    0,
+    0,
+    0,
+    0,
+    1
+   ],
+   "featuresUsed": [],
+   "geomEntities": [
+    {
+     "id": "pmL5OgnWVs0k",
+     "entityType": "circle",
+     "center": [
+      -0.022366221994161606,
+      0.04345344752073288
+     ],
+     "radius": 0.02165
+    },
+    {
+     "id": "pmL5OgnWVs0k.center",
+     "entityType": "point",
+     "point": [
+      -0.022366221994161606,
+      0.04345344752073288
+     ],
+     "isConstruction": true
+    },
+    {
+     "id": "SliCkQOu4yk9.0",
+     "entityType": "circle",
+     "center": [
+      0,
+      0
+     ],
+     "radius": 0.0085
+    },
+    {
+     "id": "SliCkQOu4yk9.0.center",
+     "entityType": "point",
+     "point": [
+      0,
+      0
+     ],
+     "isConstruction": true
+    },
+    {
+     "id": "FoZVUjbQwgmY",
+     "entityType": "circle",
+     "center": [
+      -0.022366221994161606,
+      0.04345344752073288
+     ],
+     "radius": 0.005
+    },
+    {
+     "id": "FoZVUjbQwgmY.center",
+     "entityType": "point",
+     "point": [
+      -0.022366221994161606,
+      0.04345344752073288
+     ],
+     "isConstruction": true
+    }
+   ]
+  },
+  {
+   "sketch": "Sketch 3",
+   "featureId": "FHVWoQ8vv7LL893_2",
+   "transformMatrix": [
+    1,
+    0,
+    0,
+    0,
+    0,
+    0,
+    -1,
+    0,
+    0,
+    1,
+    0,
+    0,
+    0,
+    0,
+    0,
+    1
+   ],
+   "featuresUsed": [
+    "Extrude 4",
+    "Extrude 5"
+   ],
+   "geomEntities": [
+    {
+     "id": "antXmRPP11l5.start",
+     "entityType": "point",
+     "point": [
+      -0.022366221994161623,
+      0.043453447520732866
+     ]
+    },
+    {
+     "id": "antXmRPP11l5.end",
+     "entityType": "point",
+     "point": [
+      0.020939564323402656,
+      0.06991809191097717
+     ]
+    },
+    {
+     "id": "antXmRPP11l5",
+     "entityType": "lineSegment",
+     "startPoint": [
+      -0.022366221994161637,
+      0.04345344752073286
+     ],
+     "endPoint": [
+      0.02093956432340267,
+      0.06991809191097717
+     ],
+     "endPointIds": [
+      "antXmRPP11l5.start",
+      "antXmRPP11l5.end"
+     ]
+    },
+    {
+     "id": "kxvAzIG4FBz6",
+     "entityType": "circle",
+     "center": [
+      0.005193922430324883,
+      0.06029575621798856
+     ],
+     "radius": 0.004721148793634146
+    },
+    {
+     "id": "kxvAzIG4FBz6.center",
+     "entityType": "point",
+     "point": [
+      0.005193922430324883,
+      0.06029575621798856
+     ],
+     "isConstruction": true
+    },
+    {
+     "id": "FlFeJRPF3X54.start",
+     "entityType": "point",
+     "point": [
+      0.024812225711248335,
+      0.06358100896856855
+     ]
+    },
+    {
+     "id": "FlFeJRPF3X54.end",
+     "entityType": "point",
+     "point": [
+      0.020939564323402646,
+      0.06991809191097717
+     ]
+    },
+    {
+     "id": "FlFeJRPF3X54",
+     "entityType": "lineSegment",
+     "startPoint": [
+      0.024812225711248335,
+      0.06358100896856855
+     ],
+     "endPoint": [
+      0.020939564323402646,
+      0.06991809191097717
+     ],
+     "endPointIds": [
+      "FlFeJRPF3X54.start",
+      "FlFeJRPF3X54.end"
+     ]
+    },
+    {
+     "id": "08rg0yzrEOv2.start",
+     "entityType": "point",
+     "point": [
+      0.03006493878493225,
+      0.05498565939189766
+     ]
+    },
+    {
+     "id": "08rg0yzrEOv2.end",
+     "entityType": "point",
+     "point": [
+      0.013462126415884268,
+      0.044839497352424554
+     ]
+    },
+    {
+     "id": "08rg0yzrEOv2",
+     "entityType": "lineSegment",
+     "startPoint": [
+      0.03006493878493225,
+      0.05498565939189766
+     ],
+     "endPoint": [
+      0.013462126415884266,
+      0.044839497352424554
+     ],
+     "endPointIds": [
+      "08rg0yzrEOv2.start",
+      "08rg0yzrEOv2.end"
+     ]
+    },
+    {
+     "id": "X3TnL0hTW8aZ.0.startCap",
+     "entityType": "arc",
+     "center": [
+      0.03006493878493225,
+      0.05498565939189766
+     ],
+     "radius": 0.001999999999999999,
+     "clockwise": true,
+     "startPoint": [
+      0.029022038846471726,
+      0.05669222310836389
+     ],
+     "endPoint": [
+      0.03110783872339278,
+      0.05327909567543143
+     ],
+     "endPointIds": [
+      "X3TnL0hTW8aZ.0.startCap.start",
+      "X3TnL0hTW8aZ.0.startCap.end"
+     ]
+    },
+    {
+     "id": "X3TnL0hTW8aZ.0.startCap.center",
+     "entityType": "point",
+     "point": [
+      0.03006493878493225,
+      0.05498565939189766
+     ],
+     "isConstruction": true
+    },
+    {
+     "id": "X3TnL0hTW8aZ.0.startCap.start",
+     "entityType": "point",
+     "point": [
+      0.029022038846471726,
+      0.05669222310836389
+     ]
+    },
+    {
+     "id": "X3TnL0hTW8aZ.0.startCap.end",
+     "entityType": "point",
+     "point": [
+      0.03110783872339278,
+      0.05327909567543143
+     ]
+    },
+    {
+     "id": "X3TnL0hTW8aZ.0.endCap",
+     "entityType": "arc",
+     "center": [
+      0.01346212641588427,
+      0.044839497352424554
+     ],
+     "radius": 0.0019999999999999983,
+     "clockwise": true,
+     "startPoint": [
+      0.014505026354344797,
+      0.043132933635958326
+     ],
+     "endPoint": [
+      0.012419226477423743,
+      0.04654606106889078
+     ],
+     "endPointIds": [
+      "X3TnL0hTW8aZ.0.endCap.start",
+      "X3TnL0hTW8aZ.0.endCap.end"
+     ]
+    },
+    {
+     "id": "X3TnL0hTW8aZ.0.endCap.center",
+     "entityType": "point",
+     "point": [
+      0.01346212641588427,
+      0.044839497352424554
+     ],
+     "isConstruction": true
+    },
+    {
+     "id": "X3TnL0hTW8aZ.0.endCap.start",
+     "entityType": "point",
+     "point": [
+      0.014505026354344797,
+      0.043132933635958326
+     ]
+    },
+    {
+     "id": "X3TnL0hTW8aZ.0.endCap.end",
+     "entityType": "point",
+     "point": [
+      0.012419226477423743,
+      0.04654606106889078
+     ]
+    },
+    {
+     "id": "X3TnL0hTW8aZ.0.left.start",
+     "entityType": "point",
+     "point": [
+      0.031107838723392782,
+      0.05327909567543143
+     ]
+    },
+    {
+     "id": "X3TnL0hTW8aZ.0.left.end",
+     "entityType": "point",
+     "point": [
+      0.014505026354344796,
+      0.043132933635958326
+     ]
+    },
+    {
+     "id": "X3TnL0hTW8aZ.0.left",
+     "entityType": "lineSegment",
+     "startPoint": [
+      0.031107838723392782,
+      0.05327909567543143
+     ],
+     "endPoint": [
+      0.014505026354344794,
+      0.043132933635958326
+     ],
+     "endPointIds": [
+      "X3TnL0hTW8aZ.0.left.start",
+      "X3TnL0hTW8aZ.0.left.end"
+     ]
+    },
+    {
+     "id": "X3TnL0hTW8aZ.0.right.start",
+     "entityType": "point",
+     "point": [
+      0.029022038846471726,
+      0.05669222310836389
+     ]
+    },
+    {
+     "id": "X3TnL0hTW8aZ.0.right.end",
+     "entityType": "point",
+     "point": [
+      0.012419226477423741,
+      0.04654606106889078
+     ]
+    },
+    {
+     "id": "X3TnL0hTW8aZ.0.right",
+     "entityType": "lineSegment",
+     "startPoint": [
+      0.029022038846471726,
+      0.05669222310836389
+     ],
+     "endPoint": [
+      0.012419226477423738,
+      0.04654606106889078
+     ],
+     "endPointIds": [
+      "X3TnL0hTW8aZ.0.right.start",
+      "X3TnL0hTW8aZ.0.right.end"
+     ]
+    },
+    {
+     "id": "9r5Sz8SLhMu2.0.startCap",
+     "entityType": "arc",
+     "center": [
+      0.03006493878493225,
+      0.05498565939189766
+     ],
+     "radius": 0.0045,
+     "clockwise": true,
+     "startPoint": [
+      0.027718413923396065,
+      0.058825427753946676
+     ],
+     "endPoint": [
+      0.032411463646468436,
+      0.05114589102984864
+     ],
+     "endPointIds": [
+      "9r5Sz8SLhMu2.0.startCap.start",
+      "9r5Sz8SLhMu2.0.startCap.end"
+     ]
+    },
+    {
+     "id": "9r5Sz8SLhMu2.0.startCap.center",
+     "entityType": "point",
+     "point": [
+      0.03006493878493225,
+      0.05498565939189766
+     ],
+     "isConstruction": true
+    },
+    {
+     "id": "9r5Sz8SLhMu2.0.startCap.start",
+     "entityType": "point",
+     "point": [
+      0.027718413923396065,
+      0.058825427753946676
+     ]
+    },
+    {
+     "id": "9r5Sz8SLhMu2.0.startCap.end",
+     "entityType": "point",
+     "point": [
+      0.032411463646468436,
+      0.05114589102984864
+     ]
+    },
+    {
+     "id": "9r5Sz8SLhMu2.0.endCap",
+     "entityType": "arc",
+     "center": [
+      0.01346212641588427,
+      0.044839497352424554
+     ],
+     "radius": 0.0045,
+     "clockwise": true,
+     "startPoint": [
+      0.015808651277420455,
+      0.04099972899037554
+     ],
+     "endPoint": [
+      0.011115601554348084,
+      0.04867926571447357
+     ],
+     "endPointIds": [
+      "9r5Sz8SLhMu2.0.endCap.start",
+      "9r5Sz8SLhMu2.0.endCap.end"
+     ]
+    },
+    {
+     "id": "9r5Sz8SLhMu2.0.endCap.center",
+     "entityType": "point",
+     "point": [
+      0.01346212641588427,
+      0.044839497352424554
+     ],
+     "isConstruction": true
+    },
+    {
+     "id": "9r5Sz8SLhMu2.0.endCap.start",
+     "entityType": "point",
+     "point": [
+      0.015808651277420455,
+      0.04099972899037554
+     ]
+    },
+    {
+     "id": "9r5Sz8SLhMu2.0.endCap.end",
+     "entityType": "point",
+     "point": [
+      0.011115601554348084,
+      0.04867926571447357
+     ]
+    },
+    {
+     "id": "9r5Sz8SLhMu2.0.left.start",
+     "entityType": "point",
+     "point": [
+      0.032411463646468436,
+      0.05114589102984864
+     ]
+    },
+    {
+     "id": "9r5Sz8SLhMu2.0.left.end",
+     "entityType": "point",
+     "point": [
+      0.015808651277420455,
+      0.04099972899037554
+     ]
+    },
+    {
+     "id": "9r5Sz8SLhMu2.0.left",
+     "entityType": "lineSegment",
+     "startPoint": [
+      0.032411463646468436,
+      0.05114589102984864
+     ],
+     "endPoint": [
+      0.015808651277420455,
+      0.04099972899037554
+     ],
+     "endPointIds": [
+      "9r5Sz8SLhMu2.0.left.start",
+      "9r5Sz8SLhMu2.0.left.end"
+     ]
+    },
+    {
+     "id": "9r5Sz8SLhMu2.0.right.start",
+     "entityType": "point",
+     "point": [
+      0.027718413923396065,
+      0.058825427753946676
+     ]
+    },
+    {
+     "id": "9r5Sz8SLhMu2.0.right.end",
+     "entityType": "point",
+     "point": [
+      0.011115601554348082,
+      0.04867926571447357
+     ]
+    },
+    {
+     "id": "9r5Sz8SLhMu2.0.right",
+     "entityType": "lineSegment",
+     "startPoint": [
+      0.027718413923396065,
+      0.058825427753946676
+     ],
+     "endPoint": [
+      0.01111560155434808,
+      0.04867926571447357
+     ],
+     "endPointIds": [
+      "9r5Sz8SLhMu2.0.right.start",
+      "9r5Sz8SLhMu2.0.right.end"
+     ]
+    },
+    {
+     "id": "UeUVrCa6MVN8.0.start",
+     "entityType": "point",
+     "point": [
+      0.01697451521034029,
+      0.05879129750324209
+     ]
+    },
+    {
+     "id": "UeUVrCa6MVN8.0.end",
+     "entityType": "point",
+     "point": [
+      0.03078038325540546,
+      0.036199874672392496
+     ]
+    },
+    {
+     "id": "UeUVrCa6MVN8.0",
+     "entityType": "lineSegment",
+     "startPoint": [
+      0.01697451521034029,
+      0.05879129750324209
+     ],
+     "endPoint": [
+      0.03078038325540546,
+      0.036199874672392496
+     ],
+     "endPointIds": [
+      "UeUVrCa6MVN8.0.start",
+      "UeUVrCa6MVN8.0.end"
+     ]
+    },
+    {
+     "id": "7Gg3vGopxS3V.1.0.start",
+     "entityType": "point",
+     "point": [
+      0.024812225711248335,
+      0.06358100896856855
+     ]
+    },
+    {
+     "id": "7Gg3vGopxS3V.1.0.end",
+     "entityType": "point",
+     "point": [
+      0.01697451521034029,
+      0.05879129750324209
+     ]
+    },
+    {
+     "id": "7Gg3vGopxS3V.1.0",
+     "entityType": "lineSegment",
+     "startPoint": [
+      0.024812225711248335,
+      0.06358100896856855
+     ],
+     "endPoint": [
+      0.01697451521034029,
+      0.05879129750324209
+     ],
+     "endPointIds": [
+      "7Gg3vGopxS3V.1.0.start",
+      "7Gg3vGopxS3V.1.0.end"
+     ]
+    },
+    {
+     "id": "7Gg3vGopxS3V.1.1.start",
+     "entityType": "point",
+     "point": [
+      0.01697451521034029,
+      0.05879129750324209
+     ]
+    },
+    {
+     "id": "7Gg3vGopxS3V.1.1.end",
+     "entityType": "point",
+     "point": [
+      0.03078038325540546,
+      0.036199874672392496
+     ]
+    },
+    {
+     "id": "7Gg3vGopxS3V.1.1",
+     "entityType": "lineSegment",
+     "startPoint": [
+      0.01697451521034029,
+      0.05879129750324209
+     ],
+     "endPoint": [
+      0.03078038325540546,
+      0.036199874672392496
+     ],
+     "endPointIds": [
+      "7Gg3vGopxS3V.1.1.start",
+      "7Gg3vGopxS3V.1.1.end"
+     ]
+    },
+    {
+     "id": "7Gg3vGopxS3V.1.2.start",
+     "entityType": "point",
+     "point": [
+      0.03078038325540546,
+      0.036199874672392496
+     ]
+    },
+    {
+     "id": "7Gg3vGopxS3V.1.2.end",
+     "entityType": "point",
+     "point": [
+      0.038618093756313504,
+      0.04098958613771895
+     ]
+    },
+    {
+     "id": "7Gg3vGopxS3V.1.2",
+     "entityType": "lineSegment",
+     "startPoint": [
+      0.03078038325540546,
+      0.036199874672392496
+     ],
+     "endPoint": [
+      0.038618093756313504,
+      0.04098958613771895
+     ],
+     "endPointIds": [
+      "7Gg3vGopxS3V.1.2.start",
+      "7Gg3vGopxS3V.1.2.end"
+     ]
+    },
+    {
+     "id": "7Gg3vGopxS3V.1.3.start",
+     "entityType": "point",
+     "point": [
+      0.038618093756313504,
+      0.04098958613771895
+     ]
+    },
+    {
+     "id": "7Gg3vGopxS3V.1.3.end",
+     "entityType": "point",
+     "point": [
+      0.024812225711248328,
+      0.06358100896856855
+     ]
+    },
+    {
+     "id": "7Gg3vGopxS3V.1.3",
+     "entityType": "lineSegment",
+     "startPoint": [
+      0.038618093756313504,
+      0.04098958613771895
+     ],
+     "endPoint": [
+      0.024812225711248328,
+      0.06358100896856855
+     ],
+     "endPointIds": [
+      "7Gg3vGopxS3V.1.3.start",
+      "7Gg3vGopxS3V.1.3.end"
+     ]
+    },
+    {
+     "id": "q5DatjHoxDwu.start",
+     "entityType": "point",
+     "point": [
+      0.01697451521034029,
+      0.05879129750324209
+     ]
+    },
+    {
+     "id": "q5DatjHoxDwu.end",
+     "entityType": "point",
+     "point": [
+      0.013101853822494606,
+      0.06512838044565072
+     ]
+    },
+    {
+     "id": "q5DatjHoxDwu",
+     "entityType": "lineSegment",
+     "startPoint": [
+      0.01697451521034029,
+      0.05879129750324209
+     ],
+     "endPoint": [
+      0.013101853822494606,
+      0.06512838044565072
+     ],
+     "endPointIds": [
+      "q5DatjHoxDwu.start",
+      "q5DatjHoxDwu.end"
+     ]
+    }
+   ]
+  }
+ ]
+}

@@ -1,0 +1,145 @@
+z_focus_gear
+ - ###name :  #value [assignVariable] id: FeOGaskmLxII0OU_0
+      initEntities: <geometry ref>
+      mode: ASSIGNED
+      variableType: LENGTH
+      measurementMode: DISTANCE
+      name: stol
+      lengthValue: 0.2 mm
+      value: 0.2 mm
+      entityCouple: <geometry ref>
+      extend
+ - ###name :  #value [assignVariable] id: FlSNE0TFGx7J8KZ_1
+      initEntities: <geometry ref>
+      mode: ASSIGNED
+      variableType: LENGTH
+      measurementMode: DISTANCE
+      name: gear_width
+      lengthValue: 10 mm
+      value: 10 mm
+      entityCouple: <geometry ref>
+      ex
+ - Spur Gear (#teeth teeth) [SpurGear] id: F0dafIRDZud44ms_0
+      teeth: 42
+      numTeeth: 42
+      GearInputType: module
+      module: 1 mm
+      diametralPitch: 25.400000000000002
+      circularPitch: 3.141592653589793*mm
+      pitchCircleDiameter: 42.0*mm
+      pressureAngle: 20 deg
+      centerHoleDia: 10 mm
+      keyWidth: 3 mm
+      keyHeight: 3 mm
+      center: <geometry ref>
+      gearDepth: #gear_width/2
+ - Sketch 2 [newSketch] id: FczWpWTkTIvsFiQ_1
+      sketchPlane: <geometry ref>
+ - ###name :  #value [assignVariable] id: FCAbp5t38q2xFMH_1
+      initEntities: <geometry ref>
+      mode: ASSIGNED
+      variableType: LENGTH
+      measurementMode: DISTANCE
+      name: spatzig
+      lengthValue: 1 mm
+      value: 1 mm
+      entityCouple: <geometry ref>
+      extendE
+ - ###name :  #value [assignVariable] id: FEEtSX68b2iDq7Y_1
+      initEntities: <geometry ref>
+      mode: ASSIGNED
+      variableType: LENGTH
+      measurementMode: DISTANCE
+      name: tolerance
+      lengthValue: 0.15 mm
+      value: 0.15 mm
+      entityCouple: <geometry ref>
+      minmax: MINIMUM ;
+ - Sketch 3 [newSketch] id: F6rtOR3hulYI7nF_1
+      sketchPlane: <geometry ref>
+ - Extrude 1 [extrude] id: FvMZHVFhJPr2JjY_1
+      domain: MODEL
+      bodyType: SOLID
+      operationType: REMOVE
+      surfaceOperationType: NEW
+      flatOperationType: REMOVE
+      surfaceEntities: <geometry ref>
+      wallShape: <geometry ref>
+      thickness1: 5 mm
+      thickness: 5 mm
+      endBound: BLIND
+      depth: 25 mm
+      endBoundEntityFace: <geometry ref>
+      endBoundEntityBody: <geometry ref>
+      endBoundEntityVertex: <geometry ref>
+      offsetDistance: 25 mm
+      extrudeDirection: <geometry ref>
+      startOffsetBound: BLIND
+      startOffsetDistance: 25 mm
+      startOffsetOppositeDirection: false 
+ - Extrude 2 [extrude] id: ForHJQyoghew8L3_1
+      domain: MODEL
+      bodyType: SOLID
+      operationType: NEW
+      surfaceOperationType: NEW
+      flatOperationType: REMOVE
+      surfaceEntities: <geometry ref>
+      wallShape: <geometry ref>
+      thickness1: 5 mm
+      thickness: 5 mm
+      endBound: UP_TO_SURFACE
+      oppositeDirection: true
+      depth: 25 mm
+      endBoundEntityFace: <geometry ref>
+      endBoundEntityBody: <geometry ref>
+      endBoundEntityVertex: <geometry ref>
+      offsetDistance: 25 mm
+      extrudeDirection: <geometry ref>
+      startOffsetBound: BLIND
+      startOffsetDistance: 25 mm
+      startOffsetOppositeDirection
+ - ###name :  #value [assignVariable] id: FDuwnmDqWDL3Pa7_2
+      initEntities: <geometry ref>
+      mode: ASSIGNED
+      variableType: NUMBER
+      measurementMode: DISTANCE
+      name: gear_friction_pins
+      numberValue: 64
+      value: 64
+      entityCouple: <geometry ref>
+ - Chamfer 1 [chamfer] id: FW5IhC23bMWmuWA_1
+      chamferMethod: FACE_OFFSET
+      chamferType: OFFSET_ANGLE
+      width: 0.3 mm
+      width1: 5 mm
+      width2: 5 mm
+      angle: 45 deg
+      directionOverrides: <geometry ref>
+      tangentPropagation: true
+ - Chamfer 2 [chamfer] id: Fnhc2OI2ffFhy8P_2
+      chamferMethod: FACE_OFFSET
+      chamferType: OFFSET_ANGLE
+      width: 0.15 mm
+      width1: 5 mm
+      width2: 5 mm
+      angle: 45 deg
+      directionOverrides: <geometry ref>
+      tangentPropagation: true
+ - Circular pattern 1 [circularPattern] id: Fuiwq9ISl8IRyi6_2
+      patternType: PART
+      operationType: ADD
+      faces: <geometry ref>
+      instanceFunction: BTMParameterFeatureList-1749
+      axis: <geometry ref>
+      angle: 360 deg
+      instanceCount: #gear_friction_pins
+      equalSpace: true
+      booleanScope: <geometry ref>
+      skippedInstances: []
+ - Mirror 1 [mirror] id: Fr4xiClPJol1Lxl_1
+      patternType: PART
+      operationType: ADD
+      faces: <geometry ref>
+      instanceFunction: BTMParameterFeatureList-1749
+      mirrorPlane: <geometry ref>
+      booleanScope: <geometry ref>

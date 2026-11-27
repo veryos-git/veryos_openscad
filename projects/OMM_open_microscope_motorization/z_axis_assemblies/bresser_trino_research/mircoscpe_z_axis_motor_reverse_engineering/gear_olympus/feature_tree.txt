@@ -1,0 +1,101 @@
+Onshape feature tree of part studio "gear_olympus" (all lengths in mm unless noted; sketch entity coords in mm, sketch-local)
+E = sketch entity, C = dimension constraint, Q(...) = Onshape geometry query ids
+
+gear_olympus
+
+# Spur Gear (#teeth teeth) [SpurGear] ns=d5742c8cde4b06c68b362d748::vc65839fc6078faeb4d2aece1::e01a666571e625f8b819fd75b::me0006d76c0ec7692c3393bb7
+  teeth="32"
+  numTeeth=32
+  GearInputType=module
+  module=1 mm
+  diametralPitch=25.400000000000002
+  circularPitch=3.141592653589793*mm
+  pitchCircleDiameter=32.0*mm
+  pressureAngle=20 deg
+  centerHole=false
+  centerHoleDia=10 mm
+  key=false
+  keyWidth=3 mm
+  keyHeight=3 mm
+  centerPoint=false
+  center=Q()
+  gearDepth=10 mm
+  flipGear=false
+  offset=false
+  offsetClearance=0 mm
+  offsetDiameter=0 mm
+  offsetAngle=0 deg
+
+# Sketch 1 [newSketch]
+  sketchPlane=Q(KIGE)
+  disableImprinting=false
+
+# Sketch 2 [newSketch]
+  sketchPlane=Q(JMC)
+  disableImprinting=false
+  E FyNUINZ2R5ya Curve/Circle radius=8.75 xCenter=0 yCenter=0 xDir=1000 yDir=0
+  C DIAMETER FyNUINZ2R5ya length=17.5 mm labelRatio=2.9801518786623453 labelAngle=0.7049642737526065*rad
+
+# Extrude 1 [extrude]
+  domain=MODEL
+  bodyType=SOLID
+  operationType=REMOVE
+  surfaceOperationType=NEW
+  flatOperationType=REMOVE
+  entities=Q(JOC)
+  surfaceEntities=Q()
+  wallShape=Q()
+  midplane=false
+  thickness1=5 mm
+  flipWall=false
+  thickness2=0 mm
+  thickness=5 mm
+  endBound=BLIND
+  oppositeDirection=true
+  depth=25 mm
+  endBoundEntityFace=Q()
+  endBoundEntityBody=Q()
+  endBoundEntityVertex=Q()
+  hasOffset=false
+  offsetDistance=25 mm
+  offsetOppositeDirection=false
+  hasExtrudeDirection=false
+  extrudeDirection=Q()
+  startOffset=false
+  startOffsetBound=BLIND
+  startOffsetDistance=25 mm
+  startOffsetOppositeDirection=false
+  startOffsetEntity=Q()
+  symmetric=false
+  hasDraft=false
+  draftAngle=3 deg
+  draftPullDirection=false
+  hasSecondDirection=false
+  secondDirectionBound=BLIND
+  secondDirectionOppositeDirection=true
+  secondDirectionDepth=25 mm
+  secondDirectionBoundEntityFace=Q()
+  secondDirectionBoundEntityBody=Q()
+  secondDirectionBoundEntityVertex=Q()
+  hasSecondDirectionOffset=false
+  secondDirectionOffsetDistance=25 mm
+  secondDirectionOffsetOppositeDirection=false
+  hasSecondDirectionDraft=false
+  secondDirectionDraftAngle=3 deg
+  secondDirectionDraftPullDirection=false
+  defaultScope=false
+  booleanScope=Q(JHD)
+  defaultSurfaceScope=true
+  booleanSurfaceScope=Q()
+
+# Chamfer 1 [chamfer]
+  entities=Q(JQB,JQF)
+  chamferMethod=FACE_OFFSET
+  chamferType=OFFSET_ANGLE
+  width=1 mm
+  width1=5 mm
+  oppositeDirection=false
+  width2=5 mm
+  angle=45 deg
+  directionOverrides=Q()
+  tangentPropagation=true

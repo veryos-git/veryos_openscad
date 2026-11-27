@@ -1,0 +1,163 @@
+microscope
+ - microscope_outline [newSketch] id: F56wWUZAQ8w8tIJ_0
+      sketchPlane: <geometry ref>
+ - Extrude 1 [extrude] id: FUm1e8Nbky3su1s_0
+      domain: MODEL
+      bodyType: SOLID
+      operationType: NEW
+      surfaceOperationType: NEW
+      flatOperationType: REMOVE
+      surfaceEntities: <geometry ref>
+      wallShape: <geometry ref>
+      thickness1: 5 mm
+      thickness: 5 mm
+      endBound: BLIND
+      depth: 24.7 mm
+      endBoundEntityFace: <geometry ref>
+      endBoundEntityBody: <geometry ref>
+      endBoundEntityVertex: <geometry ref>
+      offsetDistance: 25 mm
+      extrudeDirection: <geometry ref>
+      startOffsetBound: BLIND
+      startOffsetDistance: 25 mm
+      startOffsetOppositeDirection: false ;
+ - Sketch 1 [newSketch] id: FZLeTqs396Cj36M_1
+      sketchPlane: <geometry ref>
+ - Sketch 2 [newSketch] id: FKGc8KaNO9CDpJ8_1
+      sketchPlane: <geometry ref>
+ - Extrude 2 [extrude] id: FyDIDlpgzpa5ZP5_1
+      domain: MODEL
+      bodyType: SOLID
+      operationType: NEW
+      surfaceOperationType: NEW
+      flatOperationType: REMOVE
+      surfaceEntities: <geometry ref>
+      wallShape: <geometry ref>
+      thickness1: 5 mm
+      thickness: 5 mm
+      endBound: BLIND
+      depth: 12 mm
+      endBoundEntityFace: <geometry ref>
+      endBoundEntityBody: <geometry ref>
+      endBoundEntityVertex: <geometry ref>
+      offsetDistance: 25 mm
+      extrudeDirection: <geometry ref>
+      startOffset: true
+      startOffsetBound: ENTITY
+      startOffsetDistance: 25 mm
+      s
+ - Extrude 3 [extrude] id: Fbch80PJheeKZdK_1
+      domain: MODEL
+      bodyType: SOLID
+      operationType: ADD
+      surfaceOperationType: NEW
+      flatOperationType: REMOVE
+      surfaceEntities: <geometry ref>
+      wallShape: <geometry ref>
+      thickness1: 5 mm
+      thickness: 5 mm
+      endBound: UP_TO_SURFACE
+      depth: 25 mm
+      endBoundEntityFace: <geometry ref>
+      endBoundEntityBody: <geometry ref>
+      endBoundEntityVertex: <geometry ref>
+      offsetDistance: 25 mm
+      extrudeDirection: <geometry ref>
+      startOffsetBound: BLIND
+      startOffsetDistance: 25 mm
+      startOffsetOppositeDirectio
+ - Mirror 1 [mirror] id: FTfeo3fUYOQjnoI_2
+      patternType: PART
+      operationType: ADD
+      faces: <geometry ref>
+      instanceFunction: BTMParameterFeatureList-1749
+      mirrorPlane: <geometry ref>
+      booleanScope: <geometry ref>
+ - Sketch 3 [newSketch] id: FHVWoQ8vv7LL893_2
+      sketchPlane: <geometry ref>
+ - Extrude 4 [extrude] id: FjEBVBeyiXYnynC_2
+      domain: MODEL
+      bodyType: SOLID
+      operationType: NEW
+      surfaceOperationType: NEW
+      flatOperationType: REMOVE
+      surfaceEntities: <geometry ref>
+      wallShape: <geometry ref>
+      thickness1: 5 mm
+      thickness: 5 mm
+      endBound: BLIND
+      depth: 30 mm
+      endBoundEntityFace: <geometry ref>
+      endBoundEntityBody: <geometry ref>
+      endBoundEntityVertex: <geometry ref>
+      offsetDistance: 25 mm
+      extrudeDirection: <geometry ref>
+      startOffset: true
+      startOffsetBound: ENTITY
+      startOffsetDistance: 25 mm
+      s
+ - Extrude 5 [extrude] id: FYKwkgvprZCN6YJ_3
+      domain: MODEL
+      bodyType: SOLID
+      operationType: ADD
+      surfaceOperationType: NEW
+      flatOperationType: REMOVE
+      surfaceEntities: <geometry ref>
+      wallShape: <geometry ref>
+      thickness1: 5 mm
+      thickness: 5 mm
+      endBound: BLIND
+      oppositeDirection: true
+      depth: 5 mm
+      endBoundEntityFace: <geometry ref>
+      endBoundEntityBody: <geometry ref>
+      endBoundEntityVertex: <geometry ref>
+      offsetDistance: 25 mm
+      extrudeDirection: <geometry ref>
+      startOffset: true
+      startOffsetBound: ENTITY
+      startOffsetDistance: 25 mm
+      sta
+ - Mirror 2 [mirror] id: FlEEfdgyOfdJb7Z_3
+      patternType: PART
+      operationType: ADD
+      faces: <geometry ref>
+      instanceFunction: BTMParameterFeatureList-1749
+      mirrorPlane: <geometry ref>
+      booleanScope: <geometry ref>
+ - Extrude 6 [extrude] id: FGczJpKYuYSEwic_3
+      domain: MODEL
+      bodyType: SOLID
+      operationType: ADD
+      surfaceOperationType: NEW
+      flatOperationType: REMOVE
+      surfaceEntities: <geometry ref>
+      wallShape: <geometry ref>
+      thickness1: 5 mm
+      thickness: 5 mm
+      endBound: UP_TO_SURFACE
+      depth: 25 mm
+      endBoundEntityFace: <geometry ref>
+      endBoundEntityBody: <geometry ref>
+      endBoundEntityVertex: <geometry ref>
+      offsetDistance: 25 mm
+      extrudeDirection: <geometry ref>
+      startOffsetBound: BLIND
+      startOffsetDistance: 25 mm
+      startOffsetOppositeDirectio
+ - Mirror 3 [mirror] id: Fd9ClrfJDoDnyDw_3
+      patternType: PART
+      operationType: ADD
+      faces: <geometry ref>
+      instanceFunction: BTMParameterFeatureList-1749
+      mirrorPlane: <geometry ref>
+      booleanScope: <geometry ref>
+ - Chamfer 1 [chamfer] id: FMBV8kwQ3GZCKEE_3
+      chamferMethod: FACE_OFFSET
+      chamferType: OFFSET_ANGLE
+      width: 1.2 mm
+      width1: 5 mm
+      width2: 5 mm
+      angle: 45 deg
+      directionOverrides: <geometry ref>
+      tangentPropagation: true

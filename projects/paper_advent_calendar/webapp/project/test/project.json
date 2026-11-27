@@ -1,0 +1,483 @@
+{
+  "o_setting": {
+    "n_mm__sheet_x": 297,
+    "n_mm__sheet_y": 210,
+    "n_mm__printer_margin": 5,
+    "n_mm__calendar_x": 277,
+    "n_mm__calendar_y": 190,
+    "n_mm__left": 10,
+    "n_mm__bottom": 10,
+    "b_outline": true,
+    "b_sheet_dot": true,
+    "n_window": 24,
+    "n_column": 6,
+    "n_mm__margin": 15,
+    "n_mm__window_x": 32,
+    "n_mm__window_y": 32,
+    "n_mm__corner": 2,
+    "a_s_shape": [
+      "rect",
+      "arch",
+      "round"
+    ],
+    "a_s_door": [
+      "left",
+      "right",
+      "double"
+    ],
+    "n_seed": 1,
+    "n_mm__bridge": 0.5,
+    "n_mm__bridge_distance": 25,
+    "n_mm__dash": 3,
+    "n_mm__gap": 2,
+    "b_mark": true,
+    "n_mm__mark": 3,
+    "b_logo": true,
+    "a_o_picture__front": [
+      {
+        "n_px__x": 172,
+        "n_px__y": 159,
+        "a_n_ratio__crop": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "n_mm__x": 35.12,
+        "n_mm__y": 36.54,
+        "n_mm__size_x": 38.11,
+        "n_ratio__stretch": 1,
+        "n_deg": 0,
+        "n_deg__skew": 0,
+        "b_flip_x": false,
+        "b_flip_y": false,
+        "s_file": "p16amthp8"
+      },
+      {
+        "n_px__x": 179,
+        "n_px__y": 190,
+        "a_n_ratio__crop": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "n_mm__x": 118.13,
+        "n_mm__y": 34.66,
+        "n_mm__size_x": 36.85,
+        "n_ratio__stretch": 1,
+        "n_deg": 0,
+        "n_deg__skew": 0,
+        "b_flip_x": false,
+        "b_flip_y": false,
+        "s_file": "pmt60smrv"
+      },
+      {
+        "n_px__x": 174,
+        "n_px__y": 133,
+        "a_n_ratio__crop": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "n_mm__x": 76.59,
+        "n_mm__y": 35.78,
+        "n_mm__size_x": 30.17,
+        "n_ratio__stretch": 1.1633,
+        "n_deg": 0,
+        "n_deg__skew": 0,
+        "b_flip_x": false,
+        "b_flip_y": false,
+        "s_file": "pdljwufqu"
+      },
+      {
+        "n_px__x": 187,
+        "n_px__y": 186,
+        "a_n_ratio__crop": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "n_mm__x": 240.61,
+        "n_mm__y": 154,
+        "n_mm__size_x": 36,
+        "n_ratio__stretch": 1,
+        "n_deg": 0,
+        "n_deg__skew": 0,
+        "b_flip_x": false,
+        "b_flip_y": false,
+        "s_file": "pewbtwnnr"
+      },
+      {
+        "n_px__x": 172,
+        "n_px__y": 172,
+        "a_n_ratio__crop": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "n_mm__x": 200.25,
+        "n_mm__y": 35,
+        "n_mm__size_x": 36,
+        "n_ratio__stretch": 1,
+        "n_deg": 0,
+        "n_deg__skew": 0,
+        "b_flip_x": false,
+        "b_flip_y": false,
+        "s_file": "psmi6hjd3"
+      },
+      {
+        "n_px__x": 263,
+        "n_px__y": 224,
+        "a_n_ratio__crop": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "n_mm__x": 241.42,
+        "n_mm__y": 35,
+        "n_mm__size_x": 36,
+        "n_ratio__stretch": 1,
+        "n_deg": 0,
+        "n_deg__skew": 0,
+        "b_flip_x": false,
+        "b_flip_y": false,
+        "s_file": "p1tlncwz2"
+      },
+      {
+        "n_px__x": 166,
+        "n_px__y": 161,
+        "a_n_ratio__crop": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "n_mm__x": 35.58,
+        "n_mm__y": 75,
+        "n_mm__size_x": 36,
+        "n_ratio__stretch": 1,
+        "n_deg": 0,
+        "n_deg__skew": 0,
+        "b_flip_x": false,
+        "b_flip_y": false,
+        "s_file": "pjbz1edqc"
+      },
+      {
+        "n_px__x": 211,
+        "n_px__y": 209,
+        "a_n_ratio__crop": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "n_mm__x": 76.75,
+        "n_mm__y": 75,
+        "n_mm__size_x": 36,
+        "n_ratio__stretch": 1,
+        "n_deg": 0,
+        "n_deg__skew": 0,
+        "b_flip_x": false,
+        "b_flip_y": false,
+        "s_file": "p9geamivh"
+      },
+      {
+        "n_px__x": 138,
+        "n_px__y": 159,
+        "a_n_ratio__crop": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "n_mm__x": 117.92,
+        "n_mm__y": 75,
+        "n_mm__size_x": 31.25,
+        "n_ratio__stretch": 1,
+        "n_deg": 0,
+        "n_deg__skew": 0,
+        "b_flip_x": false,
+        "b_flip_y": false,
+        "s_file": "p3qft2jpl"
+      },
+      {
+        "n_px__x": 161,
+        "n_px__y": 170,
+        "a_n_ratio__crop": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "n_mm__x": 159.08,
+        "n_mm__y": 75,
+        "n_mm__size_x": 34.09,
+        "n_ratio__stretch": 1,
+        "n_deg": 0,
+        "n_deg__skew": 0,
+        "b_flip_x": false,
+        "b_flip_y": false,
+        "s_file": "ph2zwgt3y"
+      },
+      {
+        "n_px__x": 157,
+        "n_px__y": 125,
+        "a_n_ratio__crop": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "n_mm__x": 200.25,
+        "n_mm__y": 75,
+        "n_mm__size_x": 36,
+        "n_ratio__stretch": 1,
+        "n_deg": 0,
+        "n_deg__skew": 0,
+        "b_flip_x": false,
+        "b_flip_y": false,
+        "s_file": "pin8e47n7"
+      },
+      {
+        "n_px__x": 152,
+        "n_px__y": 170,
+        "a_n_ratio__crop": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "n_mm__x": 241.42,
+        "n_mm__y": 75,
+        "n_mm__size_x": 32.19,
+        "n_ratio__stretch": 1,
+        "n_deg": 0,
+        "n_deg__skew": 0,
+        "b_flip_x": false,
+        "b_flip_y": false,
+        "s_file": "pljo4x5j0"
+      },
+      {
+        "n_px__x": 188,
+        "n_px__y": 181,
+        "a_n_ratio__crop": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "n_mm__x": 35.58,
+        "n_mm__y": 115,
+        "n_mm__size_x": 36,
+        "n_ratio__stretch": 1,
+        "n_deg": 0,
+        "n_deg__skew": 0,
+        "b_flip_x": false,
+        "b_flip_y": false,
+        "s_file": "pqjt5jsat"
+      },
+      {
+        "n_px__x": 194,
+        "n_px__y": 206,
+        "a_n_ratio__crop": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "n_mm__x": 76.75,
+        "n_mm__y": 115,
+        "n_mm__size_x": 33.9,
+        "n_ratio__stretch": 1,
+        "n_deg": 0,
+        "n_deg__skew": 0,
+        "b_flip_x": false,
+        "b_flip_y": false,
+        "s_file": "pn8v9xyab"
+      },
+      {
+        "n_px__x": 125,
+        "n_px__y": 173,
+        "a_n_ratio__crop": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "n_mm__x": 117.92,
+        "n_mm__y": 115,
+        "n_mm__size_x": 26.01,
+        "n_ratio__stretch": 1,
+        "n_deg": 0,
+        "n_deg__skew": 0,
+        "b_flip_x": false,
+        "b_flip_y": false,
+        "s_file": "plsps1rhh"
+      },
+      {
+        "n_px__x": 238,
+        "n_px__y": 216,
+        "a_n_ratio__crop": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "n_mm__x": 159.08,
+        "n_mm__y": 115,
+        "n_mm__size_x": 36,
+        "n_ratio__stretch": 1,
+        "n_deg": 0,
+        "n_deg__skew": 0,
+        "b_flip_x": false,
+        "b_flip_y": false,
+        "s_file": "pjqfz8woa"
+      },
+      {
+        "n_px__x": 153,
+        "n_px__y": 163,
+        "a_n_ratio__crop": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "n_mm__x": 200.25,
+        "n_mm__y": 115,
+        "n_mm__size_x": 33.79,
+        "n_ratio__stretch": 1,
+        "n_deg": 0,
+        "n_deg__skew": 0,
+        "b_flip_x": false,
+        "b_flip_y": false,
+        "s_file": "p1h4w9yb0"
+      },
+      {
+        "n_px__x": 182,
+        "n_px__y": 178,
+        "a_n_ratio__crop": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "n_mm__x": 241.42,
+        "n_mm__y": 115,
+        "n_mm__size_x": 36,
+        "n_ratio__stretch": 1,
+        "n_deg": 0,
+        "n_deg__skew": 0,
+        "b_flip_x": false,
+        "b_flip_y": false,
+        "s_file": "pnqd8tm1p"
+      },
+      {
+        "n_px__x": 195,
+        "n_px__y": 208,
+        "a_n_ratio__crop": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "n_mm__x": 35.58,
+        "n_mm__y": 155,
+        "n_mm__size_x": 33.75,
+        "n_ratio__stretch": 1,
+        "n_deg": 0,
+        "n_deg__skew": 0,
+        "b_flip_x": false,
+        "b_flip_y": false,
+        "s_file": "prpg1vvjy"
+      },
+      {
+        "n_px__x": 177,
+        "n_px__y": 160,
+        "a_n_ratio__crop": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "n_mm__x": 76.75,
+        "n_mm__y": 155,
+        "n_mm__size_x": 36,
+        "n_ratio__stretch": 1,
+        "n_deg": 0,
+        "n_deg__skew": 0,
+        "b_flip_x": false,
+        "b_flip_y": false,
+        "s_file": "prlgvqwwm"
+      },
+      {
+        "n_px__x": 167,
+        "n_px__y": 165,
+        "a_n_ratio__crop": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "n_mm__x": 117.92,
+        "n_mm__y": 155,
+        "n_mm__size_x": 36,
+        "n_ratio__stretch": 1,
+        "n_deg": 0,
+        "n_deg__skew": 0,
+        "b_flip_x": false,
+        "b_flip_y": false,
+        "s_file": "p2nxdhsi2"
+      },
+      {
+        "n_px__x": 188,
+        "n_px__y": 187,
+        "a_n_ratio__crop": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "n_mm__x": 159.08,
+        "n_mm__y": 155,
+        "n_mm__size_x": 36,
+        "n_ratio__stretch": 1,
+        "n_deg": 0,
+        "n_deg__skew": 0,
+        "b_flip_x": false,
+        "b_flip_y": false,
+        "s_file": "p4ut7vy4r"
+      },
+      {
+        "n_px__x": 161,
+        "n_px__y": 156,
+        "a_n_ratio__crop": [
+          0,
+          0,
+          0,
+          0
+        ],
+        "n_mm__x": 200.25,
+        "n_mm__y": 155,
+        "n_mm__size_x": 36,
+        "n_ratio__stretch": 1,
+        "n_deg": 0,
+        "n_deg__skew": 0,
+        "b_flip_x": false,
+        "b_flip_y": false,
+        "s_file": "pfpbxc2jm"
+      }
+    ],
+    "a_o_picture__back": [],
+    "s_print": "both",
+    "n_mm__bleed": 2,
+    "b_print_guide": true,
+    "n_mm__print_x": 0,
+    "n_mm__print_y": 0,
+    "a_o_window__own": []
+  }
+}

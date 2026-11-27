@@ -1,0 +1,334 @@
+{
+ "sketches": [
+  {
+   "sketch": "Sketch 2",
+   "featureId": "FMrO97M6FFaQ0ud_3",
+   "transformMatrix": [
+    1,
+    0,
+    0,
+    0,
+    0,
+    1,
+    0,
+    0,
+    0,
+    0,
+    1,
+    0,
+    0,
+    0,
+    0,
+    1
+   ],
+   "featuresUsed": [
+    "Extrude 4"
+   ],
+   "geomEntities": [
+    {
+     "id": "2uyhRqs5VAIb.cCircle",
+     "entityType": "circle",
+     "center": [
+      0,
+      0
+     ],
+     "radius": 0.007454569451510906,
+     "isConstruction": true
+    },
+    {
+     "id": "2uyhRqs5VAIb.cCircle.center",
+     "entityType": "point",
+     "point": [
+      0,
+      0
+     ],
+     "isConstruction": true
+    },
+    {
+     "id": "2uyhRqs5VAIb.seed.start",
+     "entityType": "point",
+     "point": [
+      0.0043038976795225815,
+      0.007454569451510906
+     ]
+    },
+    {
+     "id": "2uyhRqs5VAIb.seed.end",
+     "entityType": "point",
+     "point": [
+      -0.0043038976795225815,
+      0.007454569451510906
+     ]
+    },
+    {
+     "id": "2uyhRqs5VAIb.seed",
+     "entityType": "lineSegment",
+     "startPoint": [
+      0.0043038976795225815,
+      0.007454569451510906
+     ],
+     "endPoint": [
+      -0.0043038976795225815,
+      0.007454569451510906
+     ],
+     "endPointIds": [
+      "2uyhRqs5VAIb.seed.start",
+      "2uyhRqs5VAIb.seed.end"
+     ]
+    },
+    {
+     "id": "2uyhRqs5VAIb.pattern.0.1.0.start",
+     "entityType": "point",
+     "point": [
+      -0.0043038976795225815,
+      0.007454569451510906
+     ]
+    },
+    {
+     "id": "2uyhRqs5VAIb.pattern.0.1.0.end",
+     "entityType": "point",
+     "point": [
+      -0.008607795359045165,
+      2.168404344971009e-18
+     ]
+    },
+    {
+     "id": "2uyhRqs5VAIb.pattern.0.1.0",
+     "entityType": "lineSegment",
+     "startPoint": [
+      -0.0043038976795225815,
+      0.007454569451510906
+     ],
+     "endPoint": [
+      -0.008607795359045165,
+      2.168404344971009e-18
+     ],
+     "endPointIds": [
+      "2uyhRqs5VAIb.pattern.0.1.0.start",
+      "2uyhRqs5VAIb.pattern.0.1.0.end"
+     ]
+    },
+    {
+     "id": "2uyhRqs5VAIb.pattern.0.2.0.start",
+     "entityType": "point",
+     "point": [
+      -0.008607795359045163,
+      1.734723475976807e-18
+     ]
+    },
+    {
+     "id": "2uyhRqs5VAIb.pattern.0.2.0.end",
+     "entityType": "point",
+     "point": [
+      -0.004303897679522584,
+      -0.0074545694515109045
+     ]
+    },
+    {
+     "id": "2uyhRqs5VAIb.pattern.0.2.0",
+     "entityType": "lineSegment",
+     "startPoint": [
+      -0.008607795359045163,
+      1.734723475976807e-18
+     ],
+     "endPoint": [
+      -0.004303897679522584,
+      -0.0074545694515109045
+     ],
+     "endPointIds": [
+      "2uyhRqs5VAIb.pattern.0.2.0.start",
+      "2uyhRqs5VAIb.pattern.0.2.0.end"
+     ]
+    },
+    {
+     "id": "2uyhRqs5VAIb.pattern.0.3.0.start",
+     "entityType": "point",
+     "point": [
+      -0.004303897679522582,
+      -0.007454569451510905
+     ]
+    },
+    {
+     "id": "2uyhRqs5VAIb.pattern.0.3.0.end",
+     "entityType": "point",
+     "point": [
+      0.004303897679522581,
+      -0.007454569451510907
+     ]
+    },
+    {
+     "id": "2uyhRqs5VAIb.pattern.0.3.0",
+     "entityType": "lineSegment",
+     "startPoint": [
+      -0.004303897679522582,
+      -0.007454569451510905
+     ],
+     "endPoint": [
+      0.004303897679522581,
+      -0.007454569451510907
+     ],
+     "endPointIds": [
+      "2uyhRqs5VAIb.pattern.0.3.0.start",
+      "2uyhRqs5VAIb.pattern.0.3.0.end"
+     ]
+    },
+    {
+     "id": "2uyhRqs5VAIb.pattern.0.4.0.start",
+     "entityType": "point",
+     "point": [
+      0.004303897679522579,
+      -0.007454569451510908
+     ]
+    },
+    {
+     "id": "2uyhRqs5VAIb.pattern.0.4.0.end",
+     "entityType": "point",
+     "point": [
+      0.008607795359045163,
+      -5.637851296924623e-18
+     ]
+    },
+    {
+     "id": "2uyhRqs5VAIb.pattern.0.4.0",
+     "entityType": "lineSegment",
+     "startPoint": [
+      0.004303897679522579,
+      -0.007454569451510908
+     ],
+     "endPoint": [
+      0.008607795359045163,
+      -6.938893903907228e-18
+     ],
+     "endPointIds": [
+      "2uyhRqs5VAIb.pattern.0.4.0.start",
+      "2uyhRqs5VAIb.pattern.0.4.0.end"
+     ]
+    },
+    {
+     "id": "2uyhRqs5VAIb.pattern.0.5.0.start",
+     "entityType": "point",
+     "point": [
+      0.008607795359045165,
+      2.168404344971009e-18
+     ]
+    },
+    {
+     "id": "2uyhRqs5VAIb.pattern.0.5.0.end",
+     "entityType": "point",
+     "point": [
+      0.0043038976795225815,
+      0.007454569451510906
+     ]
+    },
+    {
+     "id": "2uyhRqs5VAIb.pattern.0.5.0",
+     "entityType": "lineSegment",
+     "startPoint": [
+      0.008607795359045165,
+      2.168404344971009e-18
+     ],
+     "endPoint": [
+      0.0043038976795225815,
+      0.007454569451510906
+     ],
+     "endPointIds": [
+      "2uyhRqs5VAIb.pattern.0.5.0.start",
+      "2uyhRqs5VAIb.pattern.0.5.0.end"
+     ]
+    },
+    {
+     "id": "2uyhRqs5VAIb.midPoint",
+     "entityType": "point",
+     "point": [
+      0,
+      0.007454569451510906
+     ],
+     "isConstruction": true
+    }
+   ]
+  },
+  {
+   "sketch": "Sketch 1",
+   "featureId": "FcDLncWOiOdyqq4_0",
+   "transformMatrix": [
+    1,
+    0,
+    0,
+    0,
+    0,
+    1,
+    0,
+    0,
+    0,
+    0,
+    1,
+    0,
+    0,
+    0,
+    0,
+    1
+   ],
+   "featuresUsed": [
+    "Extrude 1",
+    "Extrude 2",
+    "Extrude 3"
+   ],
+   "geomEntities": [
+    {
+     "id": "3gfMOATuNK16",
+     "entityType": "circle",
+     "center": [
+      0,
+      0
+     ],
+     "radius": 0.0035
+    },
+    {
+     "id": "3gfMOATuNK16.center",
+     "entityType": "point",
+     "point": [
+      0,
+      0
+     ],
+     "isConstruction": true
+    },
+    {
+     "id": "hGMyEkiczqQF",
+     "entityType": "circle",
+     "center": [
+      0,
+      0
+     ],
+     "radius": 0.004
+    },
+    {
+     "id": "hGMyEkiczqQF.center",
+     "entityType": "point",
+     "point": [
+      0,
+      0
+     ],
+     "isConstruction": true
+    },
+    {
+     "id": "kMzhOHD5B471",
+     "entityType": "circle",
+     "center": [
+      0,
+      0
+     ],
+     "radius": 0.005
+    },
+    {
+     "id": "kMzhOHD5B471.center",
+     "entityType": "point",
+     "point": [
+      0,
+      0
+     ],
+     "isConstruction": true
+    }
+   ]
+  }
+ ]
+}

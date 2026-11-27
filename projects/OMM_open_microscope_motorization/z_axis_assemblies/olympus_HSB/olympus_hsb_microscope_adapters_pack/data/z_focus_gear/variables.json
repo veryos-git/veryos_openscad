@@ -1,0 +1,42 @@
+[
+ {
+  "variableStudioReference": null,
+  "variables": [
+   {
+    "type": "LENGTH",
+    "name": "stol",
+    "value": null,
+    "expression": "0.2 mm",
+    "description": ""
+   },
+   {
+    "type": "LENGTH",
+    "name": "gear_width",
+    "value": null,
+    "expression": "10 mm",
+    "description": ""
+   },
+   {
+    "type": "LENGTH",
+    "name": "spatzig",
+    "value": null,
+    "expression": "1 mm",
+    "description": ""
+   },
+   {
+    "type": "LENGTH",
+    "name": "tolerance",
+    "value": null,
+    "expression": "0.15 mm",
+    "description": ""
+   },
+   {
+    "type": "NUMBER",
+    "name": "gear_friction_pins",
+    "value": null,
+    "expression": "64",
+    "description": ""
+   }
+  ]
+ }
+]

@@ -1,0 +1,250 @@
+Part Studio 1
+ - ###name :  #value [assignVariable] id: F90F3LwBN6tiZU6_0
+      initEntities: <geometry ref>
+      mode: ASSIGNED
+      variableType: ANGLE
+      measurementMode: DISTANCE
+      name: comp_angle
+      angleValue: 2 deg
+      value: 2 deg
+      entityCouple: <geometry ref>
+      exte
+ - ###name :  #value [assignVariable] id: FZHB1MZ0bowyf3h_0
+      initEntities: <geometry ref>
+      mode: ASSIGNED
+      variableType: LENGTH
+      measurementMode: DISTANCE
+      name: thick
+      lengthValue: 6 mm
+      value: 6 mm
+      entityCouple: <geometry ref>
+      extendEnt
+ - ###name :  #value [assignVariable] id: FqVhe4jA1iqUhgE_0
+      initEntities: <geometry ref>
+      mode: ASSIGNED
+      variableType: LENGTH
+      measurementMode: DISTANCE
+      name: stol
+      lengthValue: 0.2 mm
+      value: 0.2 mm
+      entityCouple: <geometry ref>
+      extend
+ - microscope [newSketch] id: F8GCyihjM7CKuUr_0
+      sketchPlane: <geometry ref>
+ - microscope [extrude] id: Fsd7hJVMMxsLEVd_0
+      domain: MODEL
+      bodyType: SOLID
+      operationType: NEW
+      surfaceOperationType: NEW
+      flatOperationType: REMOVE
+      surfaceEntities: <geometry ref>
+      wallShape: <geometry ref>
+      thickness1: 5 mm
+      thickness: 5 mm
+      endBound: BLIND
+      depth: 111 mm
+      endBoundEntityFace: <geometry ref>
+      endBoundEntityBody: <geometry ref>
+      endBoundEntityVertex: <geometry ref>
+      offsetDistance: 25 mm
+      extrudeDirection: <geometry ref>
+      startOffsetBound: BLIND
+      startOffsetDistance: 25 mm
+      
+ - microscope_focus_wheel [revolve] id: F64WLeGnGECh2FK_0
+      bodyType: SOLID
+      operationType: NEW
+      surfaceOperationType: NEW
+      surfaceEntities: <geometry ref>
+      wallShape: <geometry ref>
+      thickness1: 5 mm
+      thickness: 5 mm
+      axis: <geometry ref>
+      fullRevolve: true
+      endBound: BLIND
+      angle: 30 deg
+      endBoundEntityFace: <geometry ref>
+      endBoundEntityBody: <geometry ref>
+      endBoundEntityVertex: <geometry ref>
+      startBound: BLIND
+      angleBack: 330 deg
+      startBoundEntityFace: <geometry ref>
+      startBoundEntityBody: <geometry ref>
+      sta
+ - Sketch 1 [newSketch] id: FepczotYrAUbZMn_1
+      sketchPlane: <geometry ref>
+ - Extrude 1 [extrude] id: FwWR7mcLpwF1KEz_1
+      domain: MODEL
+      bodyType: SOLID
+      operationType: ADD
+      surfaceOperationType: NEW
+      flatOperationType: REMOVE
+      surfaceEntities: <geometry ref>
+      wallShape: <geometry ref>
+      thickness1: 5 mm
+      thickness: 5 mm
+      endBound: BLIND
+      depth: 27 mm
+      endBoundEntityFace: <geometry ref>
+      endBoundEntityBody: <geometry ref>
+      endBoundEntityVertex: <geometry ref>
+      offsetDistance: 25 mm
+      extrudeDirection: <geometry ref>
+      startOffset: true
+      startOffsetBound: ENTITY
+      startOffsetDistance: 25 mm
+      s
+ - holder [newSketch] id: F2vgm2Httk5ZigP_0
+      sketchPlane: <geometry ref>
+ - Extrude 2 [extrude] id: FBrLzFDsviApYNU_1
+      domain: MODEL
+      bodyType: SOLID
+      operationType: NEW
+      surfaceOperationType: NEW
+      flatOperationType: REMOVE
+      surfaceEntities: <geometry ref>
+      wallShape: <geometry ref>
+      thickness1: 5 mm
+      thickness: 5 mm
+      endBound: BLIND
+      depth: 50 mm
+      endBoundEntityFace: <geometry ref>
+      endBoundEntityBody: <geometry ref>
+      endBoundEntityVertex: <geometry ref>
+      offsetDistance: 25 mm
+      extrudeDirection: <geometry ref>
+      startOffsetBound: BLIND
+      startOffsetDistance: 25 mm
+      s
+ - Sketch 2 [newSketch] id: FD2UqLX6rlb5pmK_2
+      sketchPlane: <geometry ref>
+ - Extrude 3 [extrude] id: FXYpeo7YxesiLJL_2
+      domain: MODEL
+      bodyType: SOLID
+      operationType: REMOVE
+      surfaceOperationType: NEW
+      flatOperationType: REMOVE
+      surfaceEntities: <geometry ref>
+      wallShape: <geometry ref>
+      thickness1: 5 mm
+      thickness: 5 mm
+      endBound: UP_TO_SURFACE
+      oppositeDirection: true
+      depth: 25 mm
+      endBoundEntityFace: <geometry ref>
+      endBoundEntityBody: <geometry ref>
+      endBoundEntityVertex: <geometry ref>
+      offsetDistance: 25 mm
+      extrudeDirection: <geometry ref>
+      startOffsetBound: BLIND
+      startOffsetDistance: 25 mm
+      startOffsetOppositeDirect
+ - Chamfer 1 [chamfer] id: FwuxYu5KF6pEkww_2
+      chamferMethod: FACE_OFFSET
+      chamferType: OFFSET_ANGLE
+      width: 5 mm
+      width1: 5 mm
+      width2: 5 mm
+      angle: 45 deg
+      directionOverrides: <geometry ref>
+      tangentPropagation: true
+ - ###name :  #value [assignVariable] id: FO6go1hQKocSy6i_2
+      initEntities: <geometry ref>
+      mode: ASSIGNED
+      variableType: LENGTH
+      measurementMode: DISTANCE
+      name: dia_screw
+      lengthValue: 5 mm
+      value: 5 mm
+      entityCouple: <geometry ref>
+      exten
+ - ###name :  #value [assignVariable] id: FPRpVi4E5IeTs0w_2
+      initEntities: <geometry ref>
+      mode: ASSIGNED
+      variableType: LENGTH
+      measurementMode: DISTANCE
+      name: screwtol
+      lengthValue: 0.5 mm
+      value: 0.5 mm
+      entityCouple: <geometry ref>
+      ex
+ - Sketch 3 [newSketch] id: Fkge334Nqy1nFJl_2
+      sketchPlane: <geometry ref>
+ - Derived 1 [importDerived] id: FkcxfDZF9u455Op_2
+      newUI: true
+      partStudio: BTMParameterReferencePartStudio-3302
+      location: <geometry ref>
+      placement: AT_ORIGIN
+      mateConnectorIndex: -1
+      mateConnectorIndexInFeature: -1
+      includeMateConnectors: true
+      includeProperties: true
+      parts: <geometry ref>
+      buildFunction: BTMParameterDerived-864
+ - Transform 1 [transform] id: FZobjlbhi9mi1DF_3
+      transformType: TRANSFORM_MATE_CONNECTORS
+      transformLine: <geometry ref>
+      transformAxis: <geometry ref>
+      transformDirection: <geometry ref>
+      distance: 25 mm
+      uniform: true
+      scale: 1
+      scaleX: 1
+      scaleY: 1
+      scaleZ: 1
+      baseConnector: <geometry ref>
+      destinationConnector: <geometry ref>
+      secondaryAxisType: PLUS_X
+      angle: 30 deg
+      scalePoint: <geometry ref>
+ - Point Pattern 1 [pointPattern] id: FkUGGxogTZy1oI8_3
+      patternType: PART
+      operationType: NEW
+      faces: <geometry ref>
+      instanceFunction: BTMParameterFeatureList-1749
+      reference: <geometry ref>
+      locations: <geometry ref>
+      booleanScope: <geometry ref>
+ - Boolean 1 [booleanBodies] id: FyGECuvdfX7FpFN_3
+      operationType: SUBTRACTION
+      tools: <geometry ref>
+      targets: <geometry ref>
+      entitiesToOffset: <geometry ref>
+      offsetDistance: 5 mm
+ - Delete part 1 [deleteBodies SUPPRESSED] id: FMxmq495H675Ti1_3
+      compositePartOption: DELETE
+      nonCompositeEntities: <geometry ref> id: FpBINmNJcNG6qhM_3
+      operationType: UNION
+      tools: <geometry ref>
+      targets: <geometry ref>
+      entitiesToOffset: <geometry ref>
+      offsetDistance: 5 mm
+ - Boolean 3 [booleanBodies] id: FTeg4ZpQGJ2auyB_3
+      operationType: UNION
+      tools: <geometry ref>
+      targets: <geometry ref>
+      entitiesToOffset: <geometry ref>
+      offsetDistance: 5 mm
+ - Sketch 4 [newSketch] id: FO7aEsQSrAJv4PM_3
+      sketchPlane: <geometry ref>
+ - Extrude 4 [extrude] id: F6kqVwkmnploEba_3
+      domain: MODEL
+      bodyType: SOLID
+      operationType: REMOVE
+      surfaceOperationType: NEW
+      flatOperationType: REMOVE
+      surfaceEntities: <geometry ref>
+      wallShape: <geometry ref>
+      thickness1: 5 mm
+      thickness: 5 mm
+      endBound: BLIND
+      oppositeDirection: true
+      depth: 222 mm
+      endBoundEntityFace: <geometry ref>
+      endBoundEntityBody: <geometry ref>
+      endBoundEntityVertex: <geometry ref>
+      offsetDistance: 25 mm
+      extrudeDirection: <geometry ref>
+      startOffsetBound: BLIND
+      startOffsetDistance: 25 mm
+      startOffsetOppositeDirection: false 
