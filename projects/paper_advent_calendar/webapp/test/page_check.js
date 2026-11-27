@@ -371,6 +371,39 @@ try{
     o_picture = await f_o_picture();
     f_check('Fill: over the calendar and its bleed again, nothing wrong', String([o_picture.n_mm__x, o_picture.n_mm__y, o_picture.n_mm__size_x]) === '138.5,95,291' && (await f_o_state()).s_status === '', o_picture);
     if(Deno.args[0]){ await o_page.f_screenshot(`${Deno.args[0]}/preview.png`); }
+    // the handles stay in view: a picture far larger than the sheet, then a sheet far larger than its place
+    let f_a_o_handle = function(){
+        return o_page.f_v(`(function(){
+            let o_view = document.getElementById('el_scroll').getBoundingClientRect();
+            return [...document.querySelectorAll('.sheet.shown .handle')].map(function(el){
+                let o = el.getBoundingClientRect();
+                let a_n = [(o.left + o.right) / 2, (o.top + o.bottom) / 2];
+                return { s_sign: el.dataset.sign, a_n, b_in: o.left >= o_view.left && o.top >= o_view.top && o.right <= o_view.right && o.bottom <= o_view.bottom, b_hit: document.elementFromPoint(a_n[0], a_n[1]) === el };
+            });
+        })()`);
+    };
+    // eight of them, each whole in the view, to be taken hold of, and apart from the others
+    let f_b_handles = function(a_o_handle){
+        return a_o_handle.length === 8 && a_o_handle.every(function(o_handle){ return o_handle.b_in && o_handle.b_hit; })
+            && new Set(a_o_handle.map(function(o_handle){ return o_handle.a_n.map(Math.round).join(); })).size === 8;
+    };
+    let a_o_handle = await f_a_o_handle();
+    f_check('a picture in view: its handles sit on its corners and sides', f_b_handles(a_o_handle) && f_b_near(a_o_handle.find(function(o_handle){ return o_handle.s_sign === '1,1'; }).a_n, await f_a_n__px(f_a_n__handle(o_picture, [1, 1])), 0.6), a_o_handle);
+    await o_page.f_fill('picture__n_mm__size_x', 900);
+    o_picture = await f_o_picture();
+    a_o_handle = await f_a_o_handle();
+    f_check('a picture of 900 × 600 mm, its corners far outside the sheet: all eight handles in view', f_b_handles(a_o_handle), a_o_handle);
+    a_n__from = a_o_handle.find(function(o_handle){ return o_handle.s_sign === '1,1'; }).a_n;
+    await o_page.f_drag(a_n__from, [a_n__from[0] - 90, a_n__from[1] - 60]);
+    o_picture__sized = await f_o_picture();
+    f_check('a corner taken where its handle is drawn sizes the picture by what the pointer moves', f_b_near(o_picture__sized.n_mm__size_x, 900 - 90 / n_px__per_mm, 0.02) && f_b_near(f_a_n__handle(o_picture__sized, [-1, -1]), f_a_n__handle(o_picture, [-1, -1]), 0.011), o_picture__sized);
+    await o_page.f_click_on('[name=n_zoom][value="4"] + span');
+    await o_page.f_v(`document.getElementById('el_scroll').scrollBy(700, 400)`);
+    await o_page.f_settle();
+    a_o_handle = await f_a_o_handle();
+    f_check('zoom 4, the sheet moved in its place: all eight handles in view', f_b_handles(a_o_handle) && (await f_o_state()).a_n__sheet[0] < -500, a_o_handle);
+    await o_page.f_click_on('[name=n_zoom][value="1"] + span');
+    await o_page.f_click_on('[data-picture=cover]');
     await o_page.f_choose('#el_picture_file', [s_path__text]);
     o_state = await f_o_state();
     f_check('a file that is no picture: said, the picture stays', o_state.s_hint.startsWith('text.txt is not a picture this browser can show.') && o_state.s_sheet__picture === 'front' && o_state.o_setting.o_picture__front.n_px__x === 3000, o_state.s_hint);
@@ -390,7 +423,7 @@ try{
     f_check('Chrome draws it on the calendar and its bleed', f_b_near(await f_a_n__image('back'), [8, 8, 289, 202], 0.05), await f_a_n__image('back'));
     await o_page.f_open();
     o_state = await f_o_state();
-    f_check('a reload keeps both pictures, their files and their places', o_state.s_sheet__picture === 'front,back' && o_state.s_step__open === 'picture' && o_state.s_sheet === 'back' && o_state.n_handle === 8 && o_state.o_setting.o_picture__front.n_mm__size_x === 291
+    f_check('a reload keeps both pictures, their files and their places', o_state.s_sheet__picture === 'front,back' && o_state.s_step__open === 'picture' && o_state.s_sheet === 'back' && o_state.n_handle === 8 && f_b_near(o_state.o_setting.o_picture__front.n_mm__size_x, 291, 1e-9)
         && await o_page.f_v(`Promise.all([...document.querySelectorAll('.sheet image')].map(function(el){ return fetch(el.href.baseVal).then(function(o){ return o.blob(); }).then(function(o){ return o.size; }); })).then(function(a_n){ return a_n.length === 2 && a_n.every(function(n){ return n > 10000; }); })`), o_state);
     await f_step('cut');
     await o_page.f_click_on('[name=b_mark]');

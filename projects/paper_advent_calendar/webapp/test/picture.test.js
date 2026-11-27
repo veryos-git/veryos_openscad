@@ -5,7 +5,7 @@
 // it is on the calendar, turned and mirrored or not; and the SVG has to put it there too.
 
 import {
-    a_s_side, n_mm__size_min, f_o_picture, f_a_n__px, f_a_n__size, f_n_dpi, f_a_n__calendar, f_a_n__own, f_a_n__from_px, f_a_n__to_px, f_a_n__handle,
+    a_s_side, n_mm__size_min, f_o_picture, f_a_n__px, f_a_n__size, f_n_dpi, f_a_n__calendar, f_a_n__own, f_a_n__from_px, f_a_n__to_px, f_a_n__handle, f_a_n__handle__shown,
     f_o_picture__fitted, f_b_covered, f_o_picture__resized, f_o_picture__scaled, f_o_picture__cut, f_o_picture__cropped, f_s_picture
 } from '../picture.module.js';
 
@@ -85,6 +85,36 @@ Deno.test('the picture\'s own frame: there and back, and where its handles sit',
         f_assert_same_place(f_a_n__handle(o_picture, [-n_x__sign, -n_y__sign]), f_a_n__of_px(o_picture, [n_x, n_y]), `${f_s_name(o_picture)}: the file's top left`, 1e-9);
         f_assert_same_place(f_a_n__handle(o_picture, [n_x__sign, n_y__sign]), f_a_n__of_px(o_picture, [n_x + n_w, n_y + n_h]), `${f_s_name(o_picture)}: the file's bottom right`, 1e-9);
     }
+});
+
+Deno.test('handles shown: where they sit if that is in view, else where the view ends, every one apart from the others', function(){
+    let a_a_n__sign = [[-1, -1], [1, -1], [1, 1], [-1, 1], [-1, 0], [0, -1], [1, 0], [0, 1]];
+    let f_a_a_n = function(o_picture, a_n__box){ return a_a_n__sign.map(function(a_n__sign){ return f_a_n__handle__shown(o_picture, a_n__sign, a_n__box); }); };
+    for(let o_picture of a_o_picture){
+        // all of the picture in view: nothing moves
+        f_a_a_n(o_picture, [-2000, -2000, 2000, 2000]).forEach(function(a_n, n_idx){ f_assert_same_place(a_n, f_a_n__handle(o_picture, a_a_n__sign[n_idx]), `${f_s_name(o_picture)}: handle ${a_a_n__sign[n_idx]}`); });
+        // a part of it, or none: every handle in the box
+        for(let a_n__box of [[100, 60, 180, 110], [-50, -40, 150, 90], [130, 0, 400, 300], [600, 600, 700, 650]]){
+            for(let a_n of f_a_a_n(o_picture, a_n__box)){
+                assert(a_n[0] >= a_n__box[0] && a_n[0] <= a_n__box[2] && a_n[1] >= a_n__box[1] && a_n[1] <= a_n__box[3], `${f_s_name(o_picture)}: ${a_n} is not in ${a_n__box}`);
+            }
+        }
+    }
+    // the plain picture lies from 20 to 260 and from 15 to 175. A view inside it: the corners' handles in the view's corners, the sides' in the middle of its edges
+    [[100, 60], [180, 60], [180, 110], [100, 110], [100, 85], [140, 60], [180, 85], [140, 110]].forEach(function(a_n, n_idx){
+        f_assert_same_place(f_a_a_n(o_picture__plain, [100, 60, 180, 110])[n_idx], a_n, `a view inside it: handle ${a_a_n__sign[n_idx]}`);
+    });
+    // a view inside it and away from its middle: still eight places
+    [[30, 20], [90, 20], [90, 60], [30, 60], [30, 40], [60, 20], [90, 40], [60, 60]].forEach(function(a_n, n_idx){
+        f_assert_same_place(f_a_a_n(o_picture__plain, [30, 20, 90, 60])[n_idx], a_n, `a view away from its middle: handle ${a_a_n__sign[n_idx]}`);
+    });
+    // its left part out of view: the left side's handle at the view's edge, the top side's in the middle of what of the side is left, the right side's where it sits
+    f_assert_same_place(f_a_n__handle__shown(o_picture__plain, [-1, 0], [100, 0, 300, 200]), [100, 95], 'left side');
+    f_assert_same_place(f_a_n__handle__shown(o_picture__plain, [0, -1], [100, 0, 300, 200]), [180, 15], 'top side');
+    f_assert_same_place(f_a_n__handle__shown(o_picture__plain, [1, 0], [100, 0, 300, 200]), [260, 95], 'right side');
+    f_assert_same_place(f_a_n__handle__shown(o_picture__plain, [-1, -1], [100, 0, 300, 200]), [100, 15], 'top left corner');
+    // a quarter turned, its top side stands at the right, at x 220 from -25 down to 215: a view from 0 to 95 shows that much of it
+    f_assert_same_place(f_a_n__handle__shown(a_o_picture[1], [0, -1], [0, 0, 300, 95]), [220, 47.5], 'top side, turned');
 });
 
 Deno.test('a place of the file on the calendar, and the calendar\'s point in the file', function(){

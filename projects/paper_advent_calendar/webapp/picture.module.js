@@ -76,6 +76,26 @@ let f_a_n__handle = function(o_picture, a_n__sign){
     let [n_x, n_y] = f_a_n__size(o_picture);
     return f_a_n__calendar(o_picture, [a_n__sign[0] * n_x / 2, a_n__sign[1] * n_y / 2]);
 };
+// Where a handle is drawn while no more of the calendar is in view than a box, left, top,
+// right, bottom: a corner's as near to the corner as the box reaches; a side's in the
+// middle of what of the side lies along the box, and from there as near as the box
+// reaches. A handle of a picture that is in view as a whole is drawn where it sits.
+let f_a_n__handle__shown = function(o_picture, a_n__sign, a_n__box){
+    let f_a_n__in = function(a_n){
+        return a_n.map(function(n, n_idx){ return Math.min(Math.max(n, a_n__box[n_idx]), a_n__box[n_idx + 2]); });
+    };
+    if(!a_n__sign.includes(0)){ return f_a_n__in(f_a_n__handle(o_picture, a_n__sign)); }
+    // the side from its one end to its other, and how far along it the box's corners lie: 0 at the one end, 1 at the other
+    let a_n__from = f_a_n__handle(o_picture, a_n__sign.map(function(n){ return n || -1; }));
+    let a_n__to = f_a_n__handle(o_picture, a_n__sign.map(function(n){ return n || 1; }));
+    let a_n__side = [a_n__to[0] - a_n__from[0], a_n__to[1] - a_n__from[1]];
+    let a_n_part = [[0, 1], [2, 1], [2, 3], [0, 3]].map(function([n_idx__x, n_idx__y]){
+        let n_part = ((a_n__box[n_idx__x] - a_n__from[0]) * a_n__side[0] + (a_n__box[n_idx__y] - a_n__from[1]) * a_n__side[1]) / (a_n__side[0] * a_n__side[0] + a_n__side[1] * a_n__side[1]);
+        return Math.min(Math.max(n_part, 0), 1);
+    });
+    let n_part = (Math.min(...a_n_part) + Math.max(...a_n_part)) / 2;
+    return f_a_n__in([a_n__from[0] + n_part * a_n__side[0], a_n__from[1] + n_part * a_n__side[1]]);
+};
 
 // The picture in the middle of a box (left, top, right, bottom), as large as fits into
 // it, or with b_cover as small as covers it.
@@ -163,6 +183,6 @@ let f_s_picture = function(o_picture, s_href){
 };
 
 export {
-    a_s_side, n_mm__size_min, f_o_picture, f_a_n__px, f_a_n__size, f_n_dpi, f_a_n__calendar, f_a_n__own, f_a_n__from_px, f_a_n__to_px, f_a_n__handle,
+    a_s_side, n_mm__size_min, f_o_picture, f_a_n__px, f_a_n__size, f_n_dpi, f_a_n__calendar, f_a_n__own, f_a_n__from_px, f_a_n__to_px, f_a_n__handle, f_a_n__handle__shown,
     f_o_picture__fitted, f_b_covered, f_o_picture__resized, f_o_picture__scaled, f_o_picture__cut, f_o_picture__cropped, f_s_picture
 };

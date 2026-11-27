@@ -3,7 +3,7 @@
 // pointer on them, and the pictures' files.
 
 import { o_setting__default, n_mm__line, f_a_o_window, f_o_door, f_a_s_problem, f_s_d, f_s_svg, f_a_n__box__file } from './calendar.module.js';
-import { a_s_side, f_o_picture, f_a_n__px, f_a_n__size, f_n_dpi, f_a_n__from_px, f_a_n__to_px, f_a_n__handle, f_o_picture__fitted, f_o_picture__resized, f_o_picture__scaled, f_o_picture__cut, f_o_picture__cropped } from './picture.module.js';
+import { a_s_side, f_o_picture, f_a_n__px, f_a_n__size, f_n_dpi, f_a_n__from_px, f_a_n__to_px, f_a_n__handle, f_a_n__handle__shown, f_o_picture__fitted, f_o_picture__resized, f_o_picture__scaled, f_o_picture__cut, f_o_picture__cropped } from './picture.module.js';
 import { f_a_n__calendar, f_a_n__distance, f_a_n__bleed, f_a_s_problem__sheet, f_s_picture__sheet, f_s_line__sheet } from './sheet.module.js';
 import { f_a_n_h, f_a_n__mapped, f_s_problem__match, f_a_a_n__anchor, f_a_n__snapped, f_n_px__per_mm, f_a_n__warped } from './match.module.js';
 
@@ -14,7 +14,8 @@ let a_s_name__picture = ['n_mm__x', 'n_mm__y', 'n_mm__size_x', 'n_deg'];
 // a picture's handles: where on its frame, -1, 0 or 1 along x and y; corners size it, sides cut it off
 let a_a_n__sign = [[-1, -1], [1, -1], [1, 1], [-1, 1], [-1, 0], [0, -1], [1, 0], [0, 1]];
 let n_px__handle = 6;
-// a picture's frame and handles show this far around their sheet of paper and no further: not on the other sheet
+// a picture's frame shows this far around its sheet of paper and no further; a handle
+// that sits further out, or out of view, is drawn where that ends, see f_a_n__handle__shown
 let n_px__around = 20;
 // matching by four points: how large a point is drawn, and from how far a click snaps to a place of the cut pattern
 let n_px__match = 9;
@@ -123,8 +124,9 @@ let f_set_html = function(el, s_html){
 };
 
 // What only the screen shows of a sheet, as SVG: the printer's margin, where the windows
-// open, and what the pointer takes hold of.
-let f_s_screen = function(s_sheet, a_o_door, n_mm__per_px){
+// open, and what the pointer takes hold of. a_n__view: what of the sheet and around it
+// a picture's handles are kept in, in the sheet's mm: left, top, right, bottom.
+let f_s_screen = function(s_sheet, a_o_door, n_mm__per_px, a_n__view){
     let n_margin = o_setting.n_mm__printer_margin;
     let a_s = [];
     if(n_margin > 0 && 2 * n_margin < Math.min(o_setting.n_mm__sheet_x, o_setting.n_mm__sheet_y)){
@@ -158,13 +160,17 @@ let f_s_screen = function(s_sheet, a_o_door, n_mm__per_px){
     } else if(s_step === 'picture' && o_picture && o_s_url[s_sheet]){
         let n_around = n_px__around * n_mm__per_px;
         a_s.push(`<clipPath id="${s_sheet}_around"><rect x="${-n_around}" y="${-n_around}" width="${o_setting.n_mm__sheet_x + 2 * n_around}" height="${o_setting.n_mm__sheet_y + 2 * n_around}"/></clipPath>`);
-        a_s.push(`<g clip-path="url(#${s_sheet}_around)"><g transform="translate(${f_a_n__calendar(o_setting).join(' ')})">`);
+        let [n_x__calendar, n_y__calendar] = f_a_n__calendar(o_setting);
+        a_s.push(`<g clip-path="url(#${s_sheet}_around)"><g transform="translate(${n_x__calendar} ${n_y__calendar})">`);
         a_s.push(`<polygon class="frame" points="${a_a_n__sign.slice(0, 4).map(function(a_n__sign){ return f_a_n__handle(o_picture, a_n__sign).join(','); }).join(' ')}"/>`);
+        // the handles are not cut off with the frame: each is drawn in view, in the calendar's mm
+        a_s.push(`</g></g><g transform="translate(${n_x__calendar} ${n_y__calendar})">`);
+        let a_n__box = [a_n__view[0] - n_x__calendar, a_n__view[1] - n_y__calendar, a_n__view[2] - n_x__calendar, a_n__view[3] - n_y__calendar];
         a_s.push(...a_a_n__sign.map(function(a_n__sign){
-            let [n_x, n_y] = f_a_n__handle(o_picture, a_n__sign);
+            let [n_x, n_y] = f_a_n__handle__shown(o_picture, a_n__sign, a_n__box);
             return `<circle class="handle${a_n__sign.includes(0) ? ' side' : ''}" data-sign="${a_n__sign.join(',')}" cx="${n_x}" cy="${n_y}" r="${n_px__handle * n_mm__per_px}"/>`;
         }));
-        a_s.push('</g></g>');
+        a_s.push('</g>');
     }
     return a_s.join('');
 };
@@ -222,9 +228,20 @@ let f_update = function(){
         el_sheet.classList.toggle('matching', o_match?.s_sheet === s_sheet);
         f_set_html(el_svg.querySelector('.picture'), f_s_picture__sheet(o_setting, s_sheet, o_s_url[s_sheet]));
         f_set_html(el_svg.querySelector('.line'), f_s_line__sheet(o_setting, s_sheet));
-        // the handles keep their size on the screen whatever the sheet's
-        let n_px = el_svg.getBoundingClientRect().width;
-        f_set_html(el_svg.querySelector('.screen'), f_s_screen(s_sheet, a_o_door, n_px ? o_setting.n_mm__sheet_x / n_px : 0.3));
+        // the handles keep their size on the screen whatever the sheet's, and stay whole in
+        // what of the sheet and the pixels around it the view shows
+        let o_rect = el_svg.getBoundingClientRect();
+        let n_mm__per_px = o_rect.width ? o_setting.n_mm__sheet_x / o_rect.width : 0.3;
+        let el_scroll = document.getElementById('el_scroll');
+        let o_rect__view = el_scroll.getBoundingClientRect();
+        let n_px__in = n_px__handle + 2;
+        let a_n__view = [
+            Math.max(-n_px__around, o_rect__view.left + n_px__in - o_rect.left),
+            Math.max(-n_px__around, o_rect__view.top + n_px__in - o_rect.top),
+            Math.min(o_rect.width + n_px__around, o_rect__view.left + el_scroll.clientWidth - n_px__in - o_rect.left),
+            Math.min(o_rect.height + n_px__around, o_rect__view.top + el_scroll.clientHeight - n_px__in - o_rect.top)
+        ].map(function(n){ return n * n_mm__per_px; });
+        f_set_html(el_svg.querySelector('.screen'), f_s_screen(s_sheet, a_o_door, n_mm__per_px, a_n__view));
     }
 
     // where the calendar lies, in the numbers a cutter's software asks for
@@ -603,6 +620,8 @@ for(let el of document.querySelectorAll('[name=n_zoom]')){
 }
 // A sheet is as large as its place between the bars; what is drawn in the screen's pixels follows.
 new ResizeObserver(function(){ requestAnimationFrame(f_update); }).observe(document.getElementById('el_view'));
+// A picture's handles stay in view: they follow where a zoomed sheet is moved to.
+document.getElementById('el_scroll').addEventListener('scroll', function(){ f_update(); });
 // The lines' legend closes with a press beside it.
 window.addEventListener('pointerdown', function(o_event){
     let el_legend_box = document.getElementById('el_legend_box');
