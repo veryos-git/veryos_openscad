@@ -187,6 +187,7 @@ input.switch:checked::after{ background: var(--s_col__black); transform: transla
     .sheet .frame{ fill: none; stroke: var(--s_col__gold); stroke-width: 1.5px; }
     .sheet .handle{ fill: var(--s_col__gold); stroke: #101517; cursor: crosshair; pointer-events: all; touch-action: none; }
     .sheet .handle.side{ fill: #ffffff; }
+    .sheet .handle.turn{ fill: #101517; stroke: var(--s_col__gold); stroke-width: 2px; cursor: grab; }
     body[data-step=picture] .has_picture{ cursor: move; touch-action: none; }
     /* matching by four points: the picture's points gold, the pattern's places white, a
        line from each point to its place; what is not being clicked steps back */
@@ -358,8 +359,8 @@ input.switch:checked::after{ background: var(--s_col__black); transform: transla
                     </div>
                     <div class="row"><span title="The picture's middle, from the calendar's left edge and from its top edge">Middle</span><span class="field"><input type="number" name="picture__n_mm__x" aria-label="Picture's middle x" step="any"><b>/</b><input type="number" name="picture__n_mm__y" aria-label="Picture's middle y" step="any"><i>mm</i></span></div>
                     <label class="row"><span title="Of what is left of the picture; its height follows, it is never stretched">Width</span><span class="field"><input type="number" name="picture__n_mm__size_x" min="5" max="5000" step="any"><i>mm</i></span></label>
-                    <label class="row"><span title="Around its middle, with the clock">Turned</span><span class="field"><input type="number" name="picture__n_deg" min="-360" max="360" step="any"><i>°</i></span></label>
-                    <p class="note">On the sheet: drag the picture to move it, a corner to size it, a side to crop it. Ctrl and the wheel size it under the pointer.</p>
+                    <label class="row"><span title="Around its middle, with the clock. Any number: 0.5 is a slight turn">Turned</span><span class="field"><input type="number" name="picture__n_deg" min="-360" max="360" step="any"><i>°</i></span></label>
+                    <p class="note">On the sheet: drag the picture to move it, a corner to size it, a side to crop it, the ring at its top to turn it. Ctrl and the wheel size it under the pointer.</p>
                 </div>
                 <div class="group">
                     <h2 title="How much of the file is cut off at each of its sides, in % of the file. What is left stays in its place">Crop, %</h2>

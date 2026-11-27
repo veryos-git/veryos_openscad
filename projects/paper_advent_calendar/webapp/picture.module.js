@@ -96,6 +96,15 @@ let f_a_n__handle__shown = function(o_picture, a_n__sign, a_n__box){
     let n_part = (Math.min(...a_n_part) + Math.max(...a_n_part)) / 2;
     return f_a_n__in([a_n__from[0] + n_part * a_n__side[0], a_n__from[1] + n_part * a_n__side[1]]);
 };
+// Where the handle that turns the picture is drawn: n_mm from where the top side's
+// handle is drawn, straight out of the frame; into the frame where that is out of view.
+let f_a_n__handle__turn = function(o_picture, a_n__box, n_mm){
+    let a_n = f_a_n__handle__shown(o_picture, [0, -1], a_n__box);
+    let n_rad = o_picture.n_deg * Math.PI / 180;
+    let a_n__out = [a_n[0] + n_mm * Math.sin(n_rad), a_n[1] - n_mm * Math.cos(n_rad)];
+    let b_in = a_n__out[0] >= a_n__box[0] && a_n__out[1] >= a_n__box[1] && a_n__out[0] <= a_n__box[2] && a_n__out[1] <= a_n__box[3];
+    return b_in ? a_n__out : [2 * a_n[0] - a_n__out[0], 2 * a_n[1] - a_n__out[1]];
+};
 
 // The picture in the middle of a box (left, top, right, bottom), as large as fits into
 // it, or with b_cover as small as covers it.
@@ -131,6 +140,12 @@ let f_o_picture__resized = function(o_picture, a_n__sign, a_n__pointer){
     n_scale = Math.max(n_scale, n_mm__size_min / Math.min(n_x, n_y));
     let a_n__middle = f_a_n__calendar(o_picture, [a_n__sign[0] * n_x * (n_scale - 1) / 2, a_n__sign[1] * n_y * (n_scale - 1) / 2]);
     return { ...o_picture, n_mm__x: a_n__middle[0], n_mm__y: a_n__middle[1], n_mm__size_x: n_x * n_scale };
+};
+// The picture turned around its middle by as much as the pointer goes around it, from
+// a_n__from to a_n__to: far from the middle a pointer turns it by little.
+let f_o_picture__turned = function(o_picture, a_n__from, a_n__to){
+    let f_n_rad = function(a_n){ return Math.atan2(a_n[1] - o_picture.n_mm__y, a_n[0] - o_picture.n_mm__x); };
+    return { ...o_picture, n_deg: o_picture.n_deg + (f_n_rad(a_n__to) - f_n_rad(a_n__from)) * 180 / Math.PI };
 };
 // The picture n_scale times as large around a point of the calendar: what lies at a_n
 // stays there.
@@ -183,6 +198,6 @@ let f_s_picture = function(o_picture, s_href){
 };
 
 export {
-    a_s_side, n_mm__size_min, f_o_picture, f_a_n__px, f_a_n__size, f_n_dpi, f_a_n__calendar, f_a_n__own, f_a_n__from_px, f_a_n__to_px, f_a_n__handle, f_a_n__handle__shown,
-    f_o_picture__fitted, f_b_covered, f_o_picture__resized, f_o_picture__scaled, f_o_picture__cut, f_o_picture__cropped, f_s_picture
+    a_s_side, n_mm__size_min, f_o_picture, f_a_n__px, f_a_n__size, f_n_dpi, f_a_n__calendar, f_a_n__own, f_a_n__from_px, f_a_n__to_px, f_a_n__handle, f_a_n__handle__shown, f_a_n__handle__turn,
+    f_o_picture__fitted, f_b_covered, f_o_picture__resized, f_o_picture__turned, f_o_picture__scaled, f_o_picture__cut, f_o_picture__cropped, f_s_picture
 };

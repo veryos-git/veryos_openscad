@@ -3,7 +3,7 @@
 // pointer on them, and the pictures' files.
 
 import { o_setting__default, n_mm__line, f_a_o_window, f_o_door, f_a_s_problem, f_s_d, f_s_svg, f_a_n__box__file } from './calendar.module.js';
-import { a_s_side, f_o_picture, f_a_n__px, f_a_n__size, f_n_dpi, f_a_n__from_px, f_a_n__to_px, f_a_n__handle, f_a_n__handle__shown, f_o_picture__fitted, f_o_picture__resized, f_o_picture__scaled, f_o_picture__cut, f_o_picture__cropped } from './picture.module.js';
+import { a_s_side, f_o_picture, f_a_n__px, f_a_n__size, f_n_dpi, f_a_n__from_px, f_a_n__to_px, f_a_n__handle, f_a_n__handle__shown, f_a_n__handle__turn, f_o_picture__fitted, f_o_picture__resized, f_o_picture__turned, f_o_picture__scaled, f_o_picture__cut, f_o_picture__cropped } from './picture.module.js';
 import { f_a_n__calendar, f_a_n__distance, f_a_n__bleed, f_a_s_problem__sheet, f_s_picture__sheet, f_s_line__sheet } from './sheet.module.js';
 import { f_a_n_h, f_a_n__mapped, f_s_problem__match, f_a_a_n__anchor, f_a_n__snapped, f_n_px__per_mm, f_a_n__warped } from './match.module.js';
 
@@ -14,6 +14,8 @@ let a_s_name__picture = ['n_mm__x', 'n_mm__y', 'n_mm__size_x', 'n_deg'];
 // a picture's handles: where on its frame, -1, 0 or 1 along x and y; corners size it, sides cut it off
 let a_a_n__sign = [[-1, -1], [1, -1], [1, 1], [-1, 1], [-1, 0], [0, -1], [1, 0], [0, 1]];
 let n_px__handle = 6;
+// the handle that turns a picture: this far from the handle of the picture's top side
+let n_px__turn = 26;
 // a picture's frame shows this far around its sheet of paper and no further; a handle
 // that sits further out, or out of view, is drawn where that ends, see f_a_n__handle__shown
 let n_px__around = 20;
@@ -166,11 +168,15 @@ let f_s_screen = function(s_sheet, a_o_door, n_mm__per_px, a_n__view){
         // the handles are not cut off with the frame: each is drawn in view, in the calendar's mm
         a_s.push(`</g></g><g transform="translate(${n_x__calendar} ${n_y__calendar})">`);
         let a_n__box = [a_n__view[0] - n_x__calendar, a_n__view[1] - n_y__calendar, a_n__view[2] - n_x__calendar, a_n__view[3] - n_y__calendar];
+        // the handle that turns it, on a stem from the top side's
+        let a_n__top = f_a_n__handle__shown(o_picture, [0, -1], a_n__box);
+        let a_n__turn = f_a_n__handle__turn(o_picture, a_n__box, n_px__turn * n_mm__per_px);
+        a_s.push(`<line class="frame" x1="${a_n__top[0]}" y1="${a_n__top[1]}" x2="${a_n__turn[0]}" y2="${a_n__turn[1]}"/>`);
         a_s.push(...a_a_n__sign.map(function(a_n__sign){
             let [n_x, n_y] = f_a_n__handle__shown(o_picture, a_n__sign, a_n__box);
-            return `<circle class="handle${a_n__sign.includes(0) ? ' side' : ''}" data-sign="${a_n__sign.join(',')}" cx="${n_x}" cy="${n_y}" r="${n_px__handle * n_mm__per_px}"/>`;
+            return `<circle class="handle${a_n__sign.includes(0) ? ' side' : ''}" data-sign="${a_n__sign.join(',')}" cx="${n_x}" cy="${n_y}" r="${n_px__handle * n_mm__per_px}"><title>Drag to ${a_n__sign.includes(0) ? 'crop' : 'size'}</title></circle>`;
         }));
-        a_s.push('</g>');
+        a_s.push(`<circle class="handle turn" cx="${a_n__turn[0]}" cy="${a_n__turn[1]}" r="${n_px__handle * n_mm__per_px}"><title>Drag to turn</title></circle></g>`);
     }
     return a_s.join('');
 };
@@ -637,7 +643,7 @@ let f_a_n__mm = function(o_event, s_sheet){
 };
 // Step 'window': a click on a window chooses it, a drag moves it in steps of 0.5 mm.
 // Step 'picture': a drag anywhere on the sheet moves its picture, a drag of a handle
-// sizes it or cuts it off. In the other steps the pointer moves nothing.
+// sizes it, cuts it off or turns it. In the other steps the pointer moves nothing.
 el_stage.addEventListener('pointerdown', function(o_event){
     let el_sheet = o_event.target.closest('.sheet');
     if(!el_sheet){ return; }
@@ -654,10 +660,11 @@ el_stage.addEventListener('pointerdown', function(o_event){
         let o_picture = o_s_url[s_sheet] ? o_setting[`o_picture__${s_sheet}`] : null;
         if(o_picture){
             let el_handle = o_event.target.closest('.handle');
-            let a_n__sign = el_handle ? el_handle.dataset.sign.split(',').map(Number) : null;
+            // the handle that turns has no place on the frame
+            let a_n__sign = el_handle?.dataset.sign ? el_handle.dataset.sign.split(',').map(Number) : null;
             // a handle is rarely taken by its middle: what the pointer is off, it stays off
             let a_n__handle = a_n__sign ? f_a_n__handle(o_picture, a_n__sign) : a_n;
-            o_drag = { s_sheet, o_picture, a_n__sign, a_n__pointer: a_n, a_n__off: [a_n[0] - a_n__handle[0], a_n[1] - a_n__handle[1]] };
+            o_drag = { s_sheet, o_picture, a_n__sign, b_turn: Boolean(el_handle) && !a_n__sign, a_n__pointer: a_n, a_n__off: [a_n[0] - a_n__handle[0], a_n[1] - a_n__handle[1]] };
             o_event.preventDefault();
         }
     } else if(s_step === 'window'){
@@ -689,14 +696,17 @@ window.addEventListener('pointermove', function(o_event){
     if(o_drag.o_picture){
         let a_n__on = [a_n[0] - o_drag.a_n__off[0], a_n[1] - o_drag.a_n__off[1]];
         let o_picture;
-        if(!o_drag.a_n__sign){
+        if(o_drag.b_turn){
+            o_picture = f_o_picture__turned(o_drag.o_picture, o_drag.a_n__pointer, a_n);
+            o_picture.n_deg = Math.round(f_n_deg(o_picture.n_deg) * 100) / 100;
+        } else if(!o_drag.a_n__sign){
             o_picture = { ...o_drag.o_picture, n_mm__x: o_drag.o_picture.n_mm__x + a_n[0] - o_drag.a_n__pointer[0], n_mm__y: o_drag.o_picture.n_mm__y + a_n[1] - o_drag.a_n__pointer[1] };
         } else if(o_drag.a_n__sign.includes(0)){
             o_picture = f_o_picture__cropped(o_drag.o_picture, a_s_side[a_a_n__sign.findIndex(function(a_n__sign){ return String(a_n__sign) === String(o_drag.a_n__sign); }) - 4], a_n__on);
         } else {
             o_picture = f_o_picture__resized(o_drag.o_picture, o_drag.a_n__sign, a_n__on);
         }
-        // hundredths of a mm are enough, and short in the fields
+        // hundredths of a mm, and of a degree, are enough, and short in the fields
         for(let s_name of ['n_mm__x', 'n_mm__y', 'n_mm__size_x']){ o_picture[s_name] = Math.round(o_picture[s_name] * 100) / 100; }
         o_setting[`o_picture__${o_drag.s_sheet}`] = o_picture;
         f_update();

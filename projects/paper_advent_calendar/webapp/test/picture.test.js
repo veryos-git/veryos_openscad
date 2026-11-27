@@ -5,8 +5,8 @@
 // it is on the calendar, turned and mirrored or not; and the SVG has to put it there too.
 
 import {
-    a_s_side, n_mm__size_min, f_o_picture, f_a_n__px, f_a_n__size, f_n_dpi, f_a_n__calendar, f_a_n__own, f_a_n__from_px, f_a_n__to_px, f_a_n__handle, f_a_n__handle__shown,
-    f_o_picture__fitted, f_b_covered, f_o_picture__resized, f_o_picture__scaled, f_o_picture__cut, f_o_picture__cropped, f_s_picture
+    a_s_side, n_mm__size_min, f_o_picture, f_a_n__px, f_a_n__size, f_n_dpi, f_a_n__calendar, f_a_n__own, f_a_n__from_px, f_a_n__to_px, f_a_n__handle, f_a_n__handle__shown, f_a_n__handle__turn,
+    f_o_picture__fitted, f_b_covered, f_o_picture__resized, f_o_picture__turned, f_o_picture__scaled, f_o_picture__cut, f_o_picture__cropped, f_s_picture
 } from '../picture.module.js';
 
 let assert = function(b, s_message = 'assertion failed'){
@@ -197,6 +197,38 @@ Deno.test('sized by a corner: the corner across stays, the shape stays, the corn
             f_assert_same_place(f_a_n__handle(o_small, [-a_n__sign[0], -a_n__sign[1]]), a_n__across, 'smallest: corner across');
         }
     }
+});
+
+Deno.test('turned by the pointer: as far as the pointer goes around the middle, which stays; and where the handle for it is drawn', function(){
+    for(let o_picture of a_o_picture){
+        let a_n__middle = [o_picture.n_mm__x, o_picture.n_mm__y];
+        for(let [n_deg__from, n_mm__from, n_deg__by, n_mm__to] of [[0, 100, 5, 100], [-80, 30, 0.4, 250], [170, 60, -75, 60], [20, 90, 200, 10]]){
+            let f_a_n = function(n_deg, n_mm){ return [a_n__middle[0] + n_mm * Math.cos(n_deg * Math.PI / 180), a_n__middle[1] + n_mm * Math.sin(n_deg * Math.PI / 180)]; };
+            let o_turned = f_o_picture__turned(o_picture, f_a_n(n_deg__from, n_mm__from), f_a_n(n_deg__from + n_deg__by, n_mm__to));
+            let s_name = `${f_s_name(o_picture)}, by ${n_deg__by}`;
+            // the same turn, whichever way around the number came out
+            assertAlmostEquals(Math.cos((o_turned.n_deg - o_picture.n_deg - n_deg__by) * Math.PI / 180), 1, 1e-12, s_name);
+            assertAlmostEquals(Math.sin((o_turned.n_deg - o_picture.n_deg - n_deg__by) * Math.PI / 180), 0, 1e-9, s_name);
+            f_assert_same_place([o_turned.n_mm__x, o_turned.n_mm__y], a_n__middle, `${s_name}: middle`);
+            assert(o_turned.n_mm__size_x === o_picture.n_mm__size_x && String(o_turned.a_n_ratio__crop) === String(o_picture.a_n_ratio__crop), `${s_name}: size and what is cut off`);
+            // every pixel goes around the middle by as much
+            for(let a_n__px of a_a_n__px){
+                let a_n = f_a_n__of_px(o_picture, a_n__px);
+                let n_rad = n_deg__by * Math.PI / 180;
+                f_assert_same_place(f_a_n__of_px(o_turned, a_n__px), [
+                    a_n__middle[0] + (a_n[0] - a_n__middle[0]) * Math.cos(n_rad) - (a_n[1] - a_n__middle[1]) * Math.sin(n_rad),
+                    a_n__middle[1] + (a_n[0] - a_n__middle[0]) * Math.sin(n_rad) + (a_n[1] - a_n__middle[1]) * Math.cos(n_rad)
+                ], `${s_name}: pixel ${a_n__px}`, 1e-9);
+            }
+        }
+    }
+    // the plain picture's top side lies at y 15, its middle at x 140: the handle 10 over it; into the picture where the view ends at y 10
+    f_assert_same_place(f_a_n__handle__turn(o_picture__plain, [-2000, -2000, 2000, 2000], 10), [140, 5], 'over the top side');
+    f_assert_same_place(f_a_n__handle__turn(o_picture__plain, [0, 10, 300, 200], 10), [140, 25], 'no room over it');
+    // the top side itself out of view: from where its handle is drawn
+    f_assert_same_place(f_a_n__handle__turn(o_picture__plain, [0, 40, 300, 200], 10), [140, 50], 'top side out of view');
+    // a quarter turned, the top side stands at the right, x 220
+    f_assert_same_place(f_a_n__handle__turn(a_o_picture[1], [-2000, -2000, 2000, 2000], 10), [230, 95], 'turned');
 });
 
 Deno.test('sized around a point: what lies there stays there', function(){

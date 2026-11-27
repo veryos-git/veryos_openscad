@@ -319,7 +319,7 @@ try{
     o_state = await f_o_state();
     let o_picture = o_state.o_setting.o_picture__front;
     f_check('a picture loaded: it fills the calendar and its bleed', o_picture.n_px__x === 3000 && o_picture.n_px__y === 2000 && String([o_picture.n_mm__x, o_picture.n_mm__y, o_picture.n_mm__size_x]) === '138.5,95,291', o_picture);
-    f_check('the panel shows its tools, its size, and which sheet has one', o_state.b_picture && o_state.s_load === 'Load another' && o_state.s_hint === '3000 × 2000 pixels, shown 291 × 194 mm: 262 pixels per inch.' && o_state.s_sheet__has === 'front' && o_state.n_handle === 8 && o_state.s_status === '', o_state);
+    f_check('the panel shows its tools, its size, and which sheet has one', o_state.b_picture && o_state.s_load === 'Load another' && o_state.s_hint === '3000 × 2000 pixels, shown 291 × 194 mm: 262 pixels per inch.' && o_state.s_sheet__has === 'front' && o_state.n_handle === 9 && o_state.s_status === '', o_state);
     let f_a_n__image = async function(s_sheet = 'front'){
         // Chrome's own box of the picture, in the sheet's mm
         let a_n = await o_page.f_v(`(function(){ let o = document.querySelector('#el_sheet__${s_sheet} image').getBoundingClientRect(); let o_sheet = document.querySelector('#el_sheet__${s_sheet} > svg').getBoundingClientRect(); return [o.left - o_sheet.left, o.top - o_sheet.top, o.right - o_sheet.left, o.bottom - o_sheet.top]; })()`);
@@ -358,6 +358,17 @@ try{
     o_picture = await f_o_picture();
     f_check('and back, top for bottom', o_picture.n_deg === 0 && !o_picture.b_flip_x && o_picture.b_flip_y, o_picture);
     await o_page.f_click_on('[data-picture=flip_y]');
+    // the ring at the picture's top turns it: as far as the pointer goes around the picture's middle
+    o_picture = await f_o_picture();
+    a_n__from = await o_page.f_v(`(function(){ let o = document.querySelector('.sheet.shown .handle.turn').getBoundingClientRect(); return [(o.left + o.right) / 2, (o.top + o.bottom) / 2]; })()`);
+    let a_n__middle = await f_a_n__px([o_picture.n_mm__x, o_picture.n_mm__y]);
+    let f_n_deg__around = function(a_n){ return Math.atan2(a_n[1] - a_n__middle[1], a_n[0] - a_n__middle[0]) * 180 / Math.PI; };
+    await o_page.f_drag(a_n__from, [a_n__from[0] + 6, a_n__from[1] + 1]);
+    let o_picture__turned = await f_o_picture();
+    let n_deg__turned = f_n_deg__around([a_n__from[0] + 6, a_n__from[1] + 1]) - f_n_deg__around(a_n__from);
+    f_check('the ring at its top turns it slightly: 6 pixels of the pointer, about a degree, its middle and size stay', f_b_near(o_picture__turned.n_deg, n_deg__turned, 0.006) && n_deg__turned > 0.5 && n_deg__turned < 3
+        && o_picture__turned.n_mm__x === o_picture.n_mm__x && o_picture__turned.n_mm__y === o_picture.n_mm__y && o_picture__turned.n_mm__size_x === o_picture.n_mm__size_x, [o_picture__turned.n_deg, n_deg__turned]);
+    f_check('the field shows the turn', Number(await o_page.f_v(`document.getElementById('el_panel').elements.picture__n_deg.value`)) === o_picture__turned.n_deg);
     await o_page.f_fill('picture__crop_2', 0);
     await o_page.f_fill('picture__crop_1', 10);
     await o_page.f_fill('picture__n_mm__x', 120);
@@ -382,17 +393,17 @@ try{
             });
         })()`);
     };
-    // eight of them, each whole in the view, to be taken hold of, and apart from the others
+    // eight on the frame and the one that turns, each whole in the view, to be taken hold of, and apart from the others
     let f_b_handles = function(a_o_handle){
-        return a_o_handle.length === 8 && a_o_handle.every(function(o_handle){ return o_handle.b_in && o_handle.b_hit; })
-            && new Set(a_o_handle.map(function(o_handle){ return o_handle.a_n.map(Math.round).join(); })).size === 8;
+        return a_o_handle.length === 9 && a_o_handle.every(function(o_handle){ return o_handle.b_in && o_handle.b_hit; })
+            && new Set(a_o_handle.map(function(o_handle){ return o_handle.a_n.map(Math.round).join(); })).size === 9;
     };
     let a_o_handle = await f_a_o_handle();
     f_check('a picture in view: its handles sit on its corners and sides', f_b_handles(a_o_handle) && f_b_near(a_o_handle.find(function(o_handle){ return o_handle.s_sign === '1,1'; }).a_n, await f_a_n__px(f_a_n__handle(o_picture, [1, 1])), 0.6), a_o_handle);
     await o_page.f_fill('picture__n_mm__size_x', 900);
     o_picture = await f_o_picture();
     a_o_handle = await f_a_o_handle();
-    f_check('a picture of 900 × 600 mm, its corners far outside the sheet: all eight handles in view', f_b_handles(a_o_handle), a_o_handle);
+    f_check('a picture of 900 × 600 mm, its corners far outside the sheet: all nine handles in view', f_b_handles(a_o_handle), a_o_handle);
     a_n__from = a_o_handle.find(function(o_handle){ return o_handle.s_sign === '1,1'; }).a_n;
     await o_page.f_drag(a_n__from, [a_n__from[0] - 90, a_n__from[1] - 60]);
     o_picture__sized = await f_o_picture();
@@ -401,7 +412,7 @@ try{
     await o_page.f_v(`document.getElementById('el_scroll').scrollBy(700, 400)`);
     await o_page.f_settle();
     a_o_handle = await f_a_o_handle();
-    f_check('zoom 4, the sheet moved in its place: all eight handles in view', f_b_handles(a_o_handle) && (await f_o_state()).a_n__sheet[0] < -500, a_o_handle);
+    f_check('zoom 4, the sheet moved in its place: all nine handles in view', f_b_handles(a_o_handle) && (await f_o_state()).a_n__sheet[0] < -500, a_o_handle);
     await o_page.f_click_on('[name=n_zoom][value="1"] + span');
     await o_page.f_click_on('[data-picture=cover]');
     await o_page.f_choose('#el_picture_file', [s_path__text]);
@@ -423,7 +434,7 @@ try{
     f_check('Chrome draws it on the calendar and its bleed', f_b_near(await f_a_n__image('back'), [8, 8, 289, 202], 0.05), await f_a_n__image('back'));
     await o_page.f_open();
     o_state = await f_o_state();
-    f_check('a reload keeps both pictures, their files and their places', o_state.s_sheet__picture === 'front,back' && o_state.s_step__open === 'picture' && o_state.s_sheet === 'back' && o_state.n_handle === 8 && f_b_near(o_state.o_setting.o_picture__front.n_mm__size_x, 291, 1e-9)
+    f_check('a reload keeps both pictures, their files and their places', o_state.s_sheet__picture === 'front,back' && o_state.s_step__open === 'picture' && o_state.s_sheet === 'back' && o_state.n_handle === 9 && f_b_near(o_state.o_setting.o_picture__front.n_mm__size_x, 291, 1e-9)
         && await o_page.f_v(`Promise.all([...document.querySelectorAll('.sheet image')].map(function(el){ return fetch(el.href.baseVal).then(function(o){ return o.blob(); }).then(function(o){ return o.size; }); })).then(function(a_n){ return a_n.length === 2 && a_n.every(function(n){ return n > 10000; }); })`), o_state);
     await f_step('cut');
     await o_page.f_click_on('[name=b_mark]');
