@@ -96,7 +96,7 @@ PROJECTS = {
     "RGBW_pucklight_lantern3": [
         ("RGBW_pucklight_lantern3V8_simple.scad", "assembly frame roof screwin clickbase window")],
     "ring_sizer2": [("ring_sizer2.scad", [("sizer", "Disk with the measuring rings")])],
-    "softbox_smallrig_40W": [("softbox_smallrig_40WV1.scad",
+    "softbox_smallrig_40W": [("softbox_smallrig_40WV2.scad",
         "assembly frame_top frame_front light_clamp screw thumb_screw wallcover_big wallcover_small")],
     "veryos_logo_cube": [("V2/veryos_logo_cubeV2.scad", [
         ("cube", "Logo from the front and from the side")])],
