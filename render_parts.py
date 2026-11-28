@@ -98,8 +98,8 @@ PROJECTS = {
     "ring_sizer2": [("ring_sizer2.scad", [("sizer", "Disk with the measuring rings")])],
     "veryos_logo_cube": [("V2/veryos_logo_cubeV2.scad", [
         ("cube", "Logo from the front and from the side")])],
-    "video_light_softbox": [("video_light_softbox_veryos_V8.scad",
-        "assembly frame_top frame_front light_clamp screw thumb_screw wallcover_big wallcover_small")],
+    "video_light_softbox": [("video_light_softbox_veryos_V9.scad",
+        "assembly frame_top frame_front light_clamp screw fabric_clamp thumb_screw wallcover_big wallcover_small")],
     "vorhangstangeschrankadapter": [("vorhangstangeschrankadapter.scad", [
         ("holder", "Rod holder, two identical ones are needed")])],
     "wind_spinner_project": [("wind_spinner.scad", [
