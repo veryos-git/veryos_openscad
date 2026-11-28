@@ -1,10 +1,11 @@
 // Copyright (C) Jonas Immanuel Frey - Licensed under GPL
-// Softbox for the SmallRig RM 40C (40 W) video light. Continues
+// Softbox for a flat cuboid video light. The sizes are parameters; their
+// defaults are those for the SmallRig RM 40C (40 W). Continues
 // cuboid_video_light_softboxV6 (01_published_or_archived), whose history
-// follows below.
+// follows below. V7 was softbox_smallrig_40WV1 until 2026-11-28.
 //
-// V1: a new way to hold the light. V6's frame_top had a tower over each end of
-// the light with a screw in its roof. Printed for this light, the screws sat
+// V7: a new way to hold the light. V6's frame_top had a tower over each end of
+// the light with a screw in its roof. Printed for the SmallRig, the screws sat
 // 7.5 mm from the light's ends, where only one of them found a hold; a tower
 // broke at its roof when its screw was tightened hard; and the part needed a
 // lot of support (problems/readme_hgc.md).

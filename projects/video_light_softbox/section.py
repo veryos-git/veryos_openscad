@@ -1,7 +1,7 @@
 # Copyright (C) [Jonas Immanuel Frey] - Licensed under GPL
 """Draws section.png: the cut through a light clamp, seen along the light, one colour per part.
 
-usage: python3 section.py [script.scad]   (default: the newest softbox_smallrig_40WV*.scad here)
+usage: python3 section.py [script.scad]   (default: the newest video_light_softbox_veryos_V*.scad here)
 needs: OpenSCAD with an X display (sandbox off), Pillow, DejaVu Sans Mono
 """
 import subprocess, sys, tempfile
@@ -11,7 +11,7 @@ from PIL import Image, ImageChops
 
 HERE = Path(__file__).resolve().parent
 SCRIPT = Path(sys.argv[1]).resolve() if len(sys.argv) > 1 else max(
-    HERE.glob("softbox_smallrig_40WV*.scad"), key=lambda p: int(p.stem.rsplit("V", 1)[1]))
+    HERE.glob("video_light_softbox_veryos_V*.scad"), key=lambda p: int(p.stem.rsplit("V", 1)[1]))
 # x here is the frame's y, y its z. The screw is turned half a turn so that its thread
 # lies in the clamp's at this depth.
 SCAD = """

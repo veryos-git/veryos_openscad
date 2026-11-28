@@ -96,10 +96,10 @@ PROJECTS = {
     "RGBW_pucklight_lantern3": [
         ("RGBW_pucklight_lantern3V8_simple.scad", "assembly frame roof screwin clickbase window")],
     "ring_sizer2": [("ring_sizer2.scad", [("sizer", "Disk with the measuring rings")])],
-    "softbox_smallrig_40W": [("softbox_smallrig_40WV2.scad",
-        "assembly frame_top frame_front light_clamp screw thumb_screw wallcover_big wallcover_small")],
     "veryos_logo_cube": [("V2/veryos_logo_cubeV2.scad", [
         ("cube", "Logo from the front and from the side")])],
+    "video_light_softbox": [("video_light_softbox_veryos_V8.scad",
+        "assembly frame_top frame_front light_clamp screw thumb_screw wallcover_big wallcover_small")],
     "vorhangstangeschrankadapter": [("vorhangstangeschrankadapter.scad", [
         ("holder", "Rod holder, two identical ones are needed")])],
     "wind_spinner_project": [("wind_spinner.scad", [
@@ -135,8 +135,8 @@ CAMERA = {
     ("paper_folding_lantern", "flat"): "0,0,0",
     ("rechargable_motor_power_kit_turntable", "open"): "45,0,160",
     ("rechargable_motor_power_kit_turntable", "screw"): "55,0,115",
-    ("softbox_smallrig_40W", "screw"): "55,0,115",
-    ("softbox_smallrig_40W", "thumb_screw"): "55,0,115",
+    ("video_light_softbox", "screw"): "55,0,115",
+    ("video_light_softbox", "thumb_screw"): "55,0,115",
     ("veryos_logo_cube", "cube"): "75,0,45",
     ("puppentheater_magnet", "section"): "90,0,90",
 }

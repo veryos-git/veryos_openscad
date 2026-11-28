@@ -1,11 +1,14 @@
-# Softbox for the SmallRig RM 40C
+# Video light softbox
 
-Fully printed softbox for the SmallRig RM 40C (40 W) video light; the sizes are parameters. Successor of `01_published_or_archived/cuboid_video_light_softbox` (V1 to V6, for the Ulanzi VL120). The light is held by two separate clamps that hook under rails of the frame top.
+Fully printed softbox for a flat cuboid video light. The sizes are parameters; their defaults are those for the SmallRig RM 40C (40 W). The light is held by two separate clamps that hook under rails of the frame top.
 
-| Version | State |
-|---|---|
-| V1 | printed 2026-11-28: the concept works, but the light is thicker than the clamps allow and does not fit (`problems/v6p2`) |
-| V2 | taller clamps, nothing else changed. **Not printed yet** |
+| Version | Script | Where | State |
+|---|---|---|---|
+| V1 to V6 | `cuboid_video_light_softboxV1.scad` … `V6.scad` | `01_published_or_archived/cuboid_video_light_softbox/` | archived. V6 printed for the SmallRig: a clamp tower broke (`problems/readme_hgc.md`) |
+| V7 | `video_light_softbox_veryos_V7.scad` | `archive/` | printed 2026-11-28, the print "v6p2": the concept works, but the light is thicker than the clamps allow and does not fit (`problems/v6p2`) |
+| V8 | `video_light_softbox_veryos_V8.scad` | here | taller clamps, nothing else changed. **Not printed yet** |
+
+Until 2026-11-28 this folder was `softbox_smallrig_40W`, and V7 and V8 were `softbox_smallrig_40WV1.scad` and `softbox_smallrig_40WV2.scad`.
 
 ![section through a light clamp](section.png)
 
@@ -13,29 +16,29 @@ Fully printed softbox for the SmallRig RM 40C (40 W) video light; the sizes are 
 
 | File | What |
 |---|---|
-| `softbox_smallrig_40WV2.scad` | the generator, standalone, no libraries. `part`: all parts on the bed, assembly, and each part in its print orientation |
-| `softbox_smallrig_40WV2_light_clamp.stl` | the part to print on top of a V1 build |
-| `softbox_smallrig_40WV2_frame_top.stl`, `_screw.stl`, `_wallcover_big.stl` | same as V1's; with the clamp, the parts to print on top of a V6 build |
+| `video_light_softbox_veryos_V8.scad` | the generator, standalone, no libraries. `part`: all parts on the bed, assembly, and each part in its print orientation |
+| `video_light_softbox_veryos_V8_light_clamp.stl` | the part to print on top of a V7 build |
+| `video_light_softbox_veryos_V8_frame_top.stl`, `_screw.stl`, `_wallcover_big.stl` | same as V7's; with the clamp, the parts to print on top of a V6 build |
 | `rendered_parts/` | every part under its name |
 | `section.png`, `section.py` | names inside the clamp: foot, rail, hook, thread; the script draws it from the newest version |
-| `archive/` | V1 |
-| `problems/` | the V6 print's problems; `v6p2/`: the V1 print's |
-| `cuboid_video_light_softboxV5.3mf`, `V6.3mf`, `V62.3mf`, `V5.stl`, `v6p2.3mf` | print files of the V5, V6 and V1 builds |
+| `archive/` | V7 |
+| `problems/` | the V6 print's problems; `v6p2/`: the V7 print's |
+| `cuboid_video_light_softboxV5.3mf`, `V6.3mf`, `V62.3mf`, `V5.stl`, `v6p2.3mf` | print files of the V5, V6 and V7 builds |
 | `readme_hgc.md` | original goal |
 
-## V2 against V1
+## V8 against V7
 
-| | V1, as printed | V2 |
+| | V7, as printed | V8 |
 |---|---|---|
-| light's thickness | 36 in the script, 32 by SmallRig's data sheet | about 38, read from the photo of its end (80 wide as the scale); not measured |
+| SmallRig's thickness | 36 in the script, 32 by its data sheet | about 38, read from the photo of its end (80 wide as the scale); not measured |
 | clamp's roof above the plate | 37: the clamp does not go over the light | 44 |
 | light that fits | up to 35.5 | 33 to 42.5, with the same 30 long screws |
 | light_clamp | 119 × 64 × 22 | 119 × 71 × 22 |
 | frame_top, screw, covers, frame_front, thumb_screw | | unchanged, same volume to 0.001 cm³ |
 
-## V1 against cuboid_video_light_softbox V6
+## V7 against V6
 
-| | V6, as printed | V1 |
+| | V6, as printed | V7 |
 |---|---|---|
 | screws on the light | 7.5 from the light's ends, on its rounded edge: only one of the two locks | 22 from the ends; the clamps slide along the rails, about 35 to 42 from the middle |
 | force of a tightened screw | pulls the tower's legs across their layers; a tower broke at its roof | runs around a clamp printed on its side, along its layers; the hooks pull at rails right beside the light |
@@ -48,11 +51,11 @@ Fully printed softbox for the SmallRig RM 40C (40 W) video light; the sizes are 
 | small logo | on a tower | in the plate under the light's +x end, and in the side of each clamp that lies on the bed |
 | frame_front, wallcover_small, thumb_screw | | unchanged |
 
-Sliced with the settings of `cuboid_video_light_softboxV6.3mf`: Bambu Lab A2L, 0.24 mm, 2 walls, 15 % grid, tree(auto) support on, Bambu Studio 2.9.1. The V1 print itself (`v6p2.3mf`): 0.2 mm, 2 walls, 6 % infill, support off.
+Sliced with the settings of `cuboid_video_light_softboxV6.3mf`: Bambu Lab A2L, 0.24 mm, 2 walls, 15 % grid, tree(auto) support on, Bambu Studio 2.9.1. The V7 print itself (`v6p2.3mf`): 0.2 mm, 2 walls, 6 % infill, support off.
 
 ## What to print
 
-| Part | Qty | Prints | With a V1 build | With a V6 build |
+| Part | Qty | Prints | With a V7 build | With a V6 build |
 |---|---|---|---|---|
 | light_clamp | 2 | on its side | print | print |
 | frame_top | 1 | on its back face | keep | print |
@@ -72,6 +75,8 @@ Sliced with the settings of `cuboid_video_light_softboxV6.3mf`: Bambu Lab A2L, 0
 
 ## Sizes
 
+The defaults are those for the SmallRig RM 40C.
+
 | Parameter | Default | From |
 |---|---|---|
 | `light_length`, `light_width` | 129, 83 | the V6 print, measured in its 3mf; SmallRig's data sheet says 128 × 80 |
@@ -79,29 +84,29 @@ Sliced with the settings of `cuboid_video_light_softboxV6.3mf`: Bambu Lab A2L, 0
 | `light_headroom` | 6 | room under the clamps' roofs that the screws take up |
 | `softbox_depth` | 80 | the V6 print |
 | `tripod_cutout_depth` | 15 | the V6 print |
-| `clamp_width`, `clamp_roof`, `clamp_leg` | 22, 18, 6 | V1 |
-| `clamp_rail_width`, `clamp_rail_thickness`, `clamp_clearance` | 7, 5, 0.5 | V1 |
+| `clamp_width`, `clamp_roof`, `clamp_leg` | 22, 18, 6 | V7 |
+| `clamp_rail_width`, `clamp_rail_thickness`, `clamp_clearance` | 7, 5, 0.5 | V7 |
 | everything else | | V6's defaults |
 
 ## Checked in the model
 
 | Check | Result |
 |---|---|
-| V2's frame_top, screw, wallcover_big against V1's STLs; frame_front, wallcover_big, wallcover_small, thumb_screw against the meshes in the V6 3mf | same size, same volume to 0.001 cm³ |
+| V8's frame_top, screw, wallcover_big against V7's STLs; frame_front, wallcover_big, wallcover_small, thumb_screw against the meshes in the V6 3mf | same size, same volume to 0.001 cm³ |
 | every part exported with OpenSCAD 2021.01 (CGAL) and with the nightly (lazy union, Manifold) | same volumes |
 | a loose clamp swept from the gap to the rails' ends, against frame_top | no overlap |
 | a clamp lifted 0.3 past the rails | all four hooks bite, 22 × 4.3 each |
 | a loose clamp over a light 38, 42.5 and 43.4 thick | no overlap; 44 touches the roof |
 | clamps against both long covers with their screw heads; screw in the clamp's thread | no overlap |
-| V1's frame_top, light_clamp, screw sliced with support on | no support |
+| V7's frame_top, light_clamp, screw sliced with support on | no support |
 
 ## Open
 
 | | |
 |---|---|
-| print | V2's clamps are not printed |
-| light's thickness | 38 is read from a photo; a caliper reading where the clamps cross it (22 from each end) would settle it |
+| print | V8's clamps are not printed |
+| SmallRig's thickness | 38 is read from a photo; a caliper reading where the clamps cross it (22 from each end) would settle it |
 | where the screws land | 22 from the light's ends, in the middle of its width: on the magnet pad at one end, between fan and knob at the other. Read from the photos, not measured |
-| thread in the clamp, hooks on the rails with the light in | not reported for the V1 print |
+| thread in the clamp, hooks on the rails with the light in | not reported for the V7 print |
 | clamp's thread under load | it prints lying; a lying 16 mm thread split along a layer in `mikrofonarm_tischklemme` V3 (PLA, tightened with a T bar). Here the thread sits in the middle of the roof and the screw has no lever: tighten by hand, and print the clamps with more walls |
 | tripod head | the rails stick out 7 beyond the frame's top edge, from 29 off the middle outwards; a head wider than 57 at the plate's level touches them |
